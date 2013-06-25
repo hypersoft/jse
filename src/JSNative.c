@@ -156,7 +156,7 @@ static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStri
 		p->count = (unsigned long) JSValueToNumber(ctx, value, NULL);
 		return true;
 	} else if (JSStringIsEqualToUTF8CString(propertyName, "constant")) {
-		p->constant = JSValueToBoolean(ctx, value, NULL);
+		p->constant = JSValueToBoolean(ctx, value);
 		return true;
 	}
 	if (p->count > 1) {
