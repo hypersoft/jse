@@ -24,7 +24,7 @@ src/JSNative.inc: src/JSNative.js
 	@bin/bin2inc JSNativeSupport src/JSNative.js > src/JSNative.inc;
 
 # This rule builds jse
-${APPLICATION}: ${SOURCE} ${REQUIRES}
+${APPLICATION}: ${SOURCE} ${REQUIRES} src/JSNative.inc
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
