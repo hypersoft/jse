@@ -155,6 +155,9 @@ static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStri
 		if (p->allocated) return false;
 		p->count = (unsigned long) JSValueToNumber(ctx, value, NULL);
 		return true;
+	} else if (JSStringIsEqualToUTF8CString(propertyName, "constant")) {
+		p->constant = JSValueToBoolean(ctx, value, NULL);
+		return true;
 	}
 	if (p->count > 1) {
 	unsigned long length = JSStringGetMaximumUTF8CStringSize (propertyName);

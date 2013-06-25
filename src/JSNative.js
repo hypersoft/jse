@@ -59,7 +59,7 @@ JSNative.typeCodeToPrototype = function typeCodeToPrototype(val) {
 	var unsigned = false;
 	var output = "";
 
-	if (val < 120) {
+	if (val < 92) {
 		unsigned = (val % 10);
 		if (unsigned == 1) {
 			val--; output="unsigned ";
@@ -68,11 +68,19 @@ JSNative.typeCodeToPrototype = function typeCodeToPrototype(val) {
 			else if (val == 40) output += "int";
 			else if (val == 50) output += "long";
 			else if (val == 60) output += "long long";
+			else throw new Error("JSNative.typeCodeToPrototype: " + val + " is not an unsignable type code");
 		} else {
-			if (val == 10) output = "bool";
+			if (val == 0) output = "void";
+			else if (val == 10) output = "bool";
+			else if (val == 20) output = "char";
+			else if (val == 30) output = "short";
+			else if (val == 40) output = "int";
+			else if (val == 50) output = "long";
+			else if (val == 60) output = "long long";
 			else if (val == 70) output = "float";
 			else if (val == 80) output = "double";
 			else if (val == 90) output = "pointer";
+			else throw new Error("JSNative.typeCodeToPrototype: " + val + " is not a JSNative type code");
 		}
 		return output;
 	}
