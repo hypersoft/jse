@@ -1,0 +1,64 @@
+#!/bin/bash
+
+hash sed fold || {
+    printf "%s\n" "bin2inc: error: missing program dependencies";
+    exit 1; # if you don't have sed or fold, get them.
+} >&2;
+
+[[ -n $2 ]] && {
+	[[ -f "$2" && -r "$2" ]] || {
+		printf "%s\n" "bin2inc: error: argument 2 is not a valid file: $2";
+		exit 2; # c'mon man file data must "exist"
+	} >&2;
+}
+
+stream() {
+	local IFS='';
+	local -i bytes=0
+	while read -r -N1 r; do
+		printf "0x%02X, " "'$r"; let bytes++;  
+	done < "${1:-/dev/stdin}";
+	echo $bytes >&7;
+}
+
+exec 7<> <(:);
+byteField="$( { stream < "$2"; echo -n 0x00; } | fold -sw 87 | sed  's/^/    /')";
+read -u 7 bytes; exec 7>&-;
+
+(( bytes )) || {
+	echo $0: error: no content was provided;
+	file=$(readlink /proc/$$/fd/1 & wait $!);
+	[[ -f "$file" ]] && rm "$file";
+	exit 7;
+} >&2;
+
+id=${1:-binary_data};
+
+echo "/*
+
+auto-generated file include
+
+encoded by bin2inc (bash version) (C) 2013 Hypersoft
+
+date: `date`
+resource: ${2:-/dev/stdin}
+developer: $USER
+
+content-identifier: ${id} 
+
+content-length-identifier: ${id}_length
+content-length: $bytes
+
+zero-padding: 1
+
+*/
+
+unsigned char $id[] = {
+
+$byteField
+
+};
+
+unsigned long int ${id}_length = ${bytes}L;
+"
+

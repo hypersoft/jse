@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Author: pc.wiz.tt@gmail.com
+
+# OMG its the borg...
+# They are back and they are assimilating...
+# Resistance is futile..
+
+# This script does some shit (whether you like that statement or not).
+#
+# 1.  download a source tarball of dyncall (if needed)
+# 2.  set up some destination paths for resulting build files (libs & headers)
+# 3.  extract the tarball
+# 4.  build the package
+# 5.  request the general directory name the resulting binaries (differs for each platform)
+# 6.  locates the development binaries
+# 8.  locates the development headers
+# 9.  puts the binary files into BINARYDEST directory (default relative: ./bin)
+# 10. puts the development headers into HEADERDEST (default relative: ./src/dyncall)
+# 11. Removes completely the extracted tarball directory
+#
+#
+# A program may then use the dyncall libraries as such in a c file located in ./src/
+#
+#	#include "dyncall/dyncall.h"
+#	...
+#
+# compiling is fairly simple: gcc [paths] [files] bin/lib* [options] [sharedlibs]
+#
+# This script is smart enough to run properly from a makefile.
+#
+# The question is: are you smart enough to use it or dyncall? -lol
+#
+
+DYNCALLPKG=http://dyncall.org/r0.7/dyncall-0.7.tar.gz
+DYNCALLARC=pkg/dyncall-0.7.tar.gz
+
+BINARYDEST=bin
+HEADERDEST=inc/dyncall;
+
+# HACK ROOT
+dynRoot=src/dyncall-0.7;
+
+# only download missing files
+urlHamper() {
+	[[ -e "$1" ]] && return;
+	type -p curl > /dev/null || {
+		# teach the user how to be a supporting advocate of this script's operation
+		echo please install curl or download: $DYNCALLPKG --\> ./src directory;
+		exit 1;
+	} >&2;
+	curl -\# -o "$1" "${2}";
+}
+
+set -e; # exit on unhandled errors
+
+mkdir -vp ${BINARYDEST} ${HEADERDEST};
+
+urlHamper ${DYNCALLARC} ${DYNCALLPKG};
+
+tar --directory src -xf ${DYNCALLARC};
+
+( cd ${dynRoot}; ./configure && make; );
+
+echo Hacking dyncall resources...
+
+MARVEL=$(
+	cd $dynRoot;
+	make -s --eval 'Hackologist:
+	@echo ${BUILD_DIR}
+')
+
+echo Destination descriptor acquired...
+UNIVERSE=($(printf '%s\n' $dynRoot/{dyncall,dynload,dyncallback}/${MARVEL}));
+
+echo Locating objects...
+LIBS="$(
+	for superHero in "${UNIVERSE[@]}"; do
+		echo $superHero/lib*;
+	done
+)"
+
+echo Discovering headers...
+HEADERS=$(echo $dynRoot/{dyncall/*.h,dynload/*.h,dyncallback/*.h})
+
+cp -t ${HEADERDEST} ${HEADERS} &
+cp -vt ${BINARYDEST} ${LIBS};
+
+wait $!;
+
+echo Generating dyncall license...
+bin/bin2inc help_license_dyncall $dynRoot/LICENSE > $HEADERDEST/license.inc
+
+# get rid of junk
+rm -rf $dynRoot;
+
+echo Dyncall Assimilation Complete
+
