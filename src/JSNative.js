@@ -59,7 +59,7 @@ JSNative.typeCodeToPrototype = function typeCodeToPrototype(val) {
 	var unsigned = false;
 	var output = "";
 
-	if (val < 92) {
+	if (val < 91) {
 		unsigned = (val % 10);
 		if (unsigned == 1) {
 			val--; output="unsigned ";

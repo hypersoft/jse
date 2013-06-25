@@ -9,6 +9,7 @@
 
 JSClassRef JSNative = NULL;
 
+// Better performance from macros / reduced memory i/o footprint
 typedef enum JSNativeTypeCode {
 	JSNativeTypeVoid = 0,			JSNativeTypeBool = 10,	
 	JSNativeTypeChar = 20,			JSNativeTypeShort = 30,
@@ -22,17 +23,16 @@ typedef enum JSNativeTypeCode {
 typedef struct {
 	void * location;		int typeCode;	unsigned long count;
 	bool constant;			bool allocated;
-	void * compound; // struct, procedure, or union type descriptor
 } JSNativePrivate;
 
-JSValueRef js_native_eval_scriptlet(JSContextRef ctx, char * script, JSObjectRef object, JSValueRef * exception) {
+static JSValueRef js_native_eval_scriptlet(JSContextRef ctx, char * script, JSObjectRef object, JSValueRef * exception) {
 	void * translation = JSStringCreateWithUTF8CString(script);
 	JSValueRef value = JSEvaluateScript(ctx, translation, object, NULL, 1, exception); // forward exception
 	JSStringRelease(translation);
 	return value;
 }
 
-JSValueRef js_native_call_function(JSContextRef ctx, char * function, JSObjectRef object, int argc, JSValueRef arguments[], JSValueRef * exception) {
+static JSValueRef js_native_call_function(JSContextRef ctx, char * function, JSObjectRef object, int argc, JSValueRef arguments[], JSValueRef * exception) {
 	JSObjectRef call = (void*) js_native_eval_scriptlet(ctx, function, object, exception); // check exception!
 	return JSObjectCallAsFunction(ctx, call, object, argc, arguments, exception); // forward exception
 }
