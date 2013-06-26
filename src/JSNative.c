@@ -32,6 +32,14 @@ static JSValueRef js_native_eval_scriptlet(JSContextRef ctx, char * script, JSOb
 	return value;
 }
 
+static void js_native_throw_exception(JSContextRef ctx, char * message, JSValueRef * exception) {
+	unsigned long int count = strlen(message) + 19;
+	char output[count];
+	output[count - 1] = 0;
+	sprintf(output,"throw new Error(\"%s\");", message);
+	js_native_eval_scriptlet(ctx, output, NULL, exception);
+}
+
 static JSValueRef js_native_call_function(JSContextRef ctx, char * function, JSObjectRef object, int argc, JSValueRef arguments[], JSValueRef * exception) {
 	JSObjectRef call = (void*) js_native_eval_scriptlet(ctx, function, object, exception); // check exception!
 	return JSObjectCallAsFunction(ctx, call, object, argc, arguments, exception); // forward exception
@@ -117,8 +125,9 @@ static JSValueRef js_native_get_property (JSContextRef ctx, JSObjectRef object, 
 }
 
 bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsigned long index, JSValueRef value) {
-	if (! p || ! p->location || ! p->count || p->constant ) return false;
+	if (! p || ! p->location || ! p->count) return false;
 	if (index && index >= p->count) return false;
+	if ( p->constant) return true;
 	if (JSNativeUnsignedValue(p->typeCode)) {
 		if (p->typeCode == JSNativeTypeChar + 1) { *(unsigned char*)(p->location + index) = (unsigned char) JSValueToNumber(ctx, value, NULL); return true; }
 		else if (p->typeCode == JSNativeTypeShort + 1) { *(unsigned short*)(p->location + index) = (unsigned short) JSValueToNumber(ctx, value, NULL); return true; }
@@ -140,33 +149,53 @@ bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsi
 }
 
 static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+
 	JSNativePrivate * p = JSObjectGetPrivate(object);
-	if (!p) return false;
+	if (!p) { return false; }
+
+	char * e[] = { // error strings
+		"js_native_set_property: pointer is allocated, read only",
+		"js_native_set_property: unable to set value, pointer property not set",
+		"js_native_set_property: pointer is allocated, count is read only",
+		"js_native_set_property: destination index exceeds defined access range",
+		NULL
+	};
+
 	if (JSStringIsEqualToUTF8CString(propertyName, "pointer")) {
-		if (p->allocated) return false;
-		p->location = (void *) (unsigned long) JSValueToNumber(ctx, value, NULL);
+		if (p->allocated) { js_native_throw_exception(ctx, e[0], exception); return true; }
+		p->location = (void *) (unsigned long) JSValueToNumber(ctx, value, exception);
 		return true;
 	} else if (JSStringIsEqualToUTF8CString(propertyName, "value")) {
+		if (p->location == NULL || p->count == 0) { js_native_throw_exception(ctx, e[1], exception); return true; }
 		return js_native_set_property_at_index(ctx, p, 0, value);
 	} else if (JSStringIsEqualToUTF8CString(propertyName, "type")) {
-		p->typeCode = (unsigned int) JSValueToNumber(ctx, value, NULL);
+		p->typeCode = (unsigned int) JSValueToNumber(ctx, value, exception);
 		return true;
 	} else if (JSStringIsEqualToUTF8CString(propertyName, "count")) {
-		if (p->allocated) return false;
-		p->count = (unsigned long) JSValueToNumber(ctx, value, NULL);
+		if (p->allocated) {
+			js_native_throw_exception(ctx, e[2], exception);
+			return true;
+		}
+		p->count = (unsigned long) JSValueToNumber(ctx, value, exception);
 		return true;
 	} else if (JSStringIsEqualToUTF8CString(propertyName, "constant")) {
 		p->constant = JSValueToBoolean(ctx, value);
 		return true;
 	}
-	if (p->count > 1) {
+
+	if (p->location == NULL || p->count == 0) { js_native_throw_exception(ctx, e[1], exception); return true; }
+
 	unsigned long length = JSStringGetMaximumUTF8CStringSize (propertyName);
 	void * buf = g_malloc (length * sizeof (gchar));
 	JSStringGetUTF8CString (propertyName, buf, length);
 	unsigned long index = atol(buf); g_free(buf);
-	return js_native_set_property_at_index(ctx, p, index, value);
+
+	if (index && index >= p->count) {
+		js_native_throw_exception(ctx, e[3], exception); return true;
 	}
-	return false;
+
+	return js_native_set_property_at_index(ctx, p, index, value);
+
 }
 
 // The callback invoked when determining whether an object has a property.

@@ -2,6 +2,7 @@
 
 try {
 
+
 // Mockup runtime c interpreter for operational clarity...
 puts("typedef unsigned char byte;");
 	JSNative.defineAlias("unsigned char", "byte");
@@ -22,7 +23,7 @@ puts("void * pVoid = (void *) byteArray;");
 	pVoid.pointer = byteArray.pointer; pVoid.count = 1;
 	puts(pVoid.pointer);
 
-puts("(unsigned char *) *pVoid;");
+puts("*(unsigned char *) pVoid;");
 	pVoid.type = byteArray.type;
 	puts(pVoid.value);
 

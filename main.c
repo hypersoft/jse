@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <getopt.h>
+#include <string.h>
 
 #include "glib.inc"
 #include "JavaScriptCore.inc"
