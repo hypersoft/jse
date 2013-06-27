@@ -56,6 +56,7 @@ static bool js_native_jsstring_parse_int(JSContextRef ctx, JSStringRef s, unsign
 
 static JSValueRef js_native_call_function(JSContextRef ctx, char * function, JSObjectRef object, int argc, JSValueRef arguments[], JSValueRef * exception) {
 	JSObjectRef call = (void*) js_native_eval_scriptlet(ctx, function, object, exception); // check exception!
+	if (*exception) return JSValueMakeNull(ctx);
 	return JSObjectCallAsFunction(ctx, call, object, argc, arguments, exception); // forward exception
 }
 
@@ -65,12 +66,12 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	JSValueRef arg[] = { arguments[0], NULL };
 	JSValueRef jsTypeCode = js_native_call_function (
 		ctx, "JSNative.typeCode", NULL, 1, arg, exception
-	);
+	); if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	p->typeCode = (int) JSValueToNumber(ctx, jsTypeCode, exception);
-
+	if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	if (argumentCount >= 2) {
 		p->count = JSValueToNumber(ctx, arguments[1], exception);
-
+		if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	} else p->count = 1;
 	bool isUnsigned = JSNativeUnsignedValue(p->typeCode);
 	if (isUnsigned) p->typeCode--;
