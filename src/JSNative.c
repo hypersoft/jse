@@ -87,7 +87,7 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	else if (p->typeCode == JSNativeTypeDouble) p->location = g_new0(double, p->count);
 	else if (p->typeCode == JSNativeTypePointer) p->location = g_new0(void *, p->count);
 	else { js_native_throw_exception(ctx, "js_native_construct_object: unknown type code", exception);
-		g_free(p); return JSValueMakeUndefined(ctx);
+		g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx);
 	}
 	if (isUnsigned) p->typeCode++;
 	return JSObjectMake(ctx, JSNative, p);
