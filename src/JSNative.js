@@ -16,6 +16,12 @@ JSNative.Type["pointer"] = 90;
 // Type Alias Registry //
 JSNative.Alias = {};
 
+// test if the class of the given object is of type JSNative
+JSNative.isNativeObject = function(o) {
+if (o === null) return false; if (o === undefined) return false;
+return Object.prototype.toString.call(o).slice(8,-1) == "JSNative";
+}
+
 JSNative.typeCodeIsUnsigned = function (typeCode) { return typeCode % 10; }
 
 JSNative.typeCodeIsUnsignable = function (typeCode) { return typeCode < 70 && typeCode > 10; }

@@ -13,6 +13,9 @@ puts("byte byteArray[32];");
 	byteArray = new JSNative("byte", 32);
 	puts(byteArray.pointer);
 
+// in a function call, you can test if you have been given a native object like this:
+	if ( ! JSNative.isNativeObject(byteArray) ) throw new Error("byteArray is not a native object");
+
 puts("byteArray[0] = 64;");
 	byteArray[0] = 64; // zero is the default value
 	puts(byteArray[0]);

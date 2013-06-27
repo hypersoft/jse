@@ -56,8 +56,13 @@ static bool js_native_jsstring_parse_int(JSContextRef ctx, JSStringRef s, unsign
 
 static JSValueRef js_native_call_function(JSContextRef ctx, char * function, JSObjectRef object, int argc, JSValueRef arguments[], JSValueRef * exception) {
 	JSObjectRef call = (void*) js_native_eval_scriptlet(ctx, function, object, exception); // check exception!
-	if (*exception) return JSValueMakeNull(ctx);
+	if (exception && *exception) return JSValueMakeNull(ctx);
 	return JSObjectCallAsFunction(ctx, call, object, argc, arguments, exception); // forward exception
+}
+
+bool js_native_is_native_object(JSContextRef ctx, JSObjectRef object) {
+	JSValueRef arguments[] = { (JSValueRef) object, NULL };
+	return JSValueToBoolean(ctx, js_native_call_function(ctx, "JSNative.isNativeObject", NULL, 1, arguments, NULL));
 }
 
 static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
@@ -66,12 +71,12 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	JSValueRef arg[] = { arguments[0], NULL };
 	JSValueRef jsTypeCode = js_native_call_function (
 		ctx, "JSNative.typeCode", NULL, 1, arg, exception
-	); if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
+	); if (exception && *exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	p->typeCode = (int) JSValueToNumber(ctx, jsTypeCode, exception);
-	if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
+	if (exception && *exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	if (argumentCount >= 2) {
 		p->count = JSValueToNumber(ctx, arguments[1], exception);
-		if (*exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
+		if (exception && *exception) { g_free(p); return (JSObjectRef) JSValueMakeUndefined(ctx); }
 	} else p->count = 1;
 	bool isUnsigned = JSNativeUnsignedValue(p->typeCode);
 	if (isUnsigned) p->typeCode--;
@@ -131,6 +136,10 @@ JSValueRef js_native_get_property_at_index(JSContextRef ctx, JSNativePrivate * p
 
 static JSValueRef js_native_get_property (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception) {
 	JSNativePrivate * p = JSObjectGetPrivate(object); if (!p) return NULL;
+	if ( ! js_native_is_native_object(ctx, object) ) {
+		js_native_throw_exception(ctx, "js_native_get_property: not a JSNative object", exception);
+		return NULL;
+	}
 	unsigned long index = 0;
 	if (JSStringIsEqualToUTF8CString(propertyName, "pointer")) {
 		return JSValueMakeNumber(ctx, (double) (unsigned long) p->location);
@@ -186,14 +195,17 @@ bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsi
 }
 
 static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-	JSNativePrivate * p = JSObjectGetPrivate(object);
+	JSNativePrivate * p = JSObjectGetPrivate(object); if (!p) { return false; }
+	if ( ! js_native_is_native_object(ctx, object) ) {
+		js_native_throw_exception(ctx, "js_native_set_property: not a JSNative object", exception);
+		return false;
+	}
 	unsigned long index = 0;
 	char * e[] = { // error strings
 		"js_native_set_property: pointer is allocated, read only",
 		"js_native_set_property: pointer is allocated, count is read only",
 		NULL
 	};
-	if (!p) { return false; }
 	if (JSStringIsEqualToUTF8CString(propertyName, "pointer")) {
 		if (p->allocated) { js_native_throw_exception(ctx, e[0], exception); return true; }
 		p->location = (void *) (unsigned long) JSValueToNumber(ctx, value, exception); return true;
@@ -215,6 +227,10 @@ static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStri
 JSValueRef js_native_free(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
 	JSNativePrivate * p = JSObjectGetPrivate(thisObject);
 	if (p) {
+		if ( ! js_native_is_native_object(ctx, thisObject) ) {
+			js_native_throw_exception(ctx, "js_native_free: not a JSNative object", exception);
+			return JSValueMakeNull(ctx);
+		}
 		if (p->allocated && p->location) g_free(p->location);
 		g_free(p); JSObjectSetPrivate(thisObject, NULL);
 	}
