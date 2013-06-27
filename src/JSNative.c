@@ -65,12 +65,12 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	JSValueRef arg[] = { arguments[0], NULL };
 	JSValueRef jsTypeCode = js_native_call_function (
 		ctx, "JSNative.typeCode", NULL, 1, arg, exception
-	); if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
+	);
 	p->typeCode = (int) JSValueToNumber(ctx, jsTypeCode, exception);
-	if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
+
 	if (argumentCount >= 2) {
 		p->count = JSValueToNumber(ctx, arguments[1], exception);
-		if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
+
 	} else p->count = 1;
 	bool isUnsigned = JSNativeUnsignedValue(p->typeCode);
 	if (isUnsigned) p->typeCode--;
@@ -211,18 +211,6 @@ static bool js_native_set_property (JSContextRef ctx, JSObjectRef object, JSStri
 	return false;
 }
 
-// The callback invoked when determining whether an object has a property.
-static bool js_native_has_property(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName) {
-	JSNativePrivate * p = JSObjectGetPrivate(object);
-	if (!p) return false;
-	else if (JSStringIsEqualToUTF8CString(propertyName, "pointer")) return true;
-	else if (JSStringIsEqualToUTF8CString(propertyName, "value")) return true;
-	else if (JSStringIsEqualToUTF8CString(propertyName, "type")) return true;
-	else if (JSStringIsEqualToUTF8CString(propertyName, "count")) return true;
-	else if (JSStringIsEqualToUTF8CString(propertyName, "constant")) return true;
-	else return false;
-}
-
 JSValueRef js_native_free(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
 	JSNativePrivate * p = JSObjectGetPrivate(thisObject);
 	if (p) {
@@ -238,7 +226,6 @@ JSClassRef js_native_define_class(JSContextRef ctx, JSObjectRef object) {
 	jsNative.callAsConstructor = &js_native_construct_object;
 	jsNative.setProperty = &js_native_set_property;
 	jsNative.getProperty = &js_native_get_property;
-	jsNative.hasProperty = &js_native_has_property;
 	JSStaticFunction StaticFunctionArray[] = {
 	    { "free", &js_native_free, kJSPropertyAttributeDontDelete  }, { 0, 0, 0 }
 	};
