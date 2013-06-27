@@ -65,10 +65,12 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	JSValueRef arg[] = { arguments[0], NULL };
 	JSValueRef jsTypeCode = js_native_call_function (
 		ctx, "JSNative.typeCode", NULL, 1, arg, exception
-	); // check exception!
-	p->typeCode = (int) JSValueToNumber(ctx, jsTypeCode, exception); // check exception!
+	); if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
+	p->typeCode = (int) JSValueToNumber(ctx, jsTypeCode, exception);
+	if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
 	if (argumentCount >= 2) {
-		p->count = JSValueToNumber(ctx, arguments[1], exception); // check exception!
+		p->count = JSValueToNumber(ctx, arguments[1], exception);
+		if (exception) { g_free(p); return (JSObjectRef) JSValueMakeNull(ctx); }
 	} else p->count = 1;
 	bool isUnsigned = JSNativeUnsignedValue(p->typeCode);
 	if (isUnsigned) p->typeCode--;
@@ -84,12 +86,14 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	else if (p->typeCode == JSNativeTypeFloat) p->location = g_new0(float, p->count);
 	else if (p->typeCode == JSNativeTypeDouble) p->location = g_new0(double, p->count);
 	else if (p->typeCode == JSNativeTypePointer) p->location = g_new0(void *, p->count);
+	else { js_native_throw_exception(ctx, "js_native_construct_object: unknown type code", exception);
+		g_free(p); return JSValueMakeUndefined(ctx);
+	}
 	if (isUnsigned) p->typeCode++;
 	return JSObjectMake(ctx, JSNative, p);
 }
 
 JSValueRef js_native_get_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsigned long index, JSValueRef * exception) {
-
 	char * e[] = { // error strings
 		"js_native_get_property_at_index: no native data available",
 		"js_native_get_property_at_index: cannot read null base pointer",
@@ -98,13 +102,10 @@ JSValueRef js_native_get_property_at_index(JSContextRef ctx, JSNativePrivate * p
 		"js_native_get_property_at_index: cannot read unknown native type code",
 		NULL
 	};
-
 	if ( ! p ) { js_native_throw_exception(ctx, e[0], exception); return NULL; }
 	if ( ! p->location ) { js_native_throw_exception(ctx, e[1], exception); JSValueMakeNull(ctx); }
 	if (index && index >= p->count || p->count == 0) { js_native_throw_exception(ctx, e[2], exception); JSValueMakeNull(ctx); }
-
 	if (p->typeCode == JSNativeTypeVoid) { js_native_throw_exception(ctx, e[3], exception); JSValueMakeNull(ctx); }
-
 	if (JSNativeUnsignedValue(p->typeCode)) {
 		if (p->typeCode == JSNativeTypeChar + 1) return JSValueMakeNumber(ctx, (double) (unsigned char) *(unsigned char*)(p->location + index));
 		else if (p->typeCode == JSNativeTypeShort + 1) return JSValueMakeNumber(ctx, (double) *(unsigned short*)(p->location + index));
@@ -124,13 +125,10 @@ JSValueRef js_native_get_property_at_index(JSContextRef ctx, JSNativePrivate * p
 		else if (p->typeCode == JSNativeTypePointer) return JSValueMakeNumber(ctx, (double) *(unsigned long*)(p->location + index));
 		else { js_native_throw_exception(ctx, e[4], exception); return JSValueMakeNull(ctx); }
 	}
-
 	return NULL;
-
 }
 
 static JSValueRef js_native_get_property (JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef* exception) {
-
 	JSNativePrivate * p = JSObjectGetPrivate(object); if (!p) return NULL;
 	unsigned long index = 0;
 	if (JSStringIsEqualToUTF8CString(propertyName, "pointer")) {
@@ -150,7 +148,6 @@ static JSValueRef js_native_get_property (JSContextRef ctx, JSObjectRef object, 
 }
 
 bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsigned long index, JSValueRef value, JSValueRef * exception) {
-
 	char * e[] = { // error strings
 		"js_native_set_property_at_index: no native data available",
 		"js_native_set_property_at_index: cannot write null base pointer",
@@ -160,13 +157,11 @@ bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsi
 		"js_native_set_property_at_index: cannot write unknown native type code",
 		NULL
 	};
-
 	if ( ! p ) { js_native_throw_exception(ctx, e[0], exception); return false; }
 	if ( ! p->location ) { js_native_throw_exception(ctx, e[1], exception); return true; }
 	if (index && index >= p->count || p->count == 0) { js_native_throw_exception(ctx, e[2], exception); return true; }
 	if (p->typeCode == JSNativeTypeVoid) { js_native_throw_exception(ctx, e[3], exception); return true; }
-	if ( p->constant) { js_native_throw_exception(ctx, e[4], exception); return true; }
-
+	if ( p->constant ) { js_native_throw_exception(ctx, e[4], exception); return true; }
 	if (JSNativeUnsignedValue(p->typeCode)) {
 		if (p->typeCode == JSNativeTypeChar + 1) { *(unsigned char*)(p->location + index) = (unsigned char) JSValueToNumber(ctx, value, exception); return true; }
 		else if (p->typeCode == JSNativeTypeShort + 1) { *(unsigned short*)(p->location + index) = (unsigned short) JSValueToNumber(ctx, value, exception); return true; }
@@ -186,7 +181,6 @@ bool js_native_set_property_at_index(JSContextRef ctx, JSNativePrivate * p, unsi
 		else if (p->typeCode == JSNativeTypePointer) { *(unsigned long*)(p->location + index) = (unsigned long) JSValueToNumber(ctx, value, exception); return true; }
 		else { js_native_throw_exception(ctx, e[5], exception); return true; }
 	}
-
 	return false;
 }
 
