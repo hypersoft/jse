@@ -77,7 +77,7 @@ static JSObjectRef js_native_construct_object (JSContextRef ctx, JSObjectRef con
 	if (isUnsigned) p->typeCode--;
 	if (p->typeCode == JSNativeTypeVoid) {
 		p->allocated = false; p->typeCode = JSNativeTypeVoid;
-		p->location = NULL; p->count = 0;
+		p->location = NULL;
 	} else if (p->typeCode == JSNativeTypeBool) p->location = g_new0(bool, p->count);
 	else if (p->typeCode == JSNativeTypeChar) p->location = g_new0(char, p->count);
 	else if (p->typeCode == JSNativeTypeShort) p->location = g_new0(short, p->count);

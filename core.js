@@ -20,7 +20,7 @@ puts("byteArray[0] = 64;");
 // The void type provides a fully customizable JSNative without an allocated data backing
 puts("void * pVoid = (void *) byteArray;");
 	pVoid = new JSNative("void");
-	pVoid.pointer = byteArray.pointer; pVoid.count = 1;
+	pVoid.pointer = byteArray.pointer;
 	puts(pVoid.pointer);
 
 puts("*(unsigned char *) pVoid;");
