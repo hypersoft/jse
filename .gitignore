@@ -1,0 +1,4 @@
+bin/jse
+bin/lib*
+inc/JSNative.inc
+inc/dyncall

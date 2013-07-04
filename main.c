@@ -9,8 +9,6 @@
 #include "JavaScriptCore.inc"
 #include "dyncall.inc"
 
-#include "src/JSNative.c"
-
 JSContextGroupRef MainContextGroup;
 JSGlobalContextRef	MainContext;
 
@@ -175,15 +173,15 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	void * cxgobj = jse_get_context_global_object(MainContext);
 
-	js_native_define_class(MainContext, cxgobj);
+	JSValueRef exception = NULL;
 
+	jse_create_function(MainContext, "puts", &jse_fn_puts, cxgobj);
 	jse_set_object_property(
 		MainContext, cxgobj, "argv", jse_convert_argv(MainContext, argc, argv)
 	);
 
-	jse_create_function(MainContext, "puts", &jse_fn_puts, cxgobj);
-	jse_create_function(MainContext, "getenv", &jse_fn_getenv, cxgobj);
-	jse_create_function(MainContext, "setenv", &jse_fn_setenv, cxgobj);
+
+	js_native_init(MainContext, cxgobj, &exception);
 
 	char * content = NULL; g_file_get_contents(argv[1], &content, NULL, NULL);
 	JSContextScript * script = jse_create_script(MainContext, content, argv[1], NULL);
@@ -192,4 +190,6 @@ int main(int argc, char *argv[], char *envp[]) {
 	jse_run_script(script);
 
 	JSGarbageCollect(MainContext);
+	//JSContextGroupRelease(MainContextGroup);
+
 }

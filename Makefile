@@ -1,7 +1,7 @@
 
 APPLICATION := bin/jse
 
-SOURCE := main.c
+SOURCE := main.c $(shell echo src/*.c)
 
 PKGS := javascriptcoregtk-3.0
 
@@ -11,7 +11,7 @@ OPTIMIZE := -O3 -march=native -mtune=generic
 
 DYNCALL := inc/dyncall
 
-REQUIRES := ${DYNCALL} $(shell find src -type f -wholename '*.c' -o -wholename '*.h' -o -wholename '*.js' -o -wholename '*.inc') 
+REQUIRES := Makefile ${DYNCALL} $(shell find src -type f -o -wholename '*.h' -o -wholename '*.js' -o -wholename '*.inc') $(shell find inc -type f -o -wholename '*.inc' -o -wholename '*.h')
 
 all: ${APPLICATION}
 
@@ -19,18 +19,18 @@ ${DYNCALL}:
 	@bin/dynhacker
 	@echo ''
 
-src/JSNative.inc: src/JSNative.js
+inc/JSNative.inc: src/JSNative.js
 	# JSNativeSupport is being reconstructed
-	@bin/bin2inc JSNativeSupport src/JSNative.js > src/JSNative.inc;
+	@bin/bin2inc JSNativeSupport src/JSNative.js > inc/JSNative.inc;
 
 # This rule builds jse
-${APPLICATION}: ${SOURCE} ${REQUIRES} src/JSNative.inc
+${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
 	@echo 'Building jse...'
-	gcc -I inc -o "$@" "${SOURCE}" bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	gcc -I inc -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
 	@echo ''
 
 clean:
-	@rm -rf bin/jse bin/*.a inc/dyncall src/JSNative.inc;
+	@rm -rf bin/jse bin/*.a inc/dyncall inc/JSNative.inc;
