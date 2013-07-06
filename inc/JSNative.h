@@ -1,2 +1,0 @@
-extern JSObjectRef RtJSNative;
-

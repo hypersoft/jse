@@ -1,4 +1,5 @@
 bin/jse
 bin/lib*
 inc/JSNative.inc
+inc/JavaScriptCore
 inc/dyncall
