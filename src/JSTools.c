@@ -3,17 +3,10 @@
 
 JSTGlobalRuntime JSTRuntime;
 
-#define JSTCoreString(BUFFER)				(_JSTCoreString(BUFFER))
-#define JSTGetCoreValue(OBJ, STR)			JSTNativeCall(JSObjectGetProperty, OBJ, STR)
-#define JSTGetCoreObject(OBJ, STR)			((JSObjectRef)	JSTGetCoreValue(OBJ, STR))
-#define JSTGetValue(OBJ, BUFFER)			JSTGetCoreValue(OBJ, JSTCoreString(BUFFER))
-#define JSTGetObject(OBJ, BUFFER)			JSTGetCoreObject(OBJ, JSTCoreString(BUFFER))
-#define JSTGetCoreGlobalValue(SYM, STR)		JSTGetCoreValue(RtJS(SYM), STR)
-#define JSTGetGlobalValue(SYM, BUFFER)		JSTGetCoreGlobalValue(SYM, JSTCoreString(BUFFER))
-#define JSTGetCoreGlobalObject(SYM, STR) 	JSTGetCoreObject(RtJS(SYM), STR)
-#define JSTGetGlobalObject(SYM, BUFFER)		JSTGetCoreGlobalObject(SYM, JSTCoreString(BUFFER))
-#define JSTGet 								JSTGetValue
-#define JSTGetGlobal						JSTGetGlobalValue
+char * _JSTSeekLineEnding(register char * BUFFER) {
+	if (BUFFER) do BUFFER++; while (*BUFFER && *BUFFER != 10);
+	return BUFFER;
+}
 
 void _JSTCacheRuntime(register JSContextRef ctx, register JSValueRef * exception) {
 
@@ -37,12 +30,31 @@ void _JSTCacheRuntime(register JSContextRef ctx, register JSValueRef * exception
 
 }
 
-bool JSTCoreRelease(register JSStringRef s) { if (s) JSStringRelease(s); s = NULL; return true; }
-bool JSTNativeRelease(register char * s) { if (s) g_free(s); s = NULL; return true; }
+bool JSTCoreRelease(register JSStringRef s) { if (s) JSStringRelease(s); return true; }
+bool JSTNativeRelease(register char * s) { if (s) g_free(s); return true; }
 
 JSStringRef _JSTCoreString(register char * BUFFER) {
 	static JSStringRef buffer; if (buffer) { JSStringRelease(buffer); buffer = NULL; }
 	return (buffer = JSStringCreateWithUTF8CString(BUFFER));
+}
+
+JSValueRef _JSTLoadString JSTNativeProcedure (JSValueRef file) {
+	char * content = NULL; g_file_get_contents(JSTNativeGetString(file), &content, NULL, NULL);
+	JSValueRef val = JSTNativeMakeString(content);
+	JSTNativeMakeString("free");
+	return val;
+}
+
+JSStringRef _JSTCoreLoadString JSTNativeProcedure (JSStringRef file) {
+	char * content = NULL; g_file_get_contents(JSTNativeString(file), &content, NULL, NULL);
+	JSStringRef val = JSTCoreString(content);
+	g_free(content); JSTEval("", NULL);
+	return val; // must be freed
+}
+
+char * _JSTNativeLoadString JSTNativeProcedure (char * file) {
+	char * content = NULL; g_file_get_contents(file, &content, NULL, NULL);
+	return content; // must be freed
 }
 
 char * _JSTNativeString (register JSStringRef STR) {
@@ -91,5 +103,12 @@ JSObjectRef _JSTCallConstructor(register JSContextRef ctx, JSValueRef * exceptio
 	} else {
 	return JSObjectCallAsConstructor(ctx, OBJ, 0, NULL, exception);
 	}
+}
+
+JSValueRef _JSTRunScript JSTNativeProcedure (char * file) {
+	char * script = JSTNativeLoadString(file);
+	JSValueRef val = JSTEval(JSTSheBang(script), NULL); JSTNativeRelease(script);
+	if (JSTCaughtException) JSTSetValue((JSObjectRef)*exception, "file", JSTNativeMakeString(file), JSTPropertyConst);
+	return val;
 }
 
