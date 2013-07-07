@@ -84,8 +84,8 @@ JSValueRef
 )	? *jsValPtrResult : NULL
 
 JSStringRef
-/*-->*/_JSTGetStringValue JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult);
-#define JSTGetStringValue(jsVal, jsStringPtrResult)	(	\
+/*-->*/_JSTGetValueString JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult);
+#define JSTGetValueString(jsVal, jsStringPtrResult)	(	\
 	*jsStringPtrResult = JSValueToStringCopy(ctx, jsVal, exception)	\
 )
 
@@ -96,7 +96,7 @@ char *
 	(((bFreeFile != 0) && JSTFreeBuffer(chrPtrFile)) || true) \
 )	? *chrPtrPtrResult : NULL
 
-#define JSTGetValueBuffer(jsVal, chrPtrPtrResult) (*chrPtrPtrResult = JSTGetStringBuffer(JSTGetStringValue(jsVal, &JSTStringRef), chrPtrPtrResult, &JSTBufferLen, true))
+#define JSTGetValueBuffer(jsVal, chrPtrPtrResult) (*chrPtrPtrResult = JSTGetStringBuffer(JSTGetValueString(jsVal, &JSTStringRef), chrPtrPtrResult, &JSTBufferLen, true))
 
 #define JSTMakeBufferValue(chrPtr) JSTMakeString(JSTCreateStaticString(chrPtr, &JSTStringRef), &JSTValueRef, true)
 

@@ -25,8 +25,8 @@ char * _JSTGetStringBuffer(JSStringRef jsStringSource, char ** chrPtrPtrResult, 
 JSValueRef _JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValPtrResult, bool bFreeString) {
 	return JSTMakeString(jsString, jsValPtrResult, bFreeString);
 }
-JSStringRef _JSTGetStringValue JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult) {
-	return JSTGetStringValue(jsVal, jsStringPtrResult);
+JSStringRef _JSTGetValueString JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult) {
+	return JSTGetValueString(jsVal, jsStringPtrResult);
 }
 char * _JSTLoadStringBuffer (char * chrPtrFile, char ** chrPtrPtrResult, bool bFreeFile) {
 	return JSTLoadStringBuffer(chrPtrFile, chrPtrPtrResult, bFreeFile);
@@ -61,9 +61,9 @@ static JSValueRef jst_shell JSToolsFunction () {
 static JSValueRef jst_put JSToolsFunction () {
 
 	JSTPropertyMaster; JSTValueRef = JSTMakeNumber(
-		g_printf("%s\n"
+		g_printf("%s\n",
 			JSTGetStringBuffer(
-				JSTGetStringValue(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
+				JSTGetValueString(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
 			)
 		)
 	);
@@ -77,7 +77,7 @@ static JSValueRef jst_write JSToolsFunction () {
 	JSTPropertyMaster; JSTValueRef = JSTMakeNumber(
 		g_printf("%s",
 			JSTGetStringBuffer(
-				JSTGetStringValue(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
+				JSTGetValueString(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
 			)
 		)
 	);
