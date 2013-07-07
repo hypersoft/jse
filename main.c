@@ -5,9 +5,6 @@
 #include <getopt.h>
 #include <string.h>
 
-#include "glib.inc"
-#include "JavaScriptCore.inc"
-#include "dyncall.inc"
 #include "JSNative.h"
 
 JSContextGroupRef MainContextGroup;
@@ -24,21 +21,9 @@ void jse_destroy_context(JSGlobalContextRef context) {
 
 JSObjectRef jse_convert_argv(JSContextRef ctx, int argc, char *argv[]) {
 	void * jsargv = JSObjectMakeArray(MainContext, 0, NULL, NULL);
-	JSStringRef f;
-	register i = 0; while (i < argc) {
-		JSObjectSetPropertyAtIndex(
-			MainContext, jsargv, i, JSValueMakeString(
-				MainContext, (f = JSStringCreateWithUTF8CString(argv[i]))
-			), NULL
-		); 
-		JSStringRelease(f); i++;
-	};
+	register i = 0; while (i < argc)
+	JSObjectSetPropertyAtIndex(ctx, jsargv, i, JSTMakeBufferValue(argv[i++]), NULL); 
 	return jsargv;
-}
-
-static JSValueRef jse_fn_puts JSTNativeFunction () {
-	if (argc)
-	return JSValueMakeNumber(ctx, (double) puts(JSTNativeGetString(JSTParam(1))));
 }
 
 int main(int argc, char *argv[], char *envp[]) {
@@ -50,21 +35,15 @@ int main(int argc, char *argv[], char *envp[]) {
 	JSValueRef e = NULL;
 	JSValueRef * exception = &e;
 
-	JSTCacheRuntime();
+	JSTLoadRuntime();
 
-	JSStringRef temp = JSTCoreString("puts");
-	JSTSetCoreValue(RtJS(Global), temp, JSTCoreMakeFunction(temp, &jse_fn_puts), JSTPropertyConst);
-	JSTSetValue(RtJS(Global), "argv", jse_convert_argv(MainContext, argc, argv), JSTPropertyConst);
+	JSTPropertyMaster;
 
-	js_native_init(ctx, RtJS(Global), exception);
+	JSTSetProperty(RtJS(Global), "argv", jse_convert_argv(ctx, argc, argv), JSTPropertyConst);
 
-	JSTRunScript(argv[1]);
+//	js_native_init(ctx, RtJS(Global), exception);
 
-	if (JSTCaughtException) {
-		fprintf(stderr, "%s: Fatal Script Error: \nLine %i: %s\n",
-			argv[1], JSTInteger(JSTGet(RtJSException, "line")),
-			JSTNativeGetString(*exception)
-		);
-	}
+	if (argc) JSTCall(RtJS(Global), "loadScript", JSTMakeBufferValue(argv[1]));
+
 
 }

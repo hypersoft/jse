@@ -8,19 +8,12 @@
 
 JSObjectRef RtJSNative = NULL;
 
-void js_native_init JSTNativeProcedure (JSObjectRef global) {
+void js_native_init JSToolsProcedure (JSObjectRef global) {
 
 	/* our root object */
-	JSTSet(global, "JSNative", (RtJSNative = JSTCreateObject(NULL, NULL)), JSTPropertyConst);
+	JSTSetProperty(global, "JSNative", (RtJSNative = JSTCreateClassObject(NULL, NULL)), JSTPropertyConst);
 
 	JSTEval(JSNativeSupport, global);
-
-	if (JSTCaughtException) {
-		fprintf(stderr, "JSNative.c: js_native_init: WARNING: JSNativeSupport Script Exception: \nLine %i: %s\n",
-			JSTInteger(JSTGet(RtJSException, "line")), JSTNativeGetString(*exception)
-		);
-		*exception = NULL;
-	}
 
 }
 

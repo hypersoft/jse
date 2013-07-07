@@ -5,35 +5,170 @@
 #include "glib.inc"
 #include "JavaScriptCore.inc"
 
-#define JSTNativeProcedure(...) 	(JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
-#define JSTFastNativeProcedure(...)	(register JSContextRef ctx, ##__VA_ARGS__, register JSValueRef * exception)
-#define JSTNativeCall(NAME, ...)	NAME (ctx, ##__VA_ARGS__, exception)
-#define JSTNativeFunction()		JSTNativeProcedure (JSObjectRef callee, JSObjectRef this, size_t argc, const JSValueRef argv[])
-#define JSTCaughtException 			*exception
-
-char * _JSTSeekLineEnding(register char * BUFFER);
-void _JSTCacheRuntime(register JSContextRef ctx, register JSValueRef * exception);
-JSStringRef _JSTCoreString(register char * BUFFER);
-JSValueRef _JSTLoadString JSTNativeProcedure (JSValueRef file);
-char * _JSTNativeLoadString JSTNativeProcedure (char * file);
-JSStringRef _JSTCoreLoadString JSTNativeProcedure (JSStringRef file);
-char * _JSTNativeString (register JSStringRef STR);
-JSValueRef _JSTCallFunction (register JSContextRef ctx, JSValueRef * exception, JSObjectRef THIS, JSObjectRef FUNC, ...);
-JSObjectRef _JSTCallConstructor (register JSContextRef ctx, JSValueRef * exception, JSObjectRef OBJ, ...);
-bool JSTCoreRelease(register JSStringRef string);	// ...
-bool JSTNativeRelease(register char * string);		// always returns true
-JSValueRef _JSTRunScript JSTNativeProcedure (char * FILE);
-#define JSTRunScript(FILE) JSTNativeCall(_JSTRunScript, FILE);
-
 typedef struct {
 	JSObjectRef
 		Global, isNaN, parseInt, parseFloat, escape, unescape, isFinite, decodeURI,
 		encodeURI, decodeURIComponent, encodeURIComponent, Array, Boolean, Date,
 		Error, Function, JSON, Math, Number, Object, RangeError, ReferenceError,
-		RegExp, String, SyntaxError, TypeError, URIError;
+		RegExp, String, SyntaxError, TypeError, URIError, classOf;
 	JSValueRef Infinity, NaN, undefined;
-	JSStringRef classOf;
 } JSTGlobalRuntime;
+
+#define JSToolsProcedure(...) 		(JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
+#define JSToolsCall(NAME, ...)		NAME (ctx, ##__VA_ARGS__, exception)
+#define JSToolsFunction()			JSToolsProcedure (JSObjectRef callee, JSObjectRef this, size_t argc, const JSValueRef argv[])
+#define JSTFastNativeProcedure(...)	(register JSContextRef ctx, ##__VA_ARGS__, register JSValueRef * exception)
+#define JSTNativeConstructor(...)	JSToolsProcedure (JSObjectRef callee, size_t argc, const JSValueRef argv[])
+#define JSTNativePropertyReader()	JSToolsProcedure (JSObjectRef object, JSStringRef property)
+#define JSTNativePropertyWriter()	JSToolsProcedure (JSObjectRef object, JSStringRef property, JSValueRef value)
+#define JSTNativeConvertor()		JSToolsProcedure (JSObjectRef object, JSType type)
+
+#define JSTFunctionRelay(targetFunction)	JSToolsFunction() { return JSTRelayFunctionCall(targetFunction); } 
+
+#define JSTRelayFunctionCall(func) JSObjectCallAsFunction(ctx, func, this, argc, argv, exception)
+
+#define JSTPropertyHidden 		kJSPropertyAttributeDontEnum
+#define JSTPropertyReadOnly 	kJSPropertyAttributeReadOnly
+#define JSTPropertyRequired 	kJSPropertyAttributeDontDelete
+#define JSTPropertyConst 		(JSTPropertyReadOnly | JSTPropertyRequired)
+#define JSTPropertyPrivate 		(JSTPropertyHidden | JSTPropertyRequired)
+#define JSTPropertyProtected 	(JSTPropertyConst | JSTPropertyPrivate)
+
+#define JSTNumberType kJSTypeNumber
+#define JSTStringType kJSTypeString
+
+#define JSTCaughtException 			*exception
+
+#define JSTPropertyMaster long JSTBufferLen; char * JSTBufferRef; JSObjectRef JSTObjectRef; JSStringRef JSTStringRef; JSValueRef JSTValueRef
+
+void _JSTLoadRuntime(register JSContextRef ctx, register JSValueRef * exception);
+JSValueRef _JSTCallFunction (register JSContextRef ctx, JSValueRef * exception, JSObjectRef THIS, JSObjectRef FUNC, ...);
+JSObjectRef _JSTCallConstructor (register JSContextRef ctx, JSValueRef * exception, JSObjectRef OBJ, ...);
+JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, JSStringRef jsBody, ...);
+JSObjectRef _JSTCompileFunction(JSContextRef ctx, JSValueRef * exception, char * chrPtrName, char * chrPtrBody, ...);
+JSObjectRef _JSTCompilePropertyFunction(JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, char * chrPtrBody, ...);
+JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this);
+
+#define JSTRunScript(chrPtrFile, jsObject) JSToolsCall(_JSTRunScript, chrPtrFile, jsObject)
+
+bool
+	JSTFreeBuffer(char * buffer),
+	JSTFreeString(JSStringRef string),
+	_JSTCoreSetProperty JSToolsProcedure (JSObjectRef jsObject, JSStringRef jsStringName, JSValueRef jsValue, long jsAttributes);
+
+JSStringRef
+/*-->*/_JSTCreateString(char * chrPtrBuffer, JSStringRef * jsStringPtrResult, bool bFreeBuffer);
+#define JSTCreateString(chrPtrBuffer, jsStringPtrResult, bFreeBuffer) (	\
+	((*jsStringPtrResult = JSStringCreateWithUTF8CString(chrPtrBuffer)) || true) &&	\
+	(((bFreeBuffer != 0) && JSTFreeBuffer(chrPtrBuffer)) || true)	\
+) ? *jsStringPtrResult : NULL
+
+#define JSTCreateStaticString(chrPtrBuffer, jsStringPtrResult) (*jsStringPtrResult = JSStringCreateWithUTF8CString(chrPtrBuffer))
+
+char *
+/*-->*/_JSTGetStringBuffer(JSStringRef jsStringSource, char ** chrPtrPtrResult, long * lngPtrSize, bool bFreeSource);
+#define JSTGetStringBuffer(jsStringSource, chrPtrPtrResult, lngPtrSize, bFreeSource) (	\
+	((*chrPtrPtrResult = NULL) || true) &&	\
+	((*lngPtrSize = JSStringGetMaximumUTF8CStringSize(jsStringSource)) || true) &&	\
+	((JSStringGetUTF8CString(jsStringSource,	\
+		(*chrPtrPtrResult = g_new(char, *lngPtrSize)), *lngPtrSize	\
+	)) || true) &&	\
+	(((bFreeSource != 0) && JSTFreeString(jsStringSource)) || true)	\
+)	? *chrPtrPtrResult : NULL
+
+JSValueRef
+/*-->*/_JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValPtrResult, bool bFreeString);
+#define JSTMakeString(jsString, jsValPtrResult, bFreeString) (	\
+	((*jsValPtrResult = JSValueMakeString(ctx, jsString)) || true)	&&	\
+	(((bFreeString != 0) && JSTFreeString(jsString)) || true)	\
+)	? *jsValPtrResult : NULL
+
+JSStringRef
+/*-->*/_JSTGetStringValue JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult);
+#define JSTGetStringValue(jsVal, jsStringPtrResult)	(	\
+	*jsStringPtrResult = JSValueToStringCopy(ctx, jsVal, exception)	\
+)
+
+char *
+/*-->*/_JSTLoadStringBuffer (char * chrPtrFile, char ** chrPtrPtrResult, bool bFreeFile);
+#define JSTLoadStringBuffer(chrPtrFile, chrPtrPtrResult, bFreeFile) (	\
+	((g_file_get_contents(chrPtrFile, chrPtrPtrResult, NULL, NULL)) || true) &&	\
+	(((bFreeFile != 0) && JSTFreeBuffer(chrPtrFile)) || true) \
+)	? *chrPtrPtrResult : NULL
+
+#define JSTGetValueBuffer(jsVal, chrPtrPtrResult) (*chrPtrPtrResult = JSTGetStringBuffer(JSTGetStringValue(jsVal, &JSTStringRef), chrPtrPtrResult, &JSTBufferLen, true))
+
+#define JSTMakeBufferValue(chrPtr) JSTMakeString(JSTCreateStaticString(chrPtr, &JSTStringRef), &JSTValueRef, true)
+
+#define JSTCoreSetProperty(jsObject, jsStringName, jsValue, jsAttributes)	\
+(	\
+	JSToolsCall(_JSTCoreSetProperty, jsObject, jsStringName, (JSValueRef) jsValue, jsAttributes)	\
+)
+#define JSTSetProperty(jsObject, chrPtrName, jsValue, jsAttributes)	\
+(	\
+	JSTCoreSetProperty(jsObject, JSTCreateStaticString(chrPtrName, &JSTStringRef), jsValue, jsAttributes)	\
+) ? (JSTFreeString(JSTStringRef)) : false
+
+#define JSTCoreGetProperty(jsObject, jsStringName)	\
+(	\
+	JSToolsCall(JSObjectGetProperty, jsObject, jsStringName)	\
+)
+#define JSTGetProperty(jsObject, chrPtrName)	\
+(	\
+	( (JSTValueRef = JSTCoreGetProperty(jsObject, JSTCreateStaticString(chrPtrName, &JSTStringRef))) || true) &&	\
+	( JSTFreeString(JSTStringRef) )	\
+) ? ( JSTValueRef ) : NULL
+#define JSTGetPropertyObject(jsObject, chrPtrName)	(JSObjectRef)(JSTGetProperty(jsObject, chrPtrName))
+
+#define JSTDeleteProperty(jsObject, chrPtrName)	\
+(	\
+	JSToolsCall(JSObjectDeleteProperty, jsObject, JSTCreateStaticString(chrPtrName, &JSTStringRef)) \
+) ? (JSTFreeString(JSTStringRef)) : (! JSTFreeString(JSTStringRef))
+
+#define JSTCoreHasProperty(jsObject, jsStringName)	\
+(	\
+	JSToolsCall(JSObjectHasProperty, jsObject, jsStringName)	\
+)
+#define JSTHasProperty(jsObject, chrPtrName)	\
+(	\
+	JSTCoreHasProperty(jsObject, JSTCreateStaticString(chrPtrName, &JSTStringRef)) \
+) ? (JSTFreeString(JSTStringRef)) : (! JSTFreeString(JSTStringRef))
+
+#define JSTEval(chrPtrScript, jsObject) (	\
+(	\
+	( (JSTValueRef = JSToolsCall(JSEvaluateScript, JSTCreateStaticString(chrPtrScript, &JSTStringRef), jsObject, NULL, 1)) || true) &&	\
+	( JSTFreeString(JSTStringRef) )	\
+) ? ( JSTValueRef ) : NULL )
+#define JSTEvalObject(chrPtrScript, jsObject) (JSObjectRef)(JSTEval(chrPtrScript, jsObject))
+
+#define JSTCoreMakeFunction(STR, PROC)	JSObjectMakeFunctionWithCallback (ctx, STR, PROC)
+#define JSTMakeFunction(chrPtrName, fnPtr) (	\
+(	\
+	( (JSTObjectRef = JSTCoreMakeFunction(JSTCreateStaticString(chrPtrName, &JSTStringRef), fnPtr)) || true) &&	\
+	( JSTFreeString(JSTStringRef) )	\
+) ? ( JSTObjectRef ) : NULL )
+
+#define JSTSetPropertyFunction(jsObject, chrPtrName, fnPtr) \
+( ( (JSTCoreSetProperty (	\
+	jsObject, JSTStringRef, (JSTObjectRef = JSTCoreMakeFunction (	\
+		JSTCreateStaticString(chrPtrName, &JSTStringRef), fnPtr	\
+	) ), JSTPropertyConst) || true) && JSTFreeString(JSTStringRef)	\
+) ? JSTObjectRef : NULL )
+
+#define JSTCoreCompileFunction(jsName, jsScriptBody, ...) _JSTCompileFunction(ctx, exception, jsName, jsScriptBody, ##__VA_ARGS__, NULL)
+#define JSTCompileFunction(chrPtrName, chrPtrScript, ...) _JSTCompileFunction(ctx, exception, chrPtrName, chrPtrScript, ##__VA_ARGS__, NULL)
+#define JSTCompilePropertyFunction(jsName, chrPtrScript, ...) _JSTCompilePropertyFunction(ctx, exception, jsName, chrPtrScript, ##__VA_ARGS__, NULL)
+
+#define JSTSetPropertyScript(jsObject, chrPtrName, chrPtrScript, ...) 	\
+(	\
+	(JSTObjectRef = JSTCompilePropertyFunction (JSTCreateStaticString(chrPtrName, &JSTStringRef), chrPtrScript, ##__VA_ARGS__)) && \
+	JSTCoreSetProperty(jsObject, JSTStringRef, JSTObjectRef, JSTPropertyConst) &&	\
+	JSTFreeString(JSTStringRef)	\
+)	? JSTObjectRef : NULL
+
+#define JSTGetIndex(OBJ, INDEX)						JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX))
+#define JSTGetIndexObject(OBJ, INDEX)				(JSObjectRef)(JSTGetIndex(OBJ, INDEX))
+#define JSTSetIndex(OBJ, INDEX, VAL, ATTR)			(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL, ATTR)
 
 #define RtJS(SYM) 		JSTRuntime.SYM
 #define RtJSValue(SYM)	((JSValueRef)	RtJS(SYM))
@@ -46,6 +181,7 @@ typedef struct {
 #define RtJSArgumentsLength argc
 #define RtJSArguments argv
 #define RtJSException (JSObjectRef) *exception
+#define RtJSProperty property
 
 #define JSTArgument(INDEX) 			((INDEX < argc) ? (RtJSArguments[INDEX]) : RtJS(undefined))
 #define JSTArgumentObject(INDEX)	(JSObjectRef) JSTArgument(INDEX)
@@ -54,21 +190,6 @@ typedef struct {
 #define JSTArgumentsObject() 		JSObjectMakeArray(ctx, RtJSArgumentsLength,  RtJSArguments, exception) 
 #define JSTArgumentsValue() 		(JSValueRef) JSTArgumentsObject()
 #define JSTArguments 				JSTArgumentsValue
-
-#define JSTNativeConstructor(...)	JSTNativeProcedure (JSObjectRef callee, size_t argc, const JSValueRef argv[])
-#define JSTNativePropertyReader()	JSTNativeProcedure (JSObjectRef object, JSStringRef property)
-#define JSTNativePropertyWriter()	JSTNativeProcedure (JSObjectRef object, JSStringRef property, JSValueRef value)
-#define JSTNativeConvertor()		JSTNativeProcedure (JSObjectRef object, JSType type)
-
-#define JSTPropertyHidden 		kJSPropertyAttributeDontEnum
-#define JSTPropertyReadOnly 	kJSPropertyAttributeReadOnly
-#define JSTPropertyRequired 	kJSPropertyAttributeDontDelete
-#define JSTPropertyConst 		(JSTPropertyReadOnly | JSTPropertyRequired)
-#define JSTPropertyPrivate 		(JSTPropertyHidden | JSTPropertyRequired)
-#define JSTPropertyProtected 	(JSTPropertyConst | JSTPropertyPrivate)
-
-#define JSTNumberType kJSTypeNumber
-#define JSTStringType kJSTypeString
 
 #define JSTObject(VAL) 			JSValueIsObject(ctx, VAL)
 #define JSTString(VAL)			JSValueIsString(ctx, VAL)
@@ -93,52 +214,10 @@ typedef struct {
 #define JSTMakeNumber(DOUBLE) 			JSValueMakeNumber(ctx, (double) DOUBLE)
 #define JSTMakePointer(PTR)				JSValueMakeNumber(ctx, (double) (long) PTR)
 #define JSTMakeConstructor(CLASS, PROC) JSObjectMakeConstructor(ctx, CLASS, PROC)
-#define JSTCoreMakeFunction(STR, PROC)	JSObjectMakeFunctionWithCallback (ctx, STR, PROC)
-#define JSTMakeFunction(BUFFER, PROC)	JSTCoreMakeFunction(JSTCoreString(BUFFER), PROC)
-
-#define JSTLoadString(VAL)			JSTNativeCall(_JSTLoadString, VAL)
-#define JSTCoreLoadString(STR) 		JSTNativeCall(_JSTCoreLoadString, STR)
-#define JSTNativeLoadString(BUFFER)	JSTNativeCall(_JSTNativeLoadString, BUFFER)
 
 #define JSTCoreStringLength(STR)				JSStringGetMaximumUTF8CStringSize(STR)
-#define JSTNativeStringCopy(STR, DEST, SIZE)	((char *) JSStringGetUTF8CString(STR, DEST, SIZE) ? BUFFER : NULL)
 #define JSTCoreEqualsNative 					JSStringIsEqualToUTF8CString
 #define JSTCoreEquals 							JSStringIsEqual
-
-#define JSTCoreString(BUFFER)	((JSStringRef) _JSTCoreString(BUFFER))
-#define JSTCoreMakeString(STR)	JSValueMakeString(ctx, STR)
-#define JSTCoreGetString(VAL)	JSTNativeCall(JSValueToStringCopy, VAL)
-
-#define JSTNativeString(STR)		((char *)		_JSTNativeString(STR))	
-#define JSTNativeMakeString(BUFFER) JSTCoreMakeString(JSTCoreString(BUFFER))
-#define JSTNativeGetString(VAL)		JSTNativeString(JSTCoreGetString(VAL))
-
-#define JSTGetCoreValue(OBJ, STR)	JSTNativeCall(JSObjectGetProperty, OBJ, STR)
-#define JSTGetCoreObject(OBJ, STR)	((JSObjectRef)	JSTGetCoreValue(OBJ, STR))
-#define JSTGetValue(OBJ, BUFFER)	JSTGetCoreValue(OBJ, JSTCoreString(BUFFER))
-#define JSTGetObject(OBJ, BUFFER)	JSTGetCoreObject(OBJ, JSTCoreString(BUFFER))
-#define JSTGet 						JSTGetValue
-
-#define JSTSetCoreValue(OBJ, STR, VAL, ATTR)	(void)	JSTNativeCall(JSObjectSetProperty, OBJ, STR, VAL, ATTR)
-#define JSTSetCoreObject(OBJ, STR, VAL, ATTR)	JSTSetCoreValue(OBJ, STR, (JSValueRef) VAL, ATTR)
-#define JSTSetValue(OBJ, STR, VAL, ATTR)		JSTSetCoreValue(OBJ, JSTCoreString(STR), VAL, ATTR)
-#define JSTSetObject(OBJ, STR, VAL, ATTR)		JSTSetCoreObject(OBJ, JSTCoreString(STR), VAL, ATTR)
-#define JSTSet 									JSTSetValue
-
-#define JSTGetIndexValue(OBJ, INDEX)	JSTNativeCall(JSObjectGetPropertyAtIndex, OBJ, INDEX))
-#define JSTGetIndexObject(OBJ, INDEX)	((JSObjectRef) JSTGetIndexValue(OBJ, INDEX))
-#define JSTGetIndex 					JSTGetIndexValue
-
-#define JSTSetIndexValue(OBJ, INDEX, VAL, ATTR)		(void)	JSTNativeCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, VAL, ATTR)
-#define JSTSetIndexObject(OBJ, INDEX, VAL, ATTR)	(void)	JSTSetIndexValue(OBJ, INDEX, (JSValueRef) VAL, ATTR)
-#define JSTSetIndex 								JSTSetIndexValue
-
-#define JSTDeleteCoreProperty(OBJ, STR) (bool) (JSTNativeCall(JSObjectDeleteProperty, OBJ, STR))
-#define JSTDeleteProperty(OBJ, STR)		(bool) (JSTNativeCall(JSObjectDeleteProperty, OBJ, JSTCoreString(STR)))
-#define JSTDelete JSTDeleteProperty
-
-#define JSTHasCoreProperty(OBJ, STR)	JSObjectHasProperty(ctx, OBJ, STR)
-#define JSTHasProperty(OBJ, BUFFER)		JSTHasCoreProperty(OBJ, JSTCoreString(BUFFER))
 
 #define JSTGetPrivate(OBJ)				JSObjectGetPrivate(OBJ)
 #define JSTSetPrivate(OBJ, PTR)			JSObjectSetPrivate(OBJ, PTR)
@@ -154,28 +233,19 @@ typedef struct {
 #define JSTSetPrototype 					JSTSetPrototypeValue
 
 // OBJ, FUNC[, ...]
-#define JSTCallFunctionValue(OBJ, FUNC, ...)	_JSTCallFunction(ctx, exception, OBJ, FUNC, ##__VA_ARGS__, NULL)
-#define JSTCallFunctionObject(OBJ, FUNC, ...)	((JSObjectRef) JSTCallFunctionValue(OBJ, FUNC, ##__VA_ARGS__))
-#define JSTCallCoreValue(OBJ, STR, ...) 		JSTCallFunctionValue(OBJ, JSTGetCoreObject(OBJ, STR), ##__VA_ARGS__)
-#define JSTCallCoreObject(OBJ, STR, ...)		((JSObjectRef) JSTCallCoreValue(OBJ, STR, ##__VA_ARGS__))
-#define JSTCallValue(OBJ, BUFFER, ...)			JSTCallCoreValue(OBJ, JSTCoreString(BUFFER), ##__VA_ARGS__)
-#define JSTCallObject(OBJ, BUFFER, ...)			((JSObjectRef) JSTCallValue(OBJ, BUFFER, ##__VA_ARGS__))
-#define JSTCall(OBJ, BUFFER, ...)				JSTCallValue(OBJ, BUFFER, ##__VA_ARGS__)
-#define JSTCallFunction 						JSTCallFunctionValue
+#define JSTCallFunction(OBJ, FUNC, ...)			_JSTCallFunction(ctx, exception, OBJ, FUNC, ##__VA_ARGS__, NULL)
+#define JSTCallFunctionObject(OBJ, FUNC, ...)	((JSObjectRef) JSTCallFunction(OBJ, FUNC, ##__VA_ARGS__))
 
-#define JSTCreateObject(CLASS, PRIV) 	JSObjectMake(ctx, CLASS, PRIV)
+#define JSTCall(OBJ, BUFFER, ...)				JSTCallFunction(OBJ, JSTGetPropertyObject(OBJ, BUFFER), ##__VA_ARGS__)
+#define JSTCallObject(OBJ, BUFFER, ...)			((JSObjectRef) JSTCall(OBJ, BUFFER, ##__VA_ARGS__))
+
+#define JSTCreateClassObject(CLASS, PRIV) 	JSObjectMake(ctx, CLASS, PRIV)
 
 // OBJ[, ...]
 #define JSTCallConstructor(OBJ, ...) _JSTCallConstructor(ctx, exception, OBJ, ##__VA_ARGS__, NULL)
 #define JSTConstructObject(OBJ, ...) JSTCallConstructor(OBJ, ##__VA_ARGS__)
 #define JSTConstructValue(OBJ, ...)	((JSValueRef) JSTConstructObject(OBJ, ##__VA_ARGS__))
 #define JSTConstruct 				JSTConstructObject
-
-#define JSTEvalCoreValue(STR, OBJ)	JSTNativeCall(JSEvaluateScript, STR, OBJ, NULL, 1)
-#define JSTEvalCoreObject(STR, OBJ)	((JSObjectRef) JSTEvalCoreValue(STR, OBJ))
-#define JSTEvalValue(STR, OBJ)		JSTEvalCoreValue(JSTCoreString(STR), OBJ)
-#define JSTEvalObject(STR, OBJ)		JSTEvalCoreObject(JSTCoreString(STR), OBJ)
-#define JSTEval(STR, OBJ) 			JSTEvalValue(STR, OBJ)
 
 /* Value Added Hacks */
 
@@ -184,6 +254,6 @@ typedef struct {
 #define JSTSheBang(BUFFER) ((BUFFER && *BUFFER == '#' && *(BUFFER + 1) == '!') ? (_JSTSeekLineEnding(BUFFER)) : (BUFFER))
 
 #define JSTReturnValueException return RtJSValue(undefined)
-#define JSTReturnObjectException return RtJSObject(undedfined)
+#define JSTReturnObjectException return RtJSObject(undefined)
 
 #endif

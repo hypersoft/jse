@@ -1,3 +1,9 @@
 #!bin/jse
 
-puts("hello world);
+b = shell("ls");
+
+write(b.stdout);
+
+
+
+
