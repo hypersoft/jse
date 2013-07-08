@@ -107,8 +107,8 @@ static JSValueRef jst_appendFile JSToolsFunction () {
 
 static JSValueRef jst_loadScript JSToolsFunction () {
 
-	char * fileName;
-	JSTValueRef = JSTRunScript(JSTGetValueBuffer(JSTParam(1), &fileName), JSTParamObject(2));
+	char * fileName; JSValueRef file = JSTParam(1); JSObjectRef object = JSTParamObject(2);
+	JSTValueRef = JSTRunScript(JSTGetValueBuffer(file, &fileName), object);
 	JSTFreeBuffer(fileName);
 	return JSTValueRef;
 
@@ -263,6 +263,7 @@ JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JS
 
 }
 
+
 JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
 
 	char * data; char * script;
@@ -270,11 +271,21 @@ JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
 	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;
 	JSValueRef result = JSTEval(script, this); JSTFreeBuffer(data);
 
+	JSValueRef * foo = { NULL };
+
+	MicroStackAlias(sfer, TypeList(void, *one = NULL, *two, *three)) x;
+	x.one++;
 	if (JSTCaughtException) {
 		JSTPropertyMaster;
 		JSTSetProperty((JSObjectRef)JSTCaughtException, "file", JSTMakeBufferValue(file), 0);
 	}
-
+	
 	return result;
 }
+
+#define StackBuffer(NAME, SIZE)	NAME[SIZE] = g_alloca(SIZE)
+
+#define uBranch(CASE, PASS, FAIL) ( (CASE) ? (PASS) : (FAIL) )
+
+#define StackType(TYPE, NAME, ...) TYPE __VA_ARGS__
 

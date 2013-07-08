@@ -14,6 +14,13 @@ typedef struct {
 	JSValueRef Infinity, NaN, undefined;
 } JSTGlobalRuntime;
 
+typedef struct {
+	void * pointer[16];
+} JSTMicroStack;
+
+#define TypeList(TYPE, ...) TYPE __VA_ARGS__;
+#define MicroStackAlias(NAME, ...) struct { __VA_ARGS__ }
+
 #define JSToolsProcedure(...) 		(JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
 #define JSToolsCall(NAME, ...)		NAME (ctx, ##__VA_ARGS__, exception)
 #define JSToolsFunction()			JSToolsProcedure (JSObjectRef callee, JSObjectRef this, size_t argc, const JSValueRef argv[])
@@ -39,7 +46,7 @@ typedef struct {
 
 #define JSTCaughtException 			*exception
 
-#define JSTPropertyMaster long JSTBufferLen; char * JSTBufferRef; JSObjectRef JSTObjectRef; JSStringRef JSTStringRef; JSValueRef JSTValueRef
+#define JSTPropertyMaster long JSTArgumentIndex, JSTBufferLen; char * JSTBufferRef; JSObjectRef JSTObjectRef; JSStringRef JSTStringRef; JSValueRef JSTValueRef
 
 void _JSTLoadRuntime(register JSContextRef ctx, register JSValueRef * exception);
 JSValueRef _JSTCallFunction (register JSContextRef ctx, JSValueRef * exception, JSObjectRef THIS, JSObjectRef FUNC, ...);
@@ -185,7 +192,7 @@ char *
 
 #define JSTArgument(INDEX) 			((INDEX < argc) ? (RtJSArguments[INDEX]) : RtJS(undefined))
 #define JSTArgumentObject(INDEX)	(JSObjectRef) JSTArgument(INDEX)
-#define JSTParam(INDEX) 			JSTArgument((INDEX - 1))
+#define JSTParam(INDEX) 			(((unsigned) INDEX > 0 && INDEX <= argc) ? (RtJSArguments[INDEX - 1]) : RtJS(undefined))
 #define JSTParamObject(INDEX) 		(JSObjectRef) JSTParam(INDEX)
 #define JSTArgumentsObject() 		JSObjectMakeArray(ctx, RtJSArgumentsLength,  RtJSArguments, exception) 
 #define JSTArgumentsValue() 		(JSValueRef) JSTArgumentsObject()
