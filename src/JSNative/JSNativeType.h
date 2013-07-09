@@ -5,11 +5,11 @@
 #ifndef JSNativeTypeSource
 	extern JSClassRef JSNativeType;
 	extern JSObjectRef RtJSNativeType, RtJSNativeTypeAlias;
+#else
+	#include <stdint.h>
 #endif
 
 typedef unsigned JSNativeTypeCode;
-
-void js_native_type_init JSToolsProcedure (JSObjectRef jsObjJSNative);
 
 #define JSNativeTypeVoid 0
 #define JSNativeTypeBool 10	
@@ -26,5 +26,7 @@ void js_native_type_init JSToolsProcedure (JSObjectRef jsObjJSNative);
 #define JSNativeTypeCodeIsUnsigned(V) (JSNativeTypeCodeIsInteger(V) && (V % 10))
 
 #define JSNativeTypeDeref(VAL)  ((JSObjectRef) JSTCall(RtJSNativeType, RtJSNative, VAL))
+
+void js_native_type_init JSToolsProcedure (JSObjectRef jsObjJSNative);
 
 #endif

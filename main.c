@@ -12,10 +12,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	
 	if (argc) JSTRunScript(argv[1], RtJS(Global));
 
-	if (JSTCaughtException) {
-		JSTReportError("User script execution error");
-		exit(1);
-	}
+	if (JSTCaughtException) JSTReportFatalException(1, NULL);
 
 }
 

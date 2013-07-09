@@ -12,11 +12,16 @@ static JSValueRef jst_chdir JSToolsFunction () {
 	JSTFreeBuffer(val); return result;
 }
 
-void _JSTReportError(JSContextRef ctx, char * msg, JSValueRef * exception) {
-	JSValueRef e = *exception; g_fprintf(stderr, "%s: ", msg);
-	JSTEval("if (\"file\" in this) writeError(\"source: \" + this.file + \": \");", e);
-	JSTEval("if (\"line\" in this) writeError(\"line: \" + this.line + \": \");", e);
+void _JSTReportException JSToolsProcedure (char * msg) {
+	JSValueRef e = *exception; 
+	if (msg) g_fprintf(stderr, "%s: ", msg);	
+	JSTEval("if (\"file\" in this) writeError(this.file + \": \");", e);
+	JSTEval("if (\"line\" in this) writeError(\"line \" + this.line + \": \");", e);
 	JSTEval("writeError(this + \"\\n\");", e);
+}
+
+void _JSTReportFatalException JSToolsProcedure(int code, char * msg) {
+	JSTReportException(msg); exit(code);
 }
 
 static JSValueRef jst_shell JSToolsFunction () {

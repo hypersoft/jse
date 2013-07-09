@@ -25,11 +25,16 @@ inc/JSNative.inc: src/JSNative/JSNative.js
 
 # This rule builds jse
 ${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
+	@echo Attempting to build JSE Build No. $(shell bin/buildnum -p)...
+	@sleep 3;
+	@echo ''
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
 	@echo 'Building jse...'
 	gcc -I inc -I src -I src/JSNative -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	@echo ''
+	@echo JSE Build No. $(shell bin/buildnum) complete
 	@echo ''
 
 clean:

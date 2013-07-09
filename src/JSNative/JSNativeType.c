@@ -1,9 +1,6 @@
 #define JSNativeTypeSource
 
 #include "JSNative.h"
-#include "JSNativeType.h"
-
-#include <stdint.h>
 
 JSClassRef JSNativeType = NULL;
 JSObjectRef RtJSNativeType = NULL;

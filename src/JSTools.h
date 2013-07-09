@@ -70,8 +70,9 @@ typedef struct JSTGlobalRuntime {
 #define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX)
 #define JSTSetIndex(OBJ, INDEX, VAL, ATTR)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL, ATTR)
 
-void _JSTReportError(JSContextRef ctx, char * msg, JSValueRef * exception);
-#define JSTReportError(msg) JSToolsCall(_JSTReportError, msg)
+void _JSTReportException(JSContextRef ctx, char * msg, JSValueRef * exception);
+#define JSTReportException(msg) JSToolsCall(_JSTReportException, msg)
+#define JSTReportFatalException(code, msg) JSToolsCall(_JSTReportFatalException, code, msg)
 
 bool		JSTFreeBuffer (char * buffer);
 bool		JSTFreeString (JSStringRef string);

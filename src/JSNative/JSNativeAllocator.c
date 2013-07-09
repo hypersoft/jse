@@ -1,5 +1,6 @@
+#define JSNativeAllocatorSource
+
 #include "JSNative.h"
-#include "JSNativeAddress.h"
 
 JSClassRef JSNativeAllocator = NULL;
 
@@ -8,7 +9,7 @@ JSObjectRef RtJSNativeAllocatorLease = NULL;
 JSObjectRef RtJSNativeAllocatorStack = NULL;
 JSObjectRef RtJSNativeAllocatorStackClaim = NULL;
 
-#define JSNativeAllocatorClaim(VAL)	(JSValueRef) (JSTCall(RtJSNativeAllocatorStackClaim, RtJSNativeAllocatorStack, VAL, NULL))
+#define JSNativeAllocatorClaim(VAL)	(JSValueRef) (JSTCall(RtJSNativeAllocatorStackClaim, RtJSNativeAllocatorStack, VAL))
 
 static JSObjectRef js_native_allocator_construct(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
 	return JSTCreateClassObject(JSNativeAllocator, JSTPointer(JSTGetProperty(RtJSNativeAllocatorStack, "length")));

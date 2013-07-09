@@ -1,0 +1,53 @@
+#!/bin/bash
+
+declare -i MAJOR="0"
+declare -i MINOR="0"
+declare -i MINORMAX="99"
+declare -i REVISION="3"
+declare -i REVISIONMAX="9999"
+
+buildnum () 
+{ 
+    : "A self replicating build number script";
+    : "Written by Triston J. Taylor (C) 2013 All Rights Reserved";
+    local -i update=1;
+    while [[ "${1:0:1}" = - ]]; do
+        : "Pass option -g to get the current build info";
+        [[ $1 == '-g' ]] && { 
+            printf "%i.%i.%i\\n" $MAJOR $MINOR $REVISION;
+            return 0
+        };
+        : "Pass option -m to manually increment minor";
+        [[ $1 == '-m' ]] && { 
+            let REVISION=$((REVISIONMAX + 1));
+            shift;
+            continue
+        };
+        : "Pass option -M to manually increment major";
+        [[ $1 == '-M' ]] && { 
+            let MINOR=$((MINORMAX + 1));
+            shift;
+            continue
+        };
+        : "Pass option -p to preview the next build number";
+        [[ $1 == '-p' ]] && { 
+            let update=0;
+            shift;
+            continue
+        };
+        printf "$0: unrecognized option: %s\n" 1>&2;
+        exit 1;
+    done;
+    let REVISION++;
+    (( REVISION > REVISIONMAX )) && { 
+        let MINOR++ REVISION=0
+    };
+    (( MINOR > MINORMAX )) && { 
+        let MAJOR++ MINOR=0 REVISION=0
+    };
+    printf "%i.%i.%i\\n" $MAJOR $MINOR $REVISION;
+    ((update)) && printf "%s\n\n%s\n\n%s\n\n%s;\n\n" '#!/bin/bash' "`declare -p MAJOR MINOR MINORMAX REVISION REVISIONMAX`" "`declare -f buildnum`" 'buildnum "$@"' > $0
+}
+
+buildnum "$@";
+
