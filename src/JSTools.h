@@ -67,7 +67,7 @@ typedef struct JSTGlobalRuntime {
 #define JSTCoreGetProperty(jsObject, jsStringName) JSToolsCall(JSObjectGetProperty, jsObject, jsStringName)
 #define JSTCoreMakeFunction(STR, PROC)	JSObjectMakeFunctionWithCallback (ctx, STR, PROC)
 #define JSTGetGlobalObject() JSContextGetGlobalObject(ctx)
-#define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX))
+#define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX)
 #define JSTSetIndex(OBJ, INDEX, VAL, ATTR)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL, ATTR)
 
 void _JSTReportError(JSContextRef ctx, char * msg, JSValueRef * exception);

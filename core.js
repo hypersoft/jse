@@ -1,9 +1,7 @@
 #!bin/jse
 
-b = shell("ls");
+var print = function(msg) {
+	writeOutput(msg + "\n");
+}
 
-writeString(b.stdout);
-
-
-
-foo();
+print(JSNative.Type("short").name);

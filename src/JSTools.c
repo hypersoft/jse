@@ -121,8 +121,13 @@ bool JSTFreeString(JSStringRef string) {
 	if (string) JSStringRelease(string); return true;
 }
 bool _JSTCoreSetProperty JSToolsProcedure (JSObjectRef jsObject, JSStringRef jsStringName, JSValueRef jsValue, long jsAttributes) {
+
+	/* This procedure does not return void like a dumbass would ... */
+
 	JSObjectSetProperty(ctx, jsObject, jsStringName, jsValue, jsAttributes, exception);
+
 	return true;
+
 }
 
 JSStringRef JSTCreateString(char * chrPtrBuffer, JSStringRef * jsStringRefResult, bool bFreeBuffer) {

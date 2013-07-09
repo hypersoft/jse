@@ -8,17 +8,17 @@ new JSNative.Type.Alias(20, "char signed");
 new JSNative.Type.Alias(21, "unsigned char");
 new JSNative.Type.Alias(21, "char unsigned");
 
-new JSNative.Type.Alias(30, "int");
-new JSNative.Type.Alias(30, "signed int");
-new JSNative.Type.Alias(30, "int signed");
-new JSNative.Type.Alias(31, "unsigned int");
-new JSNative.Type.Alias(31, "int unsigned");
+new JSNative.Type.Alias(30, "short");
+new JSNative.Type.Alias(30, "signed short");
+new JSNative.Type.Alias(30, "short signed");
+new JSNative.Type.Alias(31, "unsigned short");
+new JSNative.Type.Alias(31, "short unsigned");
 
-new JSNative.Type.Alias(40, "short");
-new JSNative.Type.Alias(40, "signed short");
-new JSNative.Type.Alias(40, "short signed");
-new JSNative.Type.Alias(41, "unsigned short");
-new JSNative.Type.Alias(41, "short unsigned");
+new JSNative.Type.Alias(40, "int");
+new JSNative.Type.Alias(40, "signed int");
+new JSNative.Type.Alias(40, "int signed");
+new JSNative.Type.Alias(41, "unsigned int");
+new JSNative.Type.Alias(41, "int unsigned");
 
 new JSNative.Type.Alias(50, "long");
 new JSNative.Type.Alias(50, "signed long");

@@ -1,7 +1,7 @@
 
 APPLICATION := bin/jse
 
-SOURCE := main.c $(shell echo src/*.c)
+SOURCE := main.c $(shell echo src/*.c) $(shell echo src/JSNative/*.c)
 
 PKGS := javascriptcoregtk-3.0
 
@@ -19,9 +19,9 @@ ${DYNCALL}:
 	@bin/dynhacker
 	@echo ''
 
-inc/JSNative.inc: src/JSNative.js
+inc/JSNative.inc: src/JSNative/JSNative.js
 	# JSNativeSupport is being reconstructed
-	@bin/bin2inc JSNativeSupport src/JSNative.js > inc/JSNative.inc;
+	@bin/bin2inc JSNativeSupport src/JSNative/JSNative.js > inc/JSNative.inc;
 
 # This rule builds jse
 ${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
@@ -29,7 +29,7 @@ ${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
 	@echo 'Building jse...'
-	gcc -I inc -I src -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	gcc -I inc -I src -I src/JSNative -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
 	@echo ''
 
 clean:
