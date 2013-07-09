@@ -29,7 +29,7 @@ ${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
 	@echo 'Building jse...'
-	gcc -I inc -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	gcc -I inc -I src -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
 	@echo ''
 
 clean:

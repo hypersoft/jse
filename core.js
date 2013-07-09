@@ -2,7 +2,7 @@
 
 b = shell("ls");
 
-write(b.stdout);
+writeString(b.stdout);
 
 
 

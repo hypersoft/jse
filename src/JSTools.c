@@ -1,10 +1,10 @@
+#define JSToolsSource
 
-#include "JSToolsShared.h"
+#include "JSTools.h"
+
 #include <wait.h>
 
 JSTGlobalRuntime JSTRuntime;
-
-JSTPropertyMaster;
 
 bool JSTFreeBuffer(char * buffer) {
 	if (buffer) g_free(buffer); return true;
@@ -16,20 +16,87 @@ bool _JSTCoreSetProperty JSToolsProcedure (JSObjectRef jsObject, JSStringRef jsS
 	JSObjectSetProperty(ctx, jsObject, jsStringName, jsValue, jsAttributes, exception);
 	return true;
 }
-JSStringRef _JSTCreateString(char * chrPtrBuffer, JSStringRef * jsStringPtrResult, bool bFreeBuffer) {
-	return JSTCreateString(chrPtrBuffer, jsStringPtrResult, bFreeBuffer);
+
+JSStringRef JSTCreateString(char * chrPtrBuffer, JSStringRef * jsStringRefResult, bool bFreeBuffer) {
+	JSStringRef destination; if (! jsStringRefResult ) jsStringRefResult = &destination;
+	*jsStringRefResult = JSStringCreateWithUTF8CString(chrPtrBuffer); if (bFreeBuffer) JSTFreeBuffer(chrPtrBuffer);
+	return *jsStringRefResult;
 }
-char * _JSTGetStringBuffer(JSStringRef jsStringSource, char ** chrPtrPtrResult, long * lngPtrSize, bool bFreeSource) {
-	return JSTGetStringBuffer(jsStringSource, chrPtrPtrResult, lngPtrSize, bFreeSource);
+
+char * JSTGetStringBuffer(JSStringRef jsStringSource, long * lngPtrSize, char ** chrPtrResult, bool bFreeSource) {
+	char * destination; long size = 0;
+	if (! chrPtrResult ) chrPtrResult = &destination;
+	if (! lngPtrSize )  lngPtrSize = &size;
+	if (jsStringSource) {
+		if (*lngPtrSize == 0) *lngPtrSize = JSStringGetMaximumUTF8CStringSize(jsStringSource);
+		if (*lngPtrSize) {
+			JSStringGetUTF8CString(jsStringSource, (*chrPtrResult = g_new(char, *lngPtrSize)), *lngPtrSize);
+		}
+		if (bFreeSource) JSTFreeString(jsStringSource);
+	}
+	return *chrPtrResult;
 }
-JSValueRef _JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValPtrResult, bool bFreeString) {
-	return JSTMakeString(jsString, jsValPtrResult, bFreeString);
+
+JSValueRef _JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValRefResult, bool bFreeString) {
+	JSValueRef destination; if (! jsValRefResult ) jsValRefResult = &destination;
+	*jsValRefResult = JSValueMakeString(ctx, jsString); if (bFreeString) JSTFreeString(jsString);
+	return *jsValRefResult;
 }
-JSStringRef _JSTGetValueString JSToolsProcedure (JSValueRef jsVal, JSStringRef * jsStringPtrResult) {
-	return JSTGetValueString(jsVal, jsStringPtrResult);
+
+JSStringRef _JSTGetValueString JSToolsProcedure (JSValueRef jsValueRef, JSStringRef * jsStringRefPtrResult) {
+	JSStringRef destination; if (! jsStringRefPtrResult ) jsStringRefPtrResult = &destination;
+	*jsStringRefPtrResult = JSValueToStringCopy(ctx, jsValueRef, exception);
+	return *jsStringRefPtrResult;
 }
+
 char * _JSTLoadStringBuffer (char * chrPtrFile, char ** chrPtrPtrResult, bool bFreeFile) {
-	return JSTLoadStringBuffer(chrPtrFile, chrPtrPtrResult, bFreeFile);
+	char * destination; if (! chrPtrPtrResult ) chrPtrPtrResult = &destination;
+	*chrPtrPtrResult = NULL;
+	g_file_get_contents(chrPtrFile, chrPtrPtrResult, NULL, NULL); if (bFreeFile) JSTFreeBuffer(chrPtrFile);
+	return *chrPtrPtrResult;
+}
+
+bool _JSTSetProperty JSToolsProcedure(JSObjectRef jsObject, char * chrPtrName, JSValueRef jsValue, long jsAttributes) {
+	JSStringRef jsPropertyName;
+	bool result = JSTCoreSetProperty(jsObject, JSTCreateStaticString(chrPtrName, &jsPropertyName), jsValue, jsAttributes);
+	JSTFreeString(jsPropertyName);
+	return result;
+}
+
+JSValueRef _JSTGetProperty JSToolsProcedure(JSObjectRef jsObject, char * chrPtrName) {
+	JSStringRef jsPropertyName;
+	JSValueRef result = JSTCoreGetProperty(jsObject, JSTCreateStaticString(chrPtrName, &jsPropertyName));
+	JSTFreeString(jsPropertyName);
+	return result;
+}
+
+bool _JSTDeleteProperty JSToolsProcedure(JSObjectRef jsObject, char * chrPtrName) {
+	JSStringRef jsPropertyName;
+	bool result = JSToolsCall(JSObjectDeleteProperty, jsObject, JSTCreateStaticString(chrPtrName, &jsPropertyName));
+	JSTFreeString(jsPropertyName);
+	return result;
+}
+
+bool _JSTHasProperty (JSContextRef ctx, JSObjectRef jsObject, char * chrPtrName) {
+	JSStringRef jsPropertyName;
+	bool result = JSObjectHasProperty(ctx, jsObject, JSTCreateStaticString(chrPtrName, &jsPropertyName));
+	JSTFreeString(jsPropertyName);
+	return result;
+}
+
+JSObjectRef _JSTMakeFunction JSToolsProcedure(char * chrPtrName, void * fnPtr) {
+	JSStringRef jsPropertyName;
+	JSObjectRef result = JSTCoreMakeFunction(JSTCreateStaticString(chrPtrName, &jsPropertyName), fnPtr);
+	JSTFreeString(jsPropertyName);
+	return result;
+}
+
+JSObjectRef _JSTSetPropertyFunction JSToolsProcedure(JSObjectRef jsObject, char * chrPtrName, void * fnPtr) {
+	JSStringRef jsPropertyName;
+	JSObjectRef result = JSTCoreMakeFunction(JSTCreateStaticString(chrPtrName, &jsPropertyName), fnPtr);
+	JSTCoreSetProperty(jsObject, jsPropertyName, result, JSTPropertyConst);
+	JSTFreeString(jsPropertyName);
+	return result;
 }
 
 static JSValueRef jst_chdir JSToolsFunction () {
@@ -60,34 +127,24 @@ static JSValueRef jst_shell JSToolsFunction () {
 
 static JSValueRef jst_put JSToolsFunction () {
 
-	JSTPropertyMaster; JSTValueRef = JSTMakeNumber(
-		g_printf("%s\n",
-			JSTGetStringBuffer(
-				JSTGetValueString(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
-			)
-		)
+	char * output;
+	JSValueRef result = JSTMakeNumber(
+		g_printf("%s\n", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
 	);
-	JSTFreeBuffer(JSTBufferRef);
-	return JSTValueRef;
+	JSTFreeBuffer(output);
+	return result;
+
 
 }
 
-static JSValueRef jst_write JSToolsFunction () {
+static JSValueRef jst_writeString JSToolsFunction () {
 
-	JSTPropertyMaster; JSTValueRef = JSTMakeNumber(
-		g_printf("%s",
-			JSTGetStringBuffer(
-				JSTGetValueString(JSTParam(1), &JSTStringRef), &JSTBufferRef, &JSTBufferLen, true
-			)
-		)
+	char * output;
+	JSValueRef result = JSTMakeNumber(
+		g_printf("%s", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
 	);
-
-	JSTFreeBuffer(JSTBufferRef);
-	return JSTValueRef;
-
-}
-
-static JSValueRef jst_readFile JSToolsFunction () {
+	JSTFreeBuffer(output);
+	return result;
 
 }
 
@@ -101,37 +158,31 @@ static JSValueRef jst_writeFile JSToolsFunction () {
 	return result;
 }
 
-static JSValueRef jst_appendFile JSToolsFunction () {
-
-}
-
 static JSValueRef jst_loadScript JSToolsFunction () {
 
 	char * fileName; JSValueRef file = JSTParam(1); JSObjectRef object = JSTParamObject(2);
-	JSTValueRef = JSTRunScript(JSTGetValueBuffer(file, &fileName), object);
+	JSValueRef result = JSTRunScript(JSTGetValueBuffer(file, &fileName), object);
 	JSTFreeBuffer(fileName);
-	return JSTValueRef;
+	return result;
 
 }
 
-static JSValueRef jst_fake2 JSTFunctionRelay (
-	JSTCompileFunction("fake", "put(\"you called fake: \" + arg);", "arg")
-)
+void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, char *argv[], char *envp[], register JSValueRef * exception) {
 
-void _JSTLoadRuntime(register JSContextRef ctx, register JSValueRef * exception) {
+	RtJS(Global) = global;
 
-	register JSObjectRef global = (JSTRuntime.Global = JSContextGetGlobalObject(ctx));
+	RtJS(argc) = argc;
+	RtJS(argv) = argv;
+	RtJS(envp) = envp;
 
 	JSTSetPropertyScript(
 		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
 	);
 
 	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
-	JSTSetPropertyFunction(global, "readFile", &jst_readFile);
 	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
-	JSTSetPropertyFunction(global, "appendFile", &jst_appendFile);
 	JSTSetPropertyFunction(global, "put", &jst_put);
-	JSTSetPropertyFunction(global, "write", &jst_write);
+	JSTSetPropertyFunction(global, "writeString", &jst_writeString);
 	JSTSetPropertyFunction(global, "shell", &jst_shell);
 	JSTSetPropertyFunction(global, "chdir", &jst_chdir);
 
@@ -193,7 +244,7 @@ JSObjectRef _JSTCallConstructor(register JSContextRef ctx, JSValueRef * exceptio
 
 JSObjectRef _JSTCompileFunction(JSContextRef ctx, JSValueRef * exception, char * chrPtrName, char * chrPtrBody, ...) {
 
-	JSTPropertyMaster; va_list ap;
+	JSObjectRef result; va_list ap;
 	JSStringRef jsName, jsBody; unsigned jsCount = 0, jsIndex = 0;
 
 	JSTCreateStaticString(chrPtrName, &jsName);
@@ -206,20 +257,44 @@ JSObjectRef _JSTCompileFunction(JSContextRef ctx, JSValueRef * exception, char *
 		va_start(ap, chrPtrBody);
 			while (jsIndex < jsCount) JSTCreateStaticString((char*)va_arg(ap, void *), &jsParam[jsIndex++]);
 		va_end(ap);
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
+		result = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
 		jsIndex = 0; while (jsIndex < jsCount) JSTFreeString(jsParam[jsIndex++]);
 	} else {
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
+		result = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
 	}
 
 	JSTFreeString(jsName); JSTFreeString(jsBody);
-	return JSTObjectRef;
+	return result;
 
+}
+
+JSObjectRef _JSTSetPropertyScript(JSContextRef ctx, JSValueRef * exception, JSObjectRef jsObject, char * chrPtrName, char * chrPtrBody, ...) {
+	JSObjectRef result; va_list ap;
+	JSStringRef jsName = JSTCreateStaticString(chrPtrName, NULL);
+	JSStringRef jsBody = JSTCreateStaticString(chrPtrBody, NULL);
+	unsigned jsCount = 0, jsIndex = 0;
+	va_start(ap, chrPtrBody); while ((va_arg(ap, long) != 0)) jsCount++; va_end(ap);
+	if (jsCount) {
+		JSStringRef jsParam[jsCount+1]; jsParam[jsCount] = NULL;
+		va_start(ap, chrPtrBody);
+			while (jsIndex < jsCount) {
+				jsParam[jsIndex++] = JSTCreateStaticString((char*)va_arg(ap, void *), NULL);
+			}
+		va_end(ap);
+		result = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
+		jsIndex = 0; while (jsIndex < jsCount) JSTFreeString(jsParam[jsIndex++]);
+	} else {
+		result = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
+	}
+
+	JSTCoreSetProperty(jsObject, jsName, result, JSTPropertyRequired);
+	JSTFreeString(jsName); JSTFreeString(jsBody);
+	return result;
 }
 
 JSObjectRef _JSTCompilePropertyFunction(JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, char * chrPtrBody, ...) {
 
-	JSTPropertyMaster; va_list ap;
+	JSObjectRef result; va_list ap;
 	JSStringRef jsBody; unsigned jsCount = 0, jsIndex = 0;
 
 	JSTCreateStaticString(chrPtrBody, &jsBody);
@@ -231,20 +306,20 @@ JSObjectRef _JSTCompilePropertyFunction(JSContextRef ctx, JSValueRef * exception
 		va_start(ap, chrPtrBody);
 			while (jsIndex < jsCount) JSTCreateStaticString((char*)va_arg(ap, void *), &jsParam[jsIndex++]);
 		va_end(ap);
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
+		result = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
 		jsIndex = 0; while (jsIndex < jsCount) JSTFreeString(jsParam[jsIndex++]);
 	} else {
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
+		result = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
 	}
 
 	JSTFreeString(jsBody);
-	return JSTObjectRef;
+	return result;
 
 }
 
 JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, JSStringRef jsBody, ...) {
 
-	JSTPropertyMaster; va_list ap;
+	JSObjectRef result; va_list ap;
 	unsigned jsCount = 0, jsIndex = 0;
 
 	va_start(ap, jsBody);	while ((va_arg(ap, long) != 0)) jsCount++; va_end(ap);
@@ -254,38 +329,28 @@ JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JS
 		va_start(ap, jsBody);
 			while (jsIndex < jsCount) (jsParam[jsIndex++] = (JSStringRef)va_arg(ap, void *));
 		va_end(ap);
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
+		result = JSToolsCall(JSObjectMakeFunction, jsName, jsCount, jsParam, jsBody, NULL, 1);
 	} else {
-		JSTObjectRef = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
+		result = JSToolsCall(JSObjectMakeFunction, jsName, 0, NULL, jsBody, NULL, 1);		
 	}
 
-	return JSTObjectRef;
+	return result;
 
 }
 
-
-JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
-
-	char * data; char * script;
-	script = JSTLoadStringBuffer(file, &data, false);
-	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;
-	JSValueRef result = JSTEval(script, this); JSTFreeBuffer(data);
-
-	JSValueRef * foo = { NULL };
-
-	MicroStackAlias(sfer, TypeList(void, *one = NULL, *two, *three)) x;
-	x.one++;
-	if (JSTCaughtException) {
-		JSTPropertyMaster;
-		JSTSetProperty((JSObjectRef)JSTCaughtException, "file", JSTMakeBufferValue(file), 0);
-	}
-	
+JSValueRef _JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject) {
+	JSStringRef jsStringRefScript;
+	JSValueRef result = JSToolsCall(JSEvaluateScript, JSTCreateStaticString(chrPtrScript, &jsStringRefScript), jsObject, NULL, 1); JSTFreeString(jsStringRefScript);
 	return result;
 }
 
-#define StackBuffer(NAME, SIZE)	NAME[SIZE] = g_alloca(SIZE)
-
-#define uBranch(CASE, PASS, FAIL) ( (CASE) ? (PASS) : (FAIL) )
-
-#define StackType(TYPE, NAME, ...) TYPE __VA_ARGS__
+JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
+	char *data, *script; script = JSTLoadStringBuffer(file, &data, false);
+	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;
+	JSValueRef result = JSTEval(script, this); JSTFreeBuffer(data);
+	if (JSTCaughtException) {
+		JSTSetProperty((JSObjectRef)JSTCaughtException, "file", JSTMakeBufferValue(file), 0);
+	}	
+	return result;
+}
 
