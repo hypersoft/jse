@@ -18,7 +18,12 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	/* our root object */
 	JSTSetProperty(global, "JSNative", (RtJSNative = JSTCreateClassObject(NULL, NULL)), JSTPropertyConst);
 
-	JSTEval(JSNativeSupport, global);
+//	JSTEval(JSNativeSupport, global);
+
+	if (JSTCaughtException) {
+		JSTReportError("JSNative script initialization error");
+		exit(1);
+	}
 
 }
 

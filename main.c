@@ -9,15 +9,13 @@ int main(int argc, char *argv[], char *envp[]) {
 	JSValueRef * exception = &e;
 
 	js_native_init(ctx, argc, argv, envp, exception);
-
-	if (e) {
-		// native init exception...
-	}
-
+	
 	if (argc) JSTRunScript(argv[1], RtJS(Global));
 
-	if (e) {
-		// script exception...
+	if (JSTCaughtException) {
+		JSTReportError("User script execution error");
+		exit(1);
 	}
 
 }
+

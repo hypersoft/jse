@@ -6,6 +6,114 @@
 
 JSTGlobalRuntime JSTRuntime;
 
+static JSValueRef jst_chdir JSToolsFunction () {
+	char * val; JSValueRef
+	result = JSTMakeNumber(g_chdir(JSTGetValueBuffer(JSTParam(1), &val)));
+	JSTFreeBuffer(val); return result;
+}
+
+void _JSTReportError(JSContextRef ctx, char * msg, JSValueRef * exception) {
+	JSValueRef e = *exception; g_fprintf(stderr, "%s: ", msg);
+	JSTEval("if (\"file\" in this) writeError(\"source: \" + this.file + \": \");", e);
+	JSTEval("if (\"line\" in this) writeError(\"line: \" + this.line + \": \");", e);
+	JSTEval("writeError(this + \"\\n\");", e);
+}
+
+static JSValueRef jst_shell JSToolsFunction () {
+	char ** nargv; char * usrcommand; int nargc, child_status;
+	JSObjectRef exec = RtJSObject(undefined);
+	gchar *exec_child_out, *exec_child_err; gint exec_child_status;
+	if (g_shell_parse_argv(JSTGetValueBuffer(JSTParam(1), &usrcommand), &nargc, &nargv, NULL)) {
+		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &exec_child_out, &exec_child_err, &exec_child_status, NULL)) {
+			exec_child_status = WEXITSTATUS(exec_child_status);
+			exec = JSValueToObject(ctx, JSTMakeNumber(exec_child_status), NULL);
+			JSTSetProperty(exec, "command", JSTParam(1), 0);
+			JSTSetProperty(exec, "stdout", JSTMakeBufferValue(exec_child_out), 0);
+			JSTFreeBuffer(exec_child_out);
+			JSTSetProperty(exec, "stderr", JSTMakeBufferValue(exec_child_err), 0);
+			JSTFreeBuffer(exec_child_err); 
+		}
+		g_strfreev(nargv);
+	}
+	JSTFreeBuffer(usrcommand);
+	return (JSValueRef) exec;
+}
+
+static JSValueRef jst_writeOutput JSToolsFunction () {
+
+	char * output;
+	JSValueRef result = JSTMakeNumber(
+		g_printf("%s", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
+	);
+	JSTFreeBuffer(output);
+	return result;
+
+}
+
+static JSValueRef jst_writeError JSToolsFunction () {
+
+	char * output;
+	JSValueRef result = JSTMakeNumber(
+		g_fprintf(stderr, "%s", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
+	);
+	JSTFreeBuffer(output);
+	return result;
+
+}
+
+static JSValueRef jst_writeFile JSToolsFunction () {
+	char * contents, * file;	JSValueRef result = RtJS(undefined);
+	result = JSTMakeBoolean(g_file_set_contents(
+		JSTGetValueBuffer(JSTParam(1), &file), 
+		JSTGetValueBuffer(JSTParam(2), &contents),
+		-1, NULL
+	)); JSTFreeBuffer(contents) && JSTFreeBuffer(file);
+	return result;
+}
+
+static JSValueRef jst_loadScript JSToolsFunction () {
+
+	char * fileName; JSValueRef file = JSTParam(1); JSObjectRef object = JSTParamObject(2);
+	JSValueRef result = JSTRunScript(JSTGetValueBuffer(file, &fileName), object);
+	JSTFreeBuffer(fileName);
+	return result;
+
+}
+
+void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, char *argv[], char *envp[], register JSValueRef * exception) {
+
+	RtJS(Global) = global;
+
+	RtJS(argc) = argc;
+	RtJS(argv) = argv;
+	RtJS(envp) = envp;
+
+	JSTSetPropertyScript(
+		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
+	);
+
+	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
+	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
+	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
+	JSTSetPropertyFunction(global, "writeError", &jst_writeError);
+	JSTSetPropertyFunction(global, "shell", &jst_shell);
+	JSTSetPropertyFunction(global, "chdir", &jst_chdir);
+
+#define mkObjLnk(V) JSTRuntime.V = JSTGetPropertyObject(global, #V)
+	mkObjLnk(isNaN); mkObjLnk(parseInt); mkObjLnk(parseFloat); mkObjLnk(escape); 
+	mkObjLnk(isFinite); mkObjLnk(decodeURI); mkObjLnk(encodeURI); 
+	mkObjLnk(decodeURIComponent); mkObjLnk(encodeURIComponent); 
+	mkObjLnk(Array); mkObjLnk(Boolean); mkObjLnk(Date); mkObjLnk(Error);
+	mkObjLnk(Function); mkObjLnk(JSON); mkObjLnk(Math); mkObjLnk(Number);
+	mkObjLnk(Object); mkObjLnk(RangeError); mkObjLnk(ReferenceError);
+	mkObjLnk(RegExp); mkObjLnk(String); mkObjLnk(SyntaxError); mkObjLnk(TypeError);
+	mkObjLnk(URIError); mkObjLnk(classOf); mkObjLnk(writeOutput); mkObjLnk(writeError);
+
+#define mkValLnk(V) JSTRuntime.V = JSTGetProperty(global, #V)
+	mkValLnk(Infinity); mkValLnk(NaN); mkValLnk(undefined);
+
+}
+
 bool JSTFreeBuffer(char * buffer) {
 	if (buffer) g_free(buffer); return true;
 }
@@ -97,108 +205,6 @@ JSObjectRef _JSTSetPropertyFunction JSToolsProcedure(JSObjectRef jsObject, char 
 	JSTCoreSetProperty(jsObject, jsPropertyName, result, JSTPropertyConst);
 	JSTFreeString(jsPropertyName);
 	return result;
-}
-
-static JSValueRef jst_chdir JSToolsFunction () {
-	char * val; JSValueRef
-	result = JSTMakeNumber(g_chdir(JSTGetValueBuffer(JSTParam(1), &val)));
-	JSTFreeBuffer(val); return result;
-}
-
-static JSValueRef jst_shell JSToolsFunction () {
-	char ** nargv; char * usrcommand; int nargc, child_status;
-	JSObjectRef exec = RtJSObject(undefined);
-	gchar *exec_child_out, *exec_child_err; gint exec_child_status;
-	if (g_shell_parse_argv(JSTGetValueBuffer(JSTParam(1), &usrcommand), &nargc, &nargv, NULL)) {
-		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &exec_child_out, &exec_child_err, &exec_child_status, NULL)) {
-			exec_child_status = WEXITSTATUS(exec_child_status);
-			exec = JSValueToObject(ctx, JSTMakeNumber(exec_child_status), NULL);
-			JSTSetProperty(exec, "command", JSTParam(1), 0);
-			JSTSetProperty(exec, "stdout", JSTMakeBufferValue(exec_child_out), 0);
-			JSTFreeBuffer(exec_child_out);
-			JSTSetProperty(exec, "stderr", JSTMakeBufferValue(exec_child_err), 0);
-			JSTFreeBuffer(exec_child_err); 
-		}
-		g_strfreev(nargv);
-	}
-	JSTFreeBuffer(usrcommand);
-	return (JSValueRef) exec;
-}
-
-static JSValueRef jst_put JSToolsFunction () {
-
-	char * output;
-	JSValueRef result = JSTMakeNumber(
-		g_printf("%s\n", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
-	);
-	JSTFreeBuffer(output);
-	return result;
-
-
-}
-
-static JSValueRef jst_writeString JSToolsFunction () {
-
-	char * output;
-	JSValueRef result = JSTMakeNumber(
-		g_printf("%s", JSTGetStringBuffer(JSTGetValueString(JSTParam(1), NULL), NULL, &output, true))
-	);
-	JSTFreeBuffer(output);
-	return result;
-
-}
-
-static JSValueRef jst_writeFile JSToolsFunction () {
-	char * contents, * file;	JSValueRef result = RtJS(undefined);
-	result = JSTMakeBoolean(g_file_set_contents(
-		JSTGetValueBuffer(JSTParam(1), &file), 
-		JSTGetValueBuffer(JSTParam(2), &contents),
-		-1, NULL
-	)); JSTFreeBuffer(contents) && JSTFreeBuffer(file);
-	return result;
-}
-
-static JSValueRef jst_loadScript JSToolsFunction () {
-
-	char * fileName; JSValueRef file = JSTParam(1); JSObjectRef object = JSTParamObject(2);
-	JSValueRef result = JSTRunScript(JSTGetValueBuffer(file, &fileName), object);
-	JSTFreeBuffer(fileName);
-	return result;
-
-}
-
-void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, char *argv[], char *envp[], register JSValueRef * exception) {
-
-	RtJS(Global) = global;
-
-	RtJS(argc) = argc;
-	RtJS(argv) = argv;
-	RtJS(envp) = envp;
-
-	JSTSetPropertyScript(
-		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
-	);
-
-	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
-	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
-	JSTSetPropertyFunction(global, "put", &jst_put);
-	JSTSetPropertyFunction(global, "writeString", &jst_writeString);
-	JSTSetPropertyFunction(global, "shell", &jst_shell);
-	JSTSetPropertyFunction(global, "chdir", &jst_chdir);
-
-#define mkObjLnk(V) JSTRuntime.V = JSTGetPropertyObject(global, #V)
-	mkObjLnk(isNaN); mkObjLnk(parseInt); mkObjLnk(parseFloat); mkObjLnk(escape); 
-	mkObjLnk(isFinite); mkObjLnk(decodeURI); mkObjLnk(encodeURI); 
-	mkObjLnk(decodeURIComponent); mkObjLnk(encodeURIComponent); 
-	mkObjLnk(Array); mkObjLnk(Boolean); mkObjLnk(Date); mkObjLnk(Error);
-	mkObjLnk(Function); mkObjLnk(JSON); mkObjLnk(Math); mkObjLnk(Number);
-	mkObjLnk(Object); mkObjLnk(RangeError); mkObjLnk(ReferenceError);
-	mkObjLnk(RegExp); mkObjLnk(String); mkObjLnk(SyntaxError); mkObjLnk(TypeError);
-	mkObjLnk(URIError); mkObjLnk(classOf);
-
-#define mkValLnk(V) JSTRuntime.V = JSTGetProperty(global, #V)
-	mkValLnk(Infinity); mkValLnk(NaN); mkValLnk(undefined);
-
 }
 
 JSValueRef _JSTCallFunction (register JSContextRef ctx, JSValueRef * exception, JSObjectRef THIS, JSObjectRef FUNC, ...) {
@@ -349,7 +355,7 @@ JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
 	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;
 	JSValueRef result = JSTEval(script, this); JSTFreeBuffer(data);
 	if (JSTCaughtException) {
-		JSTSetProperty((JSObjectRef)JSTCaughtException, "file", JSTMakeBufferValue(file), 0);
+		JSTSetProperty((JSObjectRef)*exception, "file", JSTMakeBufferValue(file), 0);
 	}	
 	return result;
 }

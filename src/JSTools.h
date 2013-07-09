@@ -4,6 +4,9 @@
 
 #define	JSTools
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "glib.inc"
 #include "JavaScriptCore.inc"
 
@@ -12,7 +15,7 @@ typedef struct JSTGlobalRuntime {
 		Global, isNaN, parseInt, parseFloat, escape, unescape, isFinite, decodeURI,
 		encodeURI, decodeURIComponent, encodeURIComponent, Array, Boolean, Date,
 		Error, Function, JSON, Math, Number, Object, RangeError, ReferenceError,
-		RegExp, String, SyntaxError, TypeError, URIError, classOf;
+		RegExp, String, SyntaxError, TypeError, URIError, classOf, writeOutput, writeError;
 	JSValueRef Infinity, NaN, undefined;
 	int argc;
 	char **argv, **envp;
@@ -67,6 +70,9 @@ typedef struct JSTGlobalRuntime {
 #define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX))
 #define JSTSetIndex(OBJ, INDEX, VAL, ATTR)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL, ATTR)
 
+void _JSTReportError(JSContextRef ctx, char * msg, JSValueRef * exception);
+#define JSTReportError(msg) JSToolsCall(_JSTReportError, msg)
+
 bool		JSTFreeBuffer (char * buffer);
 bool		JSTFreeString (JSStringRef string);
 
@@ -95,7 +101,7 @@ JSObjectRef	_JSTCompilePropertyFunction (JSContextRef ctx, JSValueRef * exceptio
 #define		JSTCompilePropertyFunction(jsName, chrPtrScript, ...) _JSTCompilePropertyFunction(ctx, exception, jsName, chrPtrScript, ##__VA_ARGS__, NULL)
 
 JSValueRef	_JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject);
-#define		JSTEval(chrPtrScript, jsObject) JSToolsCall(_JSTEval, chrPtrScript, jsObject)
+#define		JSTEval(chrPtrScript, jsObject) JSToolsCall(_JSTEval, chrPtrScript, (JSObjectRef) jsObject)
 
 JSValueRef	_JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValRefResult, bool bFreeString);
 #define		JSTMakeString(jsString, jsValPtrResult, bFreeString) JSToolsCall(_JSTMakeString, jsString, jsValPtrResult, bFreeString)

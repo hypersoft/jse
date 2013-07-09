@@ -6,4 +6,4 @@ writeString(b.stdout);
 
 
 
-
+foo();
