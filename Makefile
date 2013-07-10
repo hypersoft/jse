@@ -11,6 +11,8 @@ OPTIMIZE := -O3 -march=native -mtune=generic
 
 DYNCALL := inc/dyncall
 
+BUILDNO := $(shell bin/buildnum -p)
+
 REQUIRES := Makefile ${DYNCALL} $(shell find src -type f -o -wholename '*.h' -o -wholename '*.js' -o -wholename '*.inc') $(shell find inc -type f -o -wholename '*.inc' -o -wholename '*.h')
 
 all: ${APPLICATION}
@@ -25,17 +27,18 @@ inc/JSNative.inc: src/JSNative/JSNative.js
 
 # This rule builds jse
 ${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc
-	@echo Attempting to build JSE Build No. $(shell bin/buildnum -p)...
-	@sleep 3;
 	@echo ''
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
-	@echo 'Building jse...'
-	gcc -I inc -I src -I src/JSNative -o "$@" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	@echo 'Building JSE' ${BUILDNO} ...
 	@echo ''
-	@echo JSE Build No. $(shell bin/buildnum) complete
+	gcc -DBUILDNO=${BUILDNO} -I inc -I src -I src/JSNative -o "bin/jse" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	@bin/buildnum -q;
 	@echo ''
+
+source:
+	gcc -E -DBUILDNO=${BUILDNO} -I inc -I src -I src/JSNative ${SOURCE} ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
 
 clean:
 	@rm -rf bin/jse bin/*.a inc/dyncall inc/JSNative.inc;
