@@ -38,3 +38,25 @@ new JSNative.Type.Alias(80, "double");
 new JSNative.Type.Alias(90, "pointer");
 new JSNative.Type.Alias(90, "void *");
 
+var print = function(msg) { writeOutput(msg + "\n"); }
+var stdin = new Object(0); stdin.EOF = false; stdin.line = 0;
+
+fileExists = function(file) {
+	return ! (shell("bash -c '[[ -e \"$1\" ]]' \"" + file + "\""));
+}
+
+stdin.readLine = function() {
+	var result = shell("bash -c 'read; status=$?; printf %s \"$REPLY\"; exit $status;'");
+	this.EOF = ( parseInt(result) != 0 );
+	if (! this.EOF ) return result.stdout + "\n";
+	stdin.line++;
+	return result.stdout;
+}
+
+stdin.repl = function() {
+	while (! stdin.EOF ) {
+		try { eval(stdin.readLine()); } catch (e) { print(e); }
+	}
+}
+
+

@@ -10,9 +10,12 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	js_native_init(ctx, argc, argv, envp, exception);
 	
-	if (argc) JSTRunScript(argv[1], RtJS(Global));
-
-	if (JSTCaughtException) JSTReportFatalException(1, NULL);
+	if (argc && JSTBoolean(JSTEval("fileExists(this);", JSTMakeBufferValue(argv[1])))) {
+		int result = JSTInteger(JSTRunScript(argv[1], RtJS(Global)));
+		if (JSTCaughtException) JSTReportFatalException(1, NULL);
+		return result;
+	}
+	else return JSTInteger(JSTEval("stdin.repl();", NULL));
 
 }
 

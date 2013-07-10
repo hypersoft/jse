@@ -24,6 +24,11 @@ void _JSTReportFatalException JSToolsProcedure(int code, char * msg) {
 	JSTReportException(msg); exit(code);
 }
 
+static JSValueRef jst_exit JSToolsFunction () {
+	exit(JSTInteger(JSTParam(1)));
+	return RtJSValue(undefined);
+}
+
 static JSValueRef jst_shell JSToolsFunction () {
 	char ** nargv; char * usrcommand; int nargc, child_status;
 	JSObjectRef exec = RtJSObject(undefined);
@@ -102,6 +107,7 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
 	JSTSetPropertyFunction(global, "writeError", &jst_writeError);
 	JSTSetPropertyFunction(global, "shell", &jst_shell);
+	JSTSetPropertyFunction(global, "exit", &jst_exit);
 	JSTSetPropertyFunction(global, "chdir", &jst_chdir);
 
 #define mkObjLnk(V) JSTRuntime.V = JSTGetPropertyObject(global, #V)
