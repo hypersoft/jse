@@ -8,14 +8,14 @@ int main(int argc, char *argv[], char *envp[]) {
 	JSValueRef e = NULL;
 	JSValueRef * exception = &e;
 
-	js_native_init(ctx, argc, argv, envp, exception);
+	JSToolsCall(js_native_init, argc, argv, envp);
 	
 	if (argc && JSTBoolean(JSTEval("fileExists(this);", JSTMakeBufferValue(argv[1])))) {
 		int result = JSTInteger(JSTRunScript(argv[1], RtJS(Global)));
 		if (JSTCaughtException) JSTReportFatalException(1, NULL);
 		return result;
 	}
-	else return JSTInteger(JSTEval("stdin.repl();", NULL));
+	else exit( JSTInteger(JSTEval("stdin.readEval()", NULL)));
 
 }
 

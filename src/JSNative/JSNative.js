@@ -45,18 +45,28 @@ fileExists = function(file) {
 	return ! (shell("bash -c '[[ -e \"$1\" ]]' \"" + file + "\""));
 }
 
+stdin.line = 0;
+
 stdin.readLine = function() {
 	var result = shell("bash -c 'read; status=$?; printf %s \"$REPLY\"; exit $status;'");
 	this.EOF = ( parseInt(result) != 0 );
-	if (! this.EOF ) return result.stdout + "\n";
 	stdin.line++;
+	if (! this.EOF ) return result.stdout + "\n";
 	return result.stdout;
 }
 
-stdin.repl = function() {
+stdin.readEval = function() {
+	var line ="", result=undefined, count=0;
 	while (! stdin.EOF ) {
-		try { eval(stdin.readLine()); } catch (e) { print(e); }
+		try { line = stdin.readLine(); 
+			if (line.length) result = eval(line);
+		} catch (e) { 
+			print("/dev/stdin: line " + stdin.line + ": " + e);
+		}
 	}
+	return result;
 }
+
+stdin.readEval.result = {};
 
 

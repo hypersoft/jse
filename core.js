@@ -1,3 +1,3 @@
 #!bin/jse
 
-stdin.repl();
+stdin.readEval();
