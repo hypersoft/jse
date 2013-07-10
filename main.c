@@ -15,7 +15,7 @@ int main(int argc, char *argv[], char *envp[]) {
 		if (JSTCaughtException) JSTReportFatalException(1, NULL);
 		return result;
 	}
-	else exit( JSTInteger(JSTEval("stdin.readEval()", NULL)));
+	else exit( JSTInteger(JSTEval("readEval()", NULL)));
 
 }
 

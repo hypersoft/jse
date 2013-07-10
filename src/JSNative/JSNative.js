@@ -38,24 +38,22 @@ new JSNative.Type.Alias(80, "double");
 new JSNative.Type.Alias(90, "pointer");
 new JSNative.Type.Alias(90, "void *");
 
-var print = function(msg) { writeOutput(msg + "\n"); }
-var stdin = new Object(0); stdin.EOF = false; stdin.line = 0;
 
 fileExists = function(file) {
 	return ! (shell("bash -c '[[ -e \"$1\" ]]' \"" + file + "\""));
 }
 
-stdin.line = 0;
 
-stdin.readLine = function() {
-	var result = shell("bash -c 'read; status=$?; printf %s \"$REPLY\"; exit $status;'");
-	this.EOF = ( parseInt(result) != 0 );
-	stdin.line++;
-	if (! this.EOF ) return result.stdout + "\n";
-	return result.stdout;
-}
-
-stdin.readEval = function() {
+readEval = function() {
+	var print = function(msg) { writeOutput(msg + "\n"); }
+	var stdin = new Object(0); stdin.EOF = false; stdin.line = 0;
+	stdin.readLine = function() {
+		var result = shell("bash -c 'read; status=$?; printf %s \"$REPLY\"; exit $status;'");
+		this.EOF = ( parseInt(result) != 0 );
+		stdin.line++;
+		if (! this.EOF ) return result.stdout + "\n";
+		return result.stdout;
+	}
 	var line ="", result=undefined, count=0;
 	while (! stdin.EOF ) {
 		try { line = stdin.readLine(); 
@@ -66,7 +64,5 @@ stdin.readEval = function() {
 	}
 	return result;
 }
-
-stdin.readEval.result = {};
 
 
