@@ -56,4 +56,65 @@ echo = new bash.scriptlet('echo "$@"');
 canReadFile = new bash.scriptlet('[[ -r "$1" ]]');
 canWriteFile = new bash.scriptlet('[[ -w "$1" ]]');
 
+function readFile(file) {
+	if (canReadFile(file)) {
+		var cat = ShellCommand("cat");
+		cat.captureOutput = true;
+		return String(cat(file));
+	}
+	return undefined;
+}
 
+function writeFile(file, data, append) {
+	var write = bash.scriptlet("jse.writeFile", 'printf %s "$2" '+(append == true)?(">>"):(">")+' "$1";');
+	return Boolean(write(file, data));
+}
+
+function appendFile(file, data) {
+	return writeFile(file, data, true);
+}
+
+function touchFile() {
+	var touch = ShellCommand("touch");
+	return Boolean(touch.apply(touch, arguments));
+}
+
+function deleteFile() {
+	var rm = ShellCommand("rm");
+	return Boolean(rm.apply(rm, arguments));
+}
+
+function moveFile() {
+	var mv = ShellCommand("mv");
+	return Boolean(mv.apply(mv, arguments));
+}
+
+function changeFileMode() {
+	var chmod = ShellCommand("chmod");
+	return Boolean(chmod.apply(chmod, arguments));
+}
+
+function copyFile() {
+	var cp = ShellCommand("cp");
+	return Boolean(cp.apply(cp, arguments));
+}
+
+function installFile() {
+	var install = ShellCommand("install");
+	return Boolean(install.apply(install, arguments));
+}
+
+function fileLink() {
+	var ln = ShellCommand("ln");
+	return Boolean(ln.apply(ln, arguments));
+}
+
+function makeFifo() {
+	var mkfifo = ShellCommand("mkfifo");
+	return Boolean(mkfifo.apply(mkfifo, arguments));
+}
+
+function fileGlob() {
+	var ls = bash.scriptlet("jse.globlin", 'printf "%s\n" "`printf "%s\n" $@`"');
+	return Boolean(ls.apply(ls, arguments));
+}

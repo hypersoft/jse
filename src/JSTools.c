@@ -140,7 +140,6 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 	JSTSetPropertyFunction(global, "writeError", &jst_writeError);
 
 	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
-	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
 	JSTSetPropertyFunction(global, "shellExecute", &jst_shellExecute);
 	JSTSetPropertyFunction(global, "exit", &jst_exit);
 	JSTSetPropertyFunction(global, "chdir", &jst_chdir);

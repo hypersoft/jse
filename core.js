@@ -1,4 +1,5 @@
 #!bin/jse
 
-printf(classOf(printf));
-printf(printf.interpreter);
+printf("%s\n", fileGlob("*", "*.c"));
+
+
