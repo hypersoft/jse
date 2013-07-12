@@ -1,5 +1,6 @@
 #define JSToolsSource
 
+#include "JSTools.inc"
 #include "JSTools.h"
 
 #include <wait.h>
@@ -29,23 +30,53 @@ static JSValueRef jst_exit JSToolsFunction () {
 	return RtJSValue(undefined);
 }
 
-static JSValueRef jst_shell JSToolsFunction () {
-	char ** nargv; char * usrcommand; int nargc, child_status;
+static JSValueRef jst_shellExecute JSToolsFunction () {
+
+	int child_status = 0, i = 0;
+	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
+
 	JSObjectRef exec = RtJSObject(undefined);
-	gchar *exec_child_out, *exec_child_err; gint exec_child_status;
-	if (g_shell_parse_argv(JSTGetValueBuffer(JSTParam(1), &usrcommand), &nargc, &nargv, NULL)) {
-		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &exec_child_out, &exec_child_err, &exec_child_status, NULL)) {
-			exec_child_status = WEXITSTATUS(exec_child_status);
-			exec = JSValueToObject(ctx, JSTMakeNumber(exec_child_status), NULL);
-			JSTSetProperty(exec, "command", JSTParam(1), 0);
-			JSTSetProperty(exec, "stdout", JSTMakeBufferValue(exec_child_out), 0);
-			JSTFreeBuffer(exec_child_out);
-			JSTSetProperty(exec, "stderr", JSTMakeBufferValue(exec_child_err), 0);
-			JSTFreeBuffer(exec_child_err); 
-		}
-		g_strfreev(nargv);
+
+	bool captureOut = JSTBoolean(JSTGetProperty(this, "captureOutput"));
+	bool captureError = JSTBoolean(JSTGetProperty(this, "captureError"));
+	bool returnStatus = JSTBoolean(JSTGetProperty(this, "returnStatus"));
+
+	char * nargv[argc + 1];
+
+	while (i < argc) {
+		nargv[i] = JSTGetValueBuffer(argv[i], NULL);
+		i++;
 	}
-	JSTFreeBuffer(usrcommand);
+
+	nargv[i] = NULL;
+
+	if (true) {
+		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
+			exec_child_status = WEXITSTATUS(exec_child_status);
+			bool success = (exec_child_status == 0);
+			exec = JSTCreateClassObject(NULL, NULL);
+			JSTSetPrototype(exec, JSTCreateClassObject(NULL, NULL));
+			JSObjectRef proto = JSTGetPrototypeObject(exec);
+			if ( returnStatus ) {
+				JSTSetProperty(exec, "status", JSTMakeNumber(exec_child_status), 0);				
+				JSTSetPropertyScript(proto, "valueOf", "return this.status");
+			} else {
+				JSTSetPropertyScript(proto, "valueOf", (success) ? "return true" : "return false");
+			}
+			if (captureOut && exec_child_out) {
+				JSTSetPropertyScript(proto, "toString", "return this.stdout");
+				JSTSetProperty(exec, "stdout", JSTMakeBufferValue(exec_child_out), 0);
+				JSTFreeBuffer(exec_child_out);
+			}
+			if (captureError && exec_child_err) {
+				if (! success && ! captureOut)
+					JSTSetPropertyScript(proto, "toString", "return this.stderr");
+				JSTSetProperty(exec, "stderr", JSTMakeBufferValue(exec_child_err), 0);
+				JSTFreeBuffer(exec_child_err);
+			} 
+		}
+		i = 0; while (i < argc) JSTFreeBuffer(nargv[i++]);
+	}
 	return (JSValueRef) exec;
 }
 
@@ -94,6 +125,9 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 
 	RtJS(Global) = global;
 
+	JSTEval(JSToolsSupport, global);
+	if (JSTCaughtException) JSTReportFatalException(1, "JSTools script initialization error");
+
 	RtJS(argc) = argc;
 	RtJS(argv) = argv;
 	RtJS(envp) = envp;
@@ -102,11 +136,12 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
 	);
 
-	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
-	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
 	JSTSetPropertyFunction(global, "writeError", &jst_writeError);
-	JSTSetPropertyFunction(global, "shell", &jst_shell);
+
+	JSTSetPropertyFunction(global, "loadScript", &jst_loadScript);
+	JSTSetPropertyFunction(global, "writeFile", &jst_writeFile);
+	JSTSetPropertyFunction(global, "shellExecute", &jst_shellExecute);
 	JSTSetPropertyFunction(global, "exit", &jst_exit);
 	JSTSetPropertyFunction(global, "chdir", &jst_chdir);
 

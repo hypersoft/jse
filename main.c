@@ -10,12 +10,12 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	JSToolsCall(js_native_init, argc, argv, envp);
 	
-	if (argc && JSTBoolean(JSTEval("fileExists(this);", JSTMakeBufferValue(argv[1])))) {
+	if (argc && JSTBoolean(JSTEval("canReadFile(this);", JSTMakeBufferValue(argv[1])))) {
 		int result = JSTInteger(JSTRunScript(argv[1], RtJS(Global)));
 		if (JSTCaughtException) JSTReportFatalException(1, NULL);
 		return result;
 	}
-	else exit( JSTInteger(JSTEval("readEval()", NULL)));
+	else exit( JSTInteger(JSTEval("shell.readEval()", NULL)));
 
 }
 

@@ -1,3 +1,4 @@
 #!bin/jse
 
-readEval();
+printf(classOf(printf));
+printf(printf.interpreter);
