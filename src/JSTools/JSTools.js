@@ -115,6 +115,6 @@ function makeFifo() {
 }
 
 function fileGlob() {
-	var ls = bash.scriptlet("jse.globlin", 'printf "%s\n" "`printf "%s\n" $@`"');
-	return Boolean(ls.apply(ls, arguments));
+	var sh = bash.scriptlet("globlin", 'shopt -s extglob; for glob in $@; do printf "%s\n" $glob; done;');
+	return Boolean(sh.apply(sh, arguments));
 }

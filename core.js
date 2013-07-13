@@ -1,5 +1,7 @@
 #!bin/jse
 
-printf("%s\n", fileGlob("*", "*.c"));
+v = new JSNative.Value("char", 20);
+
+
 
 

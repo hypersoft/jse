@@ -101,6 +101,7 @@ JSObjectRef	_JSTCompileFunction (JSContextRef ctx, JSValueRef * exception, char 
 JSObjectRef	_JSTCompilePropertyFunction (JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, char * chrPtrBody, ...);
 #define		JSTCompilePropertyFunction(jsName, chrPtrScript, ...) _JSTCompilePropertyFunction(ctx, exception, jsName, chrPtrScript, ##__VA_ARGS__, NULL)
 
+#define 	JSTCoreEval(jsStringRefScript, jsObject) JSToolsCall(JSEvaluateScript, jsStringRefScript, jsObject, NULL, 1)
 JSValueRef	_JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject);
 #define		JSTEval(chrPtrScript, jsObject) JSToolsCall(_JSTEval, chrPtrScript, (JSObjectRef) jsObject)
 
