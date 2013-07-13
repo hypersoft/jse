@@ -27,9 +27,9 @@ JSValueRef js_native_address_get_index(JSContextRef ctx, JSObjectRef object, JSS
 }
 
 JSValueRef js_native_address_convert(JSContextRef ctx, JSObjectRef object, JSType type, JSValueRef* exception) {
-	if (type == kJSTypeNumber)
-	return JSTGetProperty(object, "pointer"); else if (type == kJSTypeString) 
-	return JSTCallProperty(JSTGetPropertyObject(object, "pointer"), "toString", JSTMakeNumber(16));
+	if (type == kJSTypeBoolean)return JSTMakeBoolean((long)JSTGetPrivate(object));
+	if (type == kJSTypeNumber)return JSTMakeNumber((long)JSTGetPrivate(object));
+	if (type == kJSTypeString) return JSTMakeNumber((long)JSTGetPrivate(object));
 	else return NULL;
 }
 
@@ -69,7 +69,7 @@ static JSValueRef js_native_address_seek_align_reverse(JSContextRef ctx, JSObjec
 void js_native_address_init(JSContextRef ctx, JSObjectRef object, JSValueRef * exception) {
 
 	JSStaticValue StaticValueArray[] = {
-		{ "pointer", &js_native_address_get_pointer, &js_native_address_set_pointer, JSTPropertyConst },
+		{ "pointer", &js_native_address_get_pointer, &js_native_address_set_pointer, 0 },
 		{ 0, 0, 0, 0 }
 	};
 	JSStaticFunction StaticFunctionArray[] = {
@@ -81,7 +81,7 @@ void js_native_address_init(JSContextRef ctx, JSObjectRef object, JSValueRef * e
 
 	JSClassDefinition jsNative = kJSClassDefinitionEmpty;
 	jsNative.className = "JSNative.Address";
-	jsNative.attributes = kJSClassAttributeNoAutomaticPrototype;
+	//jsNative.attributes = kJSClassAttributeNoAutomaticPrototype;
 	jsNative.getProperty = &js_native_address_get_index;
 	jsNative.convertToType = &js_native_address_convert;
 	jsNative.staticValues = StaticValueArray;

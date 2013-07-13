@@ -1,7 +1,9 @@
 #!bin/jse
 
-v = new JSNative.Value("char", 20);
+alloc = new JSNative.Allocator();
+
+v = new JSNative.Value("long",  16);
 
 
 
-
+print(v[17]);

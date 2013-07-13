@@ -28,7 +28,7 @@ static JSValueRef js_native_allocator_lease JSToolsFunction () {
 		else this = JSNativeMakeAddress(g_malloc(bytes)); JSNativeAddressSetAllocated(this, true);
 		JSNativeAllocatorClaim(this); return (JSValueRef) this;
 	}
-
+printf("no allocation\n");
 	// error!
 	return NULL;
 
