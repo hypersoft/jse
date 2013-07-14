@@ -27,7 +27,7 @@ typedef struct JSTGlobalRuntime {
 
 #define JSToolsProcedure(...)		(JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
 #define JSToolsCall(NAME, ...)		NAME (ctx, ##__VA_ARGS__, exception)
-#define JSToolsFunction()			JSToolsProcedure (JSObjectRef callee, JSObjectRef this, size_t argc, const JSValueRef argv[])
+#define JSToolsFunction(...)		JSToolsProcedure (JSObjectRef callee, JSObjectRef this, size_t argc, const JSValueRef argv[])
 #define JSTFastNativeProcedure(...)	(register JSContextRef ctx, ##__VA_ARGS__, register JSValueRef * exception)
 #define JSTNativeConstructor(...)	JSToolsProcedure (JSObjectRef callee, size_t argc, const JSValueRef argv[])
 #define JSTNativePropertyReader()	JSToolsProcedure (JSObjectRef object, JSStringRef property)
@@ -162,7 +162,7 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 
 #define JSTDouble(VAL)			JSValueToNumber(ctx, VAL, exception)
 #define JSTValue(TYPE, VAL)		((TYPE)	JSTDouble(VAL))
-#define JSTInteger(VAL)			JSTValue(long, VAL)
+#define JSTInteger(VAL)			JSTValue(unsigned long, VAL)
 #define JSTUnsignedInteger(VAL) JSTValue(unsigned long, VAL)
 #define JSTPointer(VAL)			((void*) JSTInteger(VAL))
 
@@ -171,7 +171,7 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTMakeUndefined()				JSValueMakeUndefined(ctx)
 #define JSTMakeNull()					JSValueMakeNull(ctx)
 #define JSTMakeNumber(DOUBLE)			JSValueMakeNumber(ctx, (double) DOUBLE)
-#define JSTMakePointer(PTR)				JSValueMakeNumber(ctx, (double) (long) PTR)
+#define JSTMakePointer(PTR)				JSValueMakeNumber(ctx, (double) (unsigned long) PTR)
 #define JSTMakeConstructor(CLASS, PROC) JSObjectMakeConstructor(ctx, CLASS, PROC)
 
 #define JSTCoreStringLength(STR)		JSStringGetMaximumUTF8CStringSize(STR)
@@ -201,9 +201,11 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 
 #define JSTCaughtException			*exception
 
-#define JSTRangeError(msg) (*exception = JSTCall(RtJSObject(RangeError), NULL, JSTMakeBufferValue(msg)))
-#define JSTReferenceError(msg) (*exception = JSTCall(RtJSObject(ReferenceError), NULL, JSTMakeBufferValue(msg)))
-#define JSTTypeError(msg) (*exception = JSTCall(RtJSObject(TypeError), NULL, JSTMakeBufferValue(msg)))
+#define JSTRangeError(msg) *exception = JSTCall(RtJSObject(RangeError), NULL, JSTMakeBufferValue(msg))
+#define JSTReferenceError(msg) *exception = JSTCall(RtJSObject(ReferenceError), NULL, JSTMakeBufferValue(msg))
+#define JSTTypeError(msg) *exception = JSTCall(RtJSObject(TypeError), NULL, JSTMakeBufferValue(msg))
+#define JSTError(msg) *exception = JSTCall(RtJSObject(Error), NULL, JSTMakeBufferValue(msg))
+#define JSTSyntaxError(msg) *exception = JSTCall(RtJSObject(SyntaxError), NULL, JSTMakeBufferValue(msg))
 
 #endif
 

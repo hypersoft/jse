@@ -11,8 +11,7 @@ static JSObjectRef js_native_address_construct JSTNativeConstructor (JSObjectRef
 }
 
 JSValueRef js_native_address_convert(JSContextRef ctx, JSObjectRef object, JSType type, JSValueRef* exception) {
-	if (type == kJSTypeBoolean)return JSTMakeBoolean((long)JSTGetPrivate(object));
-	if (type == kJSTypeNumber)return JSTMakeNumber((long)JSTGetPrivate(object));
+	if (type == kJSTypeNumber)return JSTMakeNumber((unsigned long)JSTGetPrivate(object));
 	if (type == kJSTypeString) return JSTEval("'0x' + Number(this).toString(16)", object);
 	else return NULL;
 }
