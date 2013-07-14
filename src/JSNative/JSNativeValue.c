@@ -126,19 +126,18 @@ static JSObjectRef ConstructValue JSTNativeConstructor () {
 }
 
 static JSValueRef GetArrayProperty JSTNativePropertyReader() {
+
 	JSValueRef propertyName = JSTMakeString(property, NULL, false);
 	JSValueRef propertyIndex = JSTEval("parseInt(this)", propertyName);
 	if (JSTBoolean(JSTCall(RtJSObject(isNaN), NULL, propertyIndex))) return NULL;
-	int count = JSTInteger(JSTGetProperty(object, "count"));
+
 	JSObjectRef address = JSTGetPropertyObject(object, "pointer");
 	if ( JSTHasProperty(address, "deallocated") ) {
 		JSTReferenceError("JSNative.Array: cannot get value: storage pointer is deallocated");
-		return false;
-	} else
-	if (! JSTPointer(address) ) {
-		JSTReferenceError("JSNative.Array: cannot get value: storage pointer is void");
-		return false;
+		return NULL;
 	}
+
+	int count = JSTInteger(JSTGetProperty(object, "count"));
 	int index = JSTInteger(propertyIndex);
 	if (index >= count) {
 		JSTRangeError("cannot get JSNative.Array value: index out of bounds");
@@ -150,6 +149,33 @@ static JSValueRef GetArrayProperty JSTNativePropertyReader() {
 	JSTSetProperty(value, "pointer", JSNativeMakeAddress(JSTGetPrivate(address) + index), JSTPropertyConst);
 	JSTSetProperty(value, "container", address, JSTPropertyConst);
 	return value;
+}
+
+static JSValueRef ConvertArray JSTNativeConvertor() {
+	JSObjectRef jsAddress = JSTGetPropertyObject(object, "pointer");
+	void * address = JSTGetPrivate(jsAddress);
+	int typeCode = JSTInteger(JSTEval("this.type.code", object));
+	int count = JSTInteger(JSTGetProperty(object, "count"));
+	JSValueRef value;
+
+	if (type == JSTNumberType) {
+		return JSTCall(RtJS(Number), NULL, jsAddress);
+	} else
+	if (type == JSTStringType) {
+		if (! address || JSTBoolean(JSTEval("this.pointer.deallocated", object))) {
+			return JSTCall(RtJS(String), NULL, jsAddress);
+		}
+		if (typeCode == 20 || typeCode == 21) {
+			char * sentinel = ((char*)(address + count));
+			char c = *sentinel; *sentinel = 0;
+			value = JSTMakeBufferValue(address);
+			*sentinel = c;
+			return value;
+		}
+		return JSTCall(RtJS(String), NULL, jsAddress);
+	}
+	return NULL;
+
 }
 
 static JSValueRef GetValueProperty JSTNativePropertyReader() {
@@ -178,7 +204,8 @@ static bool SetProperty JSTNativePropertyWriter() {
 	void * address = JSTGetPrivate(JSTGetPropertyObject(object, "pointer"));
 	int typeCode = JSTInteger(JSTEval("this.type.code", object));
 	// handle static names...
-	if (JSTCoreEqualsNative(property, "value") && JSValueIsObjectOfClass(ctx, value, JSNativeValue)) {
+	bool nativeValue = JSValueIsObjectOfClass(ctx, value, JSNativeValue);
+	if (JSTCoreEqualsNative(property, "value") && nativeValue) {
 		goto already;
 	}
 
@@ -188,66 +215,41 @@ static bool SetProperty JSTNativePropertyWriter() {
 	index = JSTInteger(propertyIndex);
 
 already:
-	if (JSTHasProperty(JSTGetPropertyObject(object, "container"), "deallocated")) {
+	if (nativeValue && JSTHasProperty(JSTGetPropertyObject(object, "container"), "deallocated")) {
 		JSTReferenceError("JSNative.Value: cannot set data: container has been deallocated");
+		return false;
+	}
+	if (! address )  {
+		JSTReferenceError("JSNative.Value: cannot set void data");
 		return false;
 	}
 
 	if (JSTBoolean(JSTCall(RtJSObject(isNaN), NULL, propertyIndex))) return false;
 
-	if (! address )  {
-		JSTReferenceError("JSNative.Value: cannot set void data");
-		return false;
-	}
 	if ((typeCode == 20 || typeCode == 21) && JSTBoolean(JSTEval("classOf(this) == 'String'", value)) && (JSTInteger(JSTGetProperty((JSObjectRef)value, "length")) == 1)) {
-		JSStringRef str = JSTGetValueString(value, NULL);
-		char c[2]; JSStringGetUTF8CString(str, c, 2);
+		gunichar jsc = JSTInteger(JSTEval("this.charCodeAt(0)", value));
+		char c[6]; g_unichar_to_utf8(jsc, c);
 		value = JSTMakeNumber((char)c[0]);
-		JSTFreeString(str);
 	}
 	if (index >= count) {
-		JSTRangeError("cannot set JSNative.Value: no backing present");
+		JSTRangeError("JSNative.Value: cannot set data: index out of bounds");
 		return false;
 	}
 	return js_native_value_write_address(ctx, (address + index), typeCode, value, exception);
 
 }
 
-static JSValueRef ConvertArray JSTNativeConvertor() {
-	JSObjectRef jsAddress = JSTGetPropertyObject(object, "pointer");
-	void * address = JSTGetPrivate(jsAddress);
-	if (!address) {
-		return NULL;
-	}
-	int typeCode = JSTInteger(JSTEval("this.type.code", object));
-	int count = JSTInteger(JSTGetProperty(object, "count"));
-	JSValueRef value = js_native_value_read_address(ctx, address, typeCode, exception);
-
-	if (type == JSTNumberType) {
-		return JSTCall(RtJS(Number), NULL, jsAddress);
-	} else
-	if (type == JSTBooleanType) {
-		return JSTMakeBoolean(address != 0);
-	} else
-	if (type == JSTStringType) {
-		if (typeCode == 20 || typeCode == 21) {
-			char * sentinel = ((char*)(address + count));
-			char c = *sentinel; *sentinel = 0;
-				value = JSTMakeBufferValue(address);
-			*sentinel = c;
-			return value;
-		}
-		return JSTCall(RtJS(String), NULL, jsAddress);
-	}
-	return NULL;
-
-}
 
 static JSValueRef ConvertValue JSTNativeConvertor() {
 	JSObjectRef jsAddressObject = JSTGetPropertyObject(object, "pointer");
 	void * address = JSTGetPrivate(jsAddressObject);
-	if (!address) {
+	JSObjectRef container = JSTGetPropertyObject(object, "container");
+	if (JSTHasProperty(container, "deallocated")) {
+		JSTReferenceError("JSNative.Value: cannot get data: container has been deallocated");
 		return NULL;
+	}
+	if (!address) {
+		return RtJS(undefined);
 	}
 	int typeCode = JSTInteger(JSTEval("this.type.code", object));
 	int count = JSTInteger(JSTGetProperty(object, "count"));
@@ -255,9 +257,6 @@ static JSValueRef ConvertValue JSTNativeConvertor() {
 
 	if (type == JSTNumberType) {
 		return value;
-	} else
-	if (type == JSTBooleanType) {
-		return JSTCall(RtJSObject(Boolean), NULL, value);
 	} else
 	if (type == JSTStringType) {
 		if (typeCode == 20 || typeCode == 21) {
