@@ -162,7 +162,7 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 
 #define JSTDouble(VAL)			JSValueToNumber(ctx, VAL, exception)
 #define JSTValue(TYPE, VAL)		((TYPE)	JSTDouble(VAL))
-#define JSTInteger(VAL)			JSTValue(unsigned long, VAL)
+#define JSTInteger(VAL)			JSTValue(long, VAL)
 #define JSTUnsignedInteger(VAL) JSTValue(unsigned long, VAL)
 #define JSTPointer(VAL)			((void*) JSTInteger(VAL))
 
@@ -171,7 +171,7 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTMakeUndefined()				JSValueMakeUndefined(ctx)
 #define JSTMakeNull()					JSValueMakeNull(ctx)
 #define JSTMakeNumber(DOUBLE)			JSValueMakeNumber(ctx, (double) DOUBLE)
-#define JSTMakePointer(PTR)				JSValueMakeNumber(ctx, (double) (unsigned long) PTR)
+#define JSTMakePointer(PTR)				JSValueMakeNumber(ctx, (double) (long) PTR)
 #define JSTMakeConstructor(CLASS, PROC) JSObjectMakeConstructor(ctx, CLASS, PROC)
 
 #define JSTCoreStringLength(STR)		JSStringGetMaximumUTF8CStringSize(STR)

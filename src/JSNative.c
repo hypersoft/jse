@@ -76,6 +76,15 @@ static JSValueRef jsnFindSymbol JSToolsFunction(void * libhandle , const char * 
 	return result;
 }
 
+static JSValueRef jsnCall JSToolsFunction(funcObj, ...) {
+	if (argc < 1) {
+		JSTSyntaxError("JSNative: jsnCall: expected 1 object argument: native function prototype");
+		return RtJS(undefined);
+	}
+
+	return RtJS(undefined);
+}
+
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSObjectRef global = JSTGetGlobalObject();
@@ -90,10 +99,11 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNative, "jsnCallVMGetError", &jsnCallVMGetError);
 	JSTSetPropertyFunction(RtJSNative, "jsnCallVMSetMode", &jsnCallVMSetMode);
 	JSTSetPropertyFunction(RtJSNative, "jsnCallVMReset", &jsnCallVMReset);
-	JSTSetPropertyFunction(RtJSNative, "jsnNewCallVM", &jsnNewCallVM);
 	JSTSetPropertyFunction(RtJSNative, "jsnLoadLibrary", &jsnLoadLibrary);
 	JSTSetPropertyFunction(RtJSNative, "jsnFreeLibrary", &jsnFreeLibrary);
 	JSTSetPropertyFunction(RtJSNative, "jsnFindSymbol", &jsnFindSymbol);
+
+	JSTSetPropertyFunction(RtJSNative, "jsnCall", &jsnCall);
 
 	JSToolsCall(js_native_type_init, RtJSNative);
 	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Type initialization error");
