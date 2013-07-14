@@ -43,6 +43,7 @@ typedef struct JSTGlobalRuntime {
 
 #define JSTNumberType kJSTypeNumber
 #define JSTStringType kJSTypeString
+#define JSTBooleanType kJSTypeBoolean
 
 #define RtJS(SYM)		JSTRuntime.SYM
 #define RtJSValue(SYM)	((JSValueRef)	RtJS(SYM))
@@ -68,7 +69,7 @@ typedef struct JSTGlobalRuntime {
 #define JSTCoreMakeFunction(STR, PROC)	JSObjectMakeFunctionWithCallback (ctx, STR, PROC)
 #define JSTGetGlobalObject() JSContextGetGlobalObject(ctx)
 #define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX)
-#define JSTSetIndex(OBJ, INDEX, VAL, ATTR)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL, ATTR)
+#define JSTSetIndex(OBJ, INDEX, VAL)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL)
 
 void _JSTReportException(JSContextRef ctx, char * msg, JSValueRef * exception);
 #define JSTReportException(msg) JSToolsCall(_JSTReportException, msg)
@@ -199,6 +200,10 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTRelayFunctionCall(func) JSObjectCallAsFunction(ctx, func, this, argc, argv, exception)
 
 #define JSTCaughtException			*exception
+
+#define JSTRangeError(msg) (*exception = JSTCall(RtJSObject(RangeError), NULL, JSTMakeBufferValue(msg)))
+#define JSTReferenceError(msg) (*exception = JSTCall(RtJSObject(ReferenceError), NULL, JSTMakeBufferValue(msg)))
+#define JSTTypeError(msg) (*exception = JSTCall(RtJSObject(TypeError), NULL, JSTMakeBufferValue(msg)))
 
 #endif
 
