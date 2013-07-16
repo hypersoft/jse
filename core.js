@@ -1,78 +1,43 @@
 #!bin/jse
 
-JSNative.CallVM = function() {
-	var size = (JSNative.Address.alignment * 2); // some buffering
-	for (var i = 0; i < arguments.count; i++) {
-		var n = Number(arguments[i]);
-		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]));
-		if (isNaN(n)) throw new ReferenceError("CallVM: size argument is NaN: argument: "+i);
-		if (n < JSNative.Address.alignment) n = JSNative.Address.alignment;
-		size += n;
-	}
-	var vm = JSNative.jsnNewCallVM(size); var mode = { value: "default" };
-	Object.defineProperties(vm, {
-		constructor: { value: JSNative.CallVM },
-		free: { value: JSNative.CallVM.free.bind(vm) },
-		error: { get: JSNative.CallVM.error.bind(vm) },
-		mode: { set: JSNative.CallVM.mode.bind(vm, mode), get: function() { return mode.value; } },
-		reset: { value: JSNative.CallVM.reset.bind(vm, mode) }
-	});
-	return vm;
-}
-JSNative.CallVM.free = function() { if (this === JSNative.CallVM) return;
-	JSNative.jsnCallVMFree(this);
-}
-JSNative.CallVM.error = function() { if (this === JSNative.CallVM) return;
-	return JSNative.jsnCallVMGetError(this);
-}
-JSNative.CallVM.mode = function(writeBack, mode) { if (this === JSNative.CallVM) return;
-	writeBack.value = mode; JSNative.jsnCallVMSetMode(this, JSNative.CallVM.mode[mode]);
-}
-JSNative.CallVM.reset = function(writeBack, mode) { if (this === JSNative.CallVM) return;
-	writeBack.value = mode; JSNative.jsnCallVMReset(this, JSNative.CallVM.mode[mode]);
-}
-Object.defineProperties(JSNative.CallVM.mode, {
-	"default": { value: 0, enumerable: true },
-	"system default": { value: 200, enumerable: true },
-	"linux system": { value: 201, enumerable: true },
-	"ellipsis": { value: 100, enumerable: true },
-	"varargs": { value: 101, enumerable: true },
-	"cdecl": { value: 1, enumerable: true },
-
-	// not adding any more because I cannot test them (nor do I plan to...) - pc.wiz.tt
-
-});
-
 var output;
 
 try {
 
-/* If something goes wrong, we can free ALL allocated JSNatives from this point, forward */
-var allocator = new JSNative.Allocator();
+/* If something goes wrong, we can free ALL allocated JSNatives from this point in the
+   JS Execution chain, forward by using a global allocator reference
+*/ var allocator = new JSNative.Allocator();
 
-// Allocate resource in this try block
-output = new JSNative.Array("char", "Hello world from JSE -> DynCall -> libc -> int puts(char * s); !");
-
-// load the lib
 var libc = new JSNative.Library("libc.so.6");
 
-// find the procedure
+// int puts(char * string);
+var int = JSNative.Type("int");
 var puts = libc.findSymbol("puts");
+var ptr = JSNative.Type("void *");
 
-// create a call stack
-var vm = new JSNative.CallVM("void *");
+// setup the call invocation stack
+var vm = new JSNative.CallVM(ptr);
 
-// Push arguments
-JSNative.jsnArgPointer(vm, output);
+/* 
+	JS Strings are auto-converted to native char array, and deallocated on reset....,
+	or upon execution of a global deallocation by an allocator guarding the current
+	JS call chain.
+*/
 
-// Make the call
-JSNative.jsnCallInt(vm, puts);
+/* push argument(s), call procedure, reset; reset ALWAYS clears the call stack */
+vm.push("Hello World... from JS String!"); vm.call(int, puts);
+vm.reset();
+
+/* traditionally, and optimally, you will want to have your own pointers to your own data */
+output = new JSNative.Array("char", "Hello world from JSNative char Array!");
+vm.push(output); vm.call(int, puts);
+/* we are going to free "output" later, for example purposes */
 
 throw new Error("This fake error is used to test native allocator release");
 
 } catch(e) {
 	echo(e);
-	// Free ALL JSNative.* allocated resources
+	/* free our example allocated data, as well as anything we might have forgotten... */
 	allocator.release();
 }
 
