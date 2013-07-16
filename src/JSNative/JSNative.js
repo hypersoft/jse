@@ -71,7 +71,8 @@ JSNative.Library.prototype = new JSNative.Prototype("JSNative.Library", {
 		if (name in this.symbol) return this.symbol[name];
 		if (this.pointer != 0) {
 			var sym = JSNative.jsnFindSymbol(this, name); sym.name = name;
-			return (this.symbol[name] = sym);
+			this.symbol[name] = sym;
+			return sym;
 		}
 	}, enumerable:true }
 });
