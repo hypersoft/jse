@@ -33,6 +33,9 @@ output = new JSNative.Array("char", "Hello world from JSNative char Array!");
 vm.push(output); vm.call(int, puts);
 /* we are going to free "output" later, for example purposes */
 
+// CallVM stacks are not automatically freed! This is likely to change.
+vm.free();
+
 throw new Error("This fake error is used to test native allocator release");
 
 } catch(e) {

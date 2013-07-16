@@ -56,8 +56,6 @@ JSNative.Library.findSymbol = function(searchString) {
 	return this[searchString];
 }
 
-
-
 JSNative.CallVM = function() {
 	var size = (JSNative.Address.alignment * 2); // some buffering
 	for (var i = 0; i < arguments.count; i++) {
@@ -70,12 +68,12 @@ JSNative.CallVM = function() {
 	var vm = JSNative.jsnNewCallVM(size); var mode = { value: "default" };
 	Object.defineProperties(vm, {
 		constructor: { value: JSNative.CallVM },
-		free: { value: JSNative.CallVM.free.bind(vm) },
-		error: { get: JSNative.CallVM.error.bind(vm) },
-		mode: { set: JSNative.CallVM.mode.bind(vm, mode), get: function() { return mode.value; } },
-		reset: { value: JSNative.CallVM.reset.bind(vm, mode) },
-		push: { value: JSNative.CallVM.push.bind(vm) },
-		call: { value: JSNative.CallVM.call.bind(vm) },
+		free: { value: JSNative.CallVM.free.bind(vm), enumerable:true },
+		error: { get: JSNative.CallVM.error.bind(vm), enumerable:true },
+		mode: { set: JSNative.CallVM.mode.bind(vm, mode), get: function() { return mode.value; }, enumerable:true },
+		reset: { value: JSNative.CallVM.reset.bind(vm, mode), enumerable:true },
+		push: { value: JSNative.CallVM.push.bind(vm), enumerable:true },
+		call: { value: JSNative.CallVM.call.bind(vm), enumerable:true },
 		conversion: { value: [], writeable: true }, // allocated addreses to free post-call
 	});
 	return vm;
@@ -101,7 +99,7 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 		if (arg === null) {
 			JSNative.jsnArgPointer(this, 0); continue;
 		} else if (arg === undefined) {
-			JSNative.jsnArgInt(this, arg); continue;	
+			JSNative.jsnArgInt(this, 0); continue;	
 		} else if (typeof arg == "string") {
 			var s = new JSNative.Array("char", arg);
 			this.conversion.push(s);
