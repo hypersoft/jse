@@ -161,10 +161,9 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTReference(VAL)		( VAL && ! (JSTNull((JSValueRef)VAL)) && ! (JSTUndefined((JSValueRef)VAL)) )
 
 #define JSTDouble(VAL)			JSValueToNumber(ctx, VAL, exception)
-#define JSTValue(TYPE, VAL)		((TYPE)	JSTDouble(VAL))
-#define JSTInteger(VAL)			JSTValue(long, VAL)
-#define JSTUnsignedInteger(VAL) JSTValue(unsigned long, VAL)
-#define JSTPointer(VAL)			((void*) JSTInteger(VAL))
+#define JSTInteger(VAL)			(int) JSTDouble(VAL)
+#define JSTUnsignedInteger(VAL) (unsigned int) JSTDouble(VAL)
+#define JSTPointer(VAL)			(void *) (unsigned long) JSTDouble(VAL)
 
 #define JSTMakeObject(VAL)				JSValueToObject(ctx, VAL, exception)
 #define JSTMakeBoolean(BOOL)			JSValueMakeBoolean(ctx, BOOL)

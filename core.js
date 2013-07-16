@@ -40,7 +40,8 @@ JSNative.Library = function(path) {
 	if (path in JSNative.Library) return JSNative.Library[path];
 	var library = JSNative.Prototype("JSNativeLibrary");
 	library.path = path;
-	JSNative.Library[path] = (library.pointer = JSNative.jsnLoadLibrary(path));
+	library.pointer = JSNative.jsnLoadLibrary(path);
+	JSNative.Library[path] = library;
 	return library;
 }
 
@@ -60,5 +61,6 @@ JSNative.Guard = function() { return Object.create(this); }
 
 var libc = new JSNative.Library("libc.so.6");
 
-echo(Number(libc));
+var puts = libc.findSymbol("puts");
+echo(puts);
 
