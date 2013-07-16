@@ -38,4 +38,41 @@ new JSNative.Type.Alias(80, "double");
 new JSNative.Type.Alias(90, "pointer");
 new JSNative.Type.Alias(90, "void *");
 
+JSNative.Prototype = function(name, object) {
+	if ( this instanceof JSNative.Prototype ) {
+		JSNative.Prototype[name] = Object.create({}, object);
+		return JSNative.Prototype[name];
+	}
+	if (name in JSNative.Prototype) {
+		return Object.create(JSNative.Prototype[name]);
+	} else throw new ReferenceError("JSNative.Prototype: unknown prototype predicate");
+}
+JSNative.Library = function(path) {
+	if (path in JSNative.Library) return JSNative.Library[path];
+	if (this instanceof JSNative.Library) {
+		this.path = path;
+		this.pointer  = JSNative.jsnLoadLibrary(path);
+		JSNative.Library[path] = this;
+	}
+}
+JSNative.Library.prototype = new JSNative.Prototype("JSNative.Library", {
+	constructor: { value: JSNative.Library },
+	valueOf: { value: function() { return Number(this.pointer); } },
+	toString: { value: function() { return String(this.path); } },
+	pointer: { value: 0, writeable: true, enumerable: true },
+	path: { value: "", writeable: true, enumerable: true },
+	symbol: { value: {}, writeable:true, enumerable:true },
+	unload: { value: function() {
+		if (this.pointer != 0) JSNative.jsnFreeLibrary(this.pointer);
+		this.pointer = 0;
+		this.symbol = {};
+	}, enumerable: true },
+	findSymbol: { value: function(name) {
+		if (name in this.symbol) return this.symbol[name];
+		if (this.pointer != 0) {
+			var sym = JSNative.jsnFindSymbol(this, name); sym.name = name;
+			return (this.symbol[name] = sym);
+		}
+	}, enumerable:true }
+});
 

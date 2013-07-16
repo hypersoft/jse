@@ -164,6 +164,11 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTInteger(VAL)			(int) JSTDouble(VAL)
 #define JSTUnsignedInteger(VAL) (unsigned int) JSTDouble(VAL)
 #define JSTPointer(VAL)			(void *) (unsigned long) JSTDouble(VAL)
+#define JSTChar(VAL)			(char) JSTDouble(VAL)
+#define JSTShort(VAL)			(short) JSTDouble(VAL)
+#define JSTLong(VAL)			(long) JSTDouble(VAL)
+#define JSTLongLong(VAL)		(long long) JSTDouble(VAL)
+#define JSTFloat(VAL)			(float) JSTDouble(VAL)
 
 #define JSTMakeObject(VAL)				JSValueToObject(ctx, VAL, exception)
 #define JSTMakeBoolean(BOOL)			JSValueMakeBoolean(ctx, BOOL)

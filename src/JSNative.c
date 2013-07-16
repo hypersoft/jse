@@ -76,13 +76,90 @@ static JSValueRef jsnFindSymbol JSToolsFunction(void * libhandle , const char * 
 	return result;
 }
 
-static JSValueRef jsnCall JSToolsFunction(funcObj, ...) {
-	if (argc < 1) {
-		JSTSyntaxError("JSNative: jsnCall: expected 1 object argument: native function prototype");
-		return RtJS(undefined);
-	}
-
+static JSValueRef jsnArgBool JSToolsFunction(DCCallVM * vm, bool arg) {
+	dcArgBool(JSTPointer(JSTParam(1)), JSTBoolean(JSTParam(2)));
 	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgChar JSToolsFunction(DCCallVM * vm, char arg) {
+	dcArgChar(JSTPointer(JSTParam(1)), JSTChar(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgShort JSToolsFunction(DCCallVM * vm, short arg) {
+	dcArgShort(JSTPointer(JSTParam(1)), JSTShort(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgInt JSToolsFunction(DCCallVM * vm, int arg) {
+	dcArgInt(JSTPointer(JSTParam(1)), JSTInteger(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgLong JSToolsFunction(DCCallVM * vm, long arg) {
+	dcArgLong(JSTPointer(JSTParam(1)), JSTLong(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgLongLong JSToolsFunction(DCCallVM * vm, long long arg) {
+	dcArgLongLong(JSTPointer(JSTParam(1)), JSTLongLong(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgFloat JSToolsFunction(DCCallVM * vm, float arg) {
+	dcArgFloat(JSTPointer(JSTParam(1)), JSTFloat(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgDouble JSToolsFunction(DCCallVM * vm, double arg) {
+	dcArgDouble(JSTPointer(JSTParam(1)), JSTDouble(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnArgPointer JSToolsFunction(DCCallVM * vm, void * arg) {
+	dcArgPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnCallVoid JSToolsFunction (DCCallVM * vm, void * func) {
+	dcCallVoid(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2)));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsnCallBool JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeBoolean(dcCallBool(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallChar JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallChar(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallShort JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallShort(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallInt JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallInt(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallLong JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallLong(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallLongLong JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallLongLong(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallFloat JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallFloat(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallDouble JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSTMakeNumber(dcCallDouble(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+}
+
+static JSValueRef jsnCallPointer JSToolsFunction (DCCallVM * vm, void * func) {
+	return JSNativeMakeAddress(dcCallPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
 }
 
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
@@ -103,7 +180,26 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNative, "jsnFreeLibrary", &jsnFreeLibrary);
 	JSTSetPropertyFunction(RtJSNative, "jsnFindSymbol", &jsnFindSymbol);
 
-	JSTSetPropertyFunction(RtJSNative, "jsnCall", &jsnCall);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgBool", &jsnArgBool);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgChar", &jsnArgChar);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgShort", &jsnArgShort);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgInt", &jsnArgInt);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgLong", &jsnArgLong);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgLongLong", &jsnArgLongLong);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgFloat", &jsnArgFloat);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgDouble", &jsnArgDouble);
+	JSTSetPropertyFunction(RtJSNative, "jsnArgPointer", &jsnArgPointer);
+
+	JSTSetPropertyFunction(RtJSNative, "jsnCallVoid", &jsnCallVoid);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallBool", &jsnCallBool);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallChar", &jsnCallChar);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallShort", &jsnCallShort);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallInt", &jsnCallInt);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallLong", &jsnCallLong);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallLongLong", &jsnCallLongLong);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallFloat", &jsnCallFloat);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallDouble", &jsnCallDouble);
+	JSTSetPropertyFunction(RtJSNative, "jsnCallPointer", &jsnCallPointer);
 
 	JSToolsCall(js_native_type_init, RtJSNative);
 	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Type initialization error");
