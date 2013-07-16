@@ -38,3 +38,21 @@ new JSNative.Type.Alias(80, "double");
 new JSNative.Type.Alias(90, "pointer");
 new JSNative.Type.Alias(90, "void *");
 
+JSNative.Library = function(path) {
+
+	if (path in JSNative.Library) return JSNative.Library[path];
+	var lib = JSNative.jsnLoadLibrary(path);
+	Object.defineProperties(lib, {
+		constructor: { value: JSNative.Library },
+		findSymbol: { value: JSNative.Library.findSymbol.bind(lib) }
+	});
+	return (JSNative.Library[path] = lib);
+
+}
+
+JSNative.Library.findSymbol = function(searchString) {
+	if (searchString in this) return this[searchString];
+	this[searchString] = JSNative.jsnFindSymbol(this, searchString);
+	return this[searchString];
+}
+
