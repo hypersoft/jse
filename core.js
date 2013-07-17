@@ -15,7 +15,9 @@ var int = JSNative.Type("int");
 var puts = libc.findSymbol("puts");
 var ptr = JSNative.Type("void *");
 
-// setup the call invocation stack
+/* setup the call invocation stack; CallVMs are tracked by the global allocator,
+	so this resource and all of its resources will be freed upon a global allocation release.
+*/
 var vm = new JSNative.CallVM(ptr);
 
 /* 
@@ -33,8 +35,9 @@ output = new JSNative.Array("char", "Hello world from JSNative char Array!");
 vm.push(output); vm.call(int, puts);
 /* we are going to free "output" later, for example purposes */
 
-// CallVM stacks are not automatically freed! This is likely to change.
-vm.free();
+// call VMs are managed so we don't need to call this, we are going to throw an error,
+// and release it using the global allocator reference we obtained earlier.
+//vm.free();
 
 throw new Error("This fake error is used to test native allocator release");
 
@@ -46,4 +49,5 @@ throw new Error("This fake error is used to test native allocator release");
 
 // prove we don't have any data allocated:
 echo("output deallocated:", output.pointer.deallocated);
+echo("CallVM deallocated:", vm.deallocated);
 

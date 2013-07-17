@@ -59,18 +59,30 @@ static JSValueRef js_native_allocator_release(JSContextRef ctx, JSObjectRef func
 
 static JSValueRef js_native_allocator_free(JSContextRef ctx, JSObjectRef function, JSObjectRef this, size_t argc, const JSValueRef argv[], JSValueRef *exception) {
 	JSObjectRef jsAddressObject = JSTParamObject(1);
+
 	if (! JSValueIsObjectOfClass(ctx, (JSValueRef) jsAddressObject, JSNativeAddress) ) {
 		JSTTypeError("JSNative.Allocator.free: parameter 1: expected [object JSNative.Address]");
-		goto imdead;
+		return JSTMakeBoolean(false);
 	}
 
-	if (! JSTHasProperty(jsAddressObject, "allocated") || JSTHasProperty(jsAddressObject, "deallocated")) goto imdead;
-	g_free(JSTGetPrivate(jsAddressObject)); JSTSetPrivate(jsAddressObject, NULL);
-	JSTSetProperty(jsAddressObject, "deallocated", JSTMakeBoolean(true), JSTPropertyProtected);
+	char * dealloc = "deallocated";
+
+	JSValueRef allocated = JSTGetProperty(jsAddressObject, "allocated");
+	JSValueRef deallocated = JSTGetProperty(jsAddressObject, dealloc);
+	JSObjectRef free = JSTGetPropertyObject(jsAddressObject, "free");
+
+	if (JSTFunction(free)) return JSTCall(free, jsAddressObject);
+	else if (JSTReference(allocated) && JSTBoolean(allocated)) {
+		if (JSTReference(deallocated)  && JSTBoolean(deallocated)) return JSTMakeBoolean(true);
+		g_free(JSTGetPrivate(jsAddressObject)); JSTSetPrivate(jsAddressObject, NULL);
+		JSTSetProperty(jsAddressObject, dealloc, JSTMakeBoolean(true), JSTPropertyProtected);
+	} else {
+		JSTReferenceError("JSNative.Allocator.free: no solution available for address object");
+		return JSTMakeBoolean(false);
+	}
 
 	return JSTMakeBoolean(true);
-imdead:
-	return JSTMakeBoolean(false);
+
 }
 
 

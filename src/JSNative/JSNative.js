@@ -76,10 +76,13 @@ JSNative.CallVM = function() {
 		call: { value: JSNative.CallVM.call.bind(vm), enumerable:true },
 		conversion: { value: [], writeable: true }, // allocated addreses to free post-call
 	});
+	
+	JSNative.Allocator.globalBase.push(vm);
 	return vm;
 }
 JSNative.CallVM.free = function() { if (this === JSNative.CallVM) return;
-	JSNative.jsnCallVMFree(this);
+	if (this.deallocated != true) JSNative.jsnCallVMFree(this);
+	return Boolean(this.deallocated = true);
 }
 JSNative.CallVM.error = function() { if (this === JSNative.CallVM) return;
 	return JSNative.jsnCallVMGetError(this);
