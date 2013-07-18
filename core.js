@@ -15,7 +15,9 @@ i.value = puts("Hello world");
 
 printf("%s %i\n", "Hello World", i);
 
-// test a cast
+// test a value cast
 echo(i.pointer.cast("int"))
 
+// test an array cast
+echo(i.pointer.cast("int", 1)[0])
 
