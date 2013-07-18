@@ -58,9 +58,9 @@ JSNative.Library.findSymbol = function(searchString) {
 
 JSNative.CallVM = function() {
 	var size = (JSNative.Address.alignment * 2); // some buffering
-	for (var i = 0; i < arguments.count; i++) {
+	for (var i = 0; i < arguments.length; i++) {
 		var n = parseInt(arguments[i]);
-		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]));
+		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]).size);
 		if (isNaN(n)) throw new ReferenceError("CallVM: size integer argument is NaN: argument: "+i);
 		if (n < JSNative.Address.alignment) n = JSNative.Address.alignment;
 		size += n;
@@ -103,13 +103,9 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			JSNative.jsnArgPointer(this, 0); continue;
 		} else if (arg === undefined) {
 			JSNative.jsnArgInt(this, 0); continue;	
-		} else if (typeof arg == "string") {
-			var s = new JSNative.Array("char", arg);
-			this.conversion.push(s);
-			JSNative.jsnArgPointer(this, s); continue;
-		} else if (arg instanceof JSNative.Array || arg instanceof JSNative.Address) { 
+		} else if (classOf(arg) == "JSNative.Array" || classOf(arg) == "JSNative.Address") { 
 			JSNative.jsnArgPointer(this, arg); continue; 
-		} else if (arg instanceof JSNative.Value) {
+		} else if (classOf(arg) == "JSNative.Value") {
 			var pCode = arg.type.code; pCode -= (pCode % 2); // unsigned type code
 			if (pCode == 0) throw new TypeError("CallVM: unable to push void type: argument "+i);
 			else if (pCode == 90) JSNative.jsnArgPointer(this, arg);
@@ -123,15 +119,14 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			else if (pCode == 80) JSNative.jsnArgDouble(this, arg);
 			else throw new TypeError("CallVM: unable to push unknown type code: argument "+i);
 			continue;
+		} else if (typeof arg == "string") {
+			var s = new JSNative.Array("char", arg);
+			this.conversion.push(s);
+			JSNative.jsnArgPointer(this, s); continue;
 		} else if (typeof arg == "boolean") {
 			JSNative.jsnArgBool(this, Number(arg)); continue;
 		} else if (typeof arg == "number") {
-			if (! isNaN(parseInt(arg))) {
-				JSNative.jsnArgInt(this, arg); continue;
-			} else if (! isNaN(parseFloat(arg))) {
-				JSNative.jsnArgFloat(this, parseFloat(arg)); continue;
-			} else JSNative.jsnArgDouble(this, arg);
-			continue;
+			JSNative.jsnArgInt(this, arg); continue;
 		} else throw new TypeError("CallVM: unable to push type: "+typeof arg+": argument "+i);
 	}
 	return true;
@@ -174,4 +169,69 @@ Object.defineProperties(JSNative.CallVM.mode, {
 	// not adding any more because I cannot test them (nor do I plan to...) - pc.wiz.tt
 
 });
+
+JSNative.Call = function() {
+
+	this.mode = arguments[0];
+	this.value = arguments[1];
+	this.symbol = arguments[2];
+
+	this.param = [];
+	for (var i = 3; i < arguments.length; i++) this.param.push(arguments[i]);
+
+	function _ellipsis() {
+		if (this.param.length > arguments.length ) {
+			throw new ReferenceError("expected a minimum of "+this.param.length+" arguments: recieved "+arguments.length);
+			return;
+		}
+		var size = [];
+		for (var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			if (classOf(arg) == "JSNative.Value") {
+				size.push(arg.type.size);
+			} else if (typeof arg == "string" || classOf(arg) == "JSNative.Address" || classOf(arg) == "JSNative.Array") {
+				size.push("void *");
+			} else if (typeof arg == "boolean") {
+				size.push("bool");
+			} else if (typeof arg == "number") size.push("int");
+		}
+		try {
+			var allocator = new JSNative.Allocator();
+			var vm = JSNative.CallVM.apply({}, size);
+			vm.mode = "ellipsis";
+			vm.push.apply(vm, arguments);
+			var result = vm.call(this.value, this.symbol);
+		} catch(e) {
+			allocator.release(); throw e;
+			return;
+		}
+		allocator.release();
+		return result;
+	}
+
+	function _default() {
+		if (this.param.length != arguments.length ) {
+			throw new ReferenceError("expected " +this.param.length+" arguments: recieved "+arguments.length);
+			return;
+		}
+		try {
+			var allocator = new JSNative.Allocator();
+			var vm = JSNative.CallVM.apply(null, this.param);
+			vm.push.apply(vm, arguments);
+			var result = vm.call(this.value, this.symbol);
+		} catch(e) {
+			allocator.release(); throw e;
+			return;
+		}
+		allocator.release();
+		return result;
+	}
+
+	if (arguments[0] == "default") {
+		return _default.bind(this);
+	} else if (arguments[0] == "ellipsis") {
+		return _ellipsis.bind(this);
+	}
+
+}
 

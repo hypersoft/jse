@@ -235,7 +235,8 @@ already:
 		JSTRangeError("JSNative.Value: cannot set data: index out of bounds");
 		return false;
 	}
-	return js_native_value_write_address(ctx, (address + index), typeCode, value, exception);
+	js_native_value_write_address(ctx, (address + index), typeCode, value, exception);
+	return true;
 
 }
 

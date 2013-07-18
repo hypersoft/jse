@@ -31,7 +31,7 @@ static JSValueRef jsnCallVMGetError JSToolsFunction(DCCallVM * vm) {
 }
 
 static JSValueRef jsnCallVMSetMode JSToolsFunction(DCCallVM * vm, DCint mode) {
-	if (argc != 1) {
+	if (argc != 2) {
 		JSTSyntaxError("JSNative: jsnCallVMSetMode: expected 2 integer arguments: (JSNative.CallVM) pointer, JSNativeCallVMPrototype) mode");
 		return RtJS(undefined);
 	}
@@ -107,6 +107,7 @@ static JSValueRef jsnArgLongLong JSToolsFunction(DCCallVM * vm, long long arg) {
 }
 
 static JSValueRef jsnArgFloat JSToolsFunction(DCCallVM * vm, float arg) {
+printf("val: %g\n", JSTFloat(JSTParam(2)));
 	dcArgFloat(JSTPointer(JSTParam(1)), JSTFloat(JSTParam(2)));
 	return RtJS(undefined);
 }
