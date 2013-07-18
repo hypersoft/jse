@@ -61,7 +61,7 @@ JSNative.CallVM = function() {
 	for (var i = 0; i < arguments.length; i++) {
 		var n = parseInt(arguments[i]);
 		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]).size);
-		if (isNaN(n)) throw new InvokeError("CallVM", "size integer parameter is NaN: argument: "+(i+1));
+		if (isNaN(n)) throw new InvokeError("CallVM", "integer size parameter "+(i+1)+" is NaN);
 		if (n < JSNative.Address.alignment) n = JSNative.Address.alignment;
 		size += n;
 	}
