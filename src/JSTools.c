@@ -13,19 +13,17 @@ static JSValueRef jst_chdir JSToolsFunction () {
 	JSTFreeBuffer(val); return result;
 }
 
-void _JSTReportException JSToolsProcedure (char * msg) {
+void _JSTReportException JSToolsProcedure (JSValueRef e) {
 
-	JSValueRef e = *exception; 
-	if (msg) g_fprintf(stderr, "%s: ", msg);	
-	JSTEval("if (\"file\" in this) writeError(this.file + \": \");", e);
+	JSTEval("if (\"sourceURL\" in this) writeError(this.sourceURL + \": \");", e);
 	JSTEval("if (\"line\" in this) writeError(\"line \" + this.line + \": \");", e);
 	JSTEval("if (\"name\" in this) writeError(this.name + \": \");", e);
 	JSTEval("writeError(this.message + \"\\n\");", e);
 
 }
 
-void _JSTReportFatalException JSToolsProcedure(int code, char * msg) {
-	JSTReportException(msg); exit(code);
+void _JSTReportFatalException JSToolsProcedure(int code, JSValueRef e) {
+	JSToolsCall(_JSTReportException, e); exit(code);
 }
 
 static JSValueRef jst_exit JSToolsFunction () {
@@ -128,8 +126,8 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 
 	RtJS(Global) = global;
 
-	JSTEval(JSToolsSupport, global);
-	if (JSTCaughtException) JSTReportFatalException(1, "JSTools script initialization error");
+	JSTEvalScript(JSToolsSupport, global, "JSToolsSupport");
+	if (JSTCaughtException) JSTReportFatalException(1);
 
 	RtJS(argc) = argc;
 	RtJS(argv) = argv;
@@ -137,6 +135,10 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 
 	JSTSetPropertyScript(
 		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
+	);
+
+	JSTSetPropertyScript(
+		global, "InvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
 	);
 
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
@@ -397,10 +399,10 @@ JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JS
 
 }
 
-JSValueRef _JSTEvalScript JSToolsProcedure(char * script, JSObjectRef jsObject, char * fileName) {
+JSValueRef _JSTEvalScript JSToolsProcedure(char * script, JSObjectRef jsObject, char * fileName, long line) {
 	JSStringRef jscript = JSTCreateStaticString(script, NULL);
 	JSStringRef jfile = JSTCreateStaticString(fileName, NULL);
-	JSValueRef result = JSToolsCall(JSEvaluateScript, jscript, jsObject, jfile, 1);
+	JSValueRef result = JSToolsCall(JSEvaluateScript, jscript, jsObject, jfile, line);
 	JSTFreeString(jscript); JSTFreeString(jfile);
 	return result;
 }

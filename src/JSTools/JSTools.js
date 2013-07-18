@@ -1,16 +1,5 @@
-function InvokeError(t, m){
-    try { throw Error(m) } catch(err) {
-		var info = err.stack.split("\n")[3].split("@").pop().split(":");
-		var e = new Error(m);
-		e.file=info[0];
-		e.line=info[1];
-		e.name=t; 
-		return e;
-	}
-}
 
 var print = function(msg) { writeOutput(msg + "\n"); }
-
 
 var ShellCommand = function() {
 	var genCommandProto = function(fn) {

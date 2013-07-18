@@ -203,19 +203,12 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNative, "jsnCallPointer", &jsnCallPointer);
 
 	JSToolsCall(js_native_type_init, RtJSNative);
-	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Type initialization error");
-
 	JSToolsCall(js_native_address_init, RtJSNative);
-	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Address initialization error");
-
 	JSToolsCall(js_native_allocator_init, RtJSNative);
-	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Allocator initialization error");
-
 	JSToolsCall(js_native_value_init, RtJSNative);
-	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Value initialization error");
 
 	JSTEvalScript(JSNativeSupport, global, "JSNativeSupport");
-	if (JSTCaughtException) JSTReportFatalException(1, "JSNative script initialization error");
+	if (JSTCaughtException) JSTReportFatalException(1);
 
 }
 

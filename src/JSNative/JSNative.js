@@ -61,7 +61,7 @@ JSNative.CallVM = function() {
 	for (var i = 0; i < arguments.length; i++) {
 		var n = parseInt(arguments[i]);
 		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]).size);
-		if (isNaN(n)) throw new InvokeError("CallVM", "size integer argument is NaN: argument: "+i);
+		if (isNaN(n)) throw new InvokeError("CallVM", "size integer parameter is NaN: argument: "+(i+1));
 		if (n < JSNative.Address.alignment) n = JSNative.Address.alignment;
 		size += n;
 	}
@@ -96,7 +96,7 @@ JSNative.CallVM.reset = function(writeBack, mode) { if (this === JSNative.CallVM
 	writeBack.value = mode; JSNative.jsnCallVMReset(this, JSNative.CallVM.mode[mode]);
 }
 JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
-	if (arguments.length == 0) throw new InvokeError("CallVM.push", "push requires at least one argument");
+	if (arguments.length == 0) throw new InvokeError("CallVM.push", "push requires at least one parameter");
 	for (var i = 0; i < arguments.length; i++) {
 		var arg = arguments[i];
 		var argClass = classOf(arg);
@@ -109,7 +109,7 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			JSNative.jsnArgPointer(this, arg); continue; 
 		} else if (argClass == "JSNative.Value") {
 			var pCode = arg.type.code; pCode -= (pCode % 2); // unsigned type code
-			if (pCode == 0) throw new InvokeError("CallVM.push", "unable to push void type: argument "+i);
+			if (pCode == 0) throw new InvokeError("CallVM.push", "unable to push void type: parameter "+(i+1));
 			else if (pCode == 90) JSNative.jsnArgPointer(this, arg);
 			else if (pCode == 40) JSNative.jsnArgInt(this, arg);
 			else if (pCode == 50) JSNative.jsnArgLong(this, arg);
@@ -119,7 +119,7 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			else if (pCode == 60) JSNative.jsnArgLongLong(this, arg);
 			else if (pCode == 70) JSNative.jsnArgFloat(this, arg);
 			else if (pCode == 80) JSNative.jsnArgDouble(this, arg);
-			else throw new InvokeError("CallVM.push", "unable to push unknown type code: argument "+i);
+			else throw new InvokeError("CallVM.push", "unable to push unknown type code: parameter "+(i+1));
 			continue;
 		} else if (argType == "string") {
 			var s = new JSNative.Array("char", arg);
@@ -129,7 +129,7 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			JSNative.jsnArgBool(this, Number(arg)); continue;
 		} else if (argType == "number") {
 			JSNative.jsnArgInt(this, arg); continue;
-		} else throw new InvokeError("CallVM.push", "unable to push type: "+argType+": argument "+i);
+		} else throw new InvokeError("CallVM.push", "unable to push type: "+argType+": parameter "+(i+1));
 	}
 	return true;
 }
@@ -199,7 +199,7 @@ JSNative.Call = function() {
 				size.push("bool");
 			} else if (argType == "number") size.push("int");
 			else {
-				throw new InvokeError("JSNative.Call", "parameter "+i+": unable to produce a suitable conversion for type: " + argType);
+				throw new InvokeError("JSNative.Call", "parameter "+(i+1)+": unable to produce a suitable conversion for type: "+argType+"/"+argClass);
 				return;
 			}
 		}

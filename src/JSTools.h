@@ -71,9 +71,10 @@ typedef struct JSTGlobalRuntime {
 #define JSTGetIndex(OBJ, INDEX)	JSToolsCall(JSObjectGetPropertyAtIndex, OBJ, INDEX)
 #define JSTSetIndex(OBJ, INDEX, VAL)	(void)	JSToolsCall(JSObjectSetPropertyAtIndex, OBJ, INDEX, (JSValueRef) VAL)
 
-void _JSTReportException(JSContextRef ctx, char * msg, JSValueRef * exception);
-#define JSTReportException(msg) JSToolsCall(_JSTReportException, msg)
-#define JSTReportFatalException(code, msg) JSToolsCall(_JSTReportFatalException, code, msg)
+void _JSTReportException(JSContextRef ctx, JSValueRef e, JSValueRef * exception);
+void _JSTReportFatalException(JSContextRef ctx, int code, JSValueRef e, JSValueRef * exception);
+#define JSTReportException(msg) JSToolsCall(_JSTReportException, *exception)
+#define JSTReportFatalException(code) JSToolsCall(_JSTReportFatalException, code, *exception)
 
 bool		JSTFreeBuffer (char * buffer);
 bool		JSTFreeString (JSStringRef string);
@@ -102,12 +103,12 @@ JSObjectRef	_JSTCompileFunction (JSContextRef ctx, JSValueRef * exception, char 
 JSObjectRef	_JSTCompilePropertyFunction (JSContextRef ctx, JSValueRef * exception, JSStringRef jsName, char * chrPtrBody, ...);
 #define		JSTCompilePropertyFunction(jsName, chrPtrScript, ...) _JSTCompilePropertyFunction(ctx, exception, jsName, chrPtrScript, ##__VA_ARGS__, NULL)
 
-JSValueRef	_JSTEvalScript JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject, char * fileName);
-#define		JSTEvalScript(chrPtrScript, jsObject, fileName) JSToolsCall(_JSTEvalScript, chrPtrScript, (JSObjectRef) jsObject, fileName)
+JSValueRef	_JSTEvalScript JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject, char * fileName, long line);
+#define		JSTEvalScript(chrPtrScript, jsObject, fileName) JSToolsCall(_JSTEvalScript, chrPtrScript, (JSObjectRef) jsObject, fileName, 1)
 
 #define 	JSTCoreEval(jsStringRefScript, jsObject) JSToolsCall(JSEvaluateScript, jsStringRefScript, jsObject, NULL, 1)
 JSValueRef	_JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject);
-#define		JSTEval(chrPtrScript, jsObject) JSToolsCall(_JSTEval, chrPtrScript, (JSObjectRef) jsObject)
+#define		JSTEval(chrPtrScript, jsObject) JSToolsCall(_JSTEvalScript, chrPtrScript, (JSObjectRef) jsObject, __FILE__, __LINE__)
 
 JSValueRef	_JSTMakeString JSToolsProcedure (JSStringRef jsString, JSValueRef * jsValRefResult, bool bFreeString);
 #define		JSTMakeString(jsString, jsValPtrResult, bFreeString) JSToolsCall(_JSTMakeString, jsString, jsValPtrResult, bFreeString)
