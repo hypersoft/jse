@@ -407,12 +407,6 @@ JSValueRef _JSTEvalScript JSToolsProcedure(char * script, JSObjectRef jsObject, 
 	return result;
 }
 
-JSValueRef _JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject) {
-	JSStringRef jsStringRefScript;
-	JSValueRef result = JSToolsCall(JSEvaluateScript, JSTCreateStaticString(chrPtrScript, &jsStringRefScript), jsObject, NULL, 1); JSTFreeString(jsStringRefScript);
-	return result;
-}
-
 JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
 	char *data, *script; script = JSTLoadStringBuffer(file, &data, false);
 	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;

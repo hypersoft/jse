@@ -13,4 +13,4 @@ var printf = new JSNative.Call("ellipsis", type("int"), libc.printf, type("void 
 puts("Hello world");
 printf("%s %i\n", "Hello World", 2);
 
-fff;
+
