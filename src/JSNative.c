@@ -160,7 +160,7 @@ static JSValueRef jsnCallDouble JSToolsFunction (DCCallVM * vm, void * func) {
 }
 
 static JSValueRef jsnCallPointer JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSNativeMakeAddress(dcCallPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
+	return JSTMakeNumber((double)(long) dcCallPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
 }
 
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {

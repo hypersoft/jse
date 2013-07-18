@@ -13,6 +13,7 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]);
 #include "JSNativeType.h"
 #include "JSNativeAddress.h"
 #include "JSNativeAllocator.h"
+#include "JSNativeValue.h"
 #include "dyncall.inc"
 
 #endif

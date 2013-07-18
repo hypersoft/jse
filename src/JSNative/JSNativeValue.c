@@ -62,6 +62,16 @@ static JSObjectRef ConstructArray JSTNativeConstructor () {
 
 	JSObjectRef aborted = RtJSObject(undefined);
 
+	if (JSValueIsObjectOfClass(ctx, argv[0], JSNativeAddress) ) { // cast: address, type, count
+		register JSObjectRef array = JSTCreateClassObject(JSNativeArray, NULL);
+		JSTSetProperty(array, "pointer", argv[0], JSTPropertyConst);
+		JSValueRef type = JSTEval("JSNative.Type(this)", argv[1]);
+		JSTSetProperty(array, "type", type,	JSTPropertyRequired);		
+		JSTSetProperty(array, "count", argv[2], JSTPropertyRequired);
+		JSTSetProperty(array, "length", argv[2], JSTPropertyRequired);
+		return array;
+	}
+
 	if (argc < 2) {
 		JSTReferenceError("new JSNative.Array: expected arguments: JSNative.Type, Array || ...");
 		return aborted;
@@ -115,6 +125,15 @@ static JSObjectRef ConstructArray JSTNativeConstructor () {
 }
 
 static JSObjectRef ConstructValue JSTNativeConstructor () {
+
+	if (JSValueIsObjectOfClass(ctx, argv[0], JSNativeAddress) ) { // cast: address, type
+		JSObjectRef value = JSTCreateClassObject(JSNativeValue, NULL);
+		JSTSetProperty(value, "pointer", JSTParam(1), JSTPropertyConst);
+		JSTSetProperty(value, "type", JSTEval("JSNative.Type(this)", JSTParam(2)), JSTPropertyRequired);
+		JSTSetProperty(value, "count", JSTMakeNumber(1), JSTPropertyProtected);
+		return value;
+	}
+
 	JSObjectRef address, value = JSTCreateClassObject(JSNativeValue, NULL);
 	JSTSetProperty(value, "type", JSTEval("JSNative.Type(this)", JSTParam(1)), JSTPropertyConst);
 	JSTSetProperty(value, "count", JSTMakeNumber(1), JSTPropertyProtected);
@@ -123,6 +142,7 @@ static JSObjectRef ConstructValue JSTNativeConstructor () {
 	JSValueRef data = JSTCall(RtJS(Number), NULL, JSTParam(2));
 	if (JSTNumber(data)) JSTSetIndex(value, 0, data);
 	return value;
+
 }
 
 static JSValueRef GetArrayProperty JSTNativePropertyReader() {
