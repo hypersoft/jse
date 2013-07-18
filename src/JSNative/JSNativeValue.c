@@ -64,7 +64,7 @@ static JSObjectRef ConstructArray JSTNativeConstructor () {
 
 	if (JSValueIsObjectOfClass(ctx, argv[0], JSNativeAddress) ) { // cast: address, type, count
 		register JSObjectRef array = JSTCreateClassObject(JSNativeArray, NULL);
-		JSTSetProperty(array, "pointer", argv[0], JSTPropertyConst);
+		JSTSetProperty(array, "pointer", JSNativeMakeAddress(JSTGetPrivate(JSTParamObject(1))), JSTPropertyConst);
 		JSValueRef type = JSTEval("JSNative.Type(this)", argv[1]);
 		JSTSetProperty(array, "type", type,	JSTPropertyRequired);		
 		JSTSetProperty(array, "count", argv[2], JSTPropertyRequired);
@@ -128,7 +128,7 @@ static JSObjectRef ConstructValue JSTNativeConstructor () {
 
 	if (JSValueIsObjectOfClass(ctx, argv[0], JSNativeAddress) ) { // cast: address, type
 		JSObjectRef value = JSTCreateClassObject(JSNativeValue, NULL);
-		JSTSetProperty(value, "pointer", JSTParam(1), JSTPropertyConst);
+		JSTSetProperty(value, "pointer", JSNativeMakeAddress(JSTGetPrivate(JSTParamObject(1))), JSTPropertyConst);
 		JSTSetProperty(value, "type", JSTEval("JSNative.Type(this)", JSTParam(2)), JSTPropertyRequired);
 		JSTSetProperty(value, "count", JSTMakeNumber(1), JSTPropertyProtected);
 		return value;

@@ -29,12 +29,23 @@ static JSValueRef cast JSToolsFunction (type, [count]) {
 	return RtJS(undefined);
 }
 
+static bool SetProperty JSTNativePropertyWriter() {
+	if (JSTCoreEqualsNative(property, "value")) {
+		bool constant = JSTBoolean(JSTGetProperty(object, "constant"));
+		bool allocated = JSTBoolean(JSTGetProperty(object, "allocated"));
+		if (! constant && ! allocated ) return JSTSetPrivate(object, JSTPointer(value));
+		return true;
+	}
+	return false;
+}
+
 void js_native_address_init(JSContextRef ctx, JSObjectRef object, JSValueRef * exception) {
 
 	JSClassDefinition jsNative = kJSClassDefinitionEmpty;
 	jsNative.className = "JSNative.Address";
 	jsNative.attributes = kJSClassAttributeNoAutomaticPrototype;
 	jsNative.convertToType = &js_native_address_convert;
+	jsNative.setProperty = &SetProperty;
 
 	JSStaticFunction StaticFunctionArray[] = {
 		{ "cast", &cast, JSTPropertyProtected },
