@@ -204,18 +204,20 @@ static bool SetProperty JSTNativePropertyWriter() {
 	void * address = JSTGetPrivate(JSTGetPropertyObject(object, "pointer"));
 	int typeCode = JSTInteger(JSTEval("this.type.code", object));
 	// handle static names...
-	bool nativeValue = JSValueIsObjectOfClass(ctx, value, JSNativeValue);
-	if (JSTCoreEqualsNative(property, "value") && nativeValue) {
+
+	if (JSTCoreEqualsNative(property, "value")) {
+		if (! JSValueIsObjectOfClass(ctx, (JSValueRef) object, JSNativeValue) ) return false;
 		goto already;
 	}
 
 	JSValueRef propertyName = JSTMakeString(property, NULL, false);
 	JSValueRef propertyIndex = JSTEval("parseInt(this)", propertyName);
 	// handle integer requests
+	if (JSTBoolean(JSTCall(RtJSObject(isNaN), NULL, propertyIndex))) return false;
 	index = JSTInteger(propertyIndex);
 
 already:
-	if (nativeValue && JSTHasProperty(JSTGetPropertyObject(object, "container"), "deallocated")) {
+	if (JSTHasProperty(JSTGetPropertyObject(object, "container"), "deallocated")) {
 		JSTReferenceError("JSNative.Value: cannot set data: container has been deallocated");
 		return false;
 	}
@@ -223,8 +225,6 @@ already:
 		JSTReferenceError("JSNative.Value: cannot set void data");
 		return false;
 	}
-
-	if (JSTBoolean(JSTCall(RtJSObject(isNaN), NULL, propertyIndex))) return false;
 
 	if ((typeCode == 20 || typeCode == 21) && JSTBoolean(JSTEval("classOf(this) == 'String'", value)) && (JSTInteger(JSTGetProperty((JSObjectRef)value, "length")) == 1)) {
 		gunichar jsc = JSTInteger(JSTEval("this.charCodeAt(0)", value));
