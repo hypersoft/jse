@@ -99,13 +99,15 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 	if (arguments.length == 0) throw new ReferenceError("CallVM: push requires at least one argument");
 	for (var i = 0; i < arguments.length; i++) {
 		var arg = arguments[i];
+		var argClass = classOf(arg);
+		var argType = typeof arg;
 		if (arg === null) {
 			JSNative.jsnArgPointer(this, 0); continue;
 		} else if (arg === undefined) {
 			JSNative.jsnArgInt(this, 0); continue;	
-		} else if (classOf(arg) == "JSNative.Array" || classOf(arg) == "JSNative.Address") { 
+		} else if (argClass == "JSNative.Array" || argClass == "JSNative.Address") { 
 			JSNative.jsnArgPointer(this, arg); continue; 
-		} else if (classOf(arg) == "JSNative.Value") {
+		} else if (argClass == "JSNative.Value") {
 			var pCode = arg.type.code; pCode -= (pCode % 2); // unsigned type code
 			if (pCode == 0) throw new TypeError("CallVM: unable to push void type: argument "+i);
 			else if (pCode == 90) JSNative.jsnArgPointer(this, arg);
@@ -119,15 +121,15 @@ JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
 			else if (pCode == 80) JSNative.jsnArgDouble(this, arg);
 			else throw new TypeError("CallVM: unable to push unknown type code: argument "+i);
 			continue;
-		} else if (typeof arg == "string") {
+		} else if (argType == "string") {
 			var s = new JSNative.Array("char", arg);
 			this.conversion.push(s);
 			JSNative.jsnArgPointer(this, s); continue;
-		} else if (typeof arg == "boolean") {
+		} else if (argType == "boolean") {
 			JSNative.jsnArgBool(this, Number(arg)); continue;
-		} else if (typeof arg == "number") {
+		} else if (argType == "number") {
 			JSNative.jsnArgInt(this, arg); continue;
-		} else throw new TypeError("CallVM: unable to push type: "+typeof arg+": argument "+i);
+		} else throw new TypeError("CallVM: unable to push type: "+argType+": argument "+i);
 	}
 	return true;
 }
@@ -187,13 +189,15 @@ JSNative.Call = function() {
 		var size = [];
 		for (var i = 0; i < arguments.length; i++) {
 			var arg = arguments[i];
-			if (classOf(arg) == "JSNative.Value") {
+			var argClass = classOf(arg);
+			var argType = typeof arg;
+			if (argClass == "JSNative.Value") {
 				size.push(arg.type.size);
-			} else if (typeof arg == "string" || classOf(arg) == "JSNative.Address" || classOf(arg) == "JSNative.Array") {
+			} else if (argType == "string" || argClass == "JSNative.Address" || argClass == "JSNative.Array") {
 				size.push("void *");
-			} else if (typeof arg == "boolean") {
+			} else if (argType == "boolean") {
 				size.push("bool");
-			} else if (typeof arg == "number") size.push("int");
+			} else if (argType == "number") size.push("int");
 		}
 		try {
 			var allocator = new JSNative.Allocator();
