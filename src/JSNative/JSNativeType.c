@@ -18,13 +18,16 @@ static JSObjectRef Alias JSTNativeConstructor(type, name) {
 	JSObjectRef	type = JSNativeTypeDeref(JSTArgument(0));
 	JSValueRef name = JSTArgument(1);
 	JSValueRef ptrName = JSTEval("String(this + ' *')", name),
-	arrName = JSTEval("String(this + ' []')", name);
+	arrName = JSTEval("String(this + ' []')", name),
+	arrName1 = JSTEval("String(this + ' *[]')", name),
+	arrName2 = JSTEval("String(this + ' **')", name);
+
 	JSStringRef propertyName = NULL; JSObjectRef this = NULL;
 	if (JSTReference(type)) {
 
-		propertyName = JSTGetValueString(name, NULL);
 		if ( ! JSTReference(JSNativeTypeDeref(name)) ) {
 
+			propertyName = JSTGetValueString(name, NULL);
 			this = JSTCreateClassObject(JSNativeType, JSTPointer(JSTGetProperty(type, "code")));
 			JSTSetProperty(this, "alias", name, JSTPropertyConst);
 			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
@@ -33,7 +36,8 @@ static JSObjectRef Alias JSTNativeConstructor(type, name) {
 			JSTFreeString(propertyName);
 
 			JSValueRef ptrCode = JSTMakeNumber(90);
-			this = JSTCreateClassObject(JSNativeType, JSTPointer(ptrCode));
+			void * ptr = JSTPointer(ptrCode);
+			this = JSTCreateClassObject(JSNativeType, ptr);
 			JSTSetProperty(this, "alias", ptrName, JSTPropertyConst);
 			propertyName = JSTGetValueString(ptrName, NULL);
 			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
@@ -41,13 +45,30 @@ static JSObjectRef Alias JSTNativeConstructor(type, name) {
 			);
 			JSTFreeString(propertyName);
 
-			this = JSTCreateClassObject(JSNativeType, JSTPointer(ptrCode));
+			this = JSTCreateClassObject(JSNativeType, ptr);
 			JSTSetProperty(this, "alias", arrName, JSTPropertyConst);
 			propertyName = JSTGetValueString(arrName, NULL);
 			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
 				JSTPropertyConst
 			);
 			JSTFreeString(propertyName);
+
+			this = JSTCreateClassObject(JSNativeType, ptr);
+			JSTSetProperty(this, "alias", arrName1, JSTPropertyConst);
+			propertyName = JSTGetValueString(arrName1, NULL);
+			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
+				JSTPropertyConst
+			);
+			JSTFreeString(propertyName);
+
+			this = JSTCreateClassObject(JSNativeType, ptr);
+			JSTSetProperty(this, "alias", arrName2, JSTPropertyConst);
+			propertyName = JSTGetValueString(arrName2, NULL);
+			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
+				JSTPropertyConst
+			);
+			JSTFreeString(propertyName);
+
 		}
 	}
 

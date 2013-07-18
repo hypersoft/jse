@@ -1,5 +1,7 @@
 #!bin/jse
 
+echo(JSNative.Type("char **"));
+
 var type = JSNative.Type;
 var libc = new JSNative.Library("libc.so.6");
 
