@@ -21,12 +21,12 @@ static JSValueRef CallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjec
 	return JSValueMakeNull(ctx);
 }
 
-static JSValueRef castArray JSToolsFunction (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
-	return JSTCallConstructor(RtJSNativeArray, JSTParam(1), JSTParam(2), JSTParam(3));
-	//return JSTEval("new JSNative.Array", thisObject);
-}
-static JSValueRef castValue JSToolsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
-	return JSTCallConstructor(RtJSNativeValue, JSTParam(1), JSTParam(2), JSTParam(3));
+static JSValueRef cast JSToolsFunction (type, [count]) {
+	// value
+	if (argc == 1) return JSTCallConstructor(RtJSNativeValue, this, JSTParam(1));
+	// array
+	if (argc == 2) return JSTCallConstructor(RtJSNativeArray, this, JSTParam(1), JSTParam(2));
+	return RtJS(undefined);
 }
 
 void js_native_address_init(JSContextRef ctx, JSObjectRef object, JSValueRef * exception) {
@@ -37,8 +37,7 @@ void js_native_address_init(JSContextRef ctx, JSObjectRef object, JSValueRef * e
 	jsNative.convertToType = &js_native_address_convert;
 
 	JSStaticFunction StaticFunctionArray[] = {
-		{ "castArray", &castArray, JSTPropertyProtected },
-		{ "castValue", &castValue, JSTPropertyProtected },
+		{ "cast", &cast, JSTPropertyProtected },
 		{ NULL, 0, 0 }
 	};
 
