@@ -138,23 +138,23 @@ JSNative.CallVM.call = function(type, symbol) {  if (this === JSNative.CallVM) r
 	if (tCode == 0) {
 		JSNative.jsnCallVoid(this, symbol);
 	} else if (tCode == 10) {
-		JSNative.jsnCallBool(this, symbol);
+		return JSNative.jsnCallBool(this, symbol);
 	} else if (tCode == 20) {
-		JSNative.jsnCallChar(this, symbol);
+		return JSNative.jsnCallChar(this, symbol);
 	} else if (tCode == 30) {
-		JSNative.jsnCallShort(this, symbol);
+		return JSNative.jsnCallShort(this, symbol);
 	} else if (tCode == 40) {
-		JSNative.jsnCallInt(this, symbol);
+		return JSNative.jsnCallInt(this, symbol);
 	} else if (tCode == 50) {
-		JSNative.jsnCallLong(this, symbol);
+		return JSNative.jsnCallLong(this, symbol);
 	} else if (tCode == 60) {
-		JSNative.jsnCallLongLong(this, symbol);
+		return JSNative.jsnCallLongLong(this, symbol);
 	} else if (tCode == 70) {
-		JSNative.jsnCallFloat(this, symbol);
+		return JSNative.jsnCallFloat(this, symbol);
 	} else if (tCode == 80) {
-		JSNative.jsnCallDouble(this, symbol);
+		return JSNative.jsnCallDouble(this, symbol);
 	} else if (tCode == 90) {
-		JSNative.jsnCallPointer(this, symbol);
+		return JSNative.jsnCallPointer(this, symbol);
 	} else {
 		throw new InvokeError("CallVM.call", "unknown call type: "+tCode+" ("+String(type)+")");
 	}
