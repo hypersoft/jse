@@ -214,7 +214,7 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSToolsCall(js_native_value_init, RtJSNative);
 	if (JSTCaughtException) JSTReportFatalException(1, "JSNative Value initialization error");
 
-	JSTEval(JSNativeSupport, global);
+	JSTEvalScript(JSNativeSupport, global, "JSNativeSupport");
 	if (JSTCaughtException) JSTReportFatalException(1, "JSNative script initialization error");
 
 }

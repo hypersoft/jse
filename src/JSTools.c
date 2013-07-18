@@ -14,11 +14,14 @@ static JSValueRef jst_chdir JSToolsFunction () {
 }
 
 void _JSTReportException JSToolsProcedure (char * msg) {
+
 	JSValueRef e = *exception; 
 	if (msg) g_fprintf(stderr, "%s: ", msg);	
 	JSTEval("if (\"file\" in this) writeError(this.file + \": \");", e);
 	JSTEval("if (\"line\" in this) writeError(\"line \" + this.line + \": \");", e);
-	JSTEval("writeError(this + \"\\n\");", e);
+	JSTEval("if (\"name\" in this) writeError(this.name + \": \");", e);
+	JSTEval("writeError(this.message + \"\\n\");", e);
+
 }
 
 void _JSTReportFatalException JSToolsProcedure(int code, char * msg) {
@@ -394,6 +397,14 @@ JSObjectRef _JSTCoreCompileFunction(JSContextRef ctx, JSValueRef * exception, JS
 
 }
 
+JSValueRef _JSTEvalScript JSToolsProcedure(char * script, JSObjectRef jsObject, char * fileName) {
+	JSStringRef jscript = JSTCreateStaticString(script, NULL);
+	JSStringRef jfile = JSTCreateStaticString(fileName, NULL);
+	JSValueRef result = JSToolsCall(JSEvaluateScript, jscript, jsObject, jfile, 1);
+	JSTFreeString(jscript); JSTFreeString(jfile);
+	return result;
+}
+
 JSValueRef _JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject) {
 	JSStringRef jsStringRefScript;
 	JSValueRef result = JSToolsCall(JSEvaluateScript, JSTCreateStaticString(chrPtrScript, &jsStringRefScript), jsObject, NULL, 1); JSTFreeString(jsStringRefScript);
@@ -403,10 +414,7 @@ JSValueRef _JSTEval JSToolsProcedure (char * chrPtrScript, JSObjectRef jsObject)
 JSValueRef _JSTRunScript JSToolsProcedure(char * file, JSObjectRef this) {
 	char *data, *script; script = JSTLoadStringBuffer(file, &data, false);
 	if (*data == '#' && *(data+1) =='!') while (*script && *script != 10) script++;
-	JSValueRef result = JSTEval(script, this); JSTFreeBuffer(data);
-	if (JSTCaughtException) {
-		JSTSetProperty((JSObjectRef)*exception, "file", JSTMakeBufferValue(file), 0);
-	}	
+	JSValueRef result = JSTEvalScript(script, this, file); JSTFreeBuffer(data);
 	return result;
 }
 
