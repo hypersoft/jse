@@ -6,8 +6,8 @@ var libc = new JSNative.Library("libc.so.6");
 libc.findSymbol("puts");
 libc.findSymbol("printf");
 
-var puts = new JSNative.Call("default", type("int"), libc.puts, type("void *"));
-var printf = new JSNative.Call("ellipsis", type("int"), libc.printf, type("void *"));
+var puts = new JSNative.Call("default", type("int"), libc.puts, type("char *"));
+var printf = new JSNative.Call("ellipsis", type("int"), libc.printf, type("char *"));
 
 var i = new JSNative.Value("int", 0);
 

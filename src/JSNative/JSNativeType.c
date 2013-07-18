@@ -16,19 +16,41 @@ static JSValueRef GetUnsigned JSTNativePropertyReader() {
 
 static JSObjectRef Alias JSTNativeConstructor(type, name) {
 	JSObjectRef	type = JSNativeTypeDeref(JSTArgument(0));
-	JSValueRef	name = JSTArgument(1);
+	JSValueRef name = JSTArgument(1);
+	JSValueRef ptrName = JSTEval("String(this + ' *')", name),
+	arrName = JSTEval("String(this + ' []')", name);
 	JSStringRef propertyName = NULL; JSObjectRef this = NULL;
 	if (JSTReference(type)) {
+
 		propertyName = JSTGetValueString(name, NULL);
 		if ( ! JSTReference(JSNativeTypeDeref(name)) ) {
+
 			this = JSTCreateClassObject(JSNativeType, JSTPointer(JSTGetProperty(type, "code")));
 			JSTSetProperty(this, "alias", name, JSTPropertyConst);
 			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
 				JSTPropertyConst
 			);
+			JSTFreeString(propertyName);
+
+			JSValueRef ptrCode = JSTMakeNumber(90);
+			this = JSTCreateClassObject(JSNativeType, JSTPointer(ptrCode));
+			JSTSetProperty(this, "alias", ptrName, JSTPropertyConst);
+			propertyName = JSTGetValueString(ptrName, NULL);
+			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
+				JSTPropertyConst
+			);
+			JSTFreeString(propertyName);
+
+			this = JSTCreateClassObject(JSNativeType, JSTPointer(ptrCode));
+			JSTSetProperty(this, "alias", arrName, JSTPropertyConst);
+			propertyName = JSTGetValueString(arrName, NULL);
+			JSTCoreSetProperty(RtJSNativeTypeAlias, propertyName, (JSValueRef) this,
+				JSTPropertyConst
+			);
+			JSTFreeString(propertyName);
 		}
 	}
-	if (propertyName) JSTFreeString(propertyName);
+
 	if (this) return this;
 	return RtJSObject(undefined);
 }
@@ -37,8 +59,9 @@ static JSValueRef Type JSToolsFunction () {
 	register JSValueRef code = RtJS(undefined);
 	if (argc) {
 		register JSStringRef propertyName = JSTGetValueString(JSTArgument(0), NULL);
+		
 		if ( ! JSTReference((code = JSTCoreGetProperty(RtJSNativeType, propertyName)))) {
-			if ( ! JSTReference((code = JSTCoreGetProperty(RtJSNativeTypeAlias, propertyName))) ) { 
+			if ( ! JSTReference((code = JSTCoreGetProperty(RtJSNativeTypeAlias, propertyName))) ) {
 				// js_throw_exception(ctx, "JSNative.Type: unknown type", exception);
 			}
 		}
