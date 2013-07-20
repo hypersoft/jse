@@ -2,57 +2,54 @@
 
 JSNative.Enumeration = new JSNative.Class("JSNative.Enumeration",
 	function invoke(section, query) {
-		var o = JSNative.Enumeration[section];
-		if (o !== undefined && o[query] !== undefined) return o[query];
-		return o;
+		var o = JSNative.Enumeration.register[section];
+		if (o === undefined || query === undefined) return o;
+		return o[query];
 	},
 	function construct(name, kvp) {
 		for (value in kvp) {
-			if (value == 'length') continue;
+			if (value == 'length' || value == 'name' || value == 'value') continue;
 			this.push(value, kvp[value]);
 		}
-		Object.defineProperty(JSNative.Enumeration, name, { value: this, enumerable: true});
+		Object.defineProperty(JSNative.Enumeration.register, name, { value: this, enumerable: true});
 	},
 	Object.defineProperties(
 		{ // Prototype
 			autoEnum: 0, length: 0
 		},
 		{ // Methods
-			autoEnum: { value:0,writeable:true},
-			name: { value:0,writeable:true},
-			value: { value:0,writeable:true},
 			push: { value: function(name, value) {
-				if (value === undefined) value = (this.autoEnum++ << 1);
-				var o = new JSNative.api.createClass(this.constructor.className);
-				Object.defineProperty(o, "valueOf", {value: function () {
-					return value;
-				} });
-				Object.defineProperty(o, "toString", {value: function() {
-					return name;
-				} });
+				if (value === undefined) value = this.valueAccumulator();
+				var o = new JSNative.api.createClass("JSNative.Enumeration",
+				Object.defineProperties(
+					{ name: undefined, value: undefined }, // prototype
+					{ // prototype methods
+						"valueOf": {value: JSNative.Enumeration.valueOfUnit },
+						"toString": {value: JSNative.Enumeration.valueOfUnit }
+					}
+				));
 				Object.defineProperties(o, {value: { value: value }, name: {value: name}});
 				Object.defineProperty(this, name, { value: o, enumerable:true });
+				Object.defineProperty(this, value, { value: o.name, enumerable:true });
 				this.length++;
 			} },
-			toString: { value: function(name) { //if (this.length == 0) return this.constructor;
+			valueAccumulator: {value: function valueAccumulator() { return (this.autoEnum++ << 1); } },
+			toString: { value: function(name) { if (this.length == 0) return undefined;
 					var s = [];
-					for (name in this) if (isNaN(name) && name != "autoEnum" && name != 'length') s.push(name+':'+this[name]); return '{\n'+s.join(', ')+'\n}';
+					for (name in this) if (isNaN(name) && name != "autoEnum" && name != 'length' && name != 'name' && name != 'value') s.push(name+':'+this[name]); return '{\n'+s.join(', ')+'\n}';
 			} },
 		}
 	),
-	{}
+	{
+		register: {value: {}, enumerable:true},
+		valueOfUnit: {value: function valueOfUnit() { return this.value; } },
+	}
 );
 
+c = new JSNative.Enumeration("names", [ 'andy', 'lester', 'tiffany' ]);
 
-//JSTEvalObject("function (callAsFunction, callAsConstructor, constructorPrototype) {	var self = { callAsFunction: callAsFunction, callAsConstructor: callAsConstructor };	self.construct = function() { if (this === self) return self.callAsFunction.apply(this, arguments); return self.callAsConstructor.apply(this, arguments); };	self.construct.prototype = Object.create(constructorPrototype);	Object.defineProperty(self.construct.prototype, 'constructor', { value: self.construct.bind(self) });	return self.construct.prototype.constructor; };", global);
-JSNative.callAsConstructor = function() {
-	return new JSNative.Type();
-}
 
-c = new JSNative.Enumeration("cEnum", { boner: undefined, hammer: undefined, sledge: undefined });
-
-for (name in JSNative.Enumeration) echo(name);
-echo(c.sledge.value);
+echo(JSNative.Enumeration('names')[2]);
 
 exit(0);
 //JSNative.Class = function(name, functionObject) {};

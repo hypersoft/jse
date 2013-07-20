@@ -13,22 +13,29 @@ static JSStringRef RtJSPrototype, RtJSSetProperty, RtJSGetProperty, RtJSConstruc
 static JSValueRef jsConvertProperty JSTNativeConvertor() {
 	JSObjectRef interface = JSTGetPrivate(object);
 	JSValueRef conversion;
-//	if (JSTBoolean(JSTEval("this === JSNative.api.conversionFailure", conversion))) return false;
-//	printf("convert to ");
-	if (JSTHasProperty(interface, "convert")) {
-	if (kJSTypeString == type) {
-		conversion = JSTCallProperty(interface, "convert", object, RtJS(String));
-	} else
-	if (kJSTypeNumber == type) {
-		conversion = JSTCallProperty(interface, "convert", object, RtJS(Number));
+	JSObjectRef convert = JSTGetPropertyObject(interface, "convert");
+	if (convert && JSTReference(convert)) {
+		if (kJSTypeString == type) {
+			conversion = JSTCall(convert, interface, object, RtJS(String));
+		} else
+		if (kJSTypeNumber == type) {
+			conversion = JSTCall(convert, interface, object, RtJS(Number));
+		} else
+		if (kJSTypeBoolean == type) {
+			conversion = JSTCall(convert, interface, object, RtJS(Boolean));
+		} else
+		if (kJSTypeObject == type) {
+			conversion = JSTCall(convert, interface, object, RtJS(Object));
+		} else
+		if (kJSTypeNull == type) {
+			conversion = JSTCall(convert, interface, object, JSTMakeNull());
+		} else
+		if (kJSTypeUndefined == type) {
+			conversion = JSTCall(convert, interface, object, RtJS(undefined));
+		}
+		if (JSTBoolean(JSTEval("this === JSNative.api.conversionFailure", conversion))) return false;
+		return conversion;
 	}
-	return conversion;
-	}
-/*	if (kJSTypeObject == type) printf("object: %i\n", type);*/
-/*	if (kJSTypeBoolean == type) printf("boolean: %i\n", type);*/
-/*	if (kJSTypeNull == type) printf("null: %i\n", type);*/
-/*	if (kJSTypeUndefined == type) printf("undefined: %i\n", type);*/
-/*	fflush(stdout);*/
 	return false;
 }
 
@@ -53,7 +60,7 @@ static JSObjectRef jsCreateClass JSTNativeConstructor() {
 	JSObjectRef constructor = JSTCoreGetPropertyObject(classObject, RtJSConstruct);
 	JSClassRef class = JSTGetPrivate(classObject);
 	JSObjectRef this = JSTCreateClassObject(class, (void*) constructor);
-	JSTSetPrototype(this, JSTCoreGetProperty(constructor, RtJSPrototype));
+	JSTSetPrototype(this, (argc > 1)? argv[1]:JSTCoreGetProperty(constructor, RtJSPrototype));
 	return this;
 }
 
