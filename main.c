@@ -9,6 +9,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	JSValueRef * exception = &e;
 
 	JSToolsCall(js_native_init, argc, argv, envp);
+
 	if (argc && JSTBoolean(JSTEval("canReadFile(this);", JSTMakeBufferValue(argv[1])))) {
 		int result = JSTInteger(JSTRunScript(argv[1], RtJS(Global)));
 		if (JSTCaughtException) JSTReportFatalException(1);

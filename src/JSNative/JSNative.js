@@ -1,245 +1,58 @@
+NativeBootStrap = function Class(name, callAsFunction, callAsConstructor, prototype, properties) {
 
-new JSNative.Type.Alias(0, "void");
-new JSNative.Type.Alias(10, "bool");
+	var api = (classOf(this) === "GlobalObject")?this.api:JSNative.api;
 
-new JSNative.Type.Alias(20, "char");
-new JSNative.Type.Alias(20, "signed char");
-new JSNative.Type.Alias(20, "char signed");
-new JSNative.Type.Alias(21, "unsigned char");
-new JSNative.Type.Alias(21, "char unsigned");
+	var item;
 
-new JSNative.Type.Alias(30, "short");
-new JSNative.Type.Alias(30, "signed short");
-new JSNative.Type.Alias(30, "short signed");
-new JSNative.Type.Alias(31, "unsigned short");
-new JSNative.Type.Alias(31, "short unsigned");
+	var self = { 
+		callAsFunction: callAsFunction, 
+		callAsConstructor: callAsConstructor,
+		prototype: Object.create(prototype),
+		getProperty: function(object, name) { return null; },
+		setProperty: function(object, name, val) { return false; },
+		convert: function(object, type) { 
+			return api.conversionFailure;
+		},
+	};
 
-new JSNative.Type.Alias(40, "int");
-new JSNative.Type.Alias(40, "signed int");
-new JSNative.Type.Alias(40, "int signed");
-new JSNative.Type.Alias(41, "unsigned int");
-new JSNative.Type.Alias(41, "int unsigned");
+	self.construct = function(){};
 
-new JSNative.Type.Alias(50, "long");
-new JSNative.Type.Alias(50, "signed long");
-new JSNative.Type.Alias(50, "long signed");
-new JSNative.Type.Alias(51, "unsigned long");
-new JSNative.Type.Alias(51, "long unsigned");
-
-new JSNative.Type.Alias(60, "long long");
-new JSNative.Type.Alias(60, "signed long long");
-new JSNative.Type.Alias(60, "long long signed");
-new JSNative.Type.Alias(61, "unsigned long long");
-new JSNative.Type.Alias(61, "long long unsigned");
-
-new JSNative.Type.Alias(70, "float");
-new JSNative.Type.Alias(80, "double");
-
-new JSNative.Type.Alias(90, "pointer");
-new JSNative.Type.Alias(90, "void *");
-
-JSNative.Library = function(path) {
-
-	if (path in JSNative.Library) return JSNative.Library[path];
-	var lib = JSNative.jsnLoadLibrary(path);
-	Object.defineProperties(lib, {
-		constructor: { value: JSNative.Library },
-		findSymbol: { value: JSNative.Library.findSymbol.bind(lib) }
-	});
-	return (JSNative.Library[path] = lib);
-
-}
-
-JSNative.Library.findSymbol = function(searchString) {
-	if (searchString in this) return this[searchString];
-	this[searchString] = JSNative.jsnFindSymbol(this, searchString);
-	return this[searchString];
-}
-
-JSNative.CallVM = function() {
-	var size = (JSNative.Address.alignment * 2); // some buffering
-	for (var i = 0; i < arguments.length; i++) {
-		var n = parseInt(arguments[i]);
-		if (isNaN(n)) n = Number(JSNative.Type(arguments[i]).size);
-		if (isNaN(n)) throw new InvokeError("CallVM", "integer size parameter "+(i+1)+" is NaN");
-		if (n < JSNative.Address.alignment) n = JSNative.Address.alignment;
-		size += n;
-	}
-	var vm = JSNative.jsnNewCallVM(size); var mode = { value: "default" };
-	Object.defineProperties(vm, {
-		constructor: { value: JSNative.CallVM },
-		free: { value: JSNative.CallVM.free.bind(vm), enumerable:true },
-		error: { get: JSNative.CallVM.error.bind(vm), enumerable:true },
-		mode: { set: JSNative.CallVM.mode.bind(vm, mode), get: function() { return mode.value; }, enumerable:true },
-		reset: { value: JSNative.CallVM.reset.bind(vm, mode), enumerable:true },
-		push: { value: JSNative.CallVM.push.bind(vm), enumerable:true },
-		call: { value: JSNative.CallVM.call.bind(vm), enumerable:true },
-		conversion: { value: [], writeable: true }, // allocated addreses to free post-call
-	});
-	
-	JSNative.Allocator.globalBase.push(vm);
-	return vm;
-}
-JSNative.CallVM.free = function() { if (this === JSNative.CallVM) return;
-	if (this.deallocated != true) JSNative.jsnCallVMFree(this);
-	return Boolean(this.deallocated = true);
-}
-JSNative.CallVM.error = function() { if (this === JSNative.CallVM) return;
-	return JSNative.jsnCallVMGetError(this);
-}
-JSNative.CallVM.mode = function(writeBack, mode) { if (this === JSNative.CallVM) return;
-	writeBack.value = mode; JSNative.jsnCallVMSetMode(this, JSNative.CallVM.mode[mode]);
-}
-JSNative.CallVM.reset = function(writeBack, mode) { if (this === JSNative.CallVM) return;
-	var allocator = new JSNative.Allocator(), address;
-	while ((address = this.conversion.pop()) != undefined) allocator.free(address.pointer);
-	writeBack.value = mode; JSNative.jsnCallVMReset(this, JSNative.CallVM.mode[mode]);
-}
-JSNative.CallVM.push = function() {  if (this === JSNative.CallVM) return;
-	if (arguments.length == 0) throw new InvokeError("CallVM.push", "push requires at least one parameter");
-	for (var i = 0; i < arguments.length; i++) {
-		var arg = arguments[i];
-		var argClass = classOf(arg);
-		var argType = typeof arg;
-		if (arg === null) {
-			JSNative.jsnArgPointer(this, 0); continue;
-		} else if (arg === undefined) {
-			JSNative.jsnArgInt(this, 0); continue;	
-		} else if (argClass == "JSNative.Array" || argClass == "JSNative.Address") { 
-			JSNative.jsnArgPointer(this, arg); continue; 
-		} else if (argClass == "JSNative.Value") {
-			var pCode = arg.type.code; pCode -= (pCode % 2); // unsigned type code
-			if (pCode == 0) throw new InvokeError("CallVM.push", "unable to push void type: parameter "+(i+1));
-			else if (pCode == 90) JSNative.jsnArgPointer(this, arg);
-			else if (pCode == 40) JSNative.jsnArgInt(this, arg);
-			else if (pCode == 50) JSNative.jsnArgLong(this, arg);
-			else if (pCode == 10) JSNative.jsnArgBool(this, arg);
-			else if (pCode == 20) JSNative.jsnArgChar(this, arg);
-			else if (pCode == 30) JSNative.jsnArgShort(this, arg);
-			else if (pCode == 60) JSNative.jsnArgLongLong(this, arg);
-			else if (pCode == 70) JSNative.jsnArgFloat(this, arg);
-			else if (pCode == 80) JSNative.jsnArgDouble(this, arg);
-			else throw new InvokeError("CallVM.push", "unable to push unknown type code: parameter "+(i+1));
-			continue;
-		} else if (argType == "string") {
-			var s = new JSNative.Array("char", arg);
-			this.conversion.push(s);
-			JSNative.jsnArgPointer(this, s); continue;
-		} else if (argType == "boolean") {
-			JSNative.jsnArgBool(this, Number(arg)); continue;
-		} else if (argType == "number") {
-			JSNative.jsnArgInt(this, arg); continue;
-		} else throw new InvokeError("CallVM.push", "unable to push type: "+argType+": parameter "+(i+1));
-	}
-	return true;
-}
-JSNative.CallVM.call = function(type, symbol) {  if (this === JSNative.CallVM) return;
-	var tCode = type.code; tCode -= (tCode % 2);
-	if (tCode == 0) {
-		JSNative.jsnCallVoid(this, symbol);
-	} else if (tCode == 10) {
-		return JSNative.jsnCallBool(this, symbol);
-	} else if (tCode == 20) {
-		return JSNative.jsnCallChar(this, symbol);
-	} else if (tCode == 30) {
-		return JSNative.jsnCallShort(this, symbol);
-	} else if (tCode == 40) {
-		return JSNative.jsnCallInt(this, symbol);
-	} else if (tCode == 50) {
-		return JSNative.jsnCallLong(this, symbol);
-	} else if (tCode == 60) {
-		return JSNative.jsnCallLongLong(this, symbol);
-	} else if (tCode == 70) {
-		return JSNative.jsnCallFloat(this, symbol);
-	} else if (tCode == 80) {
-		return JSNative.jsnCallDouble(this, symbol);
-	} else if (tCode == 90) {
-		return JSNative.jsnCallPointer(this, symbol);
-	} else {
-		throw new InvokeError("CallVM.call", "unknown call type: "+tCode+" ("+String(type)+")");
-	}
-}
-
-Object.defineProperties(JSNative.CallVM.mode, {
-	"default": { value: 0, enumerable: true },
-	"system default": { value: 200, enumerable: true },
-	"linux system": { value: 201, enumerable: true },
-	"ellipsis": { value: 100, enumerable: true },
-	"varargs": { value: 101, enumerable: true },
-	"cdecl": { value: 1, enumerable: true },
-
-	// not adding any more because I cannot test them (nor do I plan to...) - pc.wiz.tt
-
-});
-
-JSNative.Call = function() {
-
-	this.mode = arguments[0];
-	this.value = arguments[1];
-	this.symbol = arguments[2];
-
-	this.param = [];
-	for (var i = 3; i < arguments.length; i++) this.param.push(arguments[i]);
-
-	function _ellipsis() {
-		if (this.param.length > arguments.length ) {
-			throw new InvokeError("JSNative.Call", "expected a minimum of "+this.param.length+" arguments: recieved "+arguments.length);
-			return;
+	self.construct = function() { 
+		if (this.callAsFunction === self.callAsFunction) return self.callAsFunction.apply(this, arguments);
+		var o = new JSNative.api.createClass(name);
+		Object.defineProperty(o, 'constructor', { value: self });
+		var init = self.callAsConstructor.apply(o, arguments);
+		if (classOf(init) in api.classRegister) return init;
+		if (init !== undefined) {
+			throw new InvokeError('new '+name, "invalid return type ("+classOf(init)+") from ("+name+") constructor");
+			return null;
 		}
-		var size = [];
-		for (var i = 0; i < arguments.length; i++) {
-			var arg = arguments[i];
-			var argClass = classOf(arg);
-			var argType = typeof arg;
-			if (argClass == "JSNative.Value") {
-				size.push(arg.type.size);
-			} else if (argType == "string" || argClass == "JSNative.Address" || argClass == "JSNative.Array") {
-				size.push("void *");
-			} else if (argType == "boolean") {
-				size.push("bool");
-			} else if (argType == "number") size.push("int");
-			else {
-				throw new InvokeError("JSNative.Call", "parameter "+(i+1)+": unable to produce a suitable conversion for type: "+argType+"/"+argClass);
-				return;
-			}
-		}
-		try {
-			var allocator = new JSNative.Allocator();
-			var vm = JSNative.CallVM.apply({}, size);
-			vm.mode = "ellipsis";
-			vm.push.apply(vm, arguments);
-			var result = vm.call(this.value, this.symbol);
-		} catch(e) {
-			allocator.release(); throw e;
-			return;
-		}
-		allocator.release();
-		return result;
-	}
+		return o;
+	};
 
-	function _default() {
-		if (this.param.length != arguments.length ) {
-			throw new InvokeError("JSNative.Call", "expected " +this.param.length+" arguments: recieved "+arguments.length);
-			return;
-		}
-		try {
-			var allocator = new JSNative.Allocator();
-			var vm = JSNative.CallVM.apply(null, this.param);
-			vm.push.apply(vm, arguments);
-			var result = vm.call(this.value, this.symbol);
-		} catch(e) {
-			allocator.release(); throw e;
-			return;
-		}
-		allocator.release();
-		return result;
-	}
-
-	if (arguments[0] == "default") {
-		return _default.bind(this);
-	} else if (arguments[0] == "ellipsis") {
-		return _ellipsis.bind(this);
-	}
+	Object.defineProperty(self.prototype, 'constructor', { value: self.construct.bind(self) });
+	for (item in self) self.prototype.constructor[item] = self[item]; self = self.prototype.constructor;
+	Object.defineProperty(self, 'className', { value: name, enumerable:true });
+	api.registerClass(name, self);
+	return self;
 
 }
+
+Object.defineProperty(this, "JSNative", { value: NativeBootStrap('JSNative',
+	function() { echo('hello world'); },
+	function() { this.foo = "davy jones"; },
+	{}, {}
+), enumerable:true });
+
+Object.defineProperties(JSNative, {
+	api: {value: api, enumerable: true},
+	Class: {value: NativeBootStrap, enumerable: true },
+}); delete api, NativeBootStrap; // strap up...
+
+JSNative.Type = new JSNative.Class("JSNative.Type",
+	function invoke() { echo('JSNative.Type', 'invoked'); },
+	function construct() { echo('JSNative.Type', 'construct'); },
+	{}, {}
+);
+
 

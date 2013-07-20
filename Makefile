@@ -1,7 +1,7 @@
 
 APPLICATION := bin/jse
 
-SOURCE := main.c $(shell echo src/*.c) $(shell echo src/JSNative/*.c)
+SOURCE := main.c $(shell echo src/*.c)
 
 PKGS := javascriptcoregtk-3.0
 
@@ -22,8 +22,12 @@ ${DYNCALL}:
 	@echo ''
 
 inc/JSNative.inc: src/JSNative/JSNative.js
-	# JSNativeSupport is being reconstructed
+	# JSNative.js is being reconstructed
 	@bin/bin2inc JSNativeSupport src/JSNative/JSNative.js > inc/JSNative.inc;
+
+inc/JSNativeAPI.inc: src/JSNative/JSNativeAPI.js
+	# JSNativeAPI.js is being reconstructed
+	@bin/bin2inc JSNativeAPISupport src/JSNative/JSNativeAPI.js > inc/JSNativeAPI.inc;
 
 inc/JSTools.inc: src/JSTools/JSTools.js
 	# JSToolsSupport is being reconstructed
@@ -31,14 +35,14 @@ inc/JSTools.inc: src/JSTools/JSTools.js
 
 
 # This rule builds jse
-${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative.inc inc/JSTools.inc
+${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNative*.inc inc/JSTools.inc
 	@echo ''
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
 	@echo ''
 	@echo 'Building JSE' ${BUILDNO} ...
 	@echo ''
-	gcc -DBUILDNO=${BUILDNO} -I inc -I src -I src/JSNative -o "bin/jse" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
+	gcc -DBUILDNO=${BUILDNO} -I inc -I src -o "bin/jse" ${SOURCE} bin/*.a ${OPTIMIZE} -lpthread -ldl ${PKGCONFIG}
 	@bin/buildnum -q;
 	@echo ''
 

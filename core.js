@@ -1,5 +1,103 @@
 #!bin/jse
 
+JSNative.Enumeration = new JSNative.Class("JSNative.Enumeration",
+	function invoke(section, query) {
+		var o = JSNative.Enumeration[section];
+		if (o !== undefined && o[query] !== undefined) return o[query];
+		return o;
+	},
+	function construct(name, kvp) {
+		for (value in kvp) {
+			if (value == 'length') continue;
+			this.push(value, kvp[value]);
+		}
+		Object.defineProperty(JSNative.Enumeration, name, { value: this, enumerable: true});
+	},
+	Object.defineProperties(
+		{ // Prototype
+			autoEnum: 0, length: 0
+		},
+		{ // Methods
+			autoEnum: { value:0,writeable:true},
+			name: { value:0,writeable:true},
+			value: { value:0,writeable:true},
+			push: { value: function(name, value) {
+				if (value === undefined) value = (this.autoEnum++ << 1);
+				var o = new JSNative.api.createClass(this.constructor.className);
+				Object.defineProperty(o, "valueOf", {value: function () {
+					return value;
+				} });
+				Object.defineProperty(o, "toString", {value: function() {
+					return name;
+				} });
+				Object.defineProperties(o, {value: { value: value }, name: {value: name}});
+				Object.defineProperty(this, name, { value: o, enumerable:true });
+				this.length++;
+			} },
+			toString: { value: function(name) { //if (this.length == 0) return this.constructor;
+					var s = [];
+					for (name in this) if (isNaN(name) && name != "autoEnum" && name != 'length') s.push(name+':'+this[name]); return '{\n'+s.join(', ')+'\n}';
+			} },
+		}
+	),
+	{}
+);
+
+
+//JSTEvalObject("function (callAsFunction, callAsConstructor, constructorPrototype) {	var self = { callAsFunction: callAsFunction, callAsConstructor: callAsConstructor };	self.construct = function() { if (this === self) return self.callAsFunction.apply(this, arguments); return self.callAsConstructor.apply(this, arguments); };	self.construct.prototype = Object.create(constructorPrototype);	Object.defineProperty(self.construct.prototype, 'constructor', { value: self.construct.bind(self) });	return self.construct.prototype.constructor; };", global);
+JSNative.callAsConstructor = function() {
+	return new JSNative.Type();
+}
+
+c = new JSNative.Enumeration("cEnum", { boner: undefined, hammer: undefined, sledge: undefined });
+
+for (name in JSNative.Enumeration) echo(name);
+echo(c.sledge.value);
+
+exit(0);
+//JSNative.Class = function(name, functionObject) {};
+
+//JSNative.Class.prototype = {
+//	getName: undefined,
+//	setName: undefined,
+//	delete: undefined,
+//	invoke: undefined,
+//	construct: undefined,
+//	instanceOf: undefined,
+//	convertTo: undefined,
+//}
+
+
+//JSNative.api.constructClass = function(classAddress, classPrivateObject) {};
+//JSNative.api.getClassPrivateObject = function(classObject) {}; // returns instance copy
+
+//JSNative.api.constructAddress = function(number) {};
+//JSNative.api.allocateAddress = function(size) {};
+//JSNative.api.reallocateAddress = function(number, size) {};
+
+///* CDECL
+//char * NAME[16];
+//*/ var NAME = new JSNative("char * array[16]");
+
+///* CDECL
+//char * NAME[] = &someOtherValue;
+//*/ var NAME = new JSNative("char * array[]").value = JSNative.addressOf(someOtherObject);
+
+
+//// My set property has to validate my type
+
+JSNative.Value.addressOf = function() {
+
+}
+
+JSNative.Value.get = function() {
+
+}
+
+JSNative.Value.set = function() {
+
+}
+
 function Type() {
 	var jsType = typeof argument[0];
 	if (jsType  == 'number' || jsType == 'string') {
@@ -22,7 +120,7 @@ Type.Model.prototype = {
 		return (this.code == that.code && this.pointer == that.pointer && this.array == that.array)
 	},
 	get size() { return Type.sizeOf[this.code]; },
-	get allocationSize() { return Type.sizeOf.allocationSize[this.code]; },
+	get allocationSize() { return Type.sizeOf[this.code].allocationSize; },
 	parse: function () { return this.valueFrom(arguments) },
 	valueOf: function () { return this.code },
 	toString: function() { var build = (this.pointer == true)?"*":''+(this.array == true)?"[]":'';

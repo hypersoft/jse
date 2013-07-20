@@ -2,165 +2,80 @@
 #define JSNativeSource
 
 #include "JSNative.inc"
+#include "JSNativeAPI.inc"
 #include "JSNative.h"
 
-JSObjectRef RtJSNative = NULL;
+JSObjectRef RtJSNativeApi;
+JSClassRef JSNativeGhost;
 
-static JSValueRef jsnNewCallVM JSToolsFunction(DCsize size) {
-	if (argc != 1) {
-		JSTSyntaxError("JSNative: jsnNewCallVM: expected 1 integer argument: size");
-		return RtJS(undefined);
+static JSStringRef RtJSPrototype, RtJSSetProperty, RtJSGetProperty, RtJSConstruct, RtJSClassRegister;
+
+static JSValueRef jsConvertProperty JSTNativeConvertor() {
+	JSObjectRef interface = JSTGetPrivate(object);
+	JSValueRef conversion;
+//	if (JSTBoolean(JSTEval("this === JSNative.api.conversionFailure", conversion))) return false;
+//	printf("convert to ");
+	if (JSTHasProperty(interface, "convert")) {
+	if (kJSTypeString == type) {
+		conversion = JSTCallProperty(interface, "convert", object, RtJS(String));
+	} else
+	if (kJSTypeNumber == type) {
+		conversion = JSTCallProperty(interface, "convert", object, RtJS(Number));
 	}
-	return JSNativeMakeAddress(dcNewCallVM(JSTInteger(JSTParam(1))));
+	return conversion;
+	}
+/*	if (kJSTypeObject == type) printf("object: %i\n", type);*/
+/*	if (kJSTypeBoolean == type) printf("boolean: %i\n", type);*/
+/*	if (kJSTypeNull == type) printf("null: %i\n", type);*/
+/*	if (kJSTypeUndefined == type) printf("undefined: %i\n", type);*/
+/*	fflush(stdout);*/
+	return false;
 }
 
-static JSValueRef jsnCallVMFree JSToolsFunction(DCCallVM * vm) {
-	if (argc != 1) {
-		JSTSyntaxError("JSNative: jsnCallVMFree: expected 1 integer argument: (JSNative.CallVM) pointer");
-		return RtJS(undefined);
-	} 
-	dcFree(JSTPointer(JSTParam(1))); return RtJS(undefined);
+static bool jsSetProperty JSTNativePropertyWriter() {
+	JSObjectRef interface = JSTGetPrivate(object);
+	return JSTBoolean(JSTCallProperty(interface, "setProperty", object, JSTMakeString(property, NULL, false), value));
 }
 
-static JSValueRef jsnCallVMGetError JSToolsFunction(DCCallVM * vm) {
-	if (argc != 1) {
-		JSTSyntaxError("JSNative: jsnCallVMGetError: expected 1 integer argument: (JSNative.CallVM) pointer");
-		return RtJS(undefined);
+static JSValueRef jsGetProperty JSTNativePropertyReader() {
+	if (JSTCoreEqualsNative(property, "constructor")) return (JSValueRef) JSTGetPrivate(object);
+	JSObjectRef interface = JSTGetPrivate(object);
+	JSValueRef result = JSTCallProperty(interface, "getProperty", object, JSTMakeString(property, NULL, false));
+	if (JSTNull(result)) {
+		result = NULL;
 	}
-	return JSTMakeNumber(dcGetError(JSTPointer(JSTParam(1))));
-}
-
-static JSValueRef jsnCallVMSetMode JSToolsFunction(DCCallVM * vm, DCint mode) {
-	if (argc != 2) {
-		JSTSyntaxError("JSNative: jsnCallVMSetMode: expected 2 integer arguments: (JSNative.CallVM) pointer, JSNativeCallVMPrototype) mode");
-		return RtJS(undefined);
-	}
-	dcMode(JSTPointer(JSTParam(1)), JSTInteger(JSTParam(2))); return RtJS(undefined);
-}
-
-static JSValueRef jsnCallVMReset JSToolsFunction(DCCallVM * vm , DCint mode) {
-	if (argc != 2) {
-		JSTSyntaxError("JSNative: jsnCallVMReset: expected 2 integer arguments: (JSNative.CallVM) pointer, (CallVMPrototype) mode");
-		return RtJS(undefined);
-	}
-	dcReset(JSTPointer(JSTParam(1))); return RtJS(undefined);
-}
-
-static JSValueRef jsnLoadLibrary JSToolsFunction(const char * libpath) {
-	if (argc != 1) {
-		JSTSyntaxError("JSNative: jsnLoadLibrary: expected 1 integer argument: (char *) libPath");
-		return RtJS(undefined);
-	}
-	char * buffer = JSTGetValueBuffer(JSTParam(1), NULL);
-	JSValueRef result = JSNativeMakeAddress(dlLoadLibrary(buffer));
-	JSTFreeBuffer(buffer);
 	return result;
 }
 
-static JSValueRef jsnFreeLibrary JSToolsFunction(void * libhandle) {
-	if (argc != 1) {
-		JSTSyntaxError("JSNative: jsnFreeLibrary: expected 1 integer argument: (void *) libHandle");
-		return RtJS(undefined);
-	}
-	dlFreeLibrary(JSTPointer(JSTParam(1))); return RtJS(undefined);
+static JSObjectRef jsCreateClass JSTNativeConstructor() {
+	JSObjectRef classRegister = JSTCoreGetPropertyObject(RtJSNativeApi, RtJSClassRegister);
+	JSObjectRef classObject = JSTCallObject(classRegister, RtJSNativeApi, argv[0]);
+	JSObjectRef constructor = JSTCoreGetPropertyObject(classObject, RtJSConstruct);
+	JSClassRef class = JSTGetPrivate(classObject);
+	JSObjectRef this = JSTCreateClassObject(class, (void*) constructor);
+	JSTSetPrototype(this, JSTCoreGetProperty(constructor, RtJSPrototype));
+	return this;
 }
 
-static JSValueRef jsnFindSymbol JSToolsFunction(void * libhandle , const char * symbol ) {
-	if (argc != 2) {
-		JSTSyntaxError("JSNative: jsnFindSymbol: expected 2 integer arguments: (void *) libHandle, (char *) symbol");
-		return RtJS(undefined);
-	}
-	char * buffer = JSTGetValueBuffer(JSTParam(2), NULL);
-	JSValueRef result = JSNativeMakeAddress(dlFindSymbol(JSTPointer(JSTParam(1)), buffer));
+static JSValueRef jsRegisterClass JSToolsFunction () {
+
+	JSObjectRef classRegister = JSTCoreGetPropertyObject(this, RtJSClassRegister);
+	char * buffer = NULL;
+	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
+	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
+	jsClass.getProperty = &jsGetProperty;
+	jsClass.setProperty = &jsSetProperty;
+	jsClass.convertToType = &jsConvertProperty;
+	JSValueRef className = JSTCall(classRegister, this, argv[0]);
+	if (JSTCaughtException) return JSTMakeNull();
+	jsClass.className = JSTGetValueBuffer(className, &buffer);
+	JSClassRef JSNativeClass = JSClassRetain(JSClassCreate(&jsClass));
+	JSTSetProperty(classRegister, buffer, JSTCreateClassObject(JSNativeGhost, JSNativeClass), JSTPropertyConst);
+	JSObjectRef result = JSTGetPropertyObject(classRegister, buffer);
+	JSTCoreSetProperty(result, RtJSConstruct, argv[1], JSTPropertyRequired);
 	JSTFreeBuffer(buffer);
 	return result;
-}
 
-static JSValueRef jsnArgBool JSToolsFunction(DCCallVM * vm, bool arg) {
-	dcArgBool(JSTPointer(JSTParam(1)), JSTBoolean(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgChar JSToolsFunction(DCCallVM * vm, char arg) {
-	dcArgChar(JSTPointer(JSTParam(1)), JSTChar(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgShort JSToolsFunction(DCCallVM * vm, short arg) {
-	dcArgShort(JSTPointer(JSTParam(1)), JSTShort(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgInt JSToolsFunction(DCCallVM * vm, int arg) {
-	dcArgInt(JSTPointer(JSTParam(1)), JSTInteger(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgLong JSToolsFunction(DCCallVM * vm, long arg) {
-	dcArgLong(JSTPointer(JSTParam(1)), JSTLong(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgLongLong JSToolsFunction(DCCallVM * vm, long long arg) {
-	dcArgLongLong(JSTPointer(JSTParam(1)), JSTLongLong(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgFloat JSToolsFunction(DCCallVM * vm, float arg) {
-printf("val: %g\n", JSTFloat(JSTParam(2)));
-	dcArgFloat(JSTPointer(JSTParam(1)), JSTFloat(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgDouble JSToolsFunction(DCCallVM * vm, double arg) {
-	dcArgDouble(JSTPointer(JSTParam(1)), JSTDouble(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnArgPointer JSToolsFunction(DCCallVM * vm, void * arg) {
-	dcArgPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnCallVoid JSToolsFunction (DCCallVM * vm, void * func) {
-	dcCallVoid(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2)));
-	return RtJS(undefined);
-}
-
-static JSValueRef jsnCallBool JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeBoolean(dcCallBool(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallChar JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallChar(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallShort JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallShort(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallInt JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallInt(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallLong JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallLong(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallLongLong JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallLongLong(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallFloat JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallFloat(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallDouble JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber(dcCallDouble(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
-}
-
-static JSValueRef jsnCallPointer JSToolsFunction (DCCallVM * vm, void * func) {
-	return JSTMakeNumber((double)(long) dcCallPointer(JSTPointer(JSTParam(1)), JSTPointer(JSTParam(2))));
 }
 
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
@@ -169,45 +84,29 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSTLoadRuntime(global, argc, argv, envp);
 
-	/* our root object */
-	JSTSetProperty(global, "JSNative", (RtJSNative = JSTCreateClassObject(NULL, NULL)), JSTPropertyConst);
+	RtJSPrototype = JSTCreateStaticString("prototype", NULL);
+	RtJSSetProperty = JSTCreateStaticString("setProperty", NULL);
+	RtJSGetProperty = JSTCreateStaticString("getProperty", NULL);
+	RtJSConstruct = JSTCreateStaticString("constructor", NULL);
+	RtJSClassRegister = JSTCreateStaticString("classRegister", NULL);
 
-	JSTSetPropertyFunction(RtJSNative, "jsnNewCallVM", &jsnNewCallVM);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallVMFree", &jsnCallVMFree);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallVMGetError", &jsnCallVMGetError);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallVMSetMode", &jsnCallVMSetMode);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallVMReset", &jsnCallVMReset);
-	JSTSetPropertyFunction(RtJSNative, "jsnLoadLibrary", &jsnLoadLibrary);
-	JSTSetPropertyFunction(RtJSNative, "jsnFreeLibrary", &jsnFreeLibrary);
-	JSTSetPropertyFunction(RtJSNative, "jsnFindSymbol", &jsnFindSymbol);
+	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
+	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
+	jsClass.className = "JSNative.Class";
 
-	JSTSetPropertyFunction(RtJSNative, "jsnArgBool", &jsnArgBool);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgChar", &jsnArgChar);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgShort", &jsnArgShort);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgInt", &jsnArgInt);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgLong", &jsnArgLong);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgLongLong", &jsnArgLongLong);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgFloat", &jsnArgFloat);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgDouble", &jsnArgDouble);
-	JSTSetPropertyFunction(RtJSNative, "jsnArgPointer", &jsnArgPointer);
+	JSNativeGhost = JSClassRetain(JSClassCreate(&jsClass));
 
-	JSTSetPropertyFunction(RtJSNative, "jsnCallVoid", &jsnCallVoid);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallBool", &jsnCallBool);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallChar", &jsnCallChar);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallShort", &jsnCallShort);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallInt", &jsnCallInt);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallLong", &jsnCallLong);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallLongLong", &jsnCallLongLong);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallFloat", &jsnCallFloat);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallDouble", &jsnCallDouble);
-	JSTSetPropertyFunction(RtJSNative, "jsnCallPointer", &jsnCallPointer);
+	JSTEvalScript(JSNativeAPISupport, global, "JSNativeAPI.js"); 
+	if (JSTCaughtException) JSTReportFatalException(1);
 
-	JSToolsCall(js_native_type_init, RtJSNative);
-	JSToolsCall(js_native_address_init, RtJSNative);
-	JSToolsCall(js_native_allocator_init, RtJSNative);
-	JSToolsCall(js_native_value_init, RtJSNative);
+	JSObjectRef RtJSNativeClass = JSTGetPropertyObject(global, "NativeClass");
 
-	JSTEvalScript(JSNativeSupport, global, "JSNativeSupport");
+	RtJSNativeApi = JSTGetPropertyObject(global, "api");
+
+	JSTSetPropertyFunction(RtJSNativeApi, "registerClass", &jsRegisterClass);
+	JSTSetProperty(RtJSNativeApi, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
+
+	JSTEvalScript(JSNativeSupport, global, "JSNative.js"); 
 	if (JSTCaughtException) JSTReportFatalException(1);
 
 }
