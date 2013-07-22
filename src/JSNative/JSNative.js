@@ -12,28 +12,6 @@ var $api = api, SuperConstructor = function(){};
 function isConstructorOf(o) { return Boolean(this === o.constructor); }
 function hasMethod(name) { return Function.prototype.isPrototypeOf(this[name]); }
 
-// never runs in this scope, eval x-lated to proper name later
-function invoke() {
-
-	if (constructor.isConstructorOf(this)) {
-		if (constructor.hasMethod('create')) {
-			var o = new api.createClass(name);
-			var deviation = constructor.create.apply(o, arguments);
-			if (deviation) return deviation;
-			return o;
-		} else throw new InvokeError('new '+constructor.name+'()', "create method is not a valid constructor");
-	} else if (this === object) {
-		if (constructor.hasMethod('global')) {
-			var deviation = constructor.global.apply(this, arguments);
-			if (deviation) return deviation;
-			return;
-		} else throw new InvokeError(constructor.name+'()', 'global method is not a valid function');
-	}
-
-	throw new InvokeError(constructor.name+'()', 'this call is an unknown invocation method');
-
-}
-
 var Class = Object.defineProperties(function Class(name, prototype, methods) {
 	var api = $api;
 	if ( ! Class.prototype.isPrototypeOf(this)) throw new TypeError("Class must be called in a new context");
@@ -46,10 +24,30 @@ var Class = Object.defineProperties(function Class(name, prototype, methods) {
 		throw new InvokeError("new Class()", "argument 3: expected type object");
 	}
 
-	var object = this; var constructor = {};
+	var constructor = {}
+	var object = this;
+	function invoke() {
 
+		if (constructor.isConstructorOf(this)) {
+			if (constructor.hasMethod('create')) {
+				var o = new api.createClass(name);
+				var deviation = constructor.create.apply(o, arguments);
+				if (deviation) return deviation;
+				return o;
+			} else throw new InvokeError('new '+constructor.name+'()', "create method is not a valid constructor");
+		} else if (this === object) {
+			if (constructor.hasMethod('global')) {
+				var deviation = constructor.global.apply(this, arguments);
+				if (deviation) return deviation;
+				return;
+			} else throw new InvokeError(constructor.name+'()', 'global method is not a valid function');
+		}
+
+		throw new InvokeError(constructor.name+'()', 'this call is an unknown invocation method');
+
+	}
 	// eval-x-late-it
-	invoke = eval(invoke.toString().replace("function invoke", '(function '+name)+')');
+	invoke = eval('('+invoke.toString().replace('function invoke', 'function '+name)+')');
 	constructor = invoke.bind(this);
 
 	Object.defineProperty(constructor, 'prototype', {
