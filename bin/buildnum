@@ -3,7 +3,7 @@
 declare -i MAJOR="0"
 declare -i MINOR="0"
 declare -i MINORMAX="99"
-declare -i REVISION="991"
+declare -i REVISION="992"
 declare -i REVISIONMAX="999"
 
 buildnum () 

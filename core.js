@@ -1,7 +1,6 @@
 #!bin/jse
 
 /* Ye Old Test Class */
-echo(api);
 
 Shell = new JSNative.Class(
 

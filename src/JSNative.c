@@ -4,7 +4,6 @@
 #include "JSNative.inc"
 #include "JSNativeClass.inc"
 
-#include "JSNativeAPI.inc"
 #include "JSNative.h"
 
 JSObjectRef RtJSNativeAPI;
