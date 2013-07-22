@@ -13,5 +13,5 @@ Shell = new Class('Shell',
 
 Shell();
 shell = new Shell();
-shell.echo("I am your", Shell.name);
+shell.echo("I am your", classOf(shell));
 
