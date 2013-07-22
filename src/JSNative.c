@@ -5,15 +5,18 @@
 #include "JSNativeAPI.inc"
 #include "JSNative.h"
 
-JSObjectRef RtJSNativeApi;
+JSObjectRef RtJSNativeAPI;
+JSObjectRef RtJSNativeClassRegistry;
+
 JSClassRef JSNativeGhost;
 
-static JSStringRef RtJSPrototype, RtJSSetProperty, RtJSGetProperty, RtJSConstruct, RtJSClassRegister;
+static JSStringRef RtCSPrototype, RtCSSetProperty, RtCSGetProperty, RtCSConstruct, RtCSClassRegister,
+RtCSConvert;
 
 static JSValueRef jsConvertProperty JSTNativeConvertor() {
 	JSObjectRef interface = JSTGetPrivate(object);
 	JSValueRef conversion;
-	JSObjectRef convert = JSTGetPropertyObject(interface, "convert");
+	JSObjectRef convert = JSTCoreGetPropertyObject(interface, RtCSConvert);
 	if (convert && JSTReference(convert)) {
 		if (kJSTypeString == type) {
 			conversion = JSTCall(convert, interface, object, RtJS(String));
@@ -41,13 +44,18 @@ static JSValueRef jsConvertProperty JSTNativeConvertor() {
 
 static bool jsSetProperty JSTNativePropertyWriter() {
 	JSObjectRef interface = JSTGetPrivate(object);
-	return JSTBoolean(JSTCallProperty(interface, "setProperty", object, JSTMakeString(property, NULL, false), value));
+	if (JSTCoreHasProperty(interface, RtCSSetProperty))
+	return JSTBoolean(JSTCoreCallProperty(interface, RtCSSetProperty, object, JSTMakeString(property, NULL, false), value));
+	return false;
 }
 
 static JSValueRef jsGetProperty JSTNativePropertyReader() {
-	if (JSTCoreEqualsNative(property, "constructor")) return (JSValueRef) JSTGetPrivate(object);
+	if (JSStringIsEqual(property, RtCSConstruct)) return (JSValueRef) JSTGetPrivate(object);
 	JSObjectRef interface = JSTGetPrivate(object);
-	JSValueRef result = JSTCallProperty(interface, "getProperty", object, JSTMakeString(property, NULL, false));
+	JSValueRef result;
+	if (JSTCoreHasProperty(interface, RtCSGetProperty))
+	result = JSTCoreCallProperty(interface, RtCSGetProperty, object, JSTMakeString(property, NULL, false));
+	else return NULL;
 	if (JSTNull(result)) {
 		result = NULL;
 	}
@@ -55,35 +63,43 @@ static JSValueRef jsGetProperty JSTNativePropertyReader() {
 }
 
 static JSObjectRef jsCreateClass JSTNativeConstructor() {
-	JSObjectRef classRegister = JSTCoreGetPropertyObject(RtJSNativeApi, RtJSClassRegister);
-	JSObjectRef classObject = JSTCallObject(classRegister, RtJSNativeApi, argv[0]);
-	JSObjectRef constructor = JSTCoreGetPropertyObject(classObject, RtJSConstruct);
+	char * str;
+	JSObjectRef classObject = JSTGetPropertyObject(RtJSNativeClassRegistry, JSTGetValueBuffer(argv[0], &str));
+	if (!JSTReference(classObject)) {
+		char buffer[256];
+		if (JSTHasProperty(RtJSNativeClassRegistry, str)) {
+			sprintf(buffer, "createClass(): invalid class name parameter: '%s' is a reserved class name");
+			JSTReferenceError(buffer); JSTFreeBuffer(str);
+		}
+		JSTReturnObjectException;
+	}
+	JSObjectRef constructor = JSTCoreGetPropertyObject(classObject, RtCSConstruct);
 	JSClassRef class = JSTGetPrivate(classObject);
 	JSObjectRef this = JSTCreateClassObject(class, (void*) constructor);
-	JSTSetPrototype(this, (argc > 1)? argv[1]:JSTCoreGetProperty(constructor, RtJSPrototype));
+	JSTSetPrototype(this, (argc > 1)? argv[1]:JSTCoreGetProperty(constructor, RtCSPrototype));
+	JSTFreeBuffer(str);
 	return this;
 }
 
 static JSValueRef jsRegisterClass JSToolsFunction () {
-
-	JSObjectRef classRegister = JSTCoreGetPropertyObject(this, RtJSClassRegister);
 	char * buffer = NULL;
 	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
 	jsClass.getProperty = &jsGetProperty;
 	jsClass.setProperty = &jsSetProperty;
 	jsClass.convertToType = &jsConvertProperty;
-	JSValueRef className = JSTCall(classRegister, this, argv[0]);
+	JSValueRef className = argv[0];
 	if (JSTCaughtException) return JSTMakeNull();
 	jsClass.className = JSTGetValueBuffer(className, &buffer);
 	JSClassRef JSNativeClass = JSClassRetain(JSClassCreate(&jsClass));
-	JSTSetProperty(classRegister, buffer, JSTCreateClassObject(JSNativeGhost, JSNativeClass), JSTPropertyConst);
-	JSObjectRef result = JSTGetPropertyObject(classRegister, buffer);
-	JSTCoreSetProperty(result, RtJSConstruct, argv[1], JSTPropertyRequired);
+	JSTSetProperty(RtJSNativeClassRegistry, buffer, JSTCreateClassObject(JSNativeGhost, JSNativeClass), JSTPropertyConst);
+	JSObjectRef result = JSTGetPropertyObject(RtJSNativeClassRegistry, buffer);
+	JSTCoreSetProperty(result, RtCSConstruct, argv[1], JSTPropertyRequired);
 	JSTFreeBuffer(buffer);
 	return result;
 
 }
+
 
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
@@ -91,11 +107,12 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSTLoadRuntime(global, argc, argv, envp);
 
-	RtJSPrototype = JSTCreateStaticString("prototype", NULL);
-	RtJSSetProperty = JSTCreateStaticString("setProperty", NULL);
-	RtJSGetProperty = JSTCreateStaticString("getProperty", NULL);
-	RtJSConstruct = JSTCreateStaticString("constructor", NULL);
-	RtJSClassRegister = JSTCreateStaticString("classRegister", NULL);
+	RtCSPrototype = JSTCreateStaticString("prototype", NULL);
+	RtCSSetProperty = JSTCreateStaticString("setProperty", NULL);
+	RtCSGetProperty = JSTCreateStaticString("getProperty", NULL);
+	RtCSConstruct = JSTCreateStaticString("constructor", NULL);
+	RtCSClassRegister = JSTCreateStaticString("$registry", NULL);
+	RtCSConvert = JSTCreateStaticString("convert", NULL);
 
 	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
@@ -103,18 +120,16 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSNativeGhost = JSClassRetain(JSClassCreate(&jsClass));
 
-	JSTEvalScript(JSNativeAPISupport, global, "JSNativeAPI.js"); 
-	if (JSTCaughtException) JSTReportFatalException(1);
-
-	JSObjectRef RtJSNativeClass = JSTGetPropertyObject(global, "NativeClass");
-
-	RtJSNativeApi = JSTGetPropertyObject(global, "api");
-
-	JSTSetPropertyFunction(RtJSNativeApi, "registerClass", &jsRegisterClass);
-	JSTSetProperty(RtJSNativeApi, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
-
 	JSTEvalScript(JSNativeSupport, global, "JSNative.js"); 
 	if (JSTCaughtException) JSTReportFatalException(1);
 
+	RtJSNativeClassRegistry = JSTEvalObject("Class.$registry", global);
+	JSTEval("delete Class.$registry", global);
+
+	RtJSNativeAPI = JSTEvalObject("api", global);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "registerClass", &jsRegisterClass);
+	JSTSetProperty(RtJSNativeAPI, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
+	
 }
 

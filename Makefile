@@ -25,10 +25,6 @@ inc/JSNative.inc: src/JSNative/JSNative.js
 	# JSNative.js is being reconstructed
 	@bin/bin2inc JSNativeSupport src/JSNative/JSNative.js > inc/JSNative.inc;
 
-inc/JSNativeAPI.inc: src/JSNative/JSNativeAPI.js
-	# JSNativeAPI.js is being reconstructed
-	@bin/bin2inc JSNativeAPISupport src/JSNative/JSNativeAPI.js > inc/JSNativeAPI.inc;
-
 inc/JSTools.inc: src/JSTools/JSTools.js
 	# JSToolsSupport is being reconstructed
 	@bin/bin2inc JSToolsSupport src/JSTools/JSTools.js > inc/JSTools.inc;

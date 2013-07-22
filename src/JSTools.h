@@ -128,6 +128,7 @@ JSValueRef	_JSTGetProperty JSToolsProcedure (JSObjectRef jsObject, char * chrPtr
 
 bool		_JSTHasProperty (JSContextRef ctx, JSObjectRef jsObject, char * chrPtrName);
 #define		JSTHasProperty(jsObject, chrPtrName) _JSTHasProperty(ctx, jsObject, chrPtrName)
+#define		JSTCoreHasProperty(jsObject, jsStrName) JSObjectHasProperty(ctx, jsObject, jsStrName)
 
 bool		_JSTDeleteProperty JSToolsProcedure (JSObjectRef jsObject, char * chrPtrName);
 #define		JSTDeleteProperty(jsObject, chrPtrName)	JSToolsCall(_JSTDeleteProperty, jsObject, chrPtrName)
@@ -151,6 +152,10 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTCallObject(FUNC, THIS, ...)	((JSObjectRef) JSTCall(FUNC, THIS, ##__VA_ARGS__))
 #define JSTCallProperty(jsObjRefThis, chrPtrFuncName, ...)	JSTCall(JSTGetPropertyObject(jsObjRefThis, chrPtrFuncName), jsObjRefThis, ##__VA_ARGS__)
 #define JSTCallPropertyObject(jsObjRefThis, chrPtrFuncName, ...)	((JSObjectRef) JSTCallProperty(jsObjRefThis, chrPtrFuncName, ##__VA_ARGS__))
+
+#define JSTCoreCallProperty(jsObjRefThis, funcName, ...)	JSTCall(JSTCoreGetPropertyObject(jsObjRefThis, funcName), jsObjRefThis, ##__VA_ARGS__)
+#define JSTCoreCallPropertyObject(jsObjRefThis, funcName, ...)	((JSObjectRef) JSTCoreCallProperty(jsObjRefThis, funcName, ##__VA_ARGS__))
+
 #define JSTCallConstructorValue(THIS, ...)	((JSValueRef) JSTCallConstructor(THIS, ##__VA_ARGS__))
 #define JSTGetPropertyObject(jsObject, chrPtrName)	(JSObjectRef)(JSTGetProperty(jsObject, chrPtrName))
 #define JSTGetIndexObject(OBJ, INDEX)	(JSObjectRef)(JSTGetIndex(OBJ, INDEX))

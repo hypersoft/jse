@@ -1,102 +1,83 @@
-NativeBootStrap = function Class(name, callAsFunction, callAsConstructor, prototype, properties) {
+api = {};
 
-	var api = (classOf(this) === "GlobalObject")?this.api:JSNative.api;
 
-	var item;
+// conversion functions return this constant
+api.conversionFailure = Object.freeze({converted:false});
 
-	var self = { 
-		callAsFunction: callAsFunction, 
-		callAsConstructor: callAsConstructor,
-		prototype: Object.create(prototype),
-		getProperty: function(object, name) { return null; },
-		setProperty: function(object, name, val) { return false; },
-		convert: function(object, type) { 
-			return api.conversionFailure;
-		},
-	};
+var Class = (function( /* name, prototype, methods */ ) {
 
-	self.construct = function() { 
-		if (this.callAsFunction === self.callAsFunction) return self.callAsFunction.apply(this, arguments);
-		var o = new JSNative.api.createClass(name);
-		Object.defineProperty(o, 'constructor', { value: self });
-		var init = self.callAsConstructor.apply(o, arguments);
-		if (classOf(init) in api.classRegister) return init;
-		if (init !== undefined) {
-			throw new InvokeError('new '+name, "invalid return type ("+classOf(init)+") from ("+name+") constructor");
-			return null;
-		}
-		return o;
-	};
+//#! if the name of api changes, it only needs to be changed here for this scriptlet
+var $api = api, SuperConstructor = function(){};
 
-	Object.defineProperty(self.prototype, 'constructor', { value: self.construct.bind(self) });
-	for (item in self) self.prototype.constructor[item] = self[item]; self = self.prototype.constructor;
-	Object.defineProperty(self, 'className', { value: name, enumerable:true });
-	Object.defineProperties(self, properties);
-	api.registerClass(name, self);
-	return self;
+function isConstructorOf(o) { return Boolean(this === o.constructor); }
+function hasMethod(name) { return Function.prototype.isPrototypeOf(this[name]); }
+
+// never runs in this scope, eval x-lated to proper name later
+function invoke() {
+
+	if (constructor.isConstructorOf(this)) {
+		if (constructor.hasMethod('create')) {
+			var o = new api.createClass(name);
+			var deviation = constructor.create.apply(o, arguments);
+			if (deviation) return deviation;
+			return o;
+		} else throw new InvokeError('new '+constructor.name+'()', "create method is not a valid constructor");
+	} else if (this === object) {
+		if (constructor.hasMethod('global')) {
+			var deviation = constructor.global.apply(this, arguments);
+			if (deviation) return deviation;
+			return;
+		} else throw new InvokeError(constructor.name+'()', 'global method is not a valid function');
+	}
+
+	throw new InvokeError(constructor.name+'()', 'this call is an unknown invocation method');
 
 }
 
-Object.defineProperty(this, "JSNative", { value: NativeBootStrap('JSNative',
-	function() { echo('hello world'); },
-	function() { this.foo = "davy jones"; },
-	{}, {}
-), enumerable:true });
+var Class = Object.defineProperties(function Class(name, prototype, methods) {
+	var api = $api;
+	if ( ! Class.prototype.isPrototypeOf(this)) throw new TypeError("Class must be called in a new context");
 
-Object.defineProperties(JSNative, {
-	api: {value: api, enumerable: true},
-	Class: {value: NativeBootStrap, enumerable: true },
-}); delete api, NativeBootStrap; // strap up...
+	if (name in Class.registry) {
+		throw new InvokeError("new Class()", "'"+name+"' is already a defined class");
+	}	
 
-JSNative.Type = new JSNative.Class("JSNative.Type",
-	function invoke() { echo('JSNative.Type', 'invoked'); },
-	function construct() { echo('JSNative.Type', 'construct'); },
-	{}, {}
-);
-
-JSNative.Enumeration = new JSNative.Class("JSNative.Enumeration",
-	function invoke(section, query) {
-		var o = JSNative.Enumeration.register[section];
-		if (o === undefined || query === undefined) return o;
-		return o[query];
-	},
-	function construct(name, kvp) {
-		for (value in kvp) {
-			if (value == 'length' || value == 'name' || value == 'value') continue;
-			this.push(value, kvp[value]);
-		}
-		Object.defineProperty(JSNative.Enumeration.register, name, { value: this, enumerable: true});
-	},
-	Object.defineProperties(
-		{ // Prototype
-			autoEnum: 0, length: 0
-		},
-		{ // Methods
-			push: { value: function(name, value) {
-				if (value === undefined) value = this.valueAccumulator();
-				var o = new JSNative.api.createClass("JSNative.Enumeration",
-				Object.defineProperties(
-					{ name: undefined, value: undefined }, // prototype
-					{ // prototype methods
-						"valueOf": {value: JSNative.Enumeration.valueOfUnit },
-						"toString": {value: JSNative.Enumeration.valueOfUnit }
-					}
-				));
-				Object.defineProperties(o, {value: { value: value }, name: {value: name}});
-				Object.defineProperty(this, name, { value: o, enumerable:true });
-				Object.defineProperty(this, value, { value: o.name, enumerable:true });
-				this.length++;
-			} },
-			valueAccumulator: {value: function valueAccumulator() { return (this.autoEnum++ << 1); } },
-			toString: { value: function(name) { if (this.length == 0) return undefined;
-					var s = [];
-					for (name in this) if (isNaN(name) && name != "autoEnum" && name != 'length' && name != 'name' && name != 'value') s.push(name+':'+this[name]); return '{\n'+s.join(', ')+'\n}';
-			} },
-		}
-	),
-	{
-		register: {value: {}, enumerable:true},
-		valueOfUnit: {value: function valueOfUnit() { return this.value; } },
+	if ( prototype && ! Object.prototype.isPrototypeOf(prototype) ) {
+		throw new InvokeError("new Class()", "argument 3: expected type object");
 	}
-);
 
+	var object = this; var constructor = {};
+
+	// eval-x-late-it
+	invoke = eval(invoke.toString().replace("function invoke", '(function '+name)+')');
+	constructor = invoke.bind(this);
+
+	Object.defineProperty(constructor, 'prototype', {
+		get: function() { return invoke.prototype; },
+		set: function(v) {  var p = Object.create(v); p.constructor = constructor; invoke.prototype = p; },
+		enumerable:true
+	});
+
+	if (prototype) constructor.prototype = Object.create(prototype);
+	if (methods) Object.defineProperties(constructor, methods);
+
+	Object.defineProperties(constructor,
+		{
+			constructor: { value: SuperConstructor },
+			isConstructorOf: { value: isConstructorOf.bind(constructor) },
+			hasMethod: { value: hasMethod.bind(constructor) },
+		}
+	)
+
+	api.registerClass(name, constructor);
+	return constructor;
+
+}, { registry:{value:{ Class:undefined,Arguments:undefined,Array:undefined,Boolean:undefined,Date:undefined,Error:undefined,EvalError:undefined,Function:undefined,Global:undefined,JSON:undefined,Math:undefined,Number:undefined,Object:undefined,RangeError:undefined,ReferenceError:undefined,RegExp:undefined,String:undefined,SyntaxError:undefined,TypeError:undefined,URIError:undefined}} });
+
+return (SuperConstructor = Object.defineProperties(Class.bind(), {
+	"$registry": { get: function() {return Class.registry}, configurable:true },
+	"nameIsDefined": { value: (function(name) {return Boolean(name in Class.registry)}).bind() },
+	"constructorOf": { value: (function(name) { return Class.registry[name].constructor;}).bind() },
+}));
+
+})();
