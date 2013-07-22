@@ -120,16 +120,16 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSNativeGhost = JSClassRetain(JSClassCreate(&jsClass));
 
+	RtJSNativeAPI = JSTEvalObject("var api = {}; api", global);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "registerClass", &jsRegisterClass);
+	JSTSetProperty(RtJSNativeAPI, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
+
 	JSTEvalScript(JSNativeSupport, global, "JSNative.js"); 
 	if (JSTCaughtException) JSTReportFatalException(1);
 
 	RtJSNativeClassRegistry = JSTEvalObject("Class.$registry", global);
-	JSTEval("delete Class.$registry", global);
-
-	RtJSNativeAPI = JSTEvalObject("api", global);
-
-	JSTSetPropertyFunction(RtJSNativeAPI, "registerClass", &jsRegisterClass);
-	JSTSetProperty(RtJSNativeAPI, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
+	JSTEval("delete Class.$registry, api", global);
 	
 }
 

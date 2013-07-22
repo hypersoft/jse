@@ -1,5 +1,3 @@
-api = {};
-
 
 // conversion functions return this constant
 api.conversionFailure = Object.freeze({converted:false});
@@ -79,3 +77,4 @@ return (SuperConstructor = Object.defineProperties(Class.bind(), {
 }));
 
 })();
+

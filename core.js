@@ -2,6 +2,8 @@
 
 /* Ye Old Test Class */
 
+JSNative = new Class("JSNative");
+
 Shell = new Class(
 
 	'Shell',
