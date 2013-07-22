@@ -1,10 +1,9 @@
 #!bin/jse
 
 /* Ye Old Test Class */
+echo(api);
 
-JSNative = new Class("JSNative");
-
-Shell = new Class(
+Shell = new JSNative.Class(
 
 	'Shell',
 	{	/* Shell.prototype Object */

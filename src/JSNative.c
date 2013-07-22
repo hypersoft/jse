@@ -2,6 +2,8 @@
 #define JSNativeSource
 
 #include "JSNative.inc"
+#include "JSNativeClass.inc"
+
 #include "JSNativeAPI.inc"
 #include "JSNative.h"
 
@@ -120,16 +122,21 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSNativeGhost = JSClassRetain(JSClassCreate(&jsClass));
 
-	RtJSNativeAPI = JSTEvalObject("var api = {}; api", global);
+	
+	RtJSNativeAPI = JSTCreateClassObject(NULL,NULL);
+	JSTSetProperty(global, "api", RtJSNativeAPI, 0);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "registerClass", &jsRegisterClass);
 	JSTSetProperty(RtJSNativeAPI, "createClass", JSTMakeConstructor(JSNativeGhost, &jsCreateClass), 0);
 
+	JSTEvalScript(JSNativeClass, global, "JSNativeClass.js"); 
+	if (JSTCaughtException) JSTReportFatalException(1);
+
+	RtJSNativeClassRegistry = JSTEvalObject("JSNative.Class.$registry", global);
+	JSTEval("Object.defineProperty(this, 'api', {value:undefined,writeable:true,configurable:true}); delete JSNative.Class.$registry, api", global);
 	JSTEvalScript(JSNativeSupport, global, "JSNative.js"); 
 	if (JSTCaughtException) JSTReportFatalException(1);
 
-	RtJSNativeClassRegistry = JSTEvalObject("Class.$registry", global);
-	JSTEval("delete Class.$registry, api", global);
 	
 }
 

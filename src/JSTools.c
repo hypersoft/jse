@@ -138,7 +138,7 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 	);
 
 	JSTSetPropertyScript(
-		global, "InvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
+		global, "FInvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
 	);
 
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
@@ -257,7 +257,7 @@ JSObjectRef _JSTMakeFunction JSToolsProcedure(char * chrPtrName, void * fnPtr) {
 JSObjectRef _JSTSetPropertyFunction JSToolsProcedure(JSObjectRef jsObject, char * chrPtrName, void * fnPtr) {
 	JSStringRef jsPropertyName;
 	JSObjectRef result = JSTCoreMakeFunction(JSTCreateStaticString(chrPtrName, &jsPropertyName), fnPtr);
-	JSTCoreSetProperty(jsObject, jsPropertyName, result, JSTPropertyConst);
+	JSTCoreSetProperty(jsObject, jsPropertyName, result, 0);
 	JSTFreeString(jsPropertyName);
 	return result;
 }
