@@ -1,9 +1,9 @@
 #!/bin/bash
 
 declare -i MAJOR="0"
-declare -i MINOR="0"
+declare -i MINOR="1"
 declare -i MINORMAX="99"
-declare -i REVISION="992"
+declare -i REVISION="125"
 declare -i REVISIONMAX="999"
 
 buildnum () 

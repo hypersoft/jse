@@ -30,7 +30,7 @@ var ShellCommand = function() {
 bash = ShellCommand("bash");
 
 bash.scriptlet = function(name, script) {
-	if (script == undefined) { script = name; name = "jse.bash"; }
+	if (script == undefined) { if (name == undefined) throw new InvokeError("bash.scriptlet", "invalid arguments"); script = name; name = "jse.bash"; }
 	var cmd = ShellCommand("bash", "-c", script, name);
 	Object.defineProperty(cmd, "interpreter", { 
 		get: function() {  return this.argv[0]; },
