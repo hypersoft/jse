@@ -138,7 +138,7 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 	);
 
 	JSTSetPropertyScript(
-		global, "FInvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
+		global, "InvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
 	);
 
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
