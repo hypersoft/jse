@@ -2,9 +2,10 @@
 
 (function () {
 
+JSNative.List = function(){};
+
 function construct() {
 	echo('new list constructed!');
-	Object.defineProperty(this, "constructor", {value:JSNative.List});
 }
 
 function get(name) {
@@ -12,7 +13,7 @@ function get(name) {
 	return null;
 }
 
-function set() {
+function set(name, value) {
 	return false;
 }
 

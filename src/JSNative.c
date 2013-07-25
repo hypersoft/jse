@@ -63,10 +63,9 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 	static bool requestInProgress;
 	if (requestInProgress) return NULL;
 
-	if (JSTCoreEqualsNative(property, "constructor")) return NULL;
-
 	requestInProgress = true;
-		JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");	
+		JSObjectRef constructor = JSTGetPrivate(object);
+//		JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");	
 
 		JSObjectRef get = (JSObjectRef) JSTGetPropertyObject(constructor, "get");
 	requestInProgress = false;
@@ -136,10 +135,17 @@ JSValueRef jsNativeClassInvoke(JSContextRef ctx, JSObjectRef function, JSObjectR
 
 JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
 
-	JSClassRef jsClassRef = JSTGetPrivate(constructor);
-	JSObjectRef this = JSTCreateClassObject(jsClassRef, jsClassRef);
-	JSObjectRef jsConstructor = JSTGetPropertyObject(constructor, "construct");
 	int flags = JSTInteger(JSTGetProperty(constructor, "flags"));
+
+	JSObjectRef this;
+	JSClassRef jsClassRef = JSTGetPrivate(constructor);
+
+	if (flags & EnumClassConstruct) this = JSTCreateClassObject(jsClassRef, jsClassRef);
+	else {
+		this = JSTCreateClassObject(jsClassRef, NULL);
+	}
+
+	JSObjectRef jsConstructor = JSTGetPropertyObject(constructor, "construct");
 	if (flags & EnumClassInitialize) {
 		JSObjectRef initialize = JSTGetPropertyObject(constructor, "initialize");
 		JSTCall(initialize, this);
@@ -151,7 +157,17 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 	if (! JSTReference(jsConstructor) ) return this;
 	JSValueRef deviation = JSObjectCallAsFunction(ctx, jsConstructor, this, argumentCount, arguments, exception);
 	if (!JSTUndefined(deviation)) return (JSObjectRef)deviation;
-	return this;
+
+	// I have no idea why this works... but it works... API does not use object's constructor property
+	// reason being, object might want a property named constructor....
+	// JSNative.api.setClassConstructor is in order...
+
+	// caveat: all prototypes using this class system must have a constructor property
+	// that refers to it's owner.
+
+	JSTSetPrivate(this,(void*)JSTGetProperty(
+		JSTGetPropertyObject(constructor, "prototype"), "constructor")
+	); return this;
 
 }
 

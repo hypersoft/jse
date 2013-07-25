@@ -23,12 +23,21 @@ var construct = function construct(name, prototype, methods, parent) {
 	try { native = JSNative.api.createClass(this) }
 	catch(e) { throw new InvokeError("new JSNative.Class", e); }
 
+	prototype = Object.create(prototype);
+
 	Object.defineProperties(native, {
 		name: {value: this.name}, flags:{value: this.flags},
-		prototype: {value: this.prototype, writeable:true},
+		prototype: {
+			get:function get() {return prototype},
+			set:function set(value) {
+				prototype = Object.create(value);
+				Object.defineProperty(prototype, "constructor", {value:this});
+			}
+		},
 		constructor: {value: this.parent},
 	});
 
+	native.prototype = prototype;
 	Object.defineProperties(native, methods);
 
 	return native;
@@ -41,7 +50,7 @@ JSNative.Class = JSNative.api.createClass(self);
 
 Object.defineProperties(JSNative.Class, {
 	name: {value: self.name}, flags:{value: self.flags},
-	prototype: {value: {}, writeable:true},
+	prototype: {value: {constructor:JSNative.Class}, writeable:true},
 	constructor: {value: JSNative.Class},
 	construct: {value: construct}
 });
