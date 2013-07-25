@@ -23,11 +23,11 @@ ${DYNCALL}:
 
 inc/JSNative.inc: src/JSNative/JSNative.js
 	# JSNative.js is being reconstructed
-	@bin/bin2inc JSNativeSupport $< > $@;
+	@bin/bin2inc JSNativeInit $< > $@;
 
 inc/JSNativeClass.inc: src/JSNative/JSNativeClass.js
 	# JSNativeClass.js is being reconstructed
-	@bin/bin2inc JSNativeClass $< > $@;
+	@bin/bin2inc JSNativeClassInit $< > $@;
 
 inc/JSTools.inc: src/JSTools/JSTools.js
 	# JSToolsSupport is being reconstructed
