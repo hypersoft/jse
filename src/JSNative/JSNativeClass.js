@@ -17,6 +17,7 @@ var construct = function construct(name, prototype, methods, parent) {
 		if (name == 'delete') { this.flags |= JSNative.api.classDelete; continue }
 		if (name == 'convert') { this.flags |= JSNative.api.classConvert; continue }
 		if (name == 'instanceof') { this.flags |= JSNative.api.classInstanceOf; continue }
+		if (name == 'enumerate') { this.flags |= JSNative.api.classEnumerate; continue }
 	};
 
 	try { native = JSNative.api.createClass(this) }
