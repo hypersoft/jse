@@ -221,8 +221,6 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "createClass", &jsNativeClassCreate);
-
-/*	JSTSetPropertyFunction(RtJSNativeAPI, "setClassPrototype", &jsNativeClassSetClassPrototype);*/
 	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeApiSetPrototype);
 
 	JSTSetProperty(global, "api", RtJSNativeAPI, 0);
