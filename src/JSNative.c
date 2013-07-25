@@ -22,9 +22,10 @@ EnumClassInstanceOf = 256,
 EnumClassEnumerate = 512;
 
 void jsNativeClassEnumerate(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames) {
+	void * exception = NULL;
 	JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");
 	JSObjectRef enumerate = (JSObjectRef) JSTGetPropertyObject(constructor, "enumerate");
-	JSObjectRef names = JSTCall(enumerate, object); // JSValArray
+	JSObjectRef names = JSTCallObject(enumerate, object); // JSValArray
 	long length = JSTInteger(JSTGetProperty(names, "length"));
 	JSStringRef name = NULL;
 	long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
@@ -157,9 +158,21 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 
 	JSObjectRef classModel = (JSObjectRef)argv[0];
 	JSValueRef className = JSTGetProperty(classModel, "name");
-
 	int flags = JSTInteger(JSTGetProperty(classModel, "flags"));
 	char * nativeClassName = JSTGetValueBuffer(className, NULL);
+	JSObjectRef parent = JSTGetPropertyObject(classModel, "parent");
+	JSClassRef parentClass = NULL;
+
+	if (JSTReference(parent)) {
+		if (JSTConstructor(parent)) parentClass = JSTGetPrivate(parent);
+		else { JSTTypeError("class model 'parent' is not a constructor");
+			JSTReturnValueException;
+		}
+		if (! parentClass ) {
+			JSTTypeError("class model 'parent' is not a class constructor");
+			JSTReturnValueException;
+		}
+	}
 
 	jsClass.className = nativeClassName;
 
@@ -173,23 +186,20 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 	if (flags & EnumClassEnumerate) jsClass.getPropertyNames = &jsNativeClassEnumerate;
 
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
-	jsClass.parentClass = JSNativeClass;
+	jsClass.parentClass = (parentClass)?parentClass:JSNativeClass;
 
 	JSClassRef jsClassRef = JSClassRetain(JSClassCreate(&jsClass));
-	JSValueRef thisClass = (JSValueRef) JSTCreateClassObject(JSNativeClass, jsClassRef);
+	JSObjectRef thisClass = JSTCreateClassObject(JSNativeClass, jsClassRef);
 	JSTSetPrototype(thisClass, JSTEval("JSNative.Class.prototype", NULL));
 
 	JSTFreeBuffer(nativeClassName);
 
-	return thisClass;
+	return (JSValueRef) thisClass;
 
 }
 
-static JSValueRef jsNativeClassSetClassPrototype JSToolsFunction (o, c) {
-	return RtJS(undefined);
-}
-
-static JSValueRef jsNativeClassSetObjectPrototype JSToolsFunction (o, p) {
+static JSValueRef jsNativeApiSetPrototype JSToolsFunction (o, p) {
+	JSTSetPrototype((JSObjectRef)argv[0], argv[1]);
 	return RtJS(undefined);
 }
 
@@ -213,7 +223,7 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNativeAPI, "createClass", &jsNativeClassCreate);
 
 /*	JSTSetPropertyFunction(RtJSNativeAPI, "setClassPrototype", &jsNativeClassSetClassPrototype);*/
-/*	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeClassSetObjectPrototype);*/
+	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeApiSetPrototype);
 
 	JSTSetProperty(global, "api", RtJSNativeAPI, 0);
 

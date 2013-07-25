@@ -1,3 +1,44 @@
+function classOf(o) {
+	if (o === null) return "Null"; if (o === undefined) return "Undefined";
+	return Object.prototype.toString.call(o).slice(8,-1);
+}
+
+function callStack() {
+	var trace = [];
+	function toString() {
+		return this.file+': '+this.function+': line '+this.line
+	}
+	function parse(c) {
+		var o = {};
+		var parsed = c.match(/(([^@]+)@)?([^:]+):(.+)$/);
+		o.line = parsed.pop();
+		o.file = parsed.pop();
+		(o.function = parsed.pop())? undefined:(o.function = 'anonymous function');
+		o.toString = toString;
+		return o;
+	}
+	try { throw Error('n/a') } catch(err) {
+		var info = err.stack.split("\n");
+		info.shift(); // remove 'this call'
+		for (index in info) trace.unshift(parse(info[index])); // add in reverse order (logical order)
+	}
+	return trace;
+}
+
+function InvokeError(title, message) {
+	var stack = callStack();
+	stack.pop(); stack.pop();
+	invoke = stack.pop();
+	var e = new Error(message);
+	if (invoke.function != 'global code') e.function = invoke.function;
+	e.sourceURL=invoke.file; e.line=invoke.line; e.name=title;
+	e.toString = InvokeError.toString;
+	return e;
+}
+
+InvokeError.toString = function() {
+	return this.sourceURL+': '+this.function+': line '+this.line+': '+this.name+': '+this.message;
+}
 
 var print = function(msg) { writeOutput(msg + "\n"); }
 

@@ -1,8 +1,8 @@
 /* A JSNative Class is just a fancy constructor with some backend support */
 
-JSNative.Class = function Class(name, prototype, methods) {
+JSNative.Class = function Class(name, prototype, methods, parent) {
 
-	this.name = name;
+	this.name = name; this.parent = parent;
 
 	for (name in methods) {
 		if (name == 'initialize') { this.flags |= JSNative.api.classInitialize; continue }
@@ -15,7 +15,9 @@ JSNative.Class = function Class(name, prototype, methods) {
 		if (name == 'instanceof') { this.flags |= JSNative.api.classInstanceOf; continue }
 	};
 
-	native = JSNative.api.createClass(this);
+	try { native = JSNative.api.createClass(this) }
+	catch(e) { throw new InvokeError("new JSNative.Class", e); }
+
 	native.name = name;
 	native.flags = this.flags;
 	native.prototype = prototype;

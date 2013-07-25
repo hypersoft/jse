@@ -16,9 +16,10 @@ static JSValueRef jst_chdir JSToolsFunction () {
 void _JSTReportException JSToolsProcedure (JSValueRef e) {
 
 	JSTEval("if (\"sourceURL\" in this) writeError(this.sourceURL + \": \");", e);
+	JSTEval("if (\"function\" in this) writeError(this.function + \": \");", e);
 	JSTEval("if (\"line\" in this) writeError(\"line \" + this.line + \": \");", e);
 	JSTEval("if (\"name\" in this) writeError(this.name + \": \");", e);
-	JSTEval("writeError(this.message + \"\\n\");", e);
+	JSTEval("writeError(this.message+'\\n');", e);
 
 }
 
@@ -132,14 +133,6 @@ void _JSTLoadRuntime(register JSContextRef ctx, JSObjectRef global, int argc, ch
 	RtJS(argc) = argc;
 	RtJS(argv) = argv;
 	RtJS(envp) = envp;
-
-	JSTSetPropertyScript(
-		global, "classOf", "if (o === null) return \"Null\"; if (o === undefined) return \"Undefined\"; return Object.prototype.toString.call(o).slice(8,-1);", "o"
-	);
-
-	JSTSetPropertyScript(
-		global, "InvokeError", "try { throw Error(m) } catch(err) {var info = err.stack.split(\"\\n\")[3].split('@').pop().split(':');var e = new Error(m); e.sourceURL=info[0]; e.line=info[1]; e.name=t; return e;}", "t", "m"
-	);
 
 	JSTSetPropertyFunction(global, "writeOutput", &jst_writeOutput);
 	JSTSetPropertyFunction(global, "writeError", &jst_writeError);
