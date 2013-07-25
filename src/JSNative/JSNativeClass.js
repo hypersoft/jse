@@ -1,12 +1,12 @@
 /* A JSNative Class is just a fancy constructor with some backend support */
 
+(function BootStrap() {
+
 JSNative.Class = function(){}; // createClass needs an object prototype
 
-(function JSNativeClassInit() {
+var construct = function construct(name, prototype, methods, parent) {
 
-var invoke = function invoke(name, prototype, methods, parent) {
-
-	this.name = name; this.parent = parent;
+	this.name = name, this.prototype = prototype, this.parent = (parent) ? parent : JSNative.Class;
 
 	for (name in methods) {
 		if (name == 'initialize') { this.flags |= JSNative.api.classInitialize; continue }
@@ -22,10 +22,12 @@ var invoke = function invoke(name, prototype, methods, parent) {
 	try { native = JSNative.api.createClass(this) }
 	catch(e) { throw new InvokeError("new JSNative.Class", e); }
 
-	native.name = name;
-	native.flags = this.flags;
-	native.prototype = prototype;
-	native.constructor = JSNative.Class;
+	Object.defineProperties(native, {
+		name: {value: this.name}, flags:{value: this.flags},
+		prototype: {value: this.prototype, writeable:true},
+		constructor: {value: this.parent},
+	});
+
 	Object.defineProperties(native, methods);
 
 	return native;
@@ -35,11 +37,13 @@ var invoke = function invoke(name, prototype, methods, parent) {
 var self = { name:"JSNative.Class", flags:JSNative.api.classConstruct }
 
 JSNative.Class = JSNative.api.createClass(self);
-JSNative.Class.name = self.name;
-JSNative.Class.flags = self.flags;
-JSNative.Class.prototype = {};
-JSNative.Class.constructor = JSNative.Class;
-JSNative.Class.invoke = invoke;
+
+Object.defineProperties(JSNative.Class, {
+	name: {value: self.name}, flags:{value: self.flags},
+	prototype: {value: {}, writeable:true},
+	constructor: {value: JSNative.Class},
+	construct: {value: construct}
+});
 
 })();
 
