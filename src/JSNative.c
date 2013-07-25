@@ -25,7 +25,7 @@ EnumClassEnumerate = 512;
 // in the resulting list of enumerated property names.
 void jsNativeClassEnumerate(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames) {
 	void * exception = NULL;
-	JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");
+	JSObjectRef constructor = JSTGetPrivate(object);
 	JSObjectRef enumerate = (JSObjectRef) JSTGetPropertyObject(constructor, "enumerate");
 	JSObjectRef names = JSTCallObject(enumerate, object); // JSValArray
 	register long length = JSTInteger(JSTGetProperty(names, "length"));
@@ -42,11 +42,10 @@ static bool jsNativeClassSet JSTNativePropertyWriter() {
 	static bool requestInProgress;
 	if (requestInProgress) return false;
  
-	requestInProgress = true;
-		JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");
-
-		JSObjectRef set = (JSObjectRef) JSTGetPropertyObject(constructor, "set");
-	requestInProgress = false;
+//	requestInProgress = true;
+	JSObjectRef constructor = JSTGetPrivate(object);
+	JSObjectRef set = (JSObjectRef) JSTGetPropertyObject(constructor, "set");
+//	requestInProgress = false;
 
 	if (! JSTReference(set) ) return false;
 
@@ -63,12 +62,14 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 	static bool requestInProgress;
 	if (requestInProgress) return NULL;
 
-	requestInProgress = true;
-		JSObjectRef constructor = JSTGetPrivate(object);
-//		JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");	
-
-		JSObjectRef get = (JSObjectRef) JSTGetPropertyObject(constructor, "get");
-	requestInProgress = false;
+//	requestInProgress = true;
+	// we don't know if this is going to request something from us..
+	// odds are slim... such events could be fatal...
+	// such an event is better left to a script that has more knowledge of the
+	// effective situation
+	JSObjectRef constructor = JSTGetPrivate(object);
+	JSObjectRef get = (JSObjectRef) JSTGetPropertyObject(constructor, "get");
+//	requestInProgress = false;
 
 	if (! JSTReference(get) ) return NULL;
 
@@ -84,7 +85,7 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 
 bool jsNativeClassDelete(JSContextRef ctx, JSObjectRef this, JSStringRef property, JSValueRef* exception) {
 
-	JSObjectRef constructor = JSTGetPropertyObject(this, "constructor");	
+	JSObjectRef constructor = JSTGetPrivate(this);	
 	JSObjectRef delete = (JSObjectRef) JSTGetPropertyObject(constructor, "delete");
 	if (! JSTReference(delete) ) return false;
 	return JSTBoolean(JSTCall(delete, this, JSTMakeString(property, NULL, false)));
@@ -99,7 +100,7 @@ bool jsNativeClassInstanceOf(JSContextRef ctx, JSObjectRef constructor, JSValueR
 
 static JSValueRef jsNativeClassConvert JSTNativeConvertor() {
 	JSValueRef conversion;
-	JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");	
+	JSObjectRef constructor = JSTGetPrivate(object);	
 	JSObjectRef convert = (JSObjectRef) JSTGetPropertyObject(constructor, "convert");
 	if (convert && JSTReference(convert)) {
 		if (kJSTypeString == type) {
@@ -127,7 +128,7 @@ static JSValueRef jsNativeClassConvert JSTNativeConvertor() {
 }
 
 JSValueRef jsNativeClassInvoke(JSContextRef ctx, JSObjectRef function, JSObjectRef this, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-	JSObjectRef constructor = JSTGetPropertyObject(function, "constructor");
+	JSObjectRef constructor = JSTGetPrivate(function);
 	JSObjectRef classFunction = JSTGetPropertyObject(constructor, "invoke");
 	if (! JSTReference(classFunction) ) return NULL;
 	return JSTRelayFunctionCall(classFunction);
@@ -154,16 +155,23 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 		JSTSetPrototype(this, JSTGetProperty(constructor, "prototype"));
 		// class constructor must set constructor!
 	}
+
 	if (! JSTReference(jsConstructor) ) return this;
 	JSValueRef deviation = JSObjectCallAsFunction(ctx, jsConstructor, this, argumentCount, arguments, exception);
 	if (!JSTUndefined(deviation)) return (JSObjectRef)deviation;
 
 	// I have no idea why this works... but it works... API does not use object's constructor property
 	// reason being, object might want a property named constructor....
-	// JSNative.api.setClassConstructor is in order...
 
 	// caveat: all prototypes using this class system must have a constructor property
 	// that refers to it's owner.
+
+	// for now, changing the class object's native constructor is not supported.
+	// JSNative.api.setClassConstructor is in order, or we can query the constructor's
+	// prototype for EVERY api call requiring data from the constructor.
+
+	// I'm liking the idea of a class object that works the way it was intended, however
+	// we shall see what logic dictates before we choose our path.
 
 	JSTSetPrivate(this,(void*)JSTGetProperty(
 		JSTGetPropertyObject(constructor, "prototype"), "constructor")

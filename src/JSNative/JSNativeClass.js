@@ -23,8 +23,6 @@ var construct = function construct(name, prototype, methods, parent) {
 	try { native = JSNative.api.createClass(this) }
 	catch(e) { throw new InvokeError("new JSNative.Class", e); }
 
-	prototype = Object.create(prototype);
-
 	Object.defineProperties(native, {
 		name: {value: this.name}, flags:{value: this.flags},
 		prototype: {
