@@ -21,14 +21,16 @@ EnumClassConvert = 128,
 EnumClassInstanceOf = 256,
 EnumClassEnumerate = 512;
 
+// The array of names returned by 'enumerate', must be handled by 'get' in order to show up 
+// in the resulting list of enumerated property names.
 void jsNativeClassEnumerate(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames) {
 	void * exception = NULL;
 	JSObjectRef constructor = JSTGetPropertyObject(object, "constructor");
 	JSObjectRef enumerate = (JSObjectRef) JSTGetPropertyObject(constructor, "enumerate");
 	JSObjectRef names = JSTCallObject(enumerate, object); // JSValArray
-	long length = JSTInteger(JSTGetProperty(names, "length"));
+	register long length = JSTInteger(JSTGetProperty(names, "length"));
 	JSStringRef name = NULL;
-	long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
+	register long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
 		propertyNames, JSTGetValueString(JSTGetIndex(names, i), &name)
 	);
 		JSTFreeString(name);
@@ -141,9 +143,10 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 	if (flags & EnumClassInitialize) {
 		JSObjectRef initialize = JSTGetPropertyObject(constructor, "initialize");
 		JSTCall(initialize, this);
+		// class initializer must set object prototype AND constructor!
 	} else {
 		JSTSetPrototype(this, JSTGetProperty(constructor, "prototype"));
-		JSTSetProperty(this, "constructor", constructor, JSTPropertyProtected);
+		// class constructor must set constructor!
 	}
 	if (! JSTReference(jsConstructor) ) return this;
 	JSValueRef deviation = JSObjectCallAsFunction(ctx, jsConstructor, this, argumentCount, arguments, exception);
