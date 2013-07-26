@@ -7,7 +7,6 @@
 #include "JSNative.h"
 
 JSObjectRef RtJSNativeAPI;
-JSObjectRef RtJSNativeClassRegistry;
 
 JSClassRef JSNativeClass;
 
@@ -44,6 +43,7 @@ static bool jsNativeClassSet JSTNativePropertyWriter() {
  
 //	requestInProgress = true;
 	JSObjectRef constructor = JSTGetPrivate(object);
+	// result is undefined if this object request forwards to the target object
 	JSObjectRef set = (JSObjectRef) JSTGetPropertyObject(constructor, "set");
 //	requestInProgress = false;
 
@@ -63,11 +63,8 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 	if (requestInProgress) return NULL;
 
 //	requestInProgress = true;
-	// we don't know if this is going to request something from us..
-	// odds are slim... such events could be fatal...
-	// such an event is better left to a script that has more knowledge of the
-	// effective situation
 	JSObjectRef constructor = JSTGetPrivate(object);
+	// result is undefined if this object request forwards to the target object
 	JSObjectRef get = (JSObjectRef) JSTGetPropertyObject(constructor, "get");
 //	requestInProgress = false;
 
@@ -213,7 +210,7 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 	if (flags & EnumClassEnumerate) jsClass.getPropertyNames = &jsNativeClassEnumerate;
 
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
-	jsClass.parentClass = (parentClass)?parentClass:JSNativeClass;
+	//jsClass.parentClass = (parentClass)?parentClass:NULL;
 
 	JSClassRef jsClassRef = JSClassRetain(JSClassCreate(&jsClass));
 	JSObjectRef thisClass = JSTCreateClassObject(JSNativeClass, jsClassRef);

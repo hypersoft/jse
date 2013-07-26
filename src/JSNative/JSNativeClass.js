@@ -6,7 +6,7 @@ JSNative.Class = function(){}; // createClass needs an object prototype
 
 var construct = function construct(name, prototype, methods, parent) {
 
-	this.name = name, this.prototype = prototype, this.parent = (parent) ? parent : JSNative.Class;
+	this.name = name, this.prototype = prototype; if (parent) this.parent = parent;
 
 	for (name in methods) {
 		if (name == 'initialize') { this.flags |= JSNative.api.classInitialize; continue }

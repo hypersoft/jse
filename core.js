@@ -22,15 +22,23 @@ function enumerate() {
 	return ['cat','tail'];
 }
 
+function instance() {
+	echo('instance of list called!');
+}
+
 JSNative.List = new JSNative.Class("JSNative.List", {}, {
 	construct:{value:construct},
 	get:{value:get}, set:{value:set},
 	enumerate:{value:enumerate},
+//	instanceof:{value:instance},
 })
 
 })();
 
-x = new JSNative.List();
+var x = new JSNative.List();
+new x()
+x instanceof JSNative.List;
+echo(typeof x);
 for (name in x) echo(name);
 echo(x.constructor.name);
 
