@@ -1,35 +1,39 @@
 #!bin/jse
 
-(function () {
-
-function construct() {
-	echo('new list constructed!');
-	Object.defineProperty(this, "constructor", {value:JSNative.List});
+function classFlags() {
+	var name, flags;
+	for (name in arguments) {
+		if (arguments[name] == 'classInitialize') { flags |= JSNative.api.classInitialize; continue }
+		if (arguments[name] == 'classConstruct') { flags |= JSNative.api.classConstruct; continue }
+		if (arguments[name] == 'classInvoke') { flags |= JSNative.api.classInvoke; continue }
+		if (arguments[name] == 'classGet') { flags |= JSNative.api.classGet; continue }
+		if (arguments[name] == 'classSet') { flags |= JSNative.api.classSet; continue }
+		if (arguments[name] == 'classDelete') { flags |= JSNative.api.classDelete; continue }
+		if (arguments[name] == 'classConvert') { flags |= JSNative.api.classConvert; continue }
+		if (arguments[name] == 'classEnumerate') { flags |= JSNative.api.classEnumerate; continue }
+		if (arguments[name] == 'classInstanceOf') { flags |= JSNative.api.classInstanceOf; continue }
+	};
+	return flags;
 }
 
-function get(name) {
-	echo('property requested:', name);
-	return null;
+var o = {
+	name: "SuperObject",
+	classFlags: classFlags('classInvoke', 'classConstruct', 'classGet'),
 }
 
-function set() {
-	return false;
+b = JSNative.api.createClass(o);
+
+echo(b.name)
+b.prototype = {
+	wow:true
 }
 
-function enumerate() {
-	echo('native list enumerated!');
-	return ['cat','tail'];
-}
+b.classInvoke =  function() {echo('invoked')};
+b.classConstruct =  function() {echo('constructed')};
+b.classGet = function(name){echo('name requested:', name); return null};
 
-JSNative.List = new JSNative.Class("JSNative.List", {}, {
-	construct:{value:construct},
-	get:{value:get}, set:{value:set},
-	enumerate:{value:enumerate},
-})
+a = function(){}
+a.prototype = new b();
+c = new a();
 
-})();
-
-x = new JSNative.List();
-for (name in x) echo(name);
-echo(x.constructor.name);
-
+echo(c.wow)
