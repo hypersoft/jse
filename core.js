@@ -31,6 +31,7 @@ var List = JSNative.api.createClass({name: className, classFlags: classFlags('cl
 
 declareNameSpace(className, List);
 
+// The prototype constructor (List) has the classInstance interface
 List.classInstance = JSNative.api.createClass({
 	name: className,
 	classFlags: classFlags('classGet', 'classInvoke', 'classConvert') 
@@ -44,21 +45,28 @@ List.classInstance.classInvoke = function() {
 	echo("instance invoked");
 }
 
-List.classInstance.classConvert = function(constructor) { // default toString and valueOf handler
+List.classInstance.classConvert = function(constructor) {
 	// This procedure can be passed ANY constructor as a reference to the desired type
+	// as with all classInstance interface procedures, the value of 'this' is the target object
 	if (constructor === String) {
+		echo("instance string conversion requested");
 		// return toString value
 	}
 	if (constructor === Number) {
+		echo("instance number conversion requested");
 		// return valueOf value
 	}
+	// Just use the object defined toString method, or the JavaScript Object.toString method
 	return JSNative.api.failedToConvert;
 }
 
-// The prototype constructor (List) has the classInstance interface
+// The prototype constructor (List) has the classInstance interface,
+// new shall provide this interface, through the constructed object's prototype
 List.prototype = Object.defineProperties({}, {constructor:{value:List}});
 
+// List is a "classInstance" interface
 List.classConstruct = function() {
+	// the value of 'this' is the new object, with it's prototype set to List.prototype
 	echo("constructor invoked");
 }
 
