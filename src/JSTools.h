@@ -197,8 +197,8 @@ JSValueRef	_JSTRunScript JSToolsProcedure (char * file, JSObjectRef jsObject);
 #define JSTGetPrivateInteger(OBJ)		(long) JSTGetPrivate(OBJ)
 #define JSTSetPrivateInteger(OBJ, VAL)	JSTSetPrivate(OBJ, (void *) (long) VAL)
 
-#define JSTGetPrototype(OBJ)			JSObjectGetPrototype(ctx, OBJ)
-#define JSTGetPrototypeObject(OBJ)		((JSObjectRef)	JSTGetPrototype(OBJ))
+#define JSTGetPrototype(OBJ)			(JSObjectRef) JSObjectGetPrototype(ctx, OBJ)
+#define JSTGetPrototypeObject(OBJ)		JSTGetPrototype(OBJ)
 
 #define JSTSetPrototype(OBJ, VAL)		(void)	JSObjectSetPrototype(ctx, OBJ, (JSValueRef) VAL)
 #define JSTSetPrototypeObject(OBJ, VAL)	(void)	JSTSetPrototype(OBJ, VAL)
