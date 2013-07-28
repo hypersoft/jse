@@ -1,5 +1,6 @@
 #!bin/jse
 
+// Some utility functions ..
 function classFlags() {
 	var name, flags;
 	for (name in arguments) {
@@ -23,6 +24,7 @@ function declareNameSpace(name, value) {
 	return nameSpace;
 }
 
+// Example "Class"
 (function ListInit(className) {
 
 var List = JSNative.api.createClass({name: className, classFlags: classFlags('classConstruct')});
@@ -50,21 +52,23 @@ List.classInstance.classConvert = function(constructor) { // default toString an
 	if (constructor === Number) {
 		// return valueOf value
 	}
-	return JSNative.api.failedToConvert; 
+	return JSNative.api.failedToConvert;
 }
 
-List.prototype = Object.defineProperties({}, {
-	constructor:{value:List},
-});
+// The prototype constructor (List) has the classInstance interface
+List.prototype = Object.defineProperties({}, {constructor:{value:List}});
 
 List.classConstruct = function() {
-	echo("constructor called");
+	echo("constructor invoked");
 }
 
 })("JSNative.List");
 
-
 a = new JSNative.List();
+
+// The result of this process, is an object with special behaviors that are acted upon,
+// independent of the object content, so long as the object's prototype points to a valid
+// "special behavior" interface, and that interface has the requested property interface defined.
 
 a();
 
