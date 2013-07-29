@@ -13,6 +13,7 @@ function classFlags() {
 		if (arguments[name] == 'classConvert') { flags |= JSNative.api.classConvert; continue }
 		if (arguments[name] == 'classEnumerate') { flags |= JSNative.api.classEnumerate; continue }
 		if (arguments[name] == 'classInstanceOf') { flags |= JSNative.api.classInstanceOf; continue }
+		if (arguments[name] == 'classAccessor') { flags |= JSNative.api.classAccessor; continue }
 	};
 	return flags;
 }
@@ -34,7 +35,7 @@ declareNameSpace(className, List);
 // The prototype constructor (List) has the classInstance interface
 List.classInstance = JSNative.api.createClass({
 	name: className,
-	classFlags: classFlags('classGet', 'classInvoke', 'classConvert', 'classInitialize', 'classEnumerate', 'classSet') 
+	classFlags: classFlags('classAccessor', 'classConvert', 'classInitialize', 'classEnumerate') 
 })
 
 List.classInstance.classInitialize = function() {
@@ -51,7 +52,7 @@ List.classInstance.classEnumerate = function() {
 
 List.classInstance.classGet = function(name) {
 	if (name == '__private__list__item__') return null;
-	echo("instance get", name);
+//	echo("instance get", name);
 	return this.__private__list__item__[name];
 }
 
@@ -59,10 +60,6 @@ List.classInstance.classSet = function(name, value) {
 	echo("instance set", name);
 	this.__private__list__item__[name] = value;
 	return true;
-}
-
-List.classInstance.classInvoke = function() {
-	echo("instance invoked");
 }
 
 List.classInstance.classConvert = function(constructor) {
@@ -91,7 +88,7 @@ List.classConstruct = function() {
 	// the value of 'this' is the new object, with it's prototype set to List.prototype
 	echo("constructor invoked");
 	for (var i = 0; i<arguments.length; i++) {
-		this[arguments[i]] = null;
+		this[arguments[i]] = arguments[i];
 	}
 }
 
@@ -103,8 +100,8 @@ a = new JSNative.List('bear', 'pear', 'wear', 'tear');
 // independent of the object content, so long as the object's prototype points to a valid
 // "special behavior" interface, and that interface has the requested property interface defined.
 
-a();
+
+for (name in a) echo(name);
 
 echo(a);
 
-for (name in a) echo(name);

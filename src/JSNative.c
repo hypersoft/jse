@@ -41,7 +41,7 @@ void jsNativeClassEnumerate(JSContextRef ctx, JSObjectRef object, JSPropertyName
 	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
 	if (exception) return;
 	JSObjectRef classEnumerate = (JSObjectRef) JSTGetPropertyObject(interface, "classEnumerate");
-	if (JSTReference(classEnumerate)) return;
+	if (!JSTReference(classEnumerate)) return;
 	JSObjectRef names = JSTCallObject(classEnumerate, object); // numeric indexed pseudo array with length
 	register long length = JSTInteger(JSTGetProperty(names, "length"));
 	JSStringRef name = NULL;
