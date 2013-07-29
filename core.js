@@ -12,6 +12,7 @@ function classFlags() {
 		if (arguments[name] == 'classDelete') { flags |= JSNative.api.classDelete; continue }
 		if (arguments[name] == 'classConvert') { flags |= JSNative.api.classConvert; continue }
 		if (arguments[name] == 'classEnumerate') { flags |= JSNative.api.classEnumerate; continue }
+		if (arguments[name] == 'classHasProperty') { flags |= JSNative.api.classHasProperty; continue }
 		if (arguments[name] == 'classInstanceOf') { flags |= JSNative.api.classInstanceOf; continue }
 		if (arguments[name] == 'classAccessor') { flags |= JSNative.api.classAccessor; continue }
 	};
@@ -37,8 +38,16 @@ declareNameSpace(className, List);
 // This classInstance constructor (List) has a native class interface property [classInstance].
 List.classInstance = JSNative.api.createClass({
 	name: className,
-	classFlags: classFlags('classAccessor', 'classConvert', 'classInitialize', 'classEnumerate') 
+	classFlags: classFlags('classAccessor', 'classConvert', 'classInitialize', 'classEnumerate', 'classHasProperty') 
 })
+
+// This is called to test if an instance has a property name....
+// only return true for property names you will service upon (classGet) request,
+// that do not exist on the instance
+List.classInstance.classHasProperty = function(name) {
+	if (name == "__private__list__item__") return false;
+	return this.__private__list__item__[name] != undefined;
+}
 
 // This is called when an instance of List is initialized
 List.classInstance.classInitialize = function() {
@@ -59,9 +68,9 @@ List.classInstance.classGet = function(name) {
 
 	// This line prevents circular reference errors: infinite recursion, stack overflow
 	// requesting a property from yourself (this (classInstance)) REQUIRES PREVENTATIVE MEDICINE.
-	if (name == '__private__list__item__') return null;
+	if (name == '__private__list__item__') return this.__private__list__item__;
 
-//	echo("instance get", name);
+	echo("instance get", name);
 
 	// request property from self (__private__list__item__) and return the requested property
 	// from that property
@@ -130,4 +139,6 @@ a = new JSNative.List('bear', 'pear', 'wear', 'tear', 'toString');
 for (name in a) echo(name);
 
 echo(a);
+
+if ('foo' in a) echo('foo');
 

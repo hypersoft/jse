@@ -11,6 +11,7 @@ api.classDelete = 64,
 api.classConvert = 128,
 api.classInstanceOf = 256,
 api.classEnumerate = 512,
+api.classHasProperty = 1024,
 api.classAccessor = api.classSet | api.classGet;
 
 (function(){var $api = api; JSNative = { api:$api }; delete api})();

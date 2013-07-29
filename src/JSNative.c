@@ -19,7 +19,8 @@ EnumClassSet = 32,
 EnumClassDelete = 64,
 EnumClassConvert = 128,
 EnumClassInstanceOf = 256,
-EnumClassEnumerate = 512;
+EnumClassEnumerate = 512,
+EnumClassHasProperty = 1024;
 
 static JSObjectRef jsNativeGetClassInterface JSToolsProcedure(JSObjectRef object) {
 	JSObjectRef prototype = JSTGetPrototype(object);
@@ -32,6 +33,23 @@ static JSObjectRef jsNativeGetClassInterface JSToolsProcedure(JSObjectRef object
 	JSObjectRef interface = JSTGetPropertyObject(constructor, "classInstance");
 	if (! interface ) return constructor;
 	return interface;
+}
+
+bool jsNativeClassHasProperty(JSContextRef ctx, JSObjectRef object, JSStringRef property) {
+
+	static bool requestInProgress;
+	if (requestInProgress) return false;
+
+	void * exception = NULL;
+	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
+	if (exception) return;
+	JSObjectRef classHasProperty = (JSObjectRef) JSTGetPropertyObject(interface, "classHasProperty");
+	if (!JSTReference(classHasProperty)) return false;
+	requestInProgress = true;
+		bool result = JSTBoolean(JSTCall(classHasProperty, object, JSTMakeString(property, NULL, false)));
+	requestInProgress = false;
+	return result;
+
 }
 
 // The array of names returned by 'enumerate', must be handled by 'get' in order to show up 
@@ -217,6 +235,8 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 	if (flags & EnumClassConvert) jsClass.convertToType = &jsNativeClassConvert;
 	if (flags & EnumClassInstanceOf) jsClass.hasInstance = &jsNativeClassInstanceOf;
 	if (flags & EnumClassEnumerate) jsClass.getPropertyNames = &jsNativeClassEnumerate;
+	if (flags & EnumClassHasProperty) jsClass.hasProperty = &jsNativeClassHasProperty;
+	if (flags & EnumClassInstanceOf) jsClass.hasInstance = &jsNativeClassInstanceOf;
 	JSClassRef JSNativeClass = JSClassRetain(JSClassCreate(&jsClass));
 
 	JSObjectRef thisClass = JSTCreateClassObject(JSNativeClass, JSNativeClass);
