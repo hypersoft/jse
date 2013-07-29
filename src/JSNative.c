@@ -95,11 +95,22 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 }
 
 bool jsNativeClassDelete(JSContextRef ctx, JSObjectRef this, JSStringRef property, JSValueRef* exception) {
+
+	static bool requestInProgress;
+	if (requestInProgress) return false;
+
 	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, this);
 	if (JSTCaughtException) return false;
+
 	JSObjectRef classDelete = (JSObjectRef) JSTGetPropertyObject(interface, "classDelete");
+
 	if (! JSTReference(classDelete) ) return false;
-	return JSTBoolean(JSTCall(classDelete, this, JSTMakeString(property, NULL, false)));
+
+	requestInProgress = true;
+		bool result = JSTBoolean(JSTCall(classDelete, this, JSTMakeString(property, NULL, false)));
+	requestInProgress = false;
+
+	return result;
 }
 
 bool jsNativeClassInstanceOf(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception) {
