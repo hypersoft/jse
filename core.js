@@ -94,7 +94,7 @@ List.classConstruct = function() {
 
 })("JSNative.List");
 
-a = new JSNative.List('bear', 'pear', 'wear', 'tear');
+a = new JSNative.List('bear', 'pear', 'wear', 'tear', 'toString');
 
 // The result of this process, is an object with special behaviors that are acted upon,
 // independent of the object content, so long as the object's prototype points to a valid
