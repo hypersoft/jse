@@ -56,9 +56,17 @@ List.classInstance.classEnumerate = function() {
 
 // This is called when an instance of List is queried for a property name
 List.classInstance.classGet = function(name) {
+
+	// This line prevents circular reference errors: infinite recursion, stack overflow
+	// requesting a property from yourself (this (classInstance)) REQUIRES PREVENTATIVE MEDICINE.
 	if (name == '__private__list__item__') return null;
+
 //	echo("instance get", name);
+
+	// request property from self (__private__list__item__) and return the requested property
+	// from that property
 	return this.__private__list__item__[name];
+
 }
 
 // This is called when an instance of List recieves a request to set a property name to a value
