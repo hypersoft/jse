@@ -170,7 +170,7 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 	JSClassRef thisInstance;
 	JSObjectRef this, classInstance = JSTGetPropertyObject(constructor, "classInstance");
 
-	if (JSTReference(classInstance)) {
+	if (JSTReference(classInstance) && classInstance != constructor) {
 		thisInstance = JSTGetPrivate(classInstance);
 		this = JSTCreateClassObject(thisInstance, NULL);
 		prototype = JSTGetPropertyObject(classInstance, "prototype");
