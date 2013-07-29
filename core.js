@@ -31,6 +31,7 @@ function declareNameSpace(name, value) {
 // List is a native class interface which flags classConstruct
 var List = JSNative.api.createClass({name: className, classFlags: classFlags('classConstruct')});
 
+// This creates the namespace by className (demonstration)
 declareNameSpace(className, List);
 
 // This classInstance constructor (List) has a native class interface property [classInstance].
@@ -39,11 +40,13 @@ List.classInstance = JSNative.api.createClass({
 	classFlags: classFlags('classAccessor', 'classConvert', 'classInitialize', 'classEnumerate') 
 })
 
+// This is called when an instance of List is initialized
 List.classInstance.classInitialize = function() {
 	echo("instance initialized");
 	Object.defineProperty(this, "__private__list__item__", {value:{}});
 }
 
+// This is called when an instance of List is enumerated
 List.classInstance.classEnumerate = function() {
 	echo("instance enumerate");
 	var names = [];
@@ -51,21 +54,28 @@ List.classInstance.classEnumerate = function() {
 	return names;
 }
 
+// This is called when an instance of List is queried for a property name
 List.classInstance.classGet = function(name) {
 	if (name == '__private__list__item__') return null;
 //	echo("instance get", name);
 	return this.__private__list__item__[name];
 }
 
+// This is called when an instance of List recieves a request to set a property name to a value
 List.classInstance.classSet = function(name, value) {
 	echo("instance set", name);
 	this.__private__list__item__[name] = value;
 	return true;
 }
 
+// This is called when an instance of List is queried for a type conversion; usually JS constructor
+// however, this 'native class instance method' can be invoked on the class instance,
+// with any caller defined constructor function. This enables class to class conversion,
+// for class instances who possess the intelligence to perform the requested conversion.
 List.classInstance.classConvert = function(constructor) {
-	// This procedure can be passed ANY constructor as a reference to the desired type.
+
 	// As with all classInstance interface procedures, the value of 'this' is the target object
+
 	if (constructor === String) {
 		echo("instance string conversion requested");
 		var names = [];
@@ -76,7 +86,12 @@ List.classInstance.classConvert = function(constructor) {
 		echo("instance number conversion requested");
 		// return valueOf value
 	}
-	// Just use the object defined toString method, or the JavaScript Object.toString method
+
+	// This instance supports no custom constructors, a test and warning or error upon 
+	// this condition would be implementation defined.
+
+	// If constructor is not String constructor (could be valueOf) just use the default
+	// JS Interpretation
 	return JSNative.api.failedToConvert;
 }
 
