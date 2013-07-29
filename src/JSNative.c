@@ -163,7 +163,7 @@ JSValueRef jsNativeClassInvoke(JSContextRef ctx, JSObjectRef function, JSObjectR
 JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
 
 	JSObjectRef classConstruct = JSTGetPropertyObject(constructor, "classConstruct");
-	JSValueRef prototype = JSTGetPropertyObject(constructor, "prototype");
+	JSValueRef prototype;
 
 	if (! JSTReference(classConstruct) ) return NULL;
 
@@ -173,15 +173,23 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 	if (JSTReference(classInstance)) {
 		thisInstance = JSTGetPrivate(classInstance);
 		this = JSTCreateClassObject(thisInstance, NULL);
+		prototype = JSTGetPropertyObject(classInstance, "prototype");
+		// This allows a classInstance class to provide a prototype or initializer for classInitializers to work with
+		if (JSTInteger(JSTGetProperty(classInstance, "classFlags")) & EnumClassInitialize) {
+			JSObjectRef classInitialize = JSTGetPropertyObject(classInstance, "classInitialize");
+			if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
+			else JSTSetPrototype(this, prototype);
+		} else JSTSetPrototype(this, prototype);
 	} else {
 		thisInstance = JSTGetPrivate(constructor);
 		this = JSTCreateClassObject(thisInstance, NULL);
 	}
 
+	prototype = JSTGetPropertyObject(constructor, "prototype");
 	if (JSTInteger(JSTGetProperty(constructor, "classFlags")) & EnumClassInitialize) {
 		JSObjectRef classInitialize = JSTGetPropertyObject(constructor, "classInitialize");
-		if (! JSTReference(classInitialize) ) return NULL;
-		JSTCall(classInitialize, this);
+		if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
+		else JSTSetPrototype(this, prototype);
 	} else JSTSetPrototype(this, prototype);
 
 	JSObjectRef detour = JSTCallObject(classConstruct, this);
