@@ -63,8 +63,8 @@ List.classInstance.classSet = function(name, value) {
 }
 
 List.classInstance.classConvert = function(constructor) {
-	// This procedure can be passed ANY constructor as a reference to the desired type
-	// as with all classInstance interface procedures, the value of 'this' is the target object
+	// This procedure can be passed ANY constructor as a reference to the desired type.
+	// As with all classInstance interface procedures, the value of 'this' is the target object
 	if (constructor === String) {
 		echo("instance string conversion requested");
 		var names = [];
@@ -79,11 +79,12 @@ List.classInstance.classConvert = function(constructor) {
 	return JSNative.api.failedToConvert;
 }
 
-// The prototype constructor (List) has the classInstance interface,
-// new shall provide this interface, through the constructed object's prototype
+// This classInstance constructor (List) has a native class interface property [classInstance].
+// 'new' shall provide this interface, through the constructed object's prototype,
+// as a member of the constructor property (a known classInstance provider.)
 List.prototype = Object.defineProperties({}, {constructor:{value:List}});
 
-// List is a "classInstance" interface
+// List is a native class interface which flags classConstruct, fulfill the class contract
 List.classConstruct = function() {
 	// the value of 'this' is the new object, with it's prototype set to List.prototype
 	echo("constructor invoked");
