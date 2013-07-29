@@ -28,11 +28,12 @@ function declareNameSpace(name, value) {
 // Example "Class"
 (function ListInit(className) {
 
+// List is a native class interface which flags classConstruct
 var List = JSNative.api.createClass({name: className, classFlags: classFlags('classConstruct')});
 
 declareNameSpace(className, List);
 
-// The prototype constructor (List) has the classInstance interface
+// This classInstance constructor (List) has a native class interface property [classInstance].
 List.classInstance = JSNative.api.createClass({
 	name: className,
 	classFlags: classFlags('classAccessor', 'classConvert', 'classInitialize', 'classEnumerate') 
