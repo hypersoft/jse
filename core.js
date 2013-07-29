@@ -96,9 +96,9 @@ List.classInstance.classConvert = function(constructor) {
 	}
 
 	// This instance supports no custom constructors, a test and warning or error upon 
-	// this condition would be implementation defined.
+	// this condition would be class instance implementation defined.
 
-	// If constructor is not String constructor (could be valueOf) just use the default
+	// In our case, if constructor is not String constructor just use the default
 	// JS Interpretation
 	return JSNative.api.failedToConvert;
 }
@@ -121,9 +121,10 @@ List.classConstruct = function() {
 
 a = new JSNative.List('bear', 'pear', 'wear', 'tear', 'toString');
 
-// The result of this process, is an object with special behaviors that are acted upon,
-// independent of the object content, so long as the object's prototype points to a valid
-// "special behavior" interface, and that interface has the requested property interface defined.
+// The result of this process, is a class instance object with a native classInstance interface
+// which is acted upon, independent of the defined instance properties, so long as the instance's
+// prototype refers to a valid classInstance interface, and that interface has the
+// requested native class instance methods.
 
 
 for (name in a) echo(name);
