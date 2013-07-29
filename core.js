@@ -34,11 +34,31 @@ declareNameSpace(className, List);
 // The prototype constructor (List) has the classInstance interface
 List.classInstance = JSNative.api.createClass({
 	name: className,
-	classFlags: classFlags('classGet', 'classInvoke', 'classConvert') 
+	classFlags: classFlags('classGet', 'classInvoke', 'classConvert', 'classInitialize', 'classEnumerate', 'classSet') 
 })
 
+List.classInstance.classInitialize = function() {
+	echo("instance initialized");
+	Object.defineProperty(this, "__private__list__item__", {value:{}});
+}
+
+List.classInstance.classEnumerate = function() {
+	echo("instance enumerate");
+	var names = [];
+	for (name in this.__private__list__item__) names.push(name);
+	return names;
+}
+
 List.classInstance.classGet = function(name) {
-	echo("instance get", name); return null;
+	if (name == '__private__list__item__') return null;
+	echo("instance get", name);
+	return this.__private__list__item__[name];
+}
+
+List.classInstance.classSet = function(name, value) {
+	echo("instance set", name);
+	this.__private__list__item__[name] = value;
+	return true;
 }
 
 List.classInstance.classInvoke = function() {
@@ -50,7 +70,9 @@ List.classInstance.classConvert = function(constructor) {
 	// as with all classInstance interface procedures, the value of 'this' is the target object
 	if (constructor === String) {
 		echo("instance string conversion requested");
-		// return toString value
+		var names = [];
+		for (name in this.__private__list__item__) names.push(name);
+		return names.join(', ');
 	}
 	if (constructor === Number) {
 		echo("instance number conversion requested");
@@ -68,11 +90,14 @@ List.prototype = Object.defineProperties({}, {constructor:{value:List}});
 List.classConstruct = function() {
 	// the value of 'this' is the new object, with it's prototype set to List.prototype
 	echo("constructor invoked");
+	for (var i = 0; i<arguments.length; i++) {
+		this[arguments[i]] = null;
+	}
 }
 
 })("JSNative.List");
 
-a = new JSNative.List();
+a = new JSNative.List('bear', 'pear', 'wear', 'tear');
 
 // The result of this process, is an object with special behaviors that are acted upon,
 // independent of the object content, so long as the object's prototype points to a valid
@@ -81,3 +106,5 @@ a = new JSNative.List();
 a();
 
 echo(a);
+
+for (name in a) echo(name);

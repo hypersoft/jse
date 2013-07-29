@@ -160,7 +160,7 @@ JSValueRef jsNativeClassInvoke(JSContextRef ctx, JSObjectRef function, JSObjectR
 	return JSTRelayFunctionCall(classInvoke);
 }
 
-JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) {
+JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
 
 	JSObjectRef classConstruct = JSTGetPropertyObject(constructor, "classConstruct");
 	JSValueRef prototype;
@@ -192,7 +192,7 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 		else JSTSetPrototype(this, prototype);
 	} else JSTSetPrototype(this, prototype);
 
-	JSObjectRef detour = JSTCallObject(classConstruct, this);
+	JSObjectRef detour = (JSObjectRef)JSTRelayFunctionCall(classConstruct);
 	if (JSTReference(detour)) return detour;
 
 	return this;
