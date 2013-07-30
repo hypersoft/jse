@@ -17,7 +17,20 @@ EnumClassDelete = 64,
 EnumClassConvert = 128,
 EnumClassInstanceOf = 256,
 EnumClassEnumerate = 512,
-EnumClassHasProperty = 1024;
+EnumClassHasProperty = 1024,
+
+EnumTypeVoid = 2,
+EnumTypeBoolean = 4,
+EnumTypeChar = 8,
+EnumTypeShort = 16,
+EnumTypeInt = 32,
+EnumTypeLong = 64,
+EnumTypeLongLong = 128,
+EnumTypeFloat = 256,
+EnumTypeDouble = 512,
+EnumTypePointer = 1024,
+EnumTypeUnsigned = 2048;
+
 
 static JSObjectRef jsNativeGetClassMethod JSToolsProcedure(JSObjectRef object, char * name) {
 
