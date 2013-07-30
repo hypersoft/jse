@@ -215,12 +215,12 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 	JSClassRef instanceClass = JSTGetPrivate(prototype);
 	JSObjectRef this = JSTCreateClassObject(instanceClass, constructor);
 
-	if (JSTInteger(JSTGetProperty(prototype, "classFlags")) & EnumClassInitialize) {
+	if (JSTInteger(JSTGetProperty(prototype, "__classFlags__")) & EnumClassInitialize) {
 		JSObjectRef classInitialize = JSTGetPropertyObject(prototype, "classInitialize");
 		if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
 	}
 
-	if (JSTInteger(JSTGetProperty(constructor, "classFlags")) & EnumClassInitialize) {
+	if (JSTInteger(JSTGetProperty(constructor, "__classFlags__")) & EnumClassInitialize) {
 		JSObjectRef classInitialize = JSTGetPropertyObject(constructor, "classInitialize");
 		if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
 		else JSTSetPrototype(this, prototype);
@@ -257,7 +257,7 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 	JSObjectRef thisClass = JSTCreateClassObject(JSNativeClass, JSNativeClass);
 
 	JSTSetProperty(thisClass, "name", argv[0], JSTPropertyHidden);
-	JSTSetProperty(thisClass, "classFlags", argv[1], JSTPropertyHidden);
+	JSTSetProperty(thisClass, "__classFlags__", argv[1], JSTPropertyProtected);
 
 	JSTFreeBuffer(className);
 

@@ -12,8 +12,16 @@ var Class = function Class(name, instanceMethods, classMethods){
 		JSNative.api.createClass(constructorClass, flags)
 	);	JSNative.api.setObjectPrototype(thisClass, JSNative.Class.prototype)
 
+	// Constructor.name should identify the instance class and constructor
+	Object.defineProperty(thisClass, 'name', {value:name});
+
 	var prototype = JSNative.api.createClass(name, JSNative.api.classFlags(instanceMethods));
-	delete prototype.name; extendPrototype(prototype, instanceMethods);
+
+	// Prototype instances have no name
+	delete prototype.name;
+
+	extendPrototype(prototype, instanceMethods);
+
 	Object.defineProperty(prototype, 'constructor', {value:thisClass});
 
 	/*
