@@ -45,7 +45,9 @@ function callStack() {
 
 function InvokeError(title, message) {
 	var stack = callStack();
+	echo(stack.join('\n'))
 	while (stack.pop().function != 'InvokeError');
+	stack.pop() // top is now at source
 	while((invoke = stack.pop()).file == '[native code]');
 	var e = new Error(message);
 	if (invoke.function != 'global code') e.function = invoke.function;
