@@ -29,7 +29,8 @@ EnumTypeLongLong = 128,
 EnumTypeFloat = 256,
 EnumTypeDouble = 512,
 EnumTypePointer = 1024,
-EnumTypeUnsigned = 2048;
+EnumTypeUnsigned = 2048,
+EnumTypeEllipsis = 4096;
 
 
 static JSObjectRef jsNativeGetClassMethod JSToolsProcedure(JSObjectRef object, char * name) {
