@@ -22,32 +22,33 @@ EnumClassInstanceOf = 256,
 EnumClassEnumerate = 512,
 EnumClassHasProperty = 1024;
 
-static JSObjectRef jsNativeGetClassInterface JSToolsProcedure(JSObjectRef object) {
-	JSObjectRef prototype = JSTGetPrototype(object);
-	if (! prototype ) {
-		JSTTypeError("JSNative.internal.getClassInterface: object has no prototype");
-		JSTReturnObjectException;
-	}
-	JSObjectRef constructor = JSTGetPropertyObject(prototype, "constructor");
-	if (! constructor ) return prototype;
-	JSObjectRef interface = JSTGetPropertyObject(constructor, "classInstance");
-	if (! interface ) return constructor;
-	return interface;
+static JSObjectRef jsNativeGetClassMethod JSToolsProcedure(JSObjectRef object, char * name) {
+
+	// we are going to allow all monkey business ...
+	// prototype will not be queried for methods directly
+
+	JSObjectRef method = JSTGetPropertyObject(object, name);
+
+	return method;
+
 }
 
 bool jsNativeClassHasProperty(JSContextRef ctx, JSObjectRef object, JSStringRef property) {
 
+	void * exception = NULL;
+
 	static bool requestInProgress;
 	if (requestInProgress) return false;
 
-	void * exception = NULL;
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
-	if (exception) return;
-	JSObjectRef classHasProperty = (JSObjectRef) JSTGetPropertyObject(interface, "classHasProperty");
-	if (!JSTReference(classHasProperty)) return false;
-	requestInProgress = true;
-		bool result = JSTBoolean(JSTCall(classHasProperty, object, JSTMakeString(property, NULL, false)));
+	bool result = false; requestInProgress = true;
+
+	JSObjectRef classHasProperty = JSToolsCall(jsNativeGetClassMethod, object, "classHasProperty");
+
+	if (JSTFunction(classHasProperty))
+		result = JSTBoolean(JSTCall(classHasProperty, object, JSTMakeString(property, NULL, false)));
+
 	requestInProgress = false;
+
 	return result;
 
 }
@@ -56,10 +57,8 @@ bool jsNativeClassHasProperty(JSContextRef ctx, JSObjectRef object, JSStringRef 
 // in the resulting list of enumerated property names.
 void jsNativeClassEnumerate(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames) {
 	void * exception = NULL;
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
-	if (exception) return;
-	JSObjectRef classEnumerate = (JSObjectRef) JSTGetPropertyObject(interface, "classEnumerate");
-	if (!JSTReference(classEnumerate)) return;
+	JSObjectRef classEnumerate = JSToolsCall(jsNativeGetClassMethod, object, "classEnumerate");
+	if (!JSTFunction(classEnumerate)) return;
 	JSObjectRef names = JSTCallObject(classEnumerate, object); // numeric indexed pseudo array with length
 	register long length = JSTInteger(JSTGetProperty(names, "length"));
 	JSStringRef name = NULL;
@@ -74,16 +73,14 @@ static bool jsNativeClassSet JSTNativePropertyWriter() {
 
 	static bool requestInProgress;
 	if (requestInProgress) return false;
- 
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
-	if (JSTCaughtException) return interface;
-
-	JSObjectRef classSet = (JSObjectRef) JSTGetPropertyObject(interface, "classSet");
-
-	if (! JSTReference(classSet) ) return false;
-
+ 	bool result = false;
 	requestInProgress = true;
-		bool result = JSTBoolean(JSTCall(classSet, object, JSTMakeString(property, NULL, false), value));
+
+	JSObjectRef classSet = JSToolsCall(jsNativeGetClassMethod, object, "classSet");
+
+	if (JSTFunction(classSet) )
+		result = JSTBoolean(JSTCall(classSet, object, JSTMakeString(property, NULL, false), value));
+
 	requestInProgress = false;
 
 	return result;
@@ -95,17 +92,16 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 	static bool requestInProgress;
 	if (requestInProgress) return NULL;
 
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
-	if (JSTCaughtException) return interface;
-
-	JSObjectRef get = (JSObjectRef) JSTGetPropertyObject(interface, "classGet");
-
-	if (! JSTReference(get) ) return NULL;
+	JSValueRef result = NULL;
 
 	requestInProgress = true;
-		JSValueRef result = JSTCall(get, object, JSTMakeString(property, NULL, false));
-	requestInProgress = false;
 
+	JSObjectRef get = JSToolsCall(jsNativeGetClassMethod, object, "classGet");
+
+	if (JSTFunction(get) )
+		result = JSTCall(get, object, JSTMakeString(property, NULL, false));
+
+	requestInProgress = false;
 	if (JSTNull(result)) return NULL;
 
 	return result;
@@ -114,38 +110,30 @@ static JSValueRef jsNativeClassGet JSTNativePropertyReader() {
 
 bool jsNativeClassDelete(JSContextRef ctx, JSObjectRef this, JSStringRef property, JSValueRef* exception) {
 
-	static bool requestInProgress;
-	if (requestInProgress) return false;
-
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, this);
-	if (JSTCaughtException) return false;
-
-	JSObjectRef classDelete = (JSObjectRef) JSTGetPropertyObject(interface, "classDelete");
-
-	if (! JSTReference(classDelete) ) return false;
+	static bool requestInProgress; if (requestInProgress) return false;
+	bool result = false;
 
 	requestInProgress = true;
-		bool result = JSTBoolean(JSTCall(classDelete, this, JSTMakeString(property, NULL, false)));
+		JSObjectRef classDelete = JSToolsCall(jsNativeGetClassMethod, this, "classDelete");
+		if (JSTFunction(classDelete) )
+			result = JSTBoolean(JSTCall(classDelete, this, JSTMakeString(property, NULL, false)));
 	requestInProgress = false;
 
 	return result;
 }
 
 bool jsNativeClassInstanceOf(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception) {
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, constructor);
-	if (JSTCaughtException) return false;
-	JSObjectRef classInstanceOf = (JSObjectRef) JSTGetPropertyObject(interface, "classInstanceOf");
-	if ( ! JSTReference(classInstanceOf) ) return false;
+	JSObjectRef classInstanceOf = (JSObjectRef) JSTGetPropertyObject(constructor, "classInstanceOf");
+	if ( ! JSTFunction(classInstanceOf) ) return false;
 	return JSTBoolean(JSTCall(classInstanceOf, constructor, possibleInstance));
 }
 
 static JSValueRef jsNativeClassConvert JSTNativeConvertor() {
 	JSValueRef conversion;
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, object);
-	if (JSTCaughtException) return interface;
-	JSObjectRef convert = (JSObjectRef) JSTGetPropertyObject(interface, "classConvert");
 
-	if (convert && JSTReference(convert)) {
+	JSObjectRef convert = JSToolsCall(jsNativeGetClassMethod, object, "classConvert");
+
+	if (convert && JSTFunction(convert)) {
 		if (kJSTypeString == type) {
 			conversion = JSTCall(convert, object, RtJS(String));
 		} else
@@ -171,39 +159,27 @@ static JSValueRef jsNativeClassConvert JSTNativeConvertor() {
 }
 
 JSValueRef jsNativeClassInvoke(JSContextRef ctx, JSObjectRef function, JSObjectRef this, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-	JSObjectRef interface = JSToolsCall(jsNativeGetClassInterface, function);
-	if (JSTCaughtException) return interface;
-	JSObjectRef classInvoke = (JSObjectRef) JSTGetPropertyObject(interface, "classInvoke");
-	if (! JSTReference(classInvoke) ) return classInvoke;
+	JSObjectRef classInvoke = (JSObjectRef) JSTGetPropertyObject(function, "classInvoke");
+	if (! JSTFunction(classInvoke) ) return classInvoke;
 	return JSTRelayFunctionCall(classInvoke);
 }
 
 JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
 
 	JSObjectRef classConstruct = JSTGetPropertyObject(constructor, "classConstruct");
-	JSValueRef prototype;
+	if (! JSTFunction(classConstruct) ) return NULL;
 
-	if (! JSTReference(classConstruct) ) return NULL;
+	JSObjectRef prototype = JSTGetPropertyObject(constructor, "prototype");
+	if (! JSTFunction(classConstruct) ) return NULL;
 
-	JSClassRef thisInstance;
-	JSObjectRef this, classInstance = JSTGetPropertyObject(constructor, "classInstance");
+	JSClassRef instanceClass = JSTGetPrivate(prototype);
+	JSObjectRef this = JSTCreateClassObject(instanceClass, constructor);
 
-	if (JSTReference(classInstance) && classInstance != constructor) {
-		thisInstance = JSTGetPrivate(classInstance);
-		this = JSTCreateClassObject(thisInstance, NULL);
-		prototype = JSTGetPropertyObject(classInstance, "prototype");
-		// This allows a classInstance class to provide a prototype or initializer for classInitializers to work with
-		if (JSTInteger(JSTGetProperty(classInstance, "classFlags")) & EnumClassInitialize) {
-			JSObjectRef classInitialize = JSTGetPropertyObject(classInstance, "classInitialize");
-			if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
-			else JSTSetPrototype(this, prototype);
-		} else JSTSetPrototype(this, prototype);
-	} else {
-		thisInstance = JSTGetPrivate(constructor);
-		this = JSTCreateClassObject(thisInstance, NULL);
+	if (JSTInteger(JSTGetProperty(prototype, "classFlags")) & EnumClassInitialize) {
+		JSObjectRef classInitialize = JSTGetPropertyObject(prototype, "classInitialize");
+		if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
 	}
 
-	prototype = JSTGetPropertyObject(constructor, "prototype");
 	if (JSTInteger(JSTGetProperty(constructor, "classFlags")) & EnumClassInitialize) {
 		JSObjectRef classInitialize = JSTGetPropertyObject(constructor, "classInitialize");
 		if (JSTReference(classInitialize) ) JSTCall(classInitialize, this);
@@ -219,9 +195,8 @@ JSObjectRef jsNativeClassConstruct(JSContextRef ctx, JSObjectRef constructor, si
 
 static JSValueRef jsNativeClassCreate JSToolsFunction () {
 
-	JSObjectRef descriptor = (JSObjectRef) argv[0];
-	int flags = JSTInteger(JSTGetProperty(descriptor, "classFlags"));
-	char *className = JSTGetValueBuffer(JSTGetProperty(descriptor, "name"), NULL);
+	char *className = JSTGetValueBuffer(argv[0], NULL);
+	int flags = JSTInteger(argv[1]);
 	
 	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
@@ -241,8 +216,8 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 
 	JSObjectRef thisClass = JSTCreateClassObject(JSNativeClass, JSNativeClass);
 
-	JSTSetProperty(thisClass, "classFlags", JSTGetProperty(descriptor, "classFlags"), JSTPropertyHidden);
-	JSTSetProperty(thisClass, "name", JSTGetProperty(descriptor, "name"), JSTPropertyHidden);
+	JSTSetProperty(thisClass, "name", argv[0], JSTPropertyHidden);
+	JSTSetProperty(thisClass, "classFlags", argv[1], JSTPropertyHidden);
 
 	JSTFreeBuffer(className);
 
