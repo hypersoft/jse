@@ -3,6 +3,20 @@ function classOf(o) {
 	return Object.prototype.toString.call(o).slice(8,-1);
 }
 
+function extend(o, p) {
+	for (prop in p) o[prop] = p[prop];
+	return o;
+}
+
+function extendPrototype(o, p) {
+	for(prop in p) {
+		var property = p[prop];
+		if (typeof property == 'function') Object.defineProperty(o, prop, {value:property,enumerable:false,configurable:true,writeable:true});
+		else o[prop] = property;
+	}
+	return o;
+}
+
 function callStack() {
 	var trace = [];
 	function toString() {
