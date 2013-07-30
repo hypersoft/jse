@@ -22,11 +22,8 @@ var Class = function Class(name, instanceMethods, classMethods){
 	*/
 
 	Object.defineProperties(thisClass, {prototype:{get: function() {return prototype}}})
-
-	// Not sure why but classMethods need to be bound to the class
-	for (name in classMethods) thisClass[name] = classMethods[name].bind(thisClass);
-
-	return thisClass; //extend(thisClass, classMethods)
+	
+	return extend(thisClass, classMethods)
 
 }
 
