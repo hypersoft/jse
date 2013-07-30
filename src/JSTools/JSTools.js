@@ -25,9 +25,13 @@ function callStack() {
 	function parse(c) {
 		var o = {};
 		var parsed = c.match(/(([^@]+)@)?([^:]+):(.+)$/);
+		if (parsed !== null) {
 		o.line = parsed.pop();
 		o.file = parsed.pop();
 		(o.function = parsed.pop())? undefined:(o.function = 'anonymous function');
+		} else {
+			o.file = c;
+		}
 		o.toString = toString;
 		return o;
 	}
@@ -41,8 +45,8 @@ function callStack() {
 
 function InvokeError(title, message) {
 	var stack = callStack();
-	stack.pop(); stack.pop();
-	invoke = stack.pop();
+	while (stack.pop().function != 'InvokeError');
+	while((invoke = stack.pop()).file == '[native code]');
 	var e = new Error(message);
 	if (invoke.function != 'global code') e.function = invoke.function;
 	e.sourceURL=invoke.file; e.line=invoke.line; e.name=title;
