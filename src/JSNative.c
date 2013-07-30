@@ -7,9 +7,6 @@
 #include "JSNative.h"
 
 JSObjectRef RtJSNativeAPI;
-JSObjectRef RtJSNativeClassRegistry;
-
-JSClassRef JSNativeClass;
 
 static int EnumClassInitialize = 2,
 EnumClassConstruct = 4,
@@ -236,12 +233,6 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 
 	JSTLoadRuntime(global, argc, argv, envp);
 	
-	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
-	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype;
-	jsClass.className = "JSNative.Class";
-
-	JSNativeClass = JSClassRetain(JSClassCreate(&jsClass));
-
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "createClass", &jsNativeClassCreate);
