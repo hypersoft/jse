@@ -1,5 +1,5 @@
 
-(function(){
+(function (){
 
 var declareNameSpace = function(name, value) {return eval(name+' = value')};
 
@@ -45,5 +45,4 @@ Object.defineProperty(JSNative.Class, "prototype", {
 JSNative.Class.prototype = {};
 
 })();
-
 

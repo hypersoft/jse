@@ -3,6 +3,7 @@
 
 #include "JSNative.inc"
 #include "JSNativeClass.inc"
+#include "JSNativeType.inc"
 
 #include "JSNative.h"
 
@@ -290,6 +291,9 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	if (JSTCaughtException) JSTReportFatalException(1);
 
 	JSTEvalScript(JSNativeClassInit, global, "JSNativeClass.js"); 
+	if (JSTCaughtException) JSTReportFatalException(1);
+
+	JSTEvalScript(JSNativeTypeInit, global, "JSNativeType.js"); 
 	if (JSTCaughtException) JSTReportFatalException(1);
 	
 }

@@ -29,13 +29,17 @@ inc/JSNativeClass.inc: src/JSNative/JSNativeClass.js
 	# JSNativeClass.js is being reconstructed
 	@bin/bin2inc JSNativeClassInit $< > $@;
 
+inc/JSNativeType.inc: src/JSNative/JSNativeType.js
+	# JSNativeType.js is being reconstructed
+	@bin/bin2inc JSNativeTypeInit $< > $@;
+
 inc/JSTools.inc: src/JSTools/JSTools.js
 	# JSToolsSupport is being reconstructed
 	@bin/bin2inc JSToolsSupport src/JSTools/JSTools.js > inc/JSTools.inc;
 
 
 # This rule builds jse
-${APPLICATION}: ${SOURCE} ${REQUIRES} inc/JSNativeClass.inc inc/JSNative*.inc inc/JSTools.inc
+${APPLICATION}: ${SOURCE} ${REQUIRES} $(shell echo inc/JSNative{Class,Type,}.inc) inc/JSTools.inc
 	@echo ''
 	@echo 'Validating required packages...'
 	@pkg-config --print-errors --exists ${PKGS}
