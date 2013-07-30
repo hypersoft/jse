@@ -35,25 +35,27 @@ EnumTypeEllipsis = 4096;
 static JSValueRef jsNativeGetTypeSize JSToolsFunction(enumType) {
 	int enumType = JSTInteger(argv[0]), result = 0;
 
-	if (enumType == EnumTypeVoid) goto makeResult;
-	else if (enumType == EnumTypeBoolean) {
-		result = sizeof(bool); goto makeResult;
-	} else if (enumType == EnumTypeChar) {
-		result = sizeof(char); goto makeResult;
-	} else if (enumType == EnumTypeShort) {
-		result = sizeof(short); goto makeResult;
-	} else if (enumType == EnumTypeInt) {
-		result = sizeof(int); goto makeResult;
-	} else if (enumType == EnumTypeLong) {
-		result = sizeof(long); goto makeResult;
-	} else if (enumType == EnumTypeLongLong) {
-		result = sizeof(long long); goto makeResult;
-	} else if (enumType == EnumTypeFloat) {
-		result = sizeof(float); goto makeResult;
-	} else if (enumType == EnumTypeDouble) {
-		result = sizeof(double); goto makeResult;
-	} else if (enumType == EnumTypePointer) {
+	if (enumType & EnumTypePointer) {
 		result = sizeof(void*); goto makeResult;
+	} 
+
+	if (enumType & EnumTypeVoid) goto makeResult;
+	else if (enumType & EnumTypeBoolean) {
+		result = sizeof(bool); goto makeResult;
+	} else if (enumType & EnumTypeChar) {
+		result = sizeof(char); goto makeResult;
+	} else if (enumType & EnumTypeShort) {
+		result = sizeof(short); goto makeResult;
+	} else if (enumType & EnumTypeInt) {
+		result = sizeof(int); goto makeResult;
+	} else if (enumType & EnumTypeLong) {
+		result = sizeof(long); goto makeResult;
+	} else if (enumType & EnumTypeLongLong) {
+		result = sizeof(long long); goto makeResult;
+	} else if (enumType & EnumTypeFloat) {
+		result = sizeof(float); goto makeResult;
+	} else if (enumType & EnumTypeDouble) {
+		result = sizeof(double); goto makeResult;
 	} else /* that's an error */ JSTTypeError("JSNative.api.getTypeSize: invalid type code");
 
 	return RtJS(undefined);
