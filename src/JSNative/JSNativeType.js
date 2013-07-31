@@ -29,6 +29,7 @@ function getSignedType() {
 }
 
 function getArrayType() {
+	if (this.type == JSNative.api.typeVoid) return;
 	var array;
 	if ((array = JSNative.Type[this.name+'[]'])) return array;
 	if ((array = JSNative.Type[this.name+' **'])) return array;
@@ -89,7 +90,8 @@ var classConstruct = function(code, name){
 
 	if ((code & (JSNative.api.typePointer | JSNative.api.typeArray) ) == 0) {
 		var ptrType = new JSNative.Type(code | JSNative.api.typePointer, name+' *');
-		var arrType = new JSNative.Type(code | JSNative.api.typeArray, name+'[]');
+		var arrType;
+		if (code != JSNative.api.typeVoid) arrType = new JSNative.Type(code | JSNative.api.typeArray, name+'[]');
 		var ptrArrayType = new JSNative.Type(code | JSNative.api.typePointer | JSNative.api.typeArray, name+' *[]')
 		var ptrPointerType = new JSNative.Type(code | JSNative.api.typePointer | JSNative.api.typeArray, name+' **')
 		if (code & (JSNative.api.typeShort | JSNative.api.typeLong | JSNative.api.typeLongLong)) {

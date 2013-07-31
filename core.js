@@ -10,4 +10,4 @@ echo("string[] ===", string.array)
 echo("string ** ===", string.pointer.pointer)
 echo("string *** ===", string.pointer.pointer.pointer)
 
-
+echo(JSNative.Type.void.pointer.array)
