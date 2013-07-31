@@ -1,6 +1,13 @@
 #!bin/jse
 
-char = new JSNative.Type(8, "char");
+var char = JSNative.Type['char'];
 
-echo(char.pointer)
+echo("typedef char * string")
+string = new JSNative.Type(char.pointer, "string")
+
+echo("string ===", string.names[0])
+echo("string[] ===", string.array)
+echo("string ** ===", string.pointer.pointer)
+echo("string *** ===", string.pointer.pointer.pointer)
+
 

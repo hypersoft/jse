@@ -14,8 +14,6 @@ api.classEnumerate = 512,
 api.classHasProperty = 1024,
 api.classAccessor = api.classSet | api.classGet;
 
-api.typeUnsigned = 2048,
-api.typePointer = 1024;
 
 (function(){var $api = api; JSNative = { api:$api }; delete api})();
 
