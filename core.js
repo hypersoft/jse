@@ -1,5 +1,7 @@
 #!bin/jse
 
+JSNative.Type.parse = (function() {
+
 /* C "dcl" grammar
 
 	declarator:
@@ -7,7 +9,7 @@
 
 	direct-declarator:
 		identifier
-		(declarator)
+		( declarator )
 		direct-declarator [ constant-expression? ]
 		direct-declarator ( identifier-list? )
 		direct-declarator ( parameter-type-list )
@@ -20,154 +22,143 @@
 		type-qualifier
 		type-qualifier-list type-qualifier
 
-Adopted from
+Outsourced from
 "The C Programming Language 2nd Ed." (Prentice Hall) pp. 101, 174
 
-Merged with
-http://cboard.cprogramming.com/c-programming/157885-k-r-exercise-5-20-bsearch-error-when-compiled.html
+Modeled after: http://en.wikipedia.org/wiki/Recursive_descent_parser#C_implementation (July 31st, 2013)
 
-Translated to JS By Triston J. Taylor (pc.wiz.tt@gmail.com)
-
-Types are relaxed, meaning all type names are assumed to be a known definition
+Author: Triston J. Taylor pc.wiz.tt@gmail.com
 
 */
 
-JSNative.Type.parse = function nativeTypeDescription(declaration) {
+var syntax = {
 
-	var NAME = 2, PARENS = 4, BRACKETS = 8, YES = 16, NO = 32;
+	lparen:'(',		rparen:')',
+	lbracket:'[',	rbracket:']',
+	lbrace:'{',		rbrace:'}',
+	asterisk:'*',	comma:',',
+	semicolon:';',	
 
-	var dataType, out = '', name = '', token ='', prevToken = '', tokenType = 0, charPos = 0;
+	qualifier:'qualifier', type:'type', identifier:'identifier', number:'number', ellipsis:'ellipsis',
 
-	var pointerCount = 0;
+	termination:undefined
 
-	function getChar() {return declaration[charPos++]}
-	function unGetChar() {charPos--; return}
-	function isAlpha(c) {return (c != undefined && c.match(/[a-zA-Z]|_/) != null)}
-	function isAlphaNumeric(c) {return (c != undefined && c.match(/[a-zA-Z0-9]|_/) != null)}
-
-	function parseDeclaration() {
-		var ns;
-		for (ns = 0; getToken() == '*'; ns++); /* count *'s */
-		parseDirectDeclaration();
-		while (ns-- > 0) out += " pointer to"		
-	}
-
-	function parseDirectDeclaration() {
-		var type;
-		if (tokenType == '(') {
-			/* ( parseDeclaration ) */
-			parseDeclaration();
-			if (tokenType != ')')
-			throw new SyntaxError("expected: ')' in native declaration at char " + charPos);
-		} else if (tokenType == NAME) {
-			if (name == '') /* variable name */ name = token;
-			else out += ' '+token+':'
-		} else prevToken = YES;
-		while ((type=getToken()) == PARENS || type == BRACKETS || type == '(') {
-		    if(type == PARENS)
-		        out += " function expecting no arguments, returning";
-		    else if (type == '(') {
-		        out += " function that returns type "+dataType+", and expects arguments of:";
-		        parseParameterDeclaration();
-		    } else {
-		        out += " array";
-		        out += token;
-		        out += " of";
-		    }
-		}
-	}
-
-	function parseParameterDeclaration() {
-	    do {
-	        parseDeclarationSpec();
-	    } while(tokenType == ',');
-	    if(tokenType != ')')
-	        throw new SyntaxError("missing ')' in native function parameter declaration at char " +charPos);
-	}
-
-	var typeQualifiers = {'const':true, 'static':true, 'extern':true, 'volatile':true, signed:true, unsigned:true};
-	function typeQualifier() {
-		if (token in typeQualifiers) return YES;
-		return NO;
-	}
-
-	var typeHash = this;
-	function registeredType(name) {
-		if (name in typeHash) return YES;
-		return NO
-	}
-
-	function parseDeclarationSpec () {
-		var temp = '', tq = '', name = '';
-		getToken();
-		do {
-			if (tokenType == '...') {
-				//echo("ellipsis");
-				temp = "followed by a variadic argument list"
-				getToken()
-		    } else if (tokenType != NAME) {
-		        prevToken = YES;
-		        parseDeclaration();
-		    } else if (typeQualifier() == YES) {
-				tq += token+' '
-	            getToken();
-		    } else if(registeredType(temp+token) == YES) {
-				temp += token+" "
-	            getToken();
-			} else parseDirectDeclaration();
-
-		} while (tokenType != ',' && tokenType != ')' && tokenType != undefined);
-		if (tq != '') tq = ' '+tq
-		else temp = ' '+temp.trim()
-		out += tq+temp;
-		if(tokenType == ',') out+=tokenType
-	}
-
-	function getToken() {
-		var c; token = ''
-
-		if (prevToken == YES) {
-		    prevToken = NO;
-		    return tokenType;
-		}
-
-		while ((c = getChar()) == ' ' || c == '\t' || c == '\n');
-		if (c == '(') {
-			if ((c = getChar()) == ')') {
-				token = "()"; return tokenType = PARENS;
-			} else {
-				unGetChar(); return tokenType = '(';
-			}
-		} else if (c == '[') {
-			for (token += c; (token += getChar(), declaration[charPos - 1]) != ']'; );
-			return tokenType = BRACKETS;
-		} else if (isAlpha(c)) {
-			for (token += c; isAlphaNumeric(c = getChar()); )
-			token += c; unGetChar();
-			return tokenType = NAME;
-		} else if (c == '.') {
-			for (token += c; (c = getChar()) == '.'; ) token+=c; unGetChar()
-			return tokenType = token;
-		} else return tokenType = c;
-	}
-
-	function parseDeclarationList() {
-		parseDeclaration();
-		if (out == '') out = ' an alias of '+dataType
-		else if (out.match(/pointer to$|returning$/) != null) out +=' '+dataType
-		if (tokenType == ',') {
-			printf("%s is%s %s\n", name, out);
-			name = out = '';
-			parseDeclarationList();
-		}
-	}
-
-	getToken(); dataType = token;
-	parseDeclarationList()
-	if (tokenType != undefined && tokenType != ';')
-		throw new SyntaxError("expected end of input found: "+tokenType);
-	printf("%s is%s %s\n", name, out);
-	
 }
 
-JSNative.Type.parse('int *dare, foo, comp(), (*comp)(char * a, ...), (*(*x())[])();')
+var parse = function parse(source) {
+
+	// It would be nice to pack the source, but that creates error reporting issues...
+
+	var element, charPosition = 0, token, accepted;
+
+	var result = Object.create(parse.prototype);
+
+	var types = JSNative.Type, qualifiers = {'const':true,'static':true,'volatile':true,'extern':true};
+
+	function getChar() {return source[charPosition++]}
+	function unGetChar() {--charPosition}
+
+	function advance(len) {charPosition += len}
+	function peek(len) {return source.slice(charPosition, charPosition + len)}
+
+	function wordPeek(count) { /* type check hack for getSyntax */
+		var sentence = source.slice(charPosition);
+		var wpk = new RegExp('^(\\s*\\w+\\s*){'+count+'}')
+		if ((words = wpk.exec(sentence)) != null) return words[0];
+	}
+
+	function getSyntax() {
+		var ok, c, words; accepted = ''
+		while ((element = getChar()) !== undefined && element.match(/\s/) != null);
+		if (element === undefined) return;
+		if (element.match(/[\(\)\[\]{},\*;]/) != null) return // we parse simple elements here, not constructs
+		if (element.match(/[a-z_]/i) != null) {
+			/* "Smart Ass Subversive Descent Parsing" -- pc.wiz.tt */
+			for (accepted = element; (element = getChar()) != undefined && element.match(/[a-z0-9_]/i) != null; accepted += element);
+			unGetChar();
+			if (accepted in qualifiers) {
+				// these things need some validation against legality, tho' we don't use them in JSNI
+				for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim().split(' ').pop() in qualifiers; ok = words, c++);
+				element = syntax.qualifier;
+			} else if (accepted in types) {
+				// type registry must be robust and stupid, containing all possible type designations
+				// such as: char, signed char, char signed, unsigned char, char unsigned, etc...
+				for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim() in types; ok = words, c++);
+				element = syntax.type;
+			} else element = syntax.identifier;
+			if (ok) { advance(ok.length - accepted.length); accepted = ok.trim() }; return
+		} else if (element.match(/[0-9]/) != null) {
+			for (accepted = element; (element = getChar()) != undefined && element.match(/[0-9]/) != null; accepted += element);
+			unGetChar(); element = syntax.number; return
+		} else if (element == '.' && peek(2) == '..') {
+			advance(2); accepted = '...'; element = syntax.ellipsis; return
+		} else throw new SyntaxError("unused characters in parse stream at char "+charPosition);
+	}
+
+	function accept(s) {
+		if (element == s) {
+			token = (accepted)?accepted:element; // No, really... its okay to use it now...
+			getSyntax(); return 1;
+		}
+		return 0;
+	}
+ 
+	function expect(s) {
+		if (accept(s)) return 1;
+		throw new SyntaxError("char "+charPosition+": expected '"+s+"'");
+	}
+
+	function declarator() {
+		var count = 0;
+		while (accept(syntax.asterisk)) count++;
+		result.indirection = count;
+		directDeclarator()
+		while (count-- > 0) result.description += " pointer to %reference"
+	}
+
+	function directDeclarator() {
+		if (accept(syntax.lparen)) { declarator(); expect(syntax.rparen) }
+		else if (accept(syntax.identifier)) {
+			result.identifier = token;
+		}
+		while (element == syntax.lparen || element == syntax.lbracket) {
+			if (accept(syntax.lparen)) {
+				result.type = 'function'; if (! result.arguments ) result.arguments = [];
+				if (accept(syntax.rparen)) {
+					result.description += " function expecting no arguments, returning %reference";
+				} else {
+					result.description += " function that returns %reference, and expects arguments of:"
+				}
+			} else {
+				result.type = 'array'; if (! result.dimensions ) result.dimensions = [];
+				expect(syntax.lbracket);
+				result.description += " array["
+				if ((result.dimensions.length && expect(syntax.number)) || accept(syntax.number)) {
+					result.dimensions.push(token); result.description += token
+				} else result.dimensions.push(null)
+				expect(syntax.rbracket);
+				result.description += "] of"
+			}
+		}
+	}
+
+
+	getSyntax()
+
+	if (accept(syntax.type)) {
+		result.reference = token;
+		declarator()
+	}
+
+	echo(JSON.stringify(result));
+}
+
+parse.prototype = {
+	reference:undefined, description:'', identifier:undefined, type:'number'
+}
+return parse;
+
+})()
+
+
+JSNative.Type.parse('int *foo[][8]')
