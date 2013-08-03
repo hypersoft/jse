@@ -168,17 +168,21 @@ var parse = function parse(source) {
 		}
 	}
 
+	var dcls = new Array();
 	function declaration() {
-		getSyntax();
-		this.expect = expect(syntax.type);
+		this.expect = expectedType;
 		declarator.call(this);
-		expect(syntax.termination)
+		dcls.push(this);
 	}
 
-	b = new declaration();
+	getSyntax();
+	var expectedType = expect(syntax.type);
+	
+	do { new declaration();
+	} while (accept(syntax.comma));
 
 	echo(source)
-	echo(JSON.stringify(b, undefined, '....'))
+	echo(JSON.stringify(dcls, undefined, '....'))
 
 //	echo(JSON.stringify(b, undefined, '    '))
 }
@@ -188,7 +192,7 @@ return parse;
 })()
 
 
-JSNative.Type.parse('char foo(char, char);')
+JSNative.Type.parse('char foo(char, char), data;')
 
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
