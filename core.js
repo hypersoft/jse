@@ -44,18 +44,15 @@ var syntax = {
 
 }
 
-var main, result;
-
 var parse = function parse(source) {
 
 	// It would be nice to pack the source, but that creates error reporting issues...
 
 	var element, charPosition = 0, token, accepted;
 
-	main = Object.create(parse.prototype); result = main;
-
-	var depth = 0;
 	var types = JSNative.Type, qualifiers = {'const':true,'static':true,'volatile':true,'extern':true};
+
+	var anonymousDeclarator = false;
 
 	function getChar() {return source[charPosition++]}
 	function unGetChar() {--charPosition}
@@ -118,11 +115,10 @@ var parse = function parse(source) {
 	function pointer() {
 		if (accept(syntax.asterisk)) {
 			for(this.pointer = 1; accept(syntax.asterisk); this.pointer++);
-		} else delete this.pointer;
+		}
 	}
 
 	function declarator() {
-		this.pointer = 0;
 		pointer.call(this);
 		directDeclarator.call(this);
 	}
@@ -137,18 +133,39 @@ var parse = function parse(source) {
 		} else if (accept(syntax.termination)) {
 			throw new InvokeError("useless type name in empty declaration");
 		} else {
+			if (element == syntax.comma && anonymousDeclarator == false)
 			throw new InvokeError("expected identifier, ‘*’ or ‘(’ before ‘"+element+"’ token");
 		}
 
 		if (accept(syntax.lbracket)) {
 			this.from = 'array'
-			expect(syntax.rbracket)
+			this.dimensions = new Array();
+			if (accept(syntax.rbracket)) {
+				this.dimensions.push('');
+			}
+			while (accept(syntax.lbracket)) {
+				if (accept(syntax.number)) {
+					this.dimensions.push(token);
+				}
+				expect(syntax.rbracket)
+			}			
 		} else if (accept(syntax.lparen)) {
 			this.from = 'function'
-			this.arguments = new Array()
+			this.arguments = new Array();
+			argumentIdentiferList.call(this.arguments);
 			expect(syntax.rparen);
 		}
 
+	}
+
+	function argumentIdentiferList() {
+		var i = 0; anonymousDeclarator = true;
+		while (accept(syntax.type)) {
+			this[i] = {};
+			this[i].expect = token;
+			declarator.call(this[i++]);
+			accept(syntax.comma)
+		}
 	}
 
 	function declaration() {
@@ -170,9 +187,12 @@ return parse;
 
 })()
 
+
+JSNative.Type.parse('char foo(char, char);')
+
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
 //JSNative.Type.parse('char *(foo);')
-JSNative.Type.parse('char *(*foo)();')
-JSNative.Type.parse('char (*(*x())[])();')
+//JSNative.Type.parse('char *(*foo)();')
+//JSNative.Type.parse('char (*(*x())[][13])();')
 
