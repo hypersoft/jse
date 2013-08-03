@@ -12,6 +12,12 @@ JSNative.api.typeArray = 2048,
 JSNative.api.typeUnsigned = 4096,
 JSNative.api.typeEllipsis = 8192;
 
+// current type system does not do anything! :(
+// need methods to extract types from parsed sources, or define types,
+// as parsed sources...
+
+// parsing algo needs to remove redundant declarators to relax info access burdens
+
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
 function getUnsignedType() {
@@ -307,8 +313,7 @@ var parse = function parse(source) {
 			this.dimensions = new Array();
 			if (accept(syntax.rbracket)) {
 				this.dimensions.push('');
-			}
-			if (accept(syntax.number)) {
+			} else if (accept(syntax.number)) {
 				this.dimensions.push(token)
 				expect(syntax.rbracket)
 			}
