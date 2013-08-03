@@ -34,8 +34,6 @@ EnumTypeArray = 2048,
 EnumTypeUnsigned = 4096,
 EnumTypeEllipsis = 8192;
 
-unsigned int short foo;
-
 static JSValueRef jsNativeGetTypeSize JSToolsFunction(enumType) {
 	int enumType = JSTInteger(argv[0]), result = 0;
 
