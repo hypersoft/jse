@@ -92,7 +92,7 @@ var parse = function parse(source) {
 			unGetChar(); element = syntax.number; return
 		} else if (element == '.' && peek(2) == '..') {
 			advance(2); accepted = '...'; element = syntax.ellipsis; return
-		} else throw new SyntaxError("unused characters in parse stream at char "+charPosition);
+		} else throw new SyntaxError("Failed to parse native declarator: useless declarator character ‘"+element+"’ in parse stream at column "+charPosition);
 	}
 
 	function accept(s) {
@@ -105,7 +105,7 @@ var parse = function parse(source) {
  
 	function expect(s) {
 		if (accept(s)) return token;
-		throw new SyntaxError("char "+charPosition+": expected '"+s+"', found '"+element+"'");
+		throw new SyntaxError("Failed to parse native declarator at column "+charPosition+": expected ‘"+s+"’, found ‘"+element+"’");
 	}
 
 	function identifier() {
@@ -131,10 +131,10 @@ var parse = function parse(source) {
 			this.declarator = new declarator();
 			expect(syntax.rparen);
 		} else if (accept(syntax.termination)) {
-			throw new InvokeError("useless type name in empty declaration");
+			throw new SyntaxError("Failed to parse native declarator: useless type name in empty declaration");
 		} else {
 			if (element == syntax.comma && anonymousDeclarator == false)
-			throw new InvokeError("expected identifier, ‘*’ or ‘(’ before ‘"+element+"’ token");
+			throw new SyntaxError("faled to parse native declarator: expected ‘*’, identifier, or ‘(’ before ‘"+element+"’ token");
 		}
 
 		if (accept(syntax.lbracket)) {
@@ -166,25 +166,36 @@ var parse = function parse(source) {
 			declarator.call(this[i++]);
 			accept(syntax.comma)
 		}
+		anonymousDeclarator = false;
 	}
 
 	var dcls = new Array();
+	dcls.source = source;
 	function declaration() {
 		this.expect = expectedType;
 		declarator.call(this);
 		dcls.push(this);
 	}
 
-	getSyntax();
-	var expectedType = expect(syntax.type);
+	try { // we use internal functions, so we need to refactor any reference to an error
+		getSyntax();
+		var expectedType = expect(syntax.type);
 	
-	do { new declaration();
-	} while (accept(syntax.comma));
+		do {
+			if (accept(syntax.type)) { // That's an error
+				throw new SyntaxError("Failed to parse native declarator: expected ‘*’, identifier, or ‘(’ before ‘"+token+"’");			
+			}
+			new declaration();
+		} while (accept(syntax.comma));
+		expect(syntax.termination)
+	} catch(e) {
+		throw new InvokeError("SyntaxError", e.message);
+	}
 
-	echo(source)
-	echo(JSON.stringify(dcls, undefined, '....'))
+	// convert to pseudo-array-object so we can JSONIFY source as well.
+	var dclso = {}; extend(dclso, dcls); dclso.length = dcls.length;
+	return dclso;
 
-//	echo(JSON.stringify(b, undefined, '    '))
 }
 
 return parse;
@@ -192,7 +203,8 @@ return parse;
 })()
 
 
-JSNative.Type.parse('char foo(char, char), data;')
+result = JSNative.Type.parse('char foo(char, char), data = bing;')
+echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
