@@ -134,7 +134,7 @@ var parse = function parse(source) {
 			throw new SyntaxError("Failed to parse native declarator: useless type name in empty declaration");
 		} else {
 			if (element == syntax.comma && anonymousDeclarator == false)
-			throw new SyntaxError("faled to parse native declarator: expected ‘*’, identifier, or ‘(’ before ‘"+element+"’ token");
+			throw new SyntaxError("Failed to parse native declarator: expected ‘*’, identifier, or ‘(’ before ‘"+element+"’ token");
 		}
 
 		if (accept(syntax.lbracket)) {
@@ -203,7 +203,7 @@ return parse;
 })()
 
 
-result = JSNative.Type.parse('char foo(char, char), data = bing;')
+result = JSNative.Type.parse('char foo(char, char), data;')
 echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
