@@ -300,7 +300,7 @@ var parse = function parse(source) {
 			identifier.call(this);
 		} else if (accept(syntax.lparen)) {
 			var d = new declarator();
-			if (this.identifier === undefined && d.pointer === undefined) extend(this, d);
+			if (this.identifier === undefined && (d.pointer === undefined )) extend(this, d);
 			else this.declarator = d;
 			expect(syntax.rparen);
 		} else if (accept(syntax.termination)) {
@@ -330,6 +330,11 @@ var parse = function parse(source) {
 			this.arguments = new Array();
 			argumentIdentiferList.call(this.arguments);
 			expect(syntax.rparen);
+		} else {
+			if (this.from === undefined) {
+				var x = this.declarator; delete this.declarator;
+				extend(this, x);
+			}
 		}
 
 	}
@@ -390,7 +395,7 @@ new JSNative.Type(JSNative.api.typeFloat,		"float")
 new JSNative.Type(JSNative.api.typeDouble,		"double")
 
 //for (name in JSNative.Type) if (isNaN(name) && JSNative.Type[name].constructor == JSNative.Type) echo(name)
-result = JSNative.Type.parse('char ((*foo)(char[4], char[][4][4][2])), (data);')
+result = JSNative.Type.parse('char ((*foo)(char[4], char[][4][4][2])), (*data), *data2;')
 echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
