@@ -1,5 +1,17 @@
 #!bin/jse
 
+/* static type code definition */
+
+/*
+	number typeCode, typeSize, typeMaximum, typeMinimum
+*/
+
+/* type definition */
+
+/*
+	string name, declarator
+*/
+
 // current type system does not do anything! :(
 // need methods to extract types from parsed sources, or define types,
 // as parsed sources...
@@ -287,7 +299,9 @@ var parse = function parse(source) {
 			this.from = 'variant'
 			identifier.call(this);
 		} else if (accept(syntax.lparen)) {
-			this.declarator = new declarator();
+			var d = new declarator();
+			if (this.identifier === undefined && d.pointer === undefined) extend(this, d);
+			else this.declarator = d;
 			expect(syntax.rparen);
 		} else if (accept(syntax.termination)) {
 			throw new SyntaxError("Failed to parse native declarator: useless type name in empty declaration");
@@ -376,7 +390,7 @@ new JSNative.Type(JSNative.api.typeFloat,		"float")
 new JSNative.Type(JSNative.api.typeDouble,		"double")
 
 //for (name in JSNative.Type) if (isNaN(name) && JSNative.Type[name].constructor == JSNative.Type) echo(name)
-result = JSNative.Type.parse('char foo(char[4], char[][4][4][2]), data;')
+result = JSNative.Type.parse('char ((*foo)(char[4], char[][4][4][2])), (data);')
 echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
