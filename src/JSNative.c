@@ -286,6 +286,9 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeApiSetPrototype);
 	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
 
+	/* Native Address Alignment */
+	JSTSetProperty(RtJSNativeAPI, "addressAlignment", JSTMakeNumber(G_MEM_ALIGN), JSTPropertyRequired);
+
 	JSTSetProperty(global, "api", RtJSNativeAPI, 0);
 
 	JSTEvalScript(JSNativeInit, global, "JSNative.js"); 
