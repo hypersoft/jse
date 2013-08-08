@@ -19,7 +19,7 @@ JSNative.Tokenizer.prototype = {
 	callback:function(){
 		this.element = this.getChar(); this.scanned = this.element
 	}, scanned:'', element:'', index:0, token:'', source:'',
-	syntax:[], matchReadAhead: 4,
+	syntax:[], matchReadAhead: 4, failed:"Failed to tokenize stream",
 	getChar:function getChar() {return this.source[this.index++]},
 	unGetChar:function unGetChar() {this.index--},
 	advance:function advance(len) {this.index += len},
@@ -88,7 +88,7 @@ JSNative.Tokenizer.prototype = {
 	},
 	expect:function expect(s) {
 		if (this.accept(s)) return this.token;
-		throw new SyntaxError("Failed to tokenize stream at column "+this.index+": expected `"+s+"', found `"+this.element+"'");
+		throw new SyntaxError(this.failed+" at column "+this.index+": expected `"+s+"', found `"+this.element+"'");
 	},
 }
 
@@ -459,7 +459,7 @@ tokenizer.recognize(/^([0-9]+)(U?L|LI)?/i, "number", ';');
 tokenizer.load("	14UL;"); tokenizer.getToken();
 tokenizer.expect('number');
 echo('-n', 'value = "'+tokenizer.subExpression[0]+'"')
-echo(tokenizer.expect(';'));
+echo(tokenizer.expect(' '));
 tokenizer.expect(null)
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
