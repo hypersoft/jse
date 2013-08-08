@@ -1,19 +1,24 @@
 #!bin/jse
 
 JSNative.Tokenizer = function(getToken) {
-	this.callback = getToken,
+	if (getToken) this.callback = getToken,
 	this.syntax = new Array();
 }
 
 JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
 	this.expression = regularExpression;
 	if (name) this.name = name;
-	if (readAhead) this.readAhead = readAhead;
+	if (readAhead) {
+		if (typeof readAhead == 'number') this.readAhead = readAhead
+		else if (typeof readAhead == 'string') this.seekAhead = readAhead
+	}
 }
 
 JSNative.Tokenizer.prototype = {
 	constructor: JSNative.Tokenizer,
-	callback:function(){}, scanned:'', element:'', index:0, token:'', source:'',
+	callback:function(){
+		this.element = this.getChar(); this.scanned = this.element
+	}, scanned:'', element:'', index:0, token:'', source:'',
 	syntax:[], matchReadAhead: 4,
 	getChar:function getChar() {return this.source[this.index++]},
 	unGetChar:function unGetChar() {this.index--},
@@ -35,14 +40,25 @@ JSNative.Tokenizer.prototype = {
 		this.syntax.push(new JSNative.Tokenizer.Expression(regularExpression, name, readAhead))
 	},
 	knownToken:function(){
-		while (this.source[this.index].match(/\s/) != null) this.index++;
+		while (this.source[this.index] && this.source[this.index].match(/\s/) != null) this.index++;
+		if (this.source[this.index] === undefined) { this.getToken(); return }
 		var source = this.readString(this.matchReadAhead);
 		var syntax = this.syntax;
 		for (rule in syntax) {
 			var name = syntax[rule].name;
-			var expression = syntax[rule].expression;
+			var expression = syntax[rule].expression, match;
 			var readAhead = syntax[rule].readAhead;
-			var match = expression.exec((readAhead != undefined)?this.readString(readAhead):source);
+			if (readAhead != undefined) {
+				match = expression.exec(this.readString(readAhead));
+			} else {
+				var seekAhead = syntax[rule].seekAhead;
+				if (seekAhead != undefined) {
+					var sought = this.source.indexOf(seekAhead, this.index);
+					if (sought == -1) continue; // you missed...
+					if (sought == this.index) continue; // this ain't no 'token'
+					match = expression.exec(this.source.slice(this.index, sought))
+				} else match = expression.exec(source)
+			}
 			if (match != null) {
 				this.advance((this.scanned = match.shift()).length);
 				if (match.length) this.subExpression = match;
@@ -60,8 +76,8 @@ JSNative.Tokenizer.prototype = {
 		}
 		// if we have rules to match attempt a successful match, else if we have a callback, call it
 		if (this.syntax.length) { if (! this.knownToken() ) 
-			if (typeof this.callback == 'function') this.callback()
-		} else if (typeof this.callback == 'function') this.callback()
+			this.callback()
+		} else this.callback()
 	},
 	accept:function accept(s) {
 		if (this.element == s) {
@@ -438,11 +454,12 @@ return parse;
 //echo(JSON.stringify(result, undefined, '....'))
 //echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
 tokenizer = new JSNative.Tokenizer();
-tokenizer.recognize(/^([0-9]+)(UL)?/i, "const unsigned long", 0);
-tokenizer.load("	14UL");
-tokenizer.getToken();
-echo(tokenizer.element, 'value = "'+tokenizer.subExpression[0]+'"')
-tokenizer.getToken()
+tokenizer.recognize(/^([0-9]+)(U?L|LI)?/i, "number", ';');
+//tokenizer.recognize(/^;/i, "end of statement");
+tokenizer.load("	14UL;"); tokenizer.getToken();
+tokenizer.expect('number');
+echo('-n', 'value = "'+tokenizer.subExpression[0]+'"')
+echo(tokenizer.expect(';'));
 tokenizer.expect(null)
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
