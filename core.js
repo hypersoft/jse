@@ -56,11 +56,12 @@ JSNative.Tokenizer.prototype = {
 	getToken:function() {
 		if (this.index >= this.source.length) {
 			delete this.subExpression; this.scanned = null, this.element = null; return;
-			// leave this.token alone, it was set by accept
+			// leave this.token alone, it was set by this.accept
 		}
-		// if we have rules to match attempt a match, else if we have a callback, call it
-		if (this.syntax.length) this.knownToken()
-		else if (typeof this.callback == 'function') this.callback()
+		// if we have rules to match attempt a successful match, else if we have a callback, call it
+		if (this.syntax.length) { if (! this.knownToken() ) 
+			if (typeof this.callback == 'function') this.callback()
+		} else if (typeof this.callback == 'function') this.callback()
 	},
 	accept:function accept(s) {
 		if (this.element == s) {
@@ -441,6 +442,8 @@ tokenizer.recognize(/^([0-9]+)(UL)?/i, "const unsigned long", 0);
 tokenizer.load("	14UL");
 tokenizer.getToken();
 echo(tokenizer.element, 'value = "'+tokenizer.subExpression[0]+'"')
+tokenizer.getToken()
+tokenizer.expect(null)
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
 //JSNative.Type.parse('char *(foo);')
