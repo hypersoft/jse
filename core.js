@@ -62,6 +62,7 @@ Object.defineProperty(JSNative.Type, "defineCoreType", {value: function(typeCode
 	var type = {};
 	type.code = typeCode;
 	type.name = name;
+	type.const = false;
 	type.size = JSNative.api.getTypeSize(typeCode);
 	type.constructor = JSNative.Type
 
@@ -69,29 +70,17 @@ Object.defineProperty(JSNative.Type, "defineCoreType", {value: function(typeCode
 		type.integer = false;
 	} else {
 		type.integer = true;
-		if (name.match(/\bunsigned\b/) !== null) {
-			type.signed = false;
-		} else {
-			type.signed = true;
-		}
+		type.signed = true;
 	}
 
 	Object.seal(type)
 	Object.defineProperty(JSNative.Type, typeCode, {value:type});
 	Object.defineProperty(JSNative.Type, name, {value:type, enumerable:true});
 
-	if (type.integer == true) {
-		if (typeCode > JSNative.api.typeChar && typeCode != JSNative.api.typeInt && name.match(/\bint\b/) === null) {
+	if (type.integer == true && typeCode > JSNative.api.typeChar) {
+		if (typeCode != JSNative.api.typeInt && name.match(/\bint\b/) === null) {
 			JSNative.Type.defineCoreType(typeCode, name+' int');
 			JSNative.Type.defineCoreType(typeCode, 'int '+name);
-		}
-		if (name.match(/\bsigned\b/) === null && name.match(/\bunsigned\b/) === null) {
-			JSNative.Type.defineCoreType(typeCode, 'signed '+name);
-			JSNative.Type.defineCoreType(typeCode, name+' signed');
-		}
-		if (name.match(/\bunsigned\b/) === null && name.match(/\bsigned\b/) === null) {
-			JSNative.Type.defineCoreType(typeCode, 'unsigned '+name);
-			JSNative.Type.defineCoreType(typeCode, name+' unsigned');
 		}
 	}
 
@@ -186,7 +175,7 @@ var parse = function parse(source) {
 			for (accepted = element; (element = getChar()) != undefined && element.match(/[a-z0-9_]/i) != null; accepted += element);
 			unGetChar();
 			if (accepted in qualifiers) {
-				// these things need some validation against legality, tho' we don't use them in JSNI
+				// we used to collect words here...
 				//for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim().split(' ').pop() in qualifiers; ok = words, c++);
 				element = syntax.qualifier;
 			} else if (accepted in types && types[accepted].constructor == types) {
