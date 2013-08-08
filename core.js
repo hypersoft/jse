@@ -222,6 +222,7 @@ var parse = function parse(source) {
 
 	function typeQualifierList() {
 		while (accept(syntax.qualifier)) {
+			if (token == 'const') { this.const = true; continue; }
 			if (! this.specifier) this.specifier = [];
 			this.specifier.push(token);
 		}
@@ -302,14 +303,16 @@ var parse = function parse(source) {
 	dcls.source = source;
 	function declaration() {
 		this.expect = expectedType;
+		extend(this, theseSpecs);
 		declarator.call(this);
 		dcls.push(this);
 	}
 
 	try { // we use internal functions, so we need to refactor any reference to an error
 		getSyntax();
+		var theseSpecs = {};
+		typeQualifierList.call(theseSpecs);
 		var expectedType = expect(syntax.type);
-	
 		do {
 			if (accept(syntax.type)) { // That's an error
 				throw new SyntaxError("Failed to parse native declarator: expected `*', identifier, or `(' before `"+token+"'");			
@@ -333,7 +336,7 @@ return parse;
 
 
 for (name in JSNative.Type) echo(name)
-result = JSNative.Type.parse('char const unsigned * name')
+result = JSNative.Type.parse('const const char const unsigned * name')
 echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
