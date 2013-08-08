@@ -12,13 +12,14 @@ JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
 }
 
 JSNative.Tokenizer.prototype = {
+	constructor: JSNative.Tokenizer,
 	callback:function(){}, scanned:'', element:'', index:0, token:'', source:'',
 	syntax:[], matchReadAhead: 4,
 	getChar:function getChar() {return this.source[this.index++]},
 	unGetChar:function unGetChar() {this.index--},
 	advance:function advance(len) {this.index += len},
 	rewind:function rewind(len) {this.index += len},
-	readString:function peek(len) {return this.source.slice(this.index, this.index + len)},
+	readString:function peek(len) {return this.source.slice(this.index, (len == 0)?undefined:this.index + len)},
 	wordPeek:function wordPeek(count) {
 		var sentence = this.source.slice(this.index);
 		var wpk = new RegExp('^(\\s*\\w+\\s*){'+count+'}')
@@ -41,7 +42,7 @@ JSNative.Tokenizer.prototype = {
 			var name = syntax[rule].name;
 			var expression = syntax[rule].expression;
 			var readAhead = syntax[rule].readAhead;
-			var match = expression.exec((readAhead)?this.readString(readAhead):source);
+			var match = expression.exec((readAhead != undefined)?this.readString(readAhead):source);
 			if (match != null) {
 				this.advance((this.scanned = match.shift()).length);
 				if (match.length) this.subExpression = match;
@@ -53,6 +54,10 @@ JSNative.Tokenizer.prototype = {
 		return 0;
 	},
 	getToken:function() {
+		if (this.index >= this.source.length) {
+			delete this.subExpression; this.scanned = null, this.element = null; return;
+			// leave this.token alone, it was set by accept
+		}
 		// if we have rules to match attempt a match, else if we have a callback, call it
 		if (this.syntax.length) this.knownToken()
 		else if (typeof this.callback == 'function') this.callback()
@@ -432,7 +437,7 @@ return parse;
 //echo(JSON.stringify(result, undefined, '....'))
 //echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
 tokenizer = new JSNative.Tokenizer();
-tokenizer.recognize(/^([0-9]+)(UL)?/i, "const unsigned long", 64);
+tokenizer.recognize(/^([0-9]+)(UL)?/i, "const unsigned long", 0);
 tokenizer.load("	14UL");
 tokenizer.getToken();
 echo(tokenizer.element, 'value = "'+tokenizer.subExpression[0]+'"')
