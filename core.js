@@ -1,5 +1,75 @@
 #!bin/jse
 
+JSNative.Tokenizer = function(getToken) {
+	this.callback = getToken,
+	this.syntax = new Array();
+}
+
+JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
+	this.expression = regularExpression;
+	if (name) this.name = name;
+	if (readAhead) this.readAhead = readAhead;
+}
+
+JSNative.Tokenizer.prototype = {
+	callback:function(){}, scanned:'', element:'', index:0, token:'', source:'',
+	syntax:[], matchReadAhead: 4,
+	getChar:function getChar() {return this.source[this.index++]},
+	unGetChar:function unGetChar() {this.index--},
+	advance:function advance(len) {this.index += len},
+	rewind:function rewind(len) {this.index += len},
+	readString:function peek(len) {return this.source.slice(this.index, this.index + len)},
+	wordPeek:function wordPeek(count) {
+		var sentence = this.source.slice(this.index);
+		var wpk = new RegExp('^(\\s*\\w+\\s*){'+count+'}')
+		if ((words = wpk.exec(sentence)) != null) return words[0];
+	},
+	reset:function(source){
+		this.scanned = '', this.element = '', this.index = 0, this.token = '',
+		this.matchReadAhead = 4, this.source = (source)?source:'';
+		delete this.subExpression;
+	},
+	load:function(source){this.reset(source)},
+	recognize:function(regularExpression, name, readAhead){
+		this.syntax.push(new JSNative.Tokenizer.Expression(regularExpression, name, readAhead))
+	},
+	knownToken:function(){
+		while (this.source[this.index].match(/\s/) != null) this.index++;
+		var source = this.readString(this.matchReadAhead);
+		var syntax = this.syntax;
+		for (rule in syntax) {
+			var name = syntax[rule].name;
+			var expression = syntax[rule].expression;
+			var readAhead = syntax[rule].readAhead;
+			var match = expression.exec((readAhead)?this.readString(readAhead):source);
+			if (match != null) {
+				this.advance((this.scanned = match.shift()).length);
+				if (match.length) this.subExpression = match;
+				else delete this.subExpression;
+				this.element = (name)?name:this.scanned;
+				return 1;
+			}
+		}
+		return 0;
+	},
+	getToken:function() {
+		// if we have rules to match attempt a match, else if we have a callback, call it
+		if (this.syntax.length) this.knownToken()
+		else if (typeof this.callback == 'function') this.callback()
+	},
+	accept:function accept(s) {
+		if (this.element == s) {
+			this.token = (this.scanned)?this.scanned:this.element;
+			this.getToken(); return 1;
+		}
+		return 0;
+	},
+	expect:function expect(s) {
+		if (this.accept(s)) return this.token;
+		throw new SyntaxError("Failed to tokenize stream at column "+this.index+": expected `"+s+"', found `"+this.element+"'");
+	},
+}
+
 JSNative.api.typeVoid = 2,
 JSNative.api.typeBoolean = 4,
 JSNative.api.typeChar = 8,
@@ -9,8 +79,9 @@ JSNative.api.typeLong = 64,
 JSNative.api.typeLongLong = 128,
 JSNative.api.typeFloat = 256,
 JSNative.api.typeDouble = 512,
-JSNative.api.typePointer = 1024,
-JSNative.api.typeFunction = 2048;
+JSNative.api.typeFunction = 1024,
+JSNative.api.typeStruct = 2048,
+JSNative.api.typeUnion = 4096;
 
 
 // current type system does not do anything! :(
@@ -57,45 +128,59 @@ Object.defineProperties(JSNative.Type, {
 	classInvoke:{value:classInvoke},
 })
 
-Object.defineProperty(JSNative.Type, "defineCoreType", {value: function(typeCode, name) {
+Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, constant, indirection, dimensions) {
 
 	var type = {};
-	type.code = typeCode;
-	type.name = name;
-	type.const = false;
-	type.size = JSNative.api.getTypeSize(typeCode);
 	type.constructor = JSNative.Type
 
-	if (typeCode <= JSNative.api.typeBoolean || typeCode > JSNative.api.typeLongLong) {
-		type.integer = false;
+	type.code = typeCode;
+	type.name = name;
+	type.const = (constant)?constant:false;
+
+	if (indirection) type.indirection = indirection; // how many *'s to deref?
+	if (dimensions) type.dimensions = dimensions; // array dimensions?
+
+	// If we supported structs and unions, arguments[5] would hold the identifier list..
+
+	if (typeCode == JSNative.api.typeFunction) {
+		type.value = arguments[5];
+		type.arguments = arguments[6];
 	} else {
-		type.integer = true;
-		type.signed = true;
+		type.size = JSNative.api.getTypeSize(typeCode);
 	}
+
+	if (typeCode > JSNative.api.typeBoolean && typeCode < JSNative.api.typeFloat) {
+		type.integer = true;
+		type.signed = (arguments[5] !== undefined)?arguments[5]:true;
+	} else type.integer = false;
 
 	Object.seal(type)
 	Object.defineProperty(JSNative.Type, typeCode, {value:type});
 	Object.defineProperty(JSNative.Type, name, {value:type, enumerable:true});
 
-	if (type.integer == true && typeCode > JSNative.api.typeChar) {
-		if (typeCode != JSNative.api.typeInt && name.match(/\bint\b/) === null) {
-			JSNative.Type.defineCoreType(typeCode, name+' int');
-			JSNative.Type.defineCoreType(typeCode, 'int '+name);
-		}
-	}
-
 }})
 
 // Initialize Core Types
-JSNative.Type.defineCoreType(JSNative.api.typeVoid,		"void")
-JSNative.Type.defineCoreType(JSNative.api.typeBoolean,	"bool")
-JSNative.Type.defineCoreType(JSNative.api.typeChar,		"char")
-JSNative.Type.defineCoreType(JSNative.api.typeShort,	"short")
-JSNative.Type.defineCoreType(JSNative.api.typeInt,		"int")
-JSNative.Type.defineCoreType(JSNative.api.typeLong,		"long")
-JSNative.Type.defineCoreType(JSNative.api.typeLongLong,	"long long")
-JSNative.Type.defineCoreType(JSNative.api.typeFloat,	"float")
-JSNative.Type.defineCoreType(JSNative.api.typeDouble,	"double")
+JSNative.Type.define(JSNative.api.typeVoid,		"void")
+JSNative.Type.define(JSNative.api.typeBoolean,	"bool")
+// chars is not signed
+JSNative.Type.define(JSNative.api.typeChar,		"char", undefined, undefined, undefined, false)
+JSNative.Type.define(JSNative.api.typeShort,	"short")
+JSNative.Type.define(JSNative.api.typeShort,	"short int")
+JSNative.Type.define(JSNative.api.typeShort,	"int short")
+JSNative.Type.define(JSNative.api.typeInt,		"int")
+JSNative.Type.define(JSNative.api.typeInt,		"signed")
+// unsigned is not signed
+JSNative.Type.define(JSNative.api.typeInt,		"unsigned", undefined, undefined, undefined, false)
+JSNative.Type.define(JSNative.api.typeLong,		"long")
+JSNative.Type.define(JSNative.api.typeLong,		"long int")
+JSNative.Type.define(JSNative.api.typeLong,		"int long")
+JSNative.Type.define(JSNative.api.typeLongLong,	"long long")
+JSNative.Type.define(JSNative.api.typeLongLong,	"long long int")
+JSNative.Type.define(JSNative.api.typeLongLong,	"int long long")
+JSNative.Type.define(JSNative.api.typeLongLong,	"long double")
+JSNative.Type.define(JSNative.api.typeFloat,	"float")
+JSNative.Type.define(JSNative.api.typeDouble,	"double")
 
 })();
 
@@ -136,11 +221,25 @@ var syntax = {
 	lbracket:'[',	rbracket:']',
 	lbrace:'{',		rbrace:'}',
 	asterisk:'*',	comma:',',
-
-	qualifier:'qualifier', type:'type name', identifier:'identifier', number:'number', ellipsis:'ellipsis',
+	assign:'=',
+	
+	qualifier:'type qualifier', type:'type specifier', identifier:'variant identifier',
+	number:'constant number', ellipsis:'ellipsis',
 
 	termination:"end of statement"
 
+}
+
+var storageClasses = {
+	auto:true, register:true, 'static':true, extern:true, typedef:true
+}
+
+var typeQualifiers = { 'const':true, volatile:true }
+
+var typeSpecifiers = {
+	'void':true, char:true, short:true, int:true, long:true,
+	float:true, double:true, signed:true, unsigned:true,
+	struct:true, union:true, 'enum':true
 }
 
 var parse = function parse(source) {
@@ -149,7 +248,14 @@ var parse = function parse(source) {
 
 	var element, charPosition = 0, token, accepted;
 
-	var types = JSNative.Type, qualifiers = {'const':true,'signed':true,'unsigned':true,'extern':true};
+	var types = JSNative.Type;
+
+	var typeQualifier = { // entirely technically uncorrect, far easier parsing though..
+
+		'const':true,'volatile':true,'auto':true,'static':true,'extern':true,
+		'register':true,'typedef':true,'signed':true,'unsigned':true
+
+	};
 
 	var anonymousDeclarator = false;
 
@@ -174,9 +280,7 @@ var parse = function parse(source) {
 			/* "Smart Ass Subversive Descent Parsing" -- pc.wiz.tt */
 			for (accepted = element; (element = getChar()) != undefined && element.match(/[a-z0-9_]/i) != null; accepted += element);
 			unGetChar();
-			if (accepted in qualifiers) {
-				// we used to collect words here...
-				//for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim().split(' ').pop() in qualifiers; ok = words, c++);
+			if (accepted in typeQualifier) {
 				element = syntax.qualifier;
 			} else if (accepted in types && types[accepted].constructor == types) {
 				// the constructor of each type, must also point to the registry.
@@ -211,9 +315,8 @@ var parse = function parse(source) {
 
 	function typeQualifierList() {
 		while (accept(syntax.qualifier)) {
-			if (token == 'const') { this.const = true; continue; }
-			if (! this.specifier) this.specifier = [];
-			this.specifier.push(token);
+			if (token == 'unsigned') { this.signed = false; continue; }
+			else this[token] = true;
 		}
 	}
 
@@ -324,10 +427,15 @@ return parse;
 })()})
 
 
-for (name in JSNative.Type) echo(name)
-result = JSNative.Type.parse('const const char const unsigned * name')
-echo(JSON.stringify(result, undefined, '....'))
-
+//for (name in JSNative.Type) echo(name)
+//result = JSNative.Type.parse('const const char const unsigned * name')
+//echo(JSON.stringify(result, undefined, '....'))
+//echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
+tokenizer = new JSNative.Tokenizer();
+tokenizer.recognize(/^([0-9]+)(UL)?/i, "const unsigned long", 64);
+tokenizer.load("	14UL");
+tokenizer.getToken();
+echo(tokenizer.element, 'value = "'+tokenizer.subExpression[0]+'"')
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
 //JSNative.Type.parse('char *(foo);')
