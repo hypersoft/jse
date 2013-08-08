@@ -11,6 +11,7 @@ JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
 	if (readAhead) {
 		if (typeof readAhead == 'number') this.readAhead = readAhead
 		else if (typeof readAhead == 'string') this.seekAhead = readAhead
+		else this.scanAhead = readAhead;
 	}
 }
 
@@ -57,7 +58,21 @@ JSNative.Tokenizer.prototype = {
 					if (sought == -1) continue; // you missed...
 					if (sought == this.index) continue; // this ain't no 'token'
 					match = expression.exec(this.source.slice(this.index, sought))
-				} else match = expression.exec(source)
+				} else {
+					var scanAhead = syntax[rule].scanAhead;
+					if (scanAhead != undefined) {
+						var x, txt;
+						for (x = this.index; x <= this.source.length; x++) {
+							txt = this.source[x];
+							if (txt === undefined) txt = '';
+							if (txt.match(scanAhead)) {
+								if (x == this.index) break;
+								match = expression.exec(this.source.slice(this.index, x));
+								break;
+							}
+						}
+					} else match = expression.exec(source)
+				}
 			}
 			if (match != null) {
 				this.advance((this.scanned = match.shift()).length);
@@ -72,7 +87,7 @@ JSNative.Tokenizer.prototype = {
 	getToken:function() {
 		if (this.index >= this.source.length) {
 			delete this.subExpression; this.scanned = null, this.element = null; return;
-			// leave this.token alone, it was set by this.accept
+			// leave this.token and this.expression alone, they were set by this.accept
 		}
 		// if we have rules to match attempt a successful match, else if we have a callback, call it
 		if (this.syntax.length) { if (! this.knownToken() ) 
@@ -82,6 +97,7 @@ JSNative.Tokenizer.prototype = {
 	accept:function accept(s) {
 		if (this.element == s) {
 			this.token = (this.scanned)?this.scanned:this.element;
+			this.expression = this.subExpression;
 			this.getToken(); return 1;
 		}
 		return 0;
@@ -454,13 +470,15 @@ return parse;
 //echo(JSON.stringify(result, undefined, '....'))
 //echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
 tokenizer = new JSNative.Tokenizer();
-tokenizer.recognize(/^([0-9]+)(U?L|LI)?/i, "number", ';');
+tokenizer.recognize(/^([0-9]+)(UL)?/i, "number", /;|\W|^$/);
 //tokenizer.recognize(/^;/i, "end of statement");
-tokenizer.load("	14UL;"); tokenizer.getToken();
+tokenizer.load("	14UL "); tokenizer.getToken();
 tokenizer.expect('number');
-echo('-n', 'value = "'+tokenizer.subExpression[0]+'"')
-echo(tokenizer.expect(' '));
+echo('value = "'+tokenizer.expression[0]+'"')
+//echo(tokenizer.expect(';'));
 tokenizer.expect(null)
+echo(''.match(/^$/) != null)
+//echo(classOf(/\b/))
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
 //JSNative.Type.parse('char *(foo);')
