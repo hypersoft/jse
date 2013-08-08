@@ -9,150 +9,26 @@ JSNative.api.typeLong = 64,
 JSNative.api.typeLongLong = 128,
 JSNative.api.typeFloat = 256,
 JSNative.api.typeDouble = 512,
-JSNative.api.typeFunction = 1024,
-JSNative.api.typeEllipsis = 2048;
+JSNative.api.typePointer = 1024,
+JSNative.api.typeFunction = 2048;
 
-/* static type code definition */
-
-/*
-	number typeCode, typeSize, typeMaximum, typeMinimum
-*/
-
-/* type definition */
-
-/*
-	string name, declarator
-*/
 
 // current type system does not do anything! :(
 // need methods to extract types from parsed sources, or define types,
 // as parsed sources...
 
-// parsing algo needs to remove redundant declarators to relax info access burdens
+/* parsing algo needs to meet the following exception models
+//unsigned bool t1; //  error: both ‘unsigned’ and ‘_Bool’ in declaration specifiers
+//int bool t1; // error: two or more data types in declaration specifiers
+//signed unsigned char t2; // error: both ‘signed’ and ‘unsigned’ in declaration specifiers
+//signed signed char t2; // error: duplicate ‘signed’
+*/
 
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
-function getUnsignedType() {
-	var unsigned;
-	if ((unsigned = JSNative.Type[this.name+' unsigned'])) return unsigned;
-	if ((unsigned = JSNative.Type['unsigned '+this.name])) return unsigned;
-	return JSNative.Type[this.type | JSNative.api.typeUnsigned]
-}
-
-function getSignedType() {
-	var signed;
-	if ((signed = JSNative.Type[this.name+' signed'])) return signed;
-	if ((signed = JSNative.Type['signed '+this.name])) return signed;
-	return JSNative.Type[this & ~JSNative.api.typeUnsigned]
-}
-
-function getArrayType() {
-	if (this.type == JSNative.api.typeVoid) return;
-	var array;
-	if ((array = JSNative.Type[this.name+'[]'])) return array;
-	if ((array = JSNative.Type[this.name+' **'])) return array;
-	return JSNative.Type[this | JSNative.api.typeArray]
-}
-
-function getTypeNames() {
-	var names = [];
-	for (name in JSNative.Type) if (isNaN(name) && JSNative.Type[name].type == this.type) names.push(name)
-	return names;
-}
-
-function getPointerType() {
-	var pointer;
-	if ((pointer = JSNative.Type[this.name+' *'])) return pointer;
-	if ((pointer = JSNative.Type[this.name+'*'])) return pointer;
-	return JSNative.Type['void'].pointer;
-};
-
-function isIntegerType(code) { return (code & (8|16|32|64|128|1024))}
 
 var classConstruct = function(code, name){
 
-	code = Number(code);
-
-	if ((code & JSNative.api.typeEllipsis) != 0) { // That's an error
-		throw new InvokeError("TypeError", "invalid type code "+code+" (ellipsis)");		
-	}
-
-	// Validate unsigned flag
-	if ((code & (JSNative.api.typeUnsigned)) != 0) {
-		if ((code & (JSNative.api.typeVoid)) || code == JSNative.api.typeUnsigned)
-		throw new InvokeError("TypeError", "invalid type code "+code+" (unsigned void)");		
-		if ((code & (JSNative.api.typeBoolean)))
-		throw new InvokeError("TypeError", "invalid type code "+code+" (unsigned boolean)");		
-		if ((code & (JSNative.api.typeFloat)))
-		throw new InvokeError("TypeError", "invalid type code "+code+" (unsigned float)");		
-		if ((code & (JSNative.api.typeDouble)))
-		throw new InvokeError("TypeError", "invalid type code "+code+" (unsigned double)");		
-	}
-
-	this.type = code, this.name = name;
-
-	// type size is a constant defined on the 'type definition' for optimal performance
-	Object.defineProperty(this, 'size', {value: JSNative.api.getTypeSize(this), enumerable:true})
-
-	// The first definition of a code is its "native representation"
-	// don't overwrite codes that have been written.
-	if (code in this.constructor); else this.constructor[code] = this;
-
-	// The name of a type is its alias
-	// don't overwrite an alias that has been written
-	if (name in this.constructor) {
-		throw new InvokeError("TypeError", "type name '"+name+"' is already registered");
-	} else {
-		this.constructor[name] = this;
-	}
-
-	// I'm deprecating the auto pointer and array definitions, as we (now) have more advanced
-	// algorithms in place to help sort out the mess.
-
-	if ((code & (JSNative.api.typePointer | JSNative.api.typeArray) ) == 0) {
-		//var ptrType = new JSNative.Type(code | JSNative.api.typePointer, name+' *');
-		//var arrType;
-		//if (code != JSNative.api.typeVoid) arrType = new JSNative.Type(code | JSNative.api.typeArray, name+'[]');
-		//var ptrArrayType = new JSNative.Type(code | JSNative.api.typePointer | JSNative.api.typeArray, name+' *[]')
-		//var ptrPointerType = new JSNative.Type(code | JSNative.api.typePointer | JSNative.api.typeArray, name+' **')
-		if (code & (JSNative.api.typeShort | JSNative.api.typeLong | JSNative.api.typeLongLong)) {
-			JSNative.Type["int "+name] = this;
-			JSNative.Type[name+" int"] = this;
-			//JSNative.Type["int "+name+' *'] = ptrType;
-			//JSNative.Type[name+" int *"] = ptrType;
-			//JSNative.Type["int "+name+'[]'] = arrType;
-			//JSNative.Type[name+" int[]"] = arrType;
-			//JSNative.Type["int "+name+' *[]'] = ptrArrayType;
-			//JSNative.Type[name+" int *[]"] = ptrArrayType;
-			//JSNative.Type[name+" int **"] = ptrPointerType;
-		} else {
-			//JSNative.Type[name+" **"] = ptrPointerType;
-		}
-	}
-
-	// is it an integer type?
-	Object.defineProperty(this, "integer", {value: isIntegerType(code), enumerable:true})
-
-	if (this.integer) {
-		if (name.match(/(un)?signed|\*$|\[\]$/));
-		else {
-			var unsignedName = "unsigned "+name
-			if (unsignedName in JSNative.Type); else new JSNative.Type(code | JSNative.api.typeUnsigned, unsignedName);
-
-			unsignedName = name+" unsigned"
-			if (unsignedName in JSNative.Type); else new JSNative.Type(code | JSNative.api.typeUnsigned, unsignedName);
-		}
-		if (name.match(/(un)?signed|\*$|\[\]$/));
-		else {
-			var signedName = "signed "+name
-			if (signedName in JSNative.Type); else new JSNative.Type(code, signedName);
-
-			signedName = name+" signed"
-			if (signedName in JSNative.Type); else new JSNative.Type(code, signedName);
-		}
-		Object.defineProperty(this, 'unsigned', {get:getUnsignedType, enumerable:true})
-		Object.defineProperty(this, 'signed', {get:getSignedType, enumerable:true})
-	}
 
 
 }
@@ -169,21 +45,72 @@ new JSNative.Class
 	{ /* class methods (constructor methods) */
 		classConstruct:classConstruct,
 		classInvoke:classInvoke,
-		sizeOf: function(typeId) {return this[typeId].size},
-		isInteger:function(typeId){return this[typeId].integer},
-		isUnsigned:function(typeId){return (this[typeId] & JSNative.api.typeUnsigned)}
 	}
 )
 
-Object.defineProperties(JSNative.Type.prototype, {
-	pointer:{get:getPointerType, enumerable:true},
-	array:{get:getArrayType, enumerable:true},
-	names:{get:getTypeNames, enumerable:true}
+
+delete JSNative.Type.classConstruct
+delete JSNative.Type.classInvoke
+
+Object.defineProperties(JSNative.Type, {
+	classConstruct:{value:classConstruct},
+	classInvoke:{value:classInvoke},
 })
+
+Object.defineProperty(JSNative.Type, "defineCoreType", {value: function(typeCode, name) {
+
+	var type = {};
+	type.code = typeCode;
+	type.name = name;
+	type.size = JSNative.api.getTypeSize(typeCode);
+	type.constructor = JSNative.Type
+
+	if (typeCode <= JSNative.api.typeBoolean || typeCode > JSNative.api.typeLongLong) {
+		type.integer = false;
+	} else {
+		type.integer = true;
+		if (name.match(/\bunsigned\b/) !== null) {
+			type.signed = false;
+		} else {
+			type.signed = true;
+		}
+	}
+
+	Object.seal(type)
+	Object.defineProperty(JSNative.Type, typeCode, {value:type});
+	Object.defineProperty(JSNative.Type, name, {value:type, enumerable:true});
+
+	if (type.integer == true) {
+		if (typeCode > JSNative.api.typeChar && typeCode != JSNative.api.typeInt && name.match(/\bint\b/) === null) {
+			JSNative.Type.defineCoreType(typeCode, name+' int');
+			JSNative.Type.defineCoreType(typeCode, 'int '+name);
+		}
+		if (name.match(/\bsigned\b/) === null && name.match(/\bunsigned\b/) === null) {
+			JSNative.Type.defineCoreType(typeCode, 'signed '+name);
+			JSNative.Type.defineCoreType(typeCode, name+' signed');
+		}
+		if (name.match(/\bunsigned\b/) === null && name.match(/\bsigned\b/) === null) {
+			JSNative.Type.defineCoreType(typeCode, 'unsigned '+name);
+			JSNative.Type.defineCoreType(typeCode, name+' unsigned');
+		}
+	}
+
+}})
+
+// Initialize Core Types
+JSNative.Type.defineCoreType(JSNative.api.typeVoid,		"void")
+JSNative.Type.defineCoreType(JSNative.api.typeBoolean,	"bool")
+JSNative.Type.defineCoreType(JSNative.api.typeChar,		"char")
+JSNative.Type.defineCoreType(JSNative.api.typeShort,	"short")
+JSNative.Type.defineCoreType(JSNative.api.typeInt,		"int")
+JSNative.Type.defineCoreType(JSNative.api.typeLong,		"long")
+JSNative.Type.defineCoreType(JSNative.api.typeLongLong,	"long long")
+JSNative.Type.defineCoreType(JSNative.api.typeFloat,	"float")
+JSNative.Type.defineCoreType(JSNative.api.typeDouble,	"double")
 
 })();
 
-JSNative.Type.parse = (function() {
+Object.defineProperty(JSNative.Type, "parse", {value: (function() {
 
 /* C "dcl" grammar
 
@@ -233,7 +160,7 @@ var parse = function parse(source) {
 
 	var element, charPosition = 0, token, accepted;
 
-	var types = JSNative.Type, qualifiers = {'const':true,'static':true,'volatile':true,'extern':true};
+	var types = JSNative.Type, qualifiers = {'const':true,'signed':true,'unsigned':true,'extern':true};
 
 	var anonymousDeclarator = false;
 
@@ -260,15 +187,13 @@ var parse = function parse(source) {
 			unGetChar();
 			if (accepted in qualifiers) {
 				// these things need some validation against legality, tho' we don't use them in JSNI
-				for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim().split(' ').pop() in qualifiers; ok = words, c++);
+				//for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim().split(' ').pop() in qualifiers; ok = words, c++);
 				element = syntax.qualifier;
 			} else if (accepted in types && types[accepted].constructor == types) {
-				// type registry must be robust and stupid, containing all possible type designations
-				// such as: char, signed char, char signed, unsigned char, char unsigned, etc...
 				// the constructor of each type, must also point to the registry.
 				for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim() in types; ok = words, c++);
 				element = syntax.type;
-			} else element = syntax.identifier;
+			} else element = syntax.name;
 			if (ok) { advance(ok.length - accepted.length); accepted = ok.trim() }; return
 		} else if (element.match(/[0-9]/) != null) {
 			for (accepted = element; (element = getChar()) != undefined && element.match(/[0-9]/) != null; accepted += element);
@@ -292,12 +217,23 @@ var parse = function parse(source) {
 	}
 
 	function identifier() {
-		this.identifier = token;
+		this.name = token;
+	}
+
+	function typeQualifierList() {
+		while (accept(syntax.qualifier)) {
+			if (! this.specifier) this.specifier = [];
+			this.specifier.push(token);
+		}
 	}
 
 	function pointer() {
 		if (accept(syntax.asterisk)) {
 			for(this.pointer = 1; accept(syntax.asterisk); this.pointer++);
+		}
+		typeQualifierList.call(this);
+		if (element == syntax.asterisk) {
+			pointer.call(this);
 		}
 	}
 
@@ -307,12 +243,12 @@ var parse = function parse(source) {
 	}
 
 	function directDeclarator() {
-		if (accept(syntax.identifier)) {
+		if (accept(syntax.name)) {
 			this.from = 'variant'
 			identifier.call(this);
 		} else if (accept(syntax.lparen)) {
 			var d = new declarator();
-			if (this.identifier === undefined && (d.pointer === undefined )) extend(this, d);
+			if (this.name === undefined && (d.pointer === undefined )) extend(this, d);
 			else this.declarator = d;
 			expect(syntax.rparen);
 		} else if (accept(syntax.termination)) {
@@ -393,21 +329,11 @@ var parse = function parse(source) {
 
 return parse;
 
-})()
+})()})
 
-// Initialize Native Types
-new JSNative.Type(JSNative.api.typeVoid,		"void")
-new JSNative.Type(JSNative.api.typeBoolean,		"bool")
-new JSNative.Type(JSNative.api.typeChar,		"char")
-new JSNative.Type(JSNative.api.typeShort,		"short")
-new JSNative.Type(JSNative.api.typeInt,			"int")
-new JSNative.Type(JSNative.api.typeLong,		"long")
-new JSNative.Type(JSNative.api.typeLongLong,	"long long")
-new JSNative.Type(JSNative.api.typeFloat,		"float")
-new JSNative.Type(JSNative.api.typeDouble,		"double")
 
-//for (name in JSNative.Type) if (isNaN(name) && JSNative.Type[name].constructor == JSNative.Type) echo(name)
-result = JSNative.Type.parse('char ((*foo)(char[4], char[][4][4][2])), (*data), *data2;')
+for (name in JSNative.Type) echo(name)
+result = JSNative.Type.parse('char const unsigned * name')
 echo(JSON.stringify(result, undefined, '....'))
 
 //JSNative.Type.parse('char (data);')
