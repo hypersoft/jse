@@ -114,7 +114,7 @@ JSNative.Tokenizer.prototype = {
 			}
 			delete this.subExpression;
 			if (classOf(expression) == 'RegExp') { // when regexp we match data
-				if (data) match.exec(data); else match.exec(source);
+				if (!data) data = source; match = expression.exec(data)
 				if (match != null) {
 					this.advance((this.scanned = match.shift()).length);
 					if (match.length) this.subExpression = match;
