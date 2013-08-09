@@ -5,16 +5,16 @@ JSNative.Tokenizer = function(getToken) {
 	this.syntax = new Array();
 }
 
-JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
-	this.expression = regularExpression;
-	if (name) this.name = name;
-	if (readAhead) {
+JSNative.Tokenizer.Expression = function(operationClass, elementName, selector) {
+	this.expression = operationClass;
+	if (elementName) this.name = elementName; // optional, if not present, "elementName == scanned data"
+	if (selector) {
 		// numbers are a string slice
-		if (typeof readAhead == 'number') this.readAhead = readAhead
+		if (typeof selector == 'number') this.readAhead = selector
 		// strings are a single case indexOf search
-		else if (typeof readAhead == 'string') this.seekAhead = readAhead
-		// regexps are a char by char match with exp.
-		else if (classOf(readAhead) == 'RegExp') this.scanAhead = readAhead;
+		else if (typeof selector == 'string') this.seekAhead = selector
+		// regexps are a single char by expression match.
+		else if (classOf(selector) == 'RegExp') this.scanAhead = selector;
 	}
 }
 
@@ -114,17 +114,17 @@ JSNative.Tokenizer.prototype = {
 			this.callback()
 		} else this.callback()
 	},
-	accept:function accept(s) {
-		if (this.element == s) {
+	accept:function accept(elementName) {
+		if (this.element == elementName) {
 			this.token = (this.scanned)?this.scanned:this.element;
 			this.expression = this.subExpression;
 			this.getToken(); return 1;
 		}
 		return 0;
 	},
-	expect:function expect(s) {
-		if (this.accept(s)) return this.token;
-		throw new SyntaxError(this.failed+" at column "+this.index+": expected `"+s+"', found `"+this.element+"'");
+	expect:function expect(elementName) {
+		if (this.accept(elementName)) return this.token;
+		throw new SyntaxError(this.failed+" at column "+this.index+": expected `"+elementName+"', found `"+this.element+"'");
 	},
 }
 
@@ -198,19 +198,22 @@ Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, 
 	if (indirection) type.indirection = indirection; // how many *'s to deref?
 	if (dimensions) type.dimensions = dimensions; // array dimensions?
 
-	// If we supported structs and unions, arguments[5] would hold the identifier list..
-
 	if (typeCode == JSNative.api.typeFunction) {
 		type.value = arguments[5];
 		type.arguments = arguments[6];
+	} else if (typeCode == JSNative.api.typeStruct) {
+		// not supported...
+		// If we supported structs and unions, arguments[5] would hold the identifier list..
+	} else if (typeCode == JSNative.api.typeUnion) {
+		// not supported...
+		// If we supported structs and unions, arguments[5] would hold the identifier list..
 	} else {
 		type.size = JSNative.api.getTypeSize(typeCode);
+		if (typeCode > JSNative.api.typeBoolean && typeCode < JSNative.api.typeFloat) {
+			type.integer = true;
+			type.signed = (arguments[5] !== undefined)?arguments[5]:true;
+		} else type.integer = false;
 	}
-
-	if (typeCode > JSNative.api.typeBoolean && typeCode < JSNative.api.typeFloat) {
-		type.integer = true;
-		type.signed = (arguments[5] !== undefined)?arguments[5]:true;
-	} else type.integer = false;
 
 	Object.seal(type)
 	Object.defineProperty(JSNative.Type, typeCode, {value:type});
