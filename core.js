@@ -177,15 +177,6 @@ new JSNative.Class
 	}
 )
 
-
-delete JSNative.Type.classConstruct
-delete JSNative.Type.classInvoke
-
-Object.defineProperties(JSNative.Type, {
-	classConstruct:{value:classConstruct},
-	classInvoke:{value:classInvoke},
-})
-
 Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, constant, indirection, dimensions) {
 
 	var type = {};
@@ -488,7 +479,7 @@ return parse;
 })()})
 
 
-//for (name in JSNative.Type) echo(name)
+for (name in JSNative.Type) echo(name)
 //result = JSNative.Type.parse('const const char const unsigned * name')
 //echo(JSON.stringify(result, undefined, '....'))
 //echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
