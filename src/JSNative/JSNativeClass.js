@@ -31,7 +31,7 @@ var Class = function Class(name, instanceMethods, classMethods){
 
 	Object.defineProperties(thisClass, {prototype:{get: function() {return prototype}}})
 	
-	return extend(thisClass, classMethods)
+	return extendPrototype(thisClass, classMethods)
 
 }
 
