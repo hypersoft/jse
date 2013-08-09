@@ -1,19 +1,5 @@
 #!bin/jse
 
-JSNative.api.typeVoid = 2,
-JSNative.api.typeBoolean = 4,
-JSNative.api.typeChar = 8,
-JSNative.api.typeShort = 16,
-JSNative.api.typeInt = 32,
-JSNative.api.typeLong = 64,
-JSNative.api.typeLongLong = 128,
-JSNative.api.typeFloat = 256,
-JSNative.api.typeDouble = 512,
-JSNative.api.typeFunction = 1024,
-JSNative.api.typeStruct = 2048,
-JSNative.api.typeUnion = 4096;
-
-
 // current type system does not do anything! :(
 // need methods to extract types from parsed sources, or define types,
 // as parsed sources...
@@ -27,10 +13,7 @@ JSNative.api.typeUnion = 4096;
 
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
-
 var classConstruct = function(code, name){
-
-
 
 }
 
@@ -87,7 +70,7 @@ Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, 
 // Initialize Core Types
 JSNative.Type.define(JSNative.api.typeVoid,		"void")
 JSNative.Type.define(JSNative.api.typeBoolean,	"bool")
-// chars is not signed
+// char is not signed
 JSNative.Type.define(JSNative.api.typeChar,		"char", undefined, undefined, undefined, false)
 JSNative.Type.define(JSNative.api.typeShort,	"short")
 JSNative.Type.define(JSNative.api.typeShort,	"short int")
@@ -147,23 +130,24 @@ var syntax = {
 	asterisk:'*',	comma:',',
 	assign:'=',
 	
-	storage:'storage class', qualifier:'type qualifier', type:'type specifier',
 	identifier:'variant identifier', number:'constant number', ellipsis:'ellipsis',
 
-	termination:"end of statement"
+	termination:"end of statement",
 
-}
+	storage:'storage class', storageClass: {
+		auto:true, register:true, 'static':true, extern:true, typedef:true
+	},
 
-var storageClasses = {
-	auto:true, register:true, 'static':true, extern:true, typedef:true
-}
+	qualifier:'type qualifier', typeQualifier: {
+		'const':true, volatile:true
+	},
 
-var typeQualifiers = { 'const':true, volatile:true }
+	type:'type specifier', typeSpecifier: {
+		'void':true, char:true, short:true, int:true, long:true,
+		float:true, double:true, signed:true, unsigned:true,
+		struct:true, union:true, 'enum':true
+	}
 
-var typeSpecifiers = {
-	'void':true, char:true, short:true, int:true, long:true,
-	float:true, double:true, signed:true, unsigned:true,
-	struct:true, union:true, 'enum':true
 }
 
 var parse = function parse(source) {
