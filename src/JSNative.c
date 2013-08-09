@@ -29,47 +29,12 @@ EnumTypeLong = 64,
 EnumTypeLongLong = 128,
 EnumTypeFloat = 256,
 EnumTypeDouble = 512,
-EnumTypePointer = 1024,
-EnumTypeFunction = 2048;
-
-static JSValueRef jsNativeGetTypeMax JSToolsFunction(enumType) {
-	int enumType = JSTInteger(argv[0]), result = 0;
-
-	if (enumType & EnumTypePointer) {
-		result = sizeof(void*); goto makeResult;
-	} 
-
-	if (enumType & EnumTypeVoid) goto makeResult;
-	else if (enumType & EnumTypeBoolean) {
-		result = sizeof(bool); goto makeResult;
-	} else if (enumType & EnumTypeChar) {
-		result = sizeof(char); goto makeResult;
-	} else if (enumType & EnumTypeShort) {
-		result = sizeof(short); goto makeResult;
-	} else if (enumType & EnumTypeInt) {
-		result = sizeof(int); goto makeResult;
-	} else if (enumType & EnumTypeLong) {
-		result = sizeof(long); goto makeResult;
-	} else if (enumType & EnumTypeLongLong) {
-		result = sizeof(long long); goto makeResult;
-	} else if (enumType & EnumTypeFloat) {
-		result = sizeof(float); goto makeResult;
-	} else if (enumType & EnumTypeDouble) {
-		result = sizeof(double); goto makeResult;
-	} else /* that's an error */ JSTTypeError("JSNative.api.getTypeSize: invalid type code");
-
-	return RtJS(undefined);
-
-makeResult:
-	return JSTMakeNumber(result);
-}
+EnumTypeFunction = 1024,
+EnumTypeStruct = 2048,
+EnumTypeUnion = 4096;
 
 static JSValueRef jsNativeGetTypeSize JSToolsFunction(enumType) {
 	int enumType = JSTInteger(argv[0]), result = 0;
-
-	if (enumType & EnumTypePointer) {
-		result = sizeof(void*); goto makeResult;
-	} 
 
 	if (enumType & EnumTypeVoid) goto makeResult;
 	else if (enumType & EnumTypeBoolean) {
