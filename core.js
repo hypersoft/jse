@@ -9,9 +9,12 @@ JSNative.Tokenizer.Expression = function(regularExpression, name, readAhead) {
 	this.expression = regularExpression;
 	if (name) this.name = name;
 	if (readAhead) {
+		// numbers are a string slice
 		if (typeof readAhead == 'number') this.readAhead = readAhead
+		// strings are a single case indexOf search
 		else if (typeof readAhead == 'string') this.seekAhead = readAhead
-		else this.scanAhead = readAhead;
+		// regexps are a char by char match with exp.
+		else if (classOf(readAhead) == 'RegExp') this.scanAhead = readAhead;
 	}
 }
 
@@ -47,17 +50,17 @@ JSNative.Tokenizer.prototype = {
 		var syntax = this.syntax;
 		for (rule in syntax) {
 			var name = syntax[rule].name;
-			var expression = syntax[rule].expression, match;
+			var expression = syntax[rule].expression, match, data;
 			var readAhead = syntax[rule].readAhead;
 			if (readAhead != undefined) {
-				match = expression.exec(this.readString(readAhead));
+				data = this.readString(readAhead);
 			} else {
 				var seekAhead = syntax[rule].seekAhead;
 				if (seekAhead != undefined) {
 					var sought = this.source.indexOf(seekAhead, this.index);
 					if (sought == -1) continue; // you missed...
 					if (sought == this.index) continue; // this ain't no 'token'
-					match = expression.exec(this.source.slice(this.index, sought))
+					data = this.source.slice(this.index, sought);
 				} else {
 					var scanAhead = syntax[rule].scanAhead;
 					if (scanAhead != undefined) {
@@ -67,20 +70,37 @@ JSNative.Tokenizer.prototype = {
 							if (txt === undefined) txt = '';
 							if (txt.match(scanAhead)) {
 								if (x == this.index) break;
-								match = expression.exec(this.source.slice(this.index, x));
+								data = this.source.slice(this.index, x);
 								break;
 							}
 						}
-					} else match = expression.exec(source)
+					}
 				}
 			}
-			if (match != null) {
-				this.advance((this.scanned = match.shift()).length);
-				if (match.length) this.subExpression = match;
-				else delete this.subExpression;
-				this.element = (name)?name:this.scanned;
-				return 1;
-			}
+			delete this.subExpression;
+			if (classOf(expression) == 'RegExp') { // when regexp we match data
+				if (data) match.exec(data); else match.exec(source);
+				if (match != null) {
+					this.advance((this.scanned = match.shift()).length);
+					if (match.length) this.subExpression = match;
+					this.element = (name)?name:this.scanned;
+					return 1;
+				}
+			} else if (classOf(expression) == 'Object') { // when object we match keys
+				if (!data) data = source; var key
+				for (key in expression) if (key == data) {
+					this.scanned = key; this.advance(this.scanned.length);
+					this.element = (name)?name:this.scanned;
+					return 1;				
+				}
+			} else if (classOf(expression) == 'Array') { // when array we match index data
+				if (!data) data = source; var index
+				for (index in expression) if (expression[index] == data) {
+					this.scanned = expression[index]; this.advance(this.scanned.length);
+					this.element = (name)?name:this.scanned;
+					return 1;				
+				}
+			} // might want to error out here..
 		}
 		return 0;
 	},
@@ -261,8 +281,8 @@ var syntax = {
 	asterisk:'*',	comma:',',
 	assign:'=',
 	
-	qualifier:'type qualifier', type:'type specifier', identifier:'variant identifier',
-	number:'constant number', ellipsis:'ellipsis',
+	storage:'storage class', qualifier:'type qualifier', type:'type specifier',
+	identifier:'variant identifier', number:'constant number', ellipsis:'ellipsis',
 
 	termination:"end of statement"
 
@@ -470,14 +490,13 @@ return parse;
 //echo(JSON.stringify(result, undefined, '....'))
 //echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
 tokenizer = new JSNative.Tokenizer();
-tokenizer.recognize(/^([0-9]+)(UL)?/i, "number", /;|\W|^$/);
+tokenizer.recognize({'one':true,'two':true}, "word number", /;|\W|^$/);
 //tokenizer.recognize(/^;/i, "end of statement");
-tokenizer.load("	14UL "); tokenizer.getToken();
-tokenizer.expect('number');
-echo('value = "'+tokenizer.expression[0]+'"')
+tokenizer.load("one"); tokenizer.getToken();
+tokenizer.expect('word number');
+echo('value = "'+tokenizer.token+'"')
 //echo(tokenizer.expect(';'));
 tokenizer.expect(null)
-echo(''.match(/^$/) != null)
 //echo(classOf(/\b/))
 //JSNative.Type.parse('char (data);')
 //JSNative.Type.parse('char foo[];')
