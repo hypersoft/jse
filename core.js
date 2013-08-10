@@ -91,44 +91,134 @@ JSNative.Type.define(JSNative.api.typeDouble,	"double")
 
 })();
 
-Object.defineProperty(JSNative.Type, "parse", {value: (function() {
+/* C Declaration Grammar Reference Notes
 
-/* C "dcl" grammar
+	copied from "The C Programming Language: Second Editon" pp. 169-174
+
+	declaration:
+	declaration-specifiers init-declarator-list?;
+
+	declaration-specifiers:
+	storage-class-specifier declaration-specifiers?
+	type-specifier declaration-specifiers?
+	type-qualifier declaration-specifiers?
+
+	init-declarator-list:
+	init-declarator
+	init-declarator-list , init-declarator
+
+	init-declarator:
+	declarator
+	declarator = initializer
+
+	storage-class specifier:
+	auto
+	register
+	static
+	extern
+	typedef
+
+	type specifier:
+	void
+	char
+	short
+	int
+	long
+	float
+	double
+	signed
+	unsigned
+	struct-or-union-specifier
+	enum-specifier
+	typedef-name
+
+	type-qualifier:
+	const
+	volatile
 
 	declarator:
-		pointer? direct-declarator
+	pointer? direct-declarator
 
 	direct-declarator:
-		identifier
-		( declarator )
-		direct-declarator [ constant-expression? ]
-		direct-declarator ( identifier-list? )
-		direct-declarator ( parameter-type-list )
+	identifier
+	(declarator)
+	direct-declarator [ constant-expression? ]
+	direct-declarator ( parameter-type-list )
+	direct-declarator ( identifier-list? )
+
+	parameter-type-list:
+	parameter-list
+	parameter-list , ...
+
+	parameter-list:
+	parameter-declaration
+	parameter-list , parameter-declaration
+
+	parameter-declaration:
+	declaration-specifiers declarator
+	declaration-specifiers abstract-declarator?
 
 	pointer:
-		* type-qualifier-list?
-		* type-qualifier-list? pointer
+	* type-qualifier-list?
+	* type-qualifier-list? pointer
 
 	type-qualifier-list:
-		type-qualifier
-		type-qualifier-list type-qualifier
-
-Outsourced from
-"The C Programming Language 2nd Ed." (Prentice Hall) pp. 101, 174
-
-Modeled after: http://en.wikipedia.org/wiki/Recursive_descent_parser#C_implementation (July 31st, 2013)
-
-Author: Triston J. Taylor pc.wiz.tt@gmail.com
+	type-qualifier
+	type-qualifier-list type-qualifier
 
 */
 
-var syntax = {
+/* cut: Struct, Union, Enum Stuff	NOT CURRENTLY AVAILABLE
+
+	struct-or-union-specifier:
+	struct-or-union identifier? { struct-declaration-list }
+	struct-or-union identifier
+
+	struct-or-union:
+	struct
+	union
+
+	struct-declaration-list:
+	struct declaration
+	struct-declaration-list struct declaration
+
+	struct-declaration:
+	specifier-qualifier-list struct-declarator-list;
+
+	specifier-qualifier-list:
+	type-specifier specifier-qualifier-list?
+	type-qualifier specifier-qualifier-list?
+
+	struct-declarator-list:
+	struct-declarator
+	struct-declarator-list , struct-declarator
+
+	struct-declarator:
+	declarator declarator? : constant-expression
+
+	enum-specifier:
+	enum identifier? { enumerator-list }
+	enum identifier
+
+	enumerator-list:
+	enumerator
+	enumerator-list , enumerator
+
+	enumerator:
+	identifier
+	identifier = constant-expression
+
+*/
+
+function Declaration() {}
+
+Declaration.syntax = {
 
 	lparen:'(',		rparen:')',
 	lbracket:'[',	rbracket:']',
 	lbrace:'{',		rbrace:'}',
 	asterisk:'*',	comma:',',
-	assign:'=',
+	assign:'=',		semicolon:';',
 	
 	identifier:'variant identifier', number:'constant number', ellipsis:'ellipsis',
 
@@ -142,7 +232,7 @@ var syntax = {
 		'const':true, volatile:true
 	},
 
-	type:'type specifier', typeSpecifier: {
+	type:'type specifier', typeSpecifier: { // not used -/-/--> JSNative.Type[]
 		'void':true, char:true, short:true, int:true, long:true,
 		float:true, double:true, signed:true, unsigned:true,
 		struct:true, union:true, 'enum':true
@@ -150,207 +240,191 @@ var syntax = {
 
 }
 
-var parse = function parse(source) {
+Declaration.parse = function(source) {
 
-	// It would be nice to pack the source, but that creates error reporting issues...
+	if (typeof source == 'string') this.source = source
+	else throw new TypeError('unable to parse declaration: expected source type string')
+	if (source.length == 0) throw new SyntaxError('unable to parse declaration: source data empty')
 
-	var element, charPosition = 0, token, accepted;
+	var syntax = Declaration.syntax, tokenizer = new JSNative.Tokenizer();
+	tokenizer.originalCallback = tokenizer.callback; // we'll use this to init our callback...
+	tokenizer.load(source);
 
-	var types = JSNative.Type;
+	var selectWord = /\W|^$/
 
-	var typeQualifier = { // entirely technically uncorrect, far easier parsing though..
+	tokenizer.recognize(/[\(\)\[\]\{\}\,\*\=]/)
+	tokenizer.recognize(syntax.storageClass, syntax.storage, selectWord)
+	tokenizer.recognize(syntax.typeQualifier, syntax.qualifier, selectWord)
+	tokenizer.recognize(/\.\.\./, syntax.ellipsis, 3)
+	tokenizer.recognize(/^([0-9]+)(UL|U|L)?/i, syntax.number, /\s|;|\]|^$/)
+	tokenizer.recognize(['struct','union','enum'], syntax.type, selectWord)
 
-		'const':true,'volatile':true,'auto':true,'static':true,'extern':true,
-		'register':true,'typedef':true,'signed':true,'unsigned':true
-
-	};
-
-	var anonymousDeclarator = false;
-
-	function getChar() {return source[charPosition++]}
-	function unGetChar() {--charPosition}
-
-	function advance(len) {charPosition += len}
-	function peek(len) {return source.slice(charPosition, charPosition + len)}
-
-	function wordPeek(count) { /* type check hack for getSyntax */
-		var sentence = source.slice(charPosition);
-		var wpk = new RegExp('^(\\s*\\w+\\s*){'+count+'}')
-		if ((words = wpk.exec(sentence)) != null) return words[0];
-	}
-
-	function getSyntax() {
-		var ok, c, words; accepted = ''
-		while ((element = getChar()) !== undefined && element.match(/\s/) != null);
-		if (element === undefined || element == ';') { element = syntax.termination; return; }
-		if (element.match(/[\(\)\[\]{},\*]/) != null) return // we parse simple elements here, not constructs
-		if (element.match(/[a-z_]/i) != null) {
-			/* "Smart Ass Subversive Descent Parsing" -- pc.wiz.tt */
-			for (accepted = element; (element = getChar()) != undefined && element.match(/[a-z0-9_]/i) != null; accepted += element);
-			unGetChar();
-			if (accepted in typeQualifier) {
-				element = syntax.qualifier;
-			} else if (accepted in types && types[accepted].constructor == types) {
-				// the constructor of each type, must also point to the registry.
-				for(c = 1; (words = accepted + wordPeek(c)).replace(/\s+/gm, ' ').trim() in types; ok = words, c++);
-				element = syntax.type;
-			} else element = syntax.name;
-			if (ok) { advance(ok.length - accepted.length); accepted = ok.trim() }; return
-		} else if (element.match(/[0-9]/) != null) {
-			for (accepted = element; (element = getChar()) != undefined && element.match(/[0-9]/) != null; accepted += element);
-			unGetChar(); element = syntax.number; return
-		} else if (element == '.' && peek(2) == '..') {
-			advance(2); accepted = '...'; element = syntax.ellipsis; return
-		} else throw new SyntaxError("Failed to parse native declarator: useless declarator character `"+element+"' in parse stream at column "+charPosition);
-	}
-
-	function accept(s) {
-		if (element == s) {
-			token = (accepted)?accepted:element; // No, really... its okay to use it now...
-			getSyntax(); return 1;
-		}
-		return 0;
-	}
- 
-	function expect(s) {
-		if (accept(s)) return token;
-		throw new SyntaxError("Failed to parse native declarator at column "+charPosition+": expected `"+s+"', found `"+element+"'");
-	}
-
-	function identifier() {
-		this.name = token;
-	}
-
-	function typeQualifierList() {
-		while (accept(syntax.qualifier)) {
-			if (token == 'unsigned') { this.signed = false; continue; }
-			else this[token] = true;
+	tokenizer.callback = function() {
+		tokenizer.originalCallback();
+		if (this.element.match(/[a-z_]/i) != null) {
+			tokenizer.unGetChar();
+			var c = 1, words, ok;
+			while ((words = this.wordPeek(c)) && words && words.trim() in JSNative.Type) { 
+				ok = words; c++;
+			}
+			if (ok) {
+				this.advance(ok.length);
+				this.element = syntax.type; this.scanned = ok.trim();
+			} else {
+				this.advance(words.length);
+				this.element = syntax.identifier; this.scanned = words.trim();
+			}
 		}
 	}
 
-	function pointer() {
-		if (accept(syntax.asterisk)) {
-			for(this.pointer = 1; accept(syntax.asterisk); this.pointer++);
-		}
-		typeQualifierList.call(this);
-		if (element == syntax.asterisk) {
-			pointer.call(this);
-		}
-	}
+	var anonymousDeclarator = false; // when true, directDeclarator does not require names..
+	var declaration = {};
 
-	function declarator() {
-		pointer.call(this);
-		directDeclarator.call(this);
-	}
+	// CSV list handler
+	list = function(name, processor) {
+		this[name] = new Array();
+		do { var unit = new Object(); processor.call(unit); this[name].push(unit);
+		} while (tokenizer.accept(syntax.comma))
+	},
 
-	function directDeclarator() {
-		if (accept(syntax.name)) {
+	declarationSpecifiers = function(){
+		if (tokenizer.accept(syntax.storage)) {
+			storageClassSpecifier.call(this); declarationSpecifiers.call(this);
+		} else if (tokenizer.accept(syntax.qualifier)) {
+			typeQualifier.call(this); declarationSpecifiers.call(this);
+		} else if (tokenizer.accept(syntax.type)) {
+			typeSpecifier.call(this); declarationSpecifiers.call(this);
+		}
+	},
+
+	initDeclarator = function(){
+		declarator.call(this);
+		if (tokenizer.accept(syntax.assign)) {
+			throw new Error("declarator initializers are not supported")
+		}
+	},
+
+	initDeclaratorList = function(){ list.call(this, 'declarators', initDeclarator) },
+
+	storageClassSpecifier = function(){
+		/* At most one storage class specifier may be given in a declaration. */
+		if ('storage' in this) throw new Error("multiple storage class specifiers in declaration")
+		this.storage = tokenizer.token
+	},
+
+	typeQualifier = function(){
+		this[tokenizer.token] = true
+	},
+
+	typeQualifierList = function(){
+		while (tokenizer.accept(syntax.qualifier)) typeQualifier.call(this);
+	},
+
+	typeSpecifier = function(){
+		if (this.type == undefined) this.type = new Object();
+		if (tokenizer.token.match(/struct|union|enum/) != null) throw new ReferenceError("`"+tokenizer.token+"' is not an acceptable type specifier in this release")
+		else if (tokenizer.token.match(/^signed$|^unsigned$/) != null) {
+			this.type[tokenizer.token] = true
+			// to do: validate ! signed && unsigned
+		}
+		this.type.reference = tokenizer.token;
+	},
+
+	parameterDeclaration = function(){
+		declarationSpecifiers.call(this);
+		// todo: validate those specifiers for parameter context
+		declarator.call(this);
+	},
+
+	parameterList = function(){},
+
+	parameterTypeList = function(){
+		anonymousDeclarator = true; 	// enable 'abstract' declarator
+		this.arguments = new Array();
+		do { var unit = new Object();
+			if (tokenizer.accept(syntax.ellipsis)) {
+				// has to be n+1 ?
+				this.from = tokenizer.token
+			} else parameterDeclaration.call(unit);
+			this.arguments.push(unit);
+		} while (tokenizer.accept(syntax.comma))
+		anonymousDeclarator = false;
+	},
+
+	declarator = function(){
+		pointer.call(this); directDeclarator.call(this);
+	},
+
+	directDeclarator = function(){
+		if (tokenizer.accept(syntax.identifier)) {
 			this.from = 'variant'
 			identifier.call(this);
-		} else if (accept(syntax.lparen)) {
+		} else if (tokenizer.accept(syntax.lparen)) {
 			var d = new declarator();
 			if (this.name === undefined && (d.pointer === undefined )) extend(this, d);
 			else this.declarator = d;
-			expect(syntax.rparen);
-		} else if (accept(syntax.termination)) {
+			tokenizer.expect(syntax.rparen);
+		} else if (tokenizer.accept(syntax.termination)) {
 			throw new SyntaxError("Failed to parse native declarator: useless type name in empty declaration");
-		} else {
-			if (element == syntax.comma && anonymousDeclarator == false)
-			throw new SyntaxError("Failed to parse native declarator: expected `*', identifier, or `(' before `"+element+"' token");
+		} else if (anonymousDeclarator == false) {
+			throw new SyntaxError("Failed to parse native declarator: expected `*', identifier, or `(' before `"+tokenizer.element+"' token");
 		}
 
-		if (accept(syntax.lbracket)) {
+		if (tokenizer.accept(syntax.lbracket)) {
 			this.from = 'array'
 			this.dimensions = new Array();
-			if (accept(syntax.rbracket)) {
+			if (tokenizer.accept(syntax.rbracket)) {
 				this.dimensions.push('');
-			} else if (accept(syntax.number)) {
-				this.dimensions.push(token)
-				expect(syntax.rbracket)
+			} else if (tokenizer.accept(syntax.number)) {
+				this.dimensions.push(tokenizer.token)
+				tokenizer.expect(syntax.rbracket)
 			}
-			while (accept(syntax.lbracket)) {
-				if (accept(syntax.number)) {
-					this.dimensions.push(token);
-					expect(syntax.rbracket)
+			while (tokenizer.accept(syntax.lbracket)) {
+				if (tokenizer.accept(syntax.number)) {
+					this.dimensions.push(tokenizer.token);
+					tokenizer.expect(syntax.rbracket)
 				}
 			}			
-		} else if (accept(syntax.lparen)) {
+		} else if (tokenizer.accept(syntax.lparen)) {
 			this.from = 'function'
-			this.arguments = new Array();
-			argumentIdentiferList.call(this.arguments);
-			expect(syntax.rparen);
+			parameterTypeList.call(this);
+			tokenizer.expect(syntax.rparen);
 		} else {
 			if (this.from === undefined) {
 				var x = this.declarator; delete this.declarator;
 				extend(this, x);
 			}
 		}
+	},
 
-	}
-
-	function argumentIdentiferList() {
-		var i = 0; anonymousDeclarator = true;
-		while (accept(syntax.type)) {
-			this[i] = {};
-			this[i].expect = token;
-			declarator.call(this[i++]);
-			accept(syntax.comma)
+	pointer = function(){
+		if (tokenizer.accept(syntax.asterisk)) {
+			for (this.pointer = 1; tokenizer.accept(syntax.asterisk); this.pointer++);
+			typeQualifierList.call(this);
+			pointer.call(this);
 		}
-		anonymousDeclarator = false;
-	}
+	},
 
-	var dcls = new Array();
-	dcls.source = source;
-	function declaration() {
-		this.expect = expectedType;
-		extend(this, theseSpecs);
-		declarator.call(this);
-		dcls.push(this);
-	}
+	identifier = function(){
+		this.name = tokenizer.token;
+	},
 
-	try { // we use internal functions, so we need to refactor any reference to an error
-		getSyntax();
-		var theseSpecs = {};
-		typeQualifierList.call(theseSpecs);
-		var expectedType = expect(syntax.type);
-		do {
-			if (accept(syntax.type)) { // That's an error
-				throw new SyntaxError("Failed to parse native declarator: expected `*', identifier, or `(' before `"+token+"'");			
-			}
-			new declaration();
-		} while (accept(syntax.comma));
-		expect(syntax.termination)
-	} catch(e) {
-		throw new InvokeError("SyntaxError", e.message);
-	}
+	identifierList = function(){}, // what the fuck is this for?
 
-	// convert to pseudo-array-object so we can JSONIFY source as well.
-	var dclso = {}; extend(dclso, dcls); dclso.length = dcls.length;
-	return dclso;
+	constantExpression = function(){}; // we took a shortcut in directDeclarator
+
+	tokenizer.getToken();
+		declarationSpecifiers.call(declaration);
+		initDeclaratorList.call(declaration);
+	tokenizer.expect(syntax.semicolon);
+
+	return declaration;
 
 }
 
-return parse;
+var dcl = Declaration.parse('typedef char (*(*x(void))[14u])(void);');
 
-})()})
+echo(JSON.stringify(dcl))
 
-
-for (name in JSNative.Type) echo(name)
-//result = JSNative.Type.parse('const const char const unsigned * name')
-//echo(JSON.stringify(result, undefined, '....'))
-//echo(JSON.stringify(JSNative.Type.unsigned, undefined, '....'))
-tokenizer = new JSNative.Tokenizer();
-tokenizer.recognize({'one':true,'two':true}, "word number", /;|\W|^$/);
-//tokenizer.recognize(/^;/i, "end of statement");
-tokenizer.load("one"); tokenizer.getToken();
-tokenizer.expect('word number');
-echo('value = "'+tokenizer.token+'"')
-//echo(tokenizer.expect(';'));
-tokenizer.expect(null)
-//echo(classOf(/\b/))
-//JSNative.Type.parse('char (data);')
-//JSNative.Type.parse('char foo[];')
-//JSNative.Type.parse('char *(foo);')
-//JSNative.Type.parse('char *(*foo)();')
-//JSNative.Type.parse('char (*(*x())[][13])();')
+exit(0);
 
