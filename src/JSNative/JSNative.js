@@ -58,7 +58,7 @@ JSNative.Tokenizer.prototype = {
 	callback:function(){
 		this.element = this.getChar(); this.scanned = this.element
 	}, scanned:'', element:'', index:0, token:'', source:'',
-	syntax:[], matchReadAhead: 4, failed:"Failed to tokenize stream",
+	syntax:[], readAhead: 1, failed:"Failed to tokenize stream",
 	getChar:function getChar() {return this.source[this.index++]},
 	unGetChar:function unGetChar() {this.index--},
 	advance:function advance(len) {this.index += len},
@@ -71,7 +71,7 @@ JSNative.Tokenizer.prototype = {
 	},
 	reset:function(source){
 		this.scanned = '', this.element = '', this.index = 0, this.token = '',
-		this.matchReadAhead = 4, this.source = (source)?source:'';
+		this.readAhead = 1, this.source = (source)?source:'';
 		delete this.subExpression;
 	},
 	load:function(source){this.reset(source)},
@@ -81,7 +81,7 @@ JSNative.Tokenizer.prototype = {
 	knownToken:function(){
 		while (this.source[this.index] && this.source[this.index].match(/\s/) != null) this.index++;
 		if (this.source[this.index] === undefined) { this.getToken(); return }
-		var source = this.readString(this.matchReadAhead);
+		var source = this.readString(this.readAhead);
 		var syntax = this.syntax;
 		for (rule in syntax) {
 			var name = syntax[rule].name;
@@ -114,7 +114,8 @@ JSNative.Tokenizer.prototype = {
 			}
 			delete this.subExpression;
 			if (classOf(expression) == 'RegExp') { // when regexp we match data
-				if (!data) data = source; match = expression.exec(data)
+				if (!data) data = source;
+				match = expression.exec(data)
 				if (match != null) {
 					this.advance((this.scanned = match.shift()).length);
 					if (match.length) this.subExpression = match;
@@ -144,10 +145,8 @@ JSNative.Tokenizer.prototype = {
 			delete this.subExpression; this.scanned = null, this.element = null; return;
 			// leave this.token and this.expression alone, they were set by this.accept
 		}
-		// if we have rules to match attempt a successful match, else if we have a callback, call it
-		if (this.syntax.length) { if (! this.knownToken() ) 
-			this.callback()
-		} else this.callback()
+		if (this.syntax.length && this.knownToken()) return;
+		this.callback()
 	},
 	accept:function accept(elementName) {
 		if (this.element == elementName) {
@@ -158,7 +157,7 @@ JSNative.Tokenizer.prototype = {
 		return 0;
 	},
 	expect:function expect(elementName) {
-		if (this.accept(elementName)) return this.token;
+		if (this.accept(elementName) == 1) return this.token;
 		throw new SyntaxError(this.failed+" at column "+this.index+": expected `"+elementName+"', found `"+this.element+"'");
 	},
 }
