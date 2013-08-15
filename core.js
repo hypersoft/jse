@@ -349,17 +349,12 @@ Declaration.parse = function(source) {
 		this.arguments = new Array();
 		do { var unit = new Object();
 			if (tokenizer.accept(syntax.ellipsis)) {
-				/* has to be n+1
-				test.c:3:11: error: ISO C requires a named argument before ‘...’ char f(...);
-				*/
+				// must have a prior named argument
 				if (this.arguments.length == 0 || this.arguments[0].name == undefined) 
 					throw new SyntaxError("ISO C requires a named argument before '...'");
-				unit.from = 'list';
-				identifier.call(unit)
-				/*
-				test.c:3: char crap(char g, ..., ...);
-				22: error: expected ‘)’ before ‘,’ token
-				*/
+				// ellipsis requires special handling
+				unit.from = 'list'; identifier.call(unit)
+				// ellispis is the last acceptable argument.
 				this.arguments.push(unit)
 				break;
 			} else parameterDeclaration.call(unit);
