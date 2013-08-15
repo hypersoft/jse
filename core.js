@@ -352,6 +352,11 @@ Declaration.parse = function(source) {
 				if (this.arguments.length == 0 || this.arguments[0].name == undefined) 
 					throw new SyntaxError("ISO C requires a named argument before '...'");
 				identifier.call(unit)
+				/*
+				test.c:3: char crap(char g, ..., ...);
+				22: error: expected ‘)’ before ‘,’ token
+				*/
+				break;
 			} else parameterDeclaration.call(unit);
 			this.arguments.push(unit);
 		} while (tokenizer.accept(syntax.comma))
@@ -431,7 +436,7 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef char (*(*x(char unsigned signed g, ...))[14u])(void);');
+var dcl = Declaration.parse('typedef char (*(*x(char g, ..., ...))[14u])(void);');
 
 echo(JSON.stringify(dcl, undefined, '....'))
 
