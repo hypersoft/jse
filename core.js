@@ -256,7 +256,10 @@ Declaration.parse = function(source) {
 	tokenizer.recognize(syntax.storageClass, syntax.storage, selectWord)
 	tokenizer.recognize(syntax.typeQualifier, syntax.qualifier, selectWord)
 	tokenizer.recognize(/\.\.\./, syntax.ellipsis, 3)
-	tokenizer.recognize(/^([0-9]+)(UL|U|L)?/i, syntax.number, /\s|;|\]|^$/)
+
+	tokenizer.recognize(/^([0-9]+)(UL|U|L)?/i, syntax.number, /[^\dul]|^$/i)
+	/* need to add more of the above for other number systems */
+
 	tokenizer.recognize(['struct','union','enum'], syntax.type, selectWord)
 
 	tokenizer.callback = function() {
@@ -421,7 +424,7 @@ Declaration.parse = function(source) {
 		this.name = tokenizer.token;
 	},
 
-	identifierList = function(){}, // what the fuck is this for?
+	identifierList = function(){}, // Q: what the fuck is this for? A: procedure call
 
 	constantExpression = function(){}; // we took a shortcut in directDeclarator
 
@@ -436,7 +439,7 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef char (*(*x(char g, ..., ...))[14u])(void);');
+var dcl = Declaration.parse('typedef char (*(*x(char g, ...))[14u])(void);');
 
 echo(JSON.stringify(dcl, undefined, '....'))
 
