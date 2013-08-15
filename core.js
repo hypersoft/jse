@@ -86,7 +86,6 @@ JSNative.Type.define(JSNative.api.typeLong,		"int long")
 JSNative.Type.define(JSNative.api.typeLongLong,	"long long")
 JSNative.Type.define(JSNative.api.typeLongLong,	"long long int")
 JSNative.Type.define(JSNative.api.typeLongLong,	"int long long")
-JSNative.Type.define(JSNative.api.typeLongLong,	"long double")
 JSNative.Type.define(JSNative.api.typeFloat,	"float")
 JSNative.Type.define(JSNative.api.typeDouble,	"double")
 
@@ -344,8 +343,12 @@ Declaration.parse = function(source) {
 		this.arguments = new Array();
 		do { var unit = new Object();
 			if (tokenizer.accept(syntax.ellipsis)) {
-				// has to be n+1 ?
-				this.from = tokenizer.token
+				/* has to be n+1
+				test.c:3:11: error: ISO C requires a named argument before ‘...’ char f(...);
+				*/
+				if (this.arguments.length == 0 || this.arguments[0].name == undefined) 
+					throw new SyntaxError("ISO C requires a named argument before '...'");
+				identifier.call(unit)
 			} else parameterDeclaration.call(unit);
 			this.arguments.push(unit);
 		} while (tokenizer.accept(syntax.comma))
@@ -419,11 +422,13 @@ Declaration.parse = function(source) {
 		initDeclaratorList.call(declaration);
 	tokenizer.expect(syntax.semicolon);
 
+	declaration.source = source;
+
 	return declaration;
 
 }
 
-var dcl = Declaration.parse('typedef char (*(*x(void))[14u])(void);');
+var dcl = Declaration.parse('typedef char (*(*x(char, ...))[14u])(void);');
 
 echo(JSON.stringify(dcl, undefined, '....'))
 
