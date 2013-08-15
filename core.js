@@ -325,7 +325,10 @@ Declaration.parse = function(source) {
 		if (tokenizer.token.match(/struct|union|enum/) != null) throw new ReferenceError("`"+tokenizer.token+"' is not an acceptable type specifier in this release")
 		else if (tokenizer.token.match(/^signed$|^unsigned$/) != null) {
 			this.type[tokenizer.token] = true
-			// to do: validate ! signed && unsigned
+			if (this.type.signed == true && this.type.unsigned == true) {
+				throw new SyntaxError("both 'signed' and 'unsigned' in declaration specifiers");
+			}
+			return
 		}
 		this.type.reference = tokenizer.token;
 	},
@@ -428,7 +431,7 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef char (*(*x(char, ...))[14u])(void);');
+var dcl = Declaration.parse('typedef char (*(*x(char unsigned signed g, ...))[14u])(void);');
 
 echo(JSON.stringify(dcl, undefined, '....'))
 
