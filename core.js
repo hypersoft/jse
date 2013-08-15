@@ -354,11 +354,13 @@ Declaration.parse = function(source) {
 				*/
 				if (this.arguments.length == 0 || this.arguments[0].name == undefined) 
 					throw new SyntaxError("ISO C requires a named argument before '...'");
+				unit.from = 'list';
 				identifier.call(unit)
 				/*
 				test.c:3: char crap(char g, ..., ...);
 				22: error: expected ‘)’ before ‘,’ token
 				*/
+				this.arguments.push(unit)
 				break;
 			} else parameterDeclaration.call(unit);
 			this.arguments.push(unit);
