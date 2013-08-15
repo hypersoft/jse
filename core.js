@@ -62,6 +62,7 @@ Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, 
 	}
 
 	Object.seal(type)
+	if (! typeCode in JSNative.Type)
 	Object.defineProperty(JSNative.Type, typeCode, {value:type});
 	Object.defineProperty(JSNative.Type, name, {value:type, enumerable:true});
 
@@ -424,7 +425,7 @@ Declaration.parse = function(source) {
 
 var dcl = Declaration.parse('typedef char (*(*x(void))[14u])(void);');
 
-echo(JSON.stringify(dcl))
+echo(JSON.stringify(dcl, undefined, '....'))
 
 exit(0);
 
