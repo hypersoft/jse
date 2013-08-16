@@ -25,13 +25,53 @@ EnumTypeBoolean = 4,
 EnumTypeChar = 8,
 EnumTypeShort = 16,
 EnumTypeInt = 32,
-EnumTypeLong = 64,
-EnumTypeLongLong = 128,
-EnumTypeFloat = 256,
-EnumTypeDouble = 512,
-EnumTypeFunction = 1024,
-EnumTypeStruct = 2048,
-EnumTypeUnion = 4096;
+EnumTypeSigned = 32,
+EnumTypeUnsigned = 64,
+EnumTypeLong = 128,
+EnumTypeLongLong = 256,
+EnumTypeFloat = 512,
+EnumTypeDouble = 1024,
+EnumTypeFunction = 2048,
+EnumTypeStruct = 4096,
+EnumTypeUnion = 8192,
+EnumTypeEnum = 16384;
+
+static JSValueRef jsNativeReadAddress JSToolsFunction (address, type) {
+
+	void * address = JSTPointer(argv[0]);
+	int type = JSTInteger(argv[1]);
+
+	if (type & EnumTypeBoolean) return JSTMakeNumber((double) *(bool*)(address));
+	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?*(signed char*)(address):*(char*)(address));
+	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned short*)(address):*(short*)(address));
+	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned int*)(address):*(int*)(address));
+	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned long*)(address):*(long*)(address));
+	else if (type & EnumTypeLongLong) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned long long*)(address):*(long long*)(address));
+	else if (type & EnumTypeFloat) return JSTMakeNumber((double) *(float*)(address));
+	else if (type & EnumTypeDouble) return JSTMakeNumber((double) *(double*)(address));
+	else { JSTTypeError("JSNative.Type: invalid type"); return RtJS(undefined); }
+	return NULL;
+
+}
+
+static bool jsNativeWriteAddress JSToolsFunction (address, type, value) {
+
+	void * address = JSTPointer(argv[0]);
+	int type = JSTInteger(argv[1]);
+	JSValueRef value = argv[2];
+
+	if (type & EnumTypeBoolean) { *(bool*)(address) = JSValueToBoolean(ctx, value); return true; }
+	else if (type & EnumTypeChar) { *(char*)(address) = (char) JSValueToNumber(ctx, value, exception); return true; }
+	else if (type & EnumTypeShort) { *(short*)(address) = (short) JSValueToNumber(ctx, value, exception); return true; }
+	else if (type & EnumTypeInt) { *(int*)(address) = (int) JSValueToNumber(ctx, value, exception); return true; }
+	else if (type & EnumTypeLong) { *(long*)(address) = (long) JSValueToNumber(ctx, value, exception); return true; } 
+	else if (type & EnumTypeLongLong) { *(long long*)(address) = (long long) JSValueToNumber(ctx, value, exception); return true; } 
+	else if (type & EnumTypeFloat) { *(float*)(address) = (float) JSValueToNumber(ctx, value, exception); return true; } 
+	else if (type & EnumTypeDouble) { *(double*)(address) = JSValueToNumber(ctx, value, exception); return true; } 
+	else { JSTTypeError("JSNative.Type: invalid type"); return false; }
+	return false;
+
+}
 
 static JSValueRef jsNativeGetTypeSize JSToolsFunction(enumType) {
 	int enumType = JSTInteger(argv[0]), result = 0;
@@ -277,9 +317,12 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
+	JSTSetPropertyFunction(RtJSNativeAPI, "writeAddress", &jsNativeWriteAddress);
+	JSTSetPropertyFunction(RtJSNativeAPI, "readAddress", &jsNativeReadAddress);
+	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
+
 	JSTSetPropertyFunction(RtJSNativeAPI, "createClass", &jsNativeClassCreate);
 	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeApiSetPrototype);
-	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
 
 	/* Native Address Alignment */
 	JSTSetProperty(RtJSNativeAPI, "addressAlignment", JSTMakeNumber(G_MEM_ALIGN), JSTPropertyRequired);
