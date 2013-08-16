@@ -36,7 +36,24 @@ EnumTypeStruct = 4096,
 EnumTypeUnion = 8192,
 EnumTypeEnum = 16384;
 
-static JSValueRef jsNativeFillMemory JSToolsFunction (address, value, count) {
+static JSValueRef jsNativeMalloc JSToolsFunction (size) {
+	return JSTMakeNumber((long)malloc(JSTLong(argv[0])));
+}
+
+static JSValueRef jsNativeFree JSToolsFunction (address) {
+	free(JSTPointer(argv[0]));
+	return RtJS(undefined);
+}
+
+static JSValueRef jsNativeCalloc JSToolsFunction (units, unit_size) {
+	return JSTMakeNumber((long)calloc(JSTLong(argv[0]), JSTLong(argv[1])));
+}
+
+static JSValueRef jsNativeRealloc JSToolsFunction (address, count) {
+	return JSTMakeNumber((long)realloc(JSTPointer(argv[0]), JSTLong(argv[1])));
+}
+
+static JSValueRef JSNativeMemset JSToolsFunction (address, value, count) {
 	memset(JSTPointer(argv[0]), JSTInteger(argv[1]), JSTLong(argv[2]));
 	return RtJS(undefined);
 }
@@ -322,10 +339,16 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
-	JSTSetPropertyFunction(RtJSNativeAPI, "fillMemory", &jsNativeFillMemory);
+	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "malloc", &jsNativeMalloc);
+	JSTSetPropertyFunction(RtJSNativeAPI, "free", &jsNativeFree);
+	JSTSetPropertyFunction(RtJSNativeAPI, "calloc", &jsNativeCalloc);
+	JSTSetPropertyFunction(RtJSNativeAPI, "realloc", &jsNativeRealloc);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "memset", &JSNativeMemset);
 	JSTSetPropertyFunction(RtJSNativeAPI, "writeAddress", &jsNativeWriteAddress);
 	JSTSetPropertyFunction(RtJSNativeAPI, "readAddress", &jsNativeReadAddress);
-	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "createClass", &jsNativeClassCreate);
 	JSTSetPropertyFunction(RtJSNativeAPI, "setObjectPrototype", &jsNativeApiSetPrototype);
