@@ -79,6 +79,45 @@ static JSValueRef jsNativeCallVMReset JSToolsFunction(DCCallVM * vm) {
 	dcReset(JSTPointer(JSTParam(1))); return RtJS(undefined);
 }
 
+static JSValueRef jsNativeCallVMPush JSToolsFunction(DCCallVM * vm, type, value) {
+
+	void * vm = JSTPointer(argv[0]);
+	int type = JSTInteger(argv[1]);
+	JSValueRef value = argv[2];
+
+	if (type & EnumTypeBoolean) dcArgBool(vm, JSTBoolean(value));
+	else if (type & EnumTypeChar) dcArgChar(vm, JSTChar(value));
+	else if (type & EnumTypeShort) dcArgShort(vm, JSTShort(value));
+	else if (type & EnumTypeInt) dcArgInt(vm, JSTInteger(value));
+	else if (type & EnumTypeLong) dcArgLong(vm, JSTLong(value));
+	else if (type & EnumTypeLongLong) dcArgLongLong(vm, JSTLongLong(value));
+	else if (type & EnumTypeFloat) dcArgFloat(vm, JSTFloat(value));
+	else if (type & EnumTypeDouble) dcArgDouble(vm, JSTDouble(value));
+	else JSTTypeError("JSNative.api.callVMPush: invalid argument type");
+	return RtJS(undefined);
+
+}
+
+static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol) {
+
+	void * vm = JSTPointer(argv[0]);
+	int type = JSTInteger(argv[1]);
+	void * symbol = JSTPointer(argv[2]);
+
+	if (type & EnumTypeBoolean) return JSTMakeBoolean(dcCallBool(vm, symbol));
+	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?(signed char)dcCallChar(vm, symbol):dcCallChar(vm, symbol));
+	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned short)dcCallShort(vm, symbol):dcCallChar(vm, symbol));
+	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned int)dcCallInt(vm, symbol):dcCallInt(vm, symbol));
+	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned long)dcCallLong(vm, symbol):dcCallLong(vm, symbol));
+	else if (type & EnumTypeLongLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned long long)dcCallLongLong(vm, symbol):dcCallLongLong(vm, symbol));
+	else if (type & EnumTypeFloat) return JSTMakeNumber(dcCallFloat(vm, symbol));
+	else if (type & EnumTypeDouble) return JSTMakeNumber(dcCallDouble(vm, symbol));
+	else if (type & EnumTypeVoid) dcCallVoid(vm, symbol);
+	else JSTTypeError("JSNative.api.callVMCall: invalid call type");
+	return RtJS(undefined);
+
+}
+
 static JSValueRef jsNativeMalloc JSToolsFunction (size) {
 	return JSTMakeNumber((long)malloc(JSTLong(argv[0])));
 }
@@ -389,6 +428,8 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNativeAPI, "callVMError", &jsNativeCallVMError);
 	JSTSetPropertyFunction(RtJSNativeAPI, "callVMSetMode", &jsNativeCallVMSetMode);
 	JSTSetPropertyFunction(RtJSNativeAPI, "callVMReset", &jsNativeCallVMReset);
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVMPush", &jsNativeCallVMPush);
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVMCall", &jsNativeCallVMCall);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "malloc", &jsNativeMalloc);
 	JSTSetPropertyFunction(RtJSNativeAPI, "free", &jsNativeFree);
