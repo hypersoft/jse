@@ -30,6 +30,7 @@ var classConstruct = function(code, name){
 		Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
 	} else if (arguments.length == 1 && code.storage == 'typedef') {
 		var d, m = extend({}, code); delete m.source; delete m.storage; delete m.declarators;
+		m.type.code = genDefintionCode(m);
 		while ((d = code.declarators.shift()) != undefined) {
 			var o = JSNative.api.setObjectPrototype(extend({}, m), JSNative.Type.prototype);
 			extend(o, {constructor:JSNative.Type,"declarator":d,"source":code.source})
@@ -45,10 +46,7 @@ new JSNative.Class
 	"JSNative.Type",
 	{ /* class instance methods (constructor prototype) */
 		toString: function() {return this.declarator.name},
-		valueOf: function() {
-			if (this.type.code != undefined) return this.type.code;
-			else return genDefinitionCode(this);
-		},
+		valueOf: function() {return this.type.code},
 		sizeOf: function() { if (this.type.size != undefined) return this.type.size; else return JSNative.Type[this.type.reference].sizeOf()},
 	},
 	{ /* class methods (constructor methods) */
