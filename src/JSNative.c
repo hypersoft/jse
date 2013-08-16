@@ -40,7 +40,7 @@ EnumTypeEnum = 32768;
 
 static JSValueRef jsNativeLoadLibrary JSToolsFunction(const char * libpath) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.loadLibrary: expected 1 string argument: libPath");
+		JSTSyntaxError("JSNative.api.loadLibrary: expected 1 argument: (String) libPath");
 		return RtJS(undefined);
 	}
 	char * buffer = JSTGetValueBuffer(JSTParam(1), NULL);
@@ -51,7 +51,7 @@ static JSValueRef jsNativeLoadLibrary JSToolsFunction(const char * libpath) {
 
 static JSValueRef jsNativeFreeLibrary JSToolsFunction(void * libhandle) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.freeLibrary: expected 1 argument: libHandle");
+		JSTSyntaxError("JSNative.api.freeLibrary: expected 1 argument: (Unsigned Long) libHandle");
 		return RtJS(undefined);
 	}
 	dlFreeLibrary(JSTPointer(JSTParam(1))); return RtJS(undefined);
@@ -59,7 +59,7 @@ static JSValueRef jsNativeFreeLibrary JSToolsFunction(void * libhandle) {
 
 static JSValueRef jsNativeFindLibrarySymbol JSToolsFunction(void * libhandle , const char * symbol ) {
 	if (argc != 2) {
-		JSTSyntaxError("JSNative.api.findLibrarySymbol: expected 2 arguments: (Number) libHandle, (String) symbol");
+		JSTSyntaxError("JSNative.api.findLibrarySymbol: expected 2 arguments: (Unsigned Long) libHandle, (String) symbol");
 		return RtJS(undefined);
 	}
 	char * buffer = JSTGetValueBuffer(JSTParam(2), NULL);
@@ -70,7 +70,7 @@ static JSValueRef jsNativeFindLibrarySymbol JSToolsFunction(void * libhandle , c
 
 static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.callVM: expected 1 integer argument: size");
+		JSTSyntaxError("JSNative.api.callVM: expected 1 argument: (Unsigned Long) size");
 		return RtJS(undefined);
 	}
 	return JSTMakeNumber((long)dcNewCallVM(JSTLong(JSTParam(1))));
@@ -78,7 +78,7 @@ static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
 
 static JSValueRef jsNativeFreeCallVM JSToolsFunction(DCCallVM * vm) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.freeCallVM: expected 1 integer argument: (JSNative.CallVM) pointer");
+		JSTSyntaxError("JSNative.api.freeCallVM: expected 1 argument: (Unsigned Long) callVM");
 		return RtJS(undefined);
 	} 
 	dcFree(JSTPointer(JSTParam(1))); return RtJS(undefined);
@@ -86,7 +86,7 @@ static JSValueRef jsNativeFreeCallVM JSToolsFunction(DCCallVM * vm) {
 
 static JSValueRef jsNativeCallVMError JSToolsFunction(DCCallVM * vm) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.callVMError: expected 1 integer argument: (JSNative.CallVM) pointer");
+		JSTSyntaxError("JSNative.api.callVMError: expected 1 argument: (Unsigned Long) callVM");
 		return RtJS(undefined);
 	}
 	return JSTMakeNumber(dcGetError(JSTPointer(JSTParam(1))));
@@ -94,7 +94,7 @@ static JSValueRef jsNativeCallVMError JSToolsFunction(DCCallVM * vm) {
 
 static JSValueRef jsNativeCallVMSetMode JSToolsFunction(DCCallVM * vm, DCint mode) {
 	if (argc != 2) {
-		JSTSyntaxError("JSNative.api.callVMSetMode: expected 2 integer arguments: (JSNative.CallVM) pointer, JSNativeCallVMPrototype) mode");
+		JSTSyntaxError("JSNative.api.callVMSetMode: expected 2 arguments: (Unsigned Long) callVM, (Integer) callMode");
 		return RtJS(undefined);
 	}
 	dcMode(JSTPointer(JSTParam(1)), JSTInteger(JSTParam(2))); return RtJS(undefined);
@@ -102,7 +102,7 @@ static JSValueRef jsNativeCallVMSetMode JSToolsFunction(DCCallVM * vm, DCint mod
 
 static JSValueRef jsNativeCallVMReset JSToolsFunction(DCCallVM * vm) {
 	if (argc != 1) {
-		JSTSyntaxError("JSNative.api.callVMReset: expected 1 integer argument: (JSNative.CallVM) pointer");
+		JSTSyntaxError("JSNative.api.callVMReset: expected 1 argument: (Unsigned Long) callVM");
 		return RtJS(undefined);
 	}
 	dcReset(JSTPointer(JSTParam(1))); return RtJS(undefined);
@@ -111,7 +111,7 @@ static JSValueRef jsNativeCallVMReset JSToolsFunction(DCCallVM * vm) {
 static JSValueRef jsNativeCallVMPush JSToolsFunction(DCCallVM * vm, type, value) {
 
 	if (argc != 3) {
-		JSTSyntaxError("JSNative.api.callVMPush: expected 3 arguments: (JSNative.CallVM) pointer, (Number) type, (Number) value");
+		JSTSyntaxError("JSNative.api.callVMPush: expected 3 arguments: (Unsigned Long) callVM, (Integer) type, (Number) value");
 		return RtJS(undefined);
 	}
 
@@ -135,7 +135,7 @@ static JSValueRef jsNativeCallVMPush JSToolsFunction(DCCallVM * vm, type, value)
 static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol) {
 
 	if (argc != 3) {
-		JSTSyntaxError("JSNative.api.callVMCall: expected 3 arguments: (JSNative.CallVM) pointer, (Number) type, (void pointer) function");
+		JSTSyntaxError("JSNative.api.callVMCall: expected 3 arguments: (Unsigned Long) callVM, (Integer) type, (Unsigned Long) function");
 		return RtJS(undefined);
 	}
 
