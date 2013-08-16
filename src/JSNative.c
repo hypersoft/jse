@@ -7,6 +7,8 @@
 
 #include "JSNative.h"
 
+#include "dyncall.inc"
+
 JSObjectRef RtJSNativeAPI;
 
 static int EnumClassInitialize = 2,
@@ -35,6 +37,47 @@ EnumTypeFunction = 2048,
 EnumTypeStruct = 4096,
 EnumTypeUnion = 8192,
 EnumTypeEnum = 16384;
+
+
+static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.callVM: expected 1 integer argument: size");
+		return RtJS(undefined);
+	}
+	return JSTMakeNumber((long)dcNewCallVM(JSTLong(JSTParam(1))));
+}
+
+static JSValueRef jsNativeFreeCallVM JSToolsFunction(DCCallVM * vm) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.freeCallVM: expected 1 integer argument: (JSNative.CallVM) pointer");
+		return RtJS(undefined);
+	} 
+	dcFree(JSTPointer(JSTParam(1))); return RtJS(undefined);
+}
+
+static JSValueRef jsNativeCallVMError JSToolsFunction(DCCallVM * vm) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.callVMError: expected 1 integer argument: (JSNative.CallVM) pointer");
+		return RtJS(undefined);
+	}
+	return JSTMakeNumber(dcGetError(JSTPointer(JSTParam(1))));
+}
+
+static JSValueRef jsNativeCallVMSetMode JSToolsFunction(DCCallVM * vm, DCint mode) {
+	if (argc != 2) {
+		JSTSyntaxError("JSNative.api.callVMSetMode: expected 2 integer arguments: (JSNative.CallVM) pointer, JSNativeCallVMPrototype) mode");
+		return RtJS(undefined);
+	}
+	dcMode(JSTPointer(JSTParam(1)), JSTInteger(JSTParam(2))); return RtJS(undefined);
+}
+
+static JSValueRef jsNativeCallVMReset JSToolsFunction(DCCallVM * vm) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.callVMReset: expected 1 integer argument: (JSNative.CallVM) pointer");
+		return RtJS(undefined);
+	}
+	dcReset(JSTPointer(JSTParam(1))); return RtJS(undefined);
+}
 
 static JSValueRef jsNativeMalloc JSToolsFunction (size) {
 	return JSTMakeNumber((long)malloc(JSTLong(argv[0])));
@@ -340,6 +383,12 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVM", &jsNativeCallVM);
+	JSTSetPropertyFunction(RtJSNativeAPI, "freeCallVM", &jsNativeFreeCallVM);
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVMError", &jsNativeCallVMError);
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVMSetMode", &jsNativeCallVMSetMode);
+	JSTSetPropertyFunction(RtJSNativeAPI, "callVMReset", &jsNativeCallVMReset);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "malloc", &jsNativeMalloc);
 	JSTSetPropertyFunction(RtJSNativeAPI, "free", &jsNativeFree);
