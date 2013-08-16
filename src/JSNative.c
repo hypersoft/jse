@@ -36,6 +36,11 @@ EnumTypeStruct = 4096,
 EnumTypeUnion = 8192,
 EnumTypeEnum = 16384;
 
+static JSValueRef jsNativeFillMemory JSToolsFunction (address, value, count) {
+	memset(JSTPointer(argv[0]), JSTInteger(argv[1]), JSTLong(argv[2]));
+	return RtJS(undefined);
+}
+
 static JSValueRef jsNativeReadAddress JSToolsFunction (address, type) {
 
 	void * address = JSTPointer(argv[0]);
@@ -317,6 +322,7 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
+	JSTSetPropertyFunction(RtJSNativeAPI, "fillMemory", &jsNativeFillMemory);
 	JSTSetPropertyFunction(RtJSNativeAPI, "writeAddress", &jsNativeWriteAddress);
 	JSTSetPropertyFunction(RtJSNativeAPI, "readAddress", &jsNativeReadAddress);
 	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
