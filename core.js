@@ -9,6 +9,8 @@
 // the above fixup is going to require type dereferencing...
 */
 
+// tokenizer needs a SyntaxError method that automatically reports stream position.
+
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
 var classConstruct = function(code, name){
