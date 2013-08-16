@@ -106,7 +106,7 @@ static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol
 
 	if (type & EnumTypeBoolean) return JSTMakeBoolean(dcCallBool(vm, symbol));
 	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?(signed char)dcCallChar(vm, symbol):dcCallChar(vm, symbol));
-	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned short)dcCallShort(vm, symbol):dcCallChar(vm, symbol));
+	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned short)dcCallShort(vm, symbol):dcCallShort(vm, symbol));
 	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned int)dcCallInt(vm, symbol):dcCallInt(vm, symbol));
 	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned long)dcCallLong(vm, symbol):dcCallLong(vm, symbol));
 	else if (type & EnumTypeLongLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned long long)dcCallLongLong(vm, symbol):dcCallLongLong(vm, symbol));
