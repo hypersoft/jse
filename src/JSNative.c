@@ -43,10 +43,10 @@ static JSValueRef jsNativeReadAddress JSToolsFunction (address, type) {
 
 	if (type & EnumTypeBoolean) return JSTMakeNumber((double) *(bool*)(address));
 	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?*(signed char*)(address):*(char*)(address));
-	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned short*)(address):*(short*)(address));
-	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned int*)(address):*(int*)(address));
-	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned long*)(address):*(long*)(address));
-	else if (type & EnumTypeLongLong) return JSTMakeNumber((double) (type & EnumTypeUnSigned)?*(unsigned long long*)(address):*(long long*)(address));
+	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned short*)(address):*(short*)(address));
+	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned int*)(address):*(int*)(address));
+	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned long*)(address):*(long*)(address));
+	else if (type & EnumTypeLongLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned long long*)(address):*(long long*)(address));
 	else if (type & EnumTypeFloat) return JSTMakeNumber((double) *(float*)(address));
 	else if (type & EnumTypeDouble) return JSTMakeNumber((double) *(double*)(address));
 	else { JSTTypeError("JSNative.Type: invalid type"); return RtJS(undefined); }
