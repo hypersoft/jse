@@ -44,7 +44,7 @@ static JSValueRef jsNativeLoadLibrary JSToolsFunction(const char * libpath) {
 		return RtJS(undefined);
 	}
 	char * buffer = JSTGetValueBuffer(JSTParam(1), NULL);
-	JSValueRef result = JSTMakeNumber((long)dlLoadLibrary(buffer));
+	JSValueRef result = JSTMakeNumber((unsigned long)dlLoadLibrary(buffer));
 	JSTFreeBuffer(buffer);
 	return result;
 }
@@ -63,7 +63,7 @@ static JSValueRef jsNativeFindLibrarySymbol JSToolsFunction(void * libhandle , c
 		return RtJS(undefined);
 	}
 	char * buffer = JSTGetValueBuffer(JSTParam(2), NULL);
-	JSValueRef result = JSTMakeNumber((long)dlFindSymbol(JSTPointer(JSTParam(1)), buffer));
+	JSValueRef result = JSTMakeNumber((unsigned long)dlFindSymbol(JSTPointer(JSTParam(1)), buffer));
 	JSTFreeBuffer(buffer);
 	return result;
 }
@@ -73,7 +73,7 @@ static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
 		JSTSyntaxError("JSNative.api.callVM: expected 1 argument: (Unsigned Long) size");
 		return RtJS(undefined);
 	}
-	return JSTMakeNumber((long)dcNewCallVM(JSTLong(JSTParam(1))));
+	return JSTMakeNumber((unsigned long)dcNewCallVM(JSTLong(JSTParam(1))));
 }
 
 static JSValueRef jsNativeFreeCallVM JSToolsFunction(DCCallVM * vm) {
@@ -158,7 +158,7 @@ static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol
 }
 
 static JSValueRef jsNativeMalloc JSToolsFunction (size) {
-	return JSTMakeNumber((long)malloc(JSTLong(argv[0])));
+	return JSTMakeNumber((unsigned long)malloc(JSTLong(argv[0])));
 }
 
 static JSValueRef jsNativeFree JSToolsFunction (address) {
@@ -167,11 +167,11 @@ static JSValueRef jsNativeFree JSToolsFunction (address) {
 }
 
 static JSValueRef jsNativeCalloc JSToolsFunction (units, unit_size) {
-	return JSTMakeNumber((long)calloc(JSTLong(argv[0]), JSTLong(argv[1])));
+	return JSTMakeNumber((unsigned long)calloc(JSTLong(argv[0]), JSTLong(argv[1])));
 }
 
 static JSValueRef jsNativeRealloc JSToolsFunction (address, count) {
-	return JSTMakeNumber((long)realloc(JSTPointer(argv[0]), JSTLong(argv[1])));
+	return JSTMakeNumber((unsigned long)realloc(JSTPointer(argv[0]), JSTLong(argv[1])));
 }
 
 static JSValueRef jsNativeMemset JSToolsFunction (address, value, count) {
