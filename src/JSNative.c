@@ -81,6 +81,11 @@ static JSValueRef jsNativeCallVMReset JSToolsFunction(DCCallVM * vm) {
 
 static JSValueRef jsNativeCallVMPush JSToolsFunction(DCCallVM * vm, type, value) {
 
+	if (argc != 3) {
+		JSTSyntaxError("JSNative.api.callVMPush: expected 3 arguments: (JSNative.CallVM) pointer, (Number) type, (Number) value");
+		return RtJS(undefined);
+	}
+
 	void * vm = JSTPointer(argv[0]);
 	int type = JSTInteger(argv[1]);
 	JSValueRef value = argv[2];
@@ -99,6 +104,11 @@ static JSValueRef jsNativeCallVMPush JSToolsFunction(DCCallVM * vm, type, value)
 }
 
 static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol) {
+
+	if (argc != 3) {
+		JSTSyntaxError("JSNative.api.callVMCall: expected 3 arguments: (JSNative.CallVM) pointer, (Number) type, (void pointer) function");
+		return RtJS(undefined);
+	}
 
 	void * vm = JSTPointer(argv[0]);
 	int type = JSTInteger(argv[1]);
