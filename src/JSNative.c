@@ -22,21 +22,21 @@ EnumClassInstanceOf = 256,
 EnumClassEnumerate = 512,
 EnumClassHasProperty = 1024,
 
-EnumTypeVoid = 2,
-EnumTypeBoolean = 4,
-EnumTypeChar = 8,
-EnumTypeShort = 16,
-EnumTypeInt = 32,
-EnumTypeSigned = 32,
-EnumTypeUnsigned = 64,
-EnumTypeLong = 128,
-EnumTypeLongLong = 256,
-EnumTypeFloat = 512,
-EnumTypeDouble = 1024,
-EnumTypeFunction = 2048,
-EnumTypeStruct = 4096,
-EnumTypeUnion = 8192,
-EnumTypeEnum = 16384;
+EnumTypeConst = 2,
+EnumTypeUnsigned = 4,
+EnumTypeVoid = 8,
+EnumTypeBoolean = 16,
+EnumTypeChar = 32 | 4,
+EnumTypeShort = 64,
+EnumTypeInt = 128,
+EnumTypeLong = 256,
+EnumTypeLongLong = 512,
+EnumTypeFloat = 1024,
+EnumTypeDouble = 2048,
+EnumTypeFunction = 4096,
+EnumTypeStruct = 8192,
+EnumTypeUnion = 16384,
+EnumTypeEnum = 32768;
 
 
 static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
@@ -115,7 +115,7 @@ static JSValueRef jsNativeCallVMCall JSToolsFunction(DCCallVM * vm, type, symbol
 	void * symbol = JSTPointer(argv[2]);
 
 	if (type & EnumTypeBoolean) return JSTMakeBoolean(dcCallBool(vm, symbol));
-	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?(signed char)dcCallChar(vm, symbol):dcCallChar(vm, symbol));
+	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?dcCallChar(vm, symbol):(signed char)dcCallChar(vm, symbol));
 	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned short)dcCallShort(vm, symbol):dcCallShort(vm, symbol));
 	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned int)dcCallInt(vm, symbol):dcCallInt(vm, symbol));
 	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?(unsigned long)dcCallLong(vm, symbol):dcCallLong(vm, symbol));
@@ -156,7 +156,7 @@ static JSValueRef jsNativeReadAddress JSToolsFunction (address, type) {
 	int type = JSTInteger(argv[1]);
 
 	if (type & EnumTypeBoolean) return JSTMakeNumber((double) *(bool*)(address));
-	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeSigned)?*(signed char*)(address):*(char*)(address));
+	else if (type & EnumTypeChar) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(char*)(address):*(signed char*)(address));
 	else if (type & EnumTypeShort) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned short*)(address):*(short*)(address));
 	else if (type & EnumTypeInt) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned int*)(address):*(int*)(address));
 	else if (type & EnumTypeLong) return JSTMakeNumber((double) (type & EnumTypeUnsigned)?*(unsigned long*)(address):*(long*)(address));

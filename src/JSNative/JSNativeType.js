@@ -1,16 +1,19 @@
 
 // API Type Constants
-JSNative.api.typeVoid = 2,
-JSNative.api.typeBoolean = 4,
-JSNative.api.typeChar = 8,
-JSNative.api.typeShort = 16,
-JSNative.api.typeInt = 32, JSNative.api.typeSigned = 32, JSNative.api.typeUnsigned = 64,
-JSNative.api.typeLong = 128,
-JSNative.api.typeLongLong = 256,
-JSNative.api.typeFloat = 512,
-JSNative.api.typeDouble = 1024,
-JSNative.api.typeFunction = 2048,
-JSNative.api.typeStruct = 4096,
-JSNative.api.typeUnion = 8192,
-JSNative.api.typeEnum = 16384;
+
+JSNative.api.typeConst = 2,
+JSNative.api.typeUnsigned = 4,
+JSNative.api.typeVoid = 8,
+JSNative.api.typeBoolean = 16,
+JSNative.api.typeChar = 32 | 4,
+JSNative.api.typeShort = 64,
+JSNative.api.typeInt = 128,
+JSNative.api.typeLong = 256,
+JSNative.api.typeLongLong = 512,
+JSNative.api.typeFloat = 1024,
+JSNative.api.typeDouble = 2048,
+JSNative.api.typeFunction = 4096,
+JSNative.api.typeStruct = 8192,
+JSNative.api.typeUnion = 16384,
+JSNative.api.typeEnum = 32768;
 
