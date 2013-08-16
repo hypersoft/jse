@@ -38,6 +38,36 @@ EnumTypeStruct = 8192,
 EnumTypeUnion = 16384,
 EnumTypeEnum = 32768;
 
+static JSValueRef jsNativeLoadLibrary JSToolsFunction(const char * libpath) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.loadLibrary: expected 1 string argument: libPath");
+		return RtJS(undefined);
+	}
+	char * buffer = JSTGetValueBuffer(JSTParam(1), NULL);
+	JSValueRef result = JSTMakeNumber((long)dlLoadLibrary(buffer));
+	JSTFreeBuffer(buffer);
+	return result;
+}
+
+static JSValueRef jsNativeFreeLibrary JSToolsFunction(void * libhandle) {
+	if (argc != 1) {
+		JSTSyntaxError("JSNative.api.freeLibrary: expected 1 argument: libHandle");
+		return RtJS(undefined);
+	}
+	dlFreeLibrary(JSTPointer(JSTParam(1))); return RtJS(undefined);
+}
+
+static JSValueRef jsNativeFindLibrarySymbol JSToolsFunction(void * libhandle , const char * symbol ) {
+	if (argc != 2) {
+		JSTSyntaxError("JSNative.api.findLibrarySymbol: expected 2 arguments: (Number) libHandle, (String) symbol");
+		return RtJS(undefined);
+	}
+	char * buffer = JSTGetValueBuffer(JSTParam(2), NULL);
+	JSValueRef result = JSTMakeNumber((long)dlFindSymbol(JSTPointer(JSTParam(1)), buffer));
+	JSTFreeBuffer(buffer);
+	return result;
+}
+
 static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
 	if (argc != 1) {
 		JSTSyntaxError("JSNative.api.callVM: expected 1 integer argument: size");
@@ -431,6 +461,10 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	RtJSNativeAPI = (JSObjectRef) JSTCreateClassObject(NULL,NULL);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "getTypeSize", &jsNativeGetTypeSize);
+
+	JSTSetPropertyFunction(RtJSNativeAPI, "loadLibrary",		&jsNativeLoadLibrary);
+	JSTSetPropertyFunction(RtJSNativeAPI, "freeLibrary",		&jsNativeFreeLibrary);
+	JSTSetPropertyFunction(RtJSNativeAPI, "findLibrarySymbol",	&jsNativeFindLibrarySymbol);
 
 	JSTSetPropertyFunction(RtJSNativeAPI, "callVM", &jsNativeCallVM);
 	JSTSetPropertyFunction(RtJSNativeAPI, "freeCallVM", &jsNativeFreeCallVM);
