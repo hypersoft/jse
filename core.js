@@ -6,9 +6,7 @@
 
 /* parsing algo needs to meet the following exception models
 //unsigned bool t1; //  error: both ‘unsigned’ and ‘_Bool’ in declaration specifiers
-//int bool t1; // error: two or more data types in declaration specifiers
-//signed unsigned char t2; // error: both ‘signed’ and ‘unsigned’ in declaration specifiers
-//signed signed char t2; // error: duplicate ‘signed’
+// the above fixup is going to require type dereferencing...
 */
 
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
@@ -327,11 +325,17 @@ Declaration.parse = function(source) {
 		if (this.type == undefined) this.type = new Object();
 		if (tokenizer.token.match(/struct|union|enum/) != null) throw new ReferenceError("`"+tokenizer.token+"' is not an acceptable type specifier in this release")
 		else if (tokenizer.token.match(/^signed$|^unsigned$/) != null) {
+			if (tokenizer.token in this.type) {
+				throw new SyntaxError("duplicate '"+tokenizer.token+"'");
+			}
 			this.type[tokenizer.token] = true
 			if (this.type.signed == true && this.type.unsigned == true) {
 				throw new SyntaxError("both 'signed' and 'unsigned' in declaration specifiers");
 			}
 			return
+		}
+		if (this.type.reference != undefined) {
+				throw new SyntaxError("two or more data types in declaration specifiers");
 		}
 		this.type.reference = tokenizer.token;
 	},
@@ -436,7 +440,7 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef char (*(*x(char g, ...))[14u])(void);');
+var dcl = Declaration.parse('unsigned bool chump;');
 
 echo(JSON.stringify(dcl, undefined, '....'))
 
