@@ -13,8 +13,29 @@
 
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
+var genDefinitionCode = function genDefinitionCode(typedef) {
+	var code = Number(JSNative.Type[typedef.type.reference])
+	if (typedef.const) code |= JSNative.api.typeConst
+	if (typedef.type.unsigned) code |= JSNative.api.typeUnsigned
+	return code;
+}
+
 var classConstruct = function(code, name){
 
+	if (arguments.length == 2) {
+		code = Number(code); name = String(name);
+		extend(this, {constructor:JSNative.Type,"type":{"code":code,"size":JSNative.api.getTypeSize(code)},"declarator":{"from":"type","name":name},"source":"new JSNative.Type("+code+", '"+name+"');"})
+		Object.seal(this)
+		if (JSNative.Type[code] == undefined) Object.defineProperty(JSNative.Type, code, {value: this});
+		Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
+	} else if (arguments.length == 1 && code.storage == 'typedef') {
+		var d, m = extend({}, code); delete m.source; delete m.storage; delete m.declarators;
+		while ((d = code.declarators.shift()) != undefined) {
+			var o = JSNative.api.setObjectPrototype(extend({}, m), JSNative.Type.prototype);
+			extend(o, {constructor:JSNative.Type,"declarator":d,"source":code.source})
+			Object.defineProperty(JSNative.Type, d.name, {value: o, enumerable:true});
+		}
+	}
 }
 
 var classInvoke = function(code) {return this.Type[code]}
@@ -23,8 +44,12 @@ new JSNative.Class
 (
 	"JSNative.Type",
 	{ /* class instance methods (constructor prototype) */
-		toString: function() {return this.name},
-		valueOf: function() {return this.type},
+		toString: function() {return this.declarator.name},
+		valueOf: function() {
+			if (this.type.code != undefined) return this.type.code;
+			else return genDefinitionCode(this);
+		},
+		sizeOf: function() { if (this.type.size != undefined) return this.type.size; else return JSNative.Type[this.type.reference].sizeOf()},
 	},
 	{ /* class methods (constructor methods) */
 		classConstruct:classConstruct,
@@ -32,62 +57,23 @@ new JSNative.Class
 	}
 )
 
-Object.defineProperty(JSNative.Type, "define", {value: function(typeCode, name, constant, indirection, dimensions) {
-
-	var type = {};
-	type.constructor = JSNative.Type
-
-	type.code = typeCode;
-	type.name = name;
-	type.const = (constant)?constant:false;
-
-	if (indirection) type.indirection = indirection; // how many *'s to deref?
-	if (dimensions) type.dimensions = dimensions; // array dimensions?
-
-	if (typeCode == JSNative.api.typeFunction) {
-		type.value = arguments[5];
-		type.arguments = arguments[6];
-	} else if (typeCode == JSNative.api.typeStruct) {
-		// not supported...
-		// If we supported structs and unions, arguments[5] would hold the identifier list..
-	} else if (typeCode == JSNative.api.typeUnion) {
-		// not supported...
-		// If we supported structs and unions, arguments[5] would hold the identifier list..
-	} else {
-		type.size = JSNative.api.getTypeSize(typeCode);
-		if (typeCode > JSNative.api.typeBoolean && typeCode < JSNative.api.typeFloat) {
-			type.integer = true;
-			type.signed = (arguments[5] !== undefined)?arguments[5]:true;
-		} else type.integer = false;
-	}
-
-	Object.seal(type)
-	if (! typeCode in JSNative.Type)
-	Object.defineProperty(JSNative.Type, typeCode, {value:type});
-	Object.defineProperty(JSNative.Type, name, {value:type, enumerable:true});
-
-}})
-
-// Initialize Core Types
-JSNative.Type.define(JSNative.api.typeVoid,		"void")
-JSNative.Type.define(JSNative.api.typeBoolean,	"bool")
-// char is not signed
-JSNative.Type.define(JSNative.api.typeChar,		"char", undefined, undefined, undefined, false)
-JSNative.Type.define(JSNative.api.typeShort,	"short")
-JSNative.Type.define(JSNative.api.typeShort,	"short int")
-JSNative.Type.define(JSNative.api.typeShort,	"int short")
-JSNative.Type.define(JSNative.api.typeInt,		"int")
-JSNative.Type.define(JSNative.api.typeInt,		"signed")
-// unsigned is not signed
-JSNative.Type.define(JSNative.api.typeInt,		"unsigned", undefined, undefined, undefined, false)
-JSNative.Type.define(JSNative.api.typeLong,		"long")
-JSNative.Type.define(JSNative.api.typeLong,		"long int")
-JSNative.Type.define(JSNative.api.typeLong,		"int long")
-JSNative.Type.define(JSNative.api.typeLongLong,	"long long")
-JSNative.Type.define(JSNative.api.typeLongLong,	"long long int")
-JSNative.Type.define(JSNative.api.typeLongLong,	"int long long")
-JSNative.Type.define(JSNative.api.typeFloat,	"float")
-JSNative.Type.define(JSNative.api.typeDouble,	"double")
+new JSNative.Type(JSNative.api.typeVoid,		"void")
+new JSNative.Type(JSNative.api.typeBoolean,		"bool")
+new JSNative.Type(JSNative.api.typeChar,		"char")
+new JSNative.Type(JSNative.api.typeShort,		"short")
+new JSNative.Type(JSNative.api.typeShort,		"short int")
+new JSNative.Type(JSNative.api.typeShort,		"int short")
+new JSNative.Type(JSNative.api.typeInt,			"int")
+new JSNative.Type(JSNative.api.typeInt,			"signed")
+new JSNative.Type(JSNative.api.typeInt | JSNative.api.typeUnsigned,	"unsigned")
+new JSNative.Type(JSNative.api.typeLong,		"long")
+new JSNative.Type(JSNative.api.typeLong,		"long int")
+new JSNative.Type(JSNative.api.typeLong,		"int long")
+new JSNative.Type(JSNative.api.typeLongLong,	"long long")
+new JSNative.Type(JSNative.api.typeLongLong,	"long long int")
+new JSNative.Type(JSNative.api.typeLongLong,	"int long long")
+new JSNative.Type(JSNative.api.typeFloat,		"float")
+new JSNative.Type(JSNative.api.typeDouble,		"double")
 
 })();
 
@@ -281,6 +267,8 @@ Declaration.parse = function(source) {
 	}
 
 	var anonymousDeclarator = false; // when true, directDeclarator does not require names..
+	var access = 'variant'
+
 	var declaration = {};
 
 	// CSV list handler
@@ -313,6 +301,7 @@ Declaration.parse = function(source) {
 		/* At most one storage class specifier may be given in a declaration. */
 		if ('storage' in this) throw new Error("multiple storage class specifiers in declaration")
 		this.storage = tokenizer.token
+		if (this.storage == 'typedef') access = 'type'
 	},
 
 	typeQualifier = function(){
@@ -375,7 +364,7 @@ Declaration.parse = function(source) {
 
 	directDeclarator = function(){
 		if (tokenizer.accept(syntax.identifier)) {
-			this.from = 'variant'
+			this.from = access;
 			identifier.call(this);
 		} else if (tokenizer.accept(syntax.lparen)) {
 			var d = new declarator();
@@ -442,9 +431,13 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('unsigned bool chump;');
+var dcl = Declaration.parse('typedef unsigned short a, b, c;');
 
-echo(JSON.stringify(dcl, undefined, '....'))
+new JSNative.Type(dcl);
+
+for (name in JSNative.Type) echo(name);
+
+echo(JSON.stringify(JSNative.Type['a']))
 
 exit(0);
 
