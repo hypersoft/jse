@@ -38,7 +38,6 @@ EnumTypeStruct = 8192,
 EnumTypeUnion = 16384,
 EnumTypeEnum = 32768;
 
-
 static JSValueRef jsNativeCallVM JSToolsFunction(DCsize size) {
 	if (argc != 1) {
 		JSTSyntaxError("JSNative.api.callVM: expected 1 integer argument: size");
@@ -420,7 +419,7 @@ static JSValueRef jsNativeClassCreate JSToolsFunction () {
 
 static JSValueRef jsNativeApiSetPrototype JSToolsFunction (o, p) {
 	JSTSetPrototype((JSObjectRef)argv[0], argv[1]);
-	return RtJS(undefined);
+	return argv[0];
 }
 
 void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
