@@ -53,7 +53,7 @@ static JSValueRef jsNativeRealloc JSToolsFunction (address, count) {
 	return JSTMakeNumber((long)realloc(JSTPointer(argv[0]), JSTLong(argv[1])));
 }
 
-static JSValueRef JSNativeMemset JSToolsFunction (address, value, count) {
+static JSValueRef jsNativeMemset JSToolsFunction (address, value, count) {
 	memset(JSTPointer(argv[0]), JSTInteger(argv[1]), JSTLong(argv[2]));
 	return RtJS(undefined);
 }
@@ -76,22 +76,22 @@ static JSValueRef jsNativeReadAddress JSToolsFunction (address, type) {
 
 }
 
-static bool jsNativeWriteAddress JSToolsFunction (address, type, value) {
+static JSValueRef jsNativeWriteAddress JSToolsFunction (address, type, value) {
 
 	void * address = JSTPointer(argv[0]);
 	int type = JSTInteger(argv[1]);
 	JSValueRef value = argv[2];
 
-	if (type & EnumTypeBoolean) { *(bool*)(address) = JSValueToBoolean(ctx, value); return true; }
-	else if (type & EnumTypeChar) { *(char*)(address) = (char) JSValueToNumber(ctx, value, exception); return true; }
-	else if (type & EnumTypeShort) { *(short*)(address) = (short) JSValueToNumber(ctx, value, exception); return true; }
-	else if (type & EnumTypeInt) { *(int*)(address) = (int) JSValueToNumber(ctx, value, exception); return true; }
-	else if (type & EnumTypeLong) { *(long*)(address) = (long) JSValueToNumber(ctx, value, exception); return true; } 
-	else if (type & EnumTypeLongLong) { *(long long*)(address) = (long long) JSValueToNumber(ctx, value, exception); return true; } 
-	else if (type & EnumTypeFloat) { *(float*)(address) = (float) JSValueToNumber(ctx, value, exception); return true; } 
-	else if (type & EnumTypeDouble) { *(double*)(address) = JSValueToNumber(ctx, value, exception); return true; } 
-	else { JSTTypeError("JSNative.Type: invalid type"); return false; }
-	return false;
+	if (type & EnumTypeBoolean) { *(bool*)(address) = JSValueToBoolean(ctx, value); return JSTMakeBoolean(true); }
+	else if (type & EnumTypeChar) { *(char*)(address) = (char) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); }
+	else if (type & EnumTypeShort) { *(short*)(address) = (short) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); }
+	else if (type & EnumTypeInt) { *(int*)(address) = (int) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); }
+	else if (type & EnumTypeLong) { *(long*)(address) = (long) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); } 
+	else if (type & EnumTypeLongLong) { *(long long*)(address) = (long long) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); } 
+	else if (type & EnumTypeFloat) { *(float*)(address) = (float) JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); } 
+	else if (type & EnumTypeDouble) { *(double*)(address) = JSValueToNumber(ctx, value, exception); return JSTMakeBoolean(true); } 
+	else { JSTTypeError("JSNative.Type: invalid type"); return JSTMakeBoolean(false); }
+	return JSTMakeBoolean(false);
 
 }
 
@@ -346,7 +346,7 @@ void js_native_init JSToolsProcedure (int argc, char *argv[], char *envp[]) {
 	JSTSetPropertyFunction(RtJSNativeAPI, "calloc", &jsNativeCalloc);
 	JSTSetPropertyFunction(RtJSNativeAPI, "realloc", &jsNativeRealloc);
 
-	JSTSetPropertyFunction(RtJSNativeAPI, "memset", &JSNativeMemset);
+	JSTSetPropertyFunction(RtJSNativeAPI, "memset", &jsNativeMemset);
 	JSTSetPropertyFunction(RtJSNativeAPI, "writeAddress", &jsNativeWriteAddress);
 	JSTSetPropertyFunction(RtJSNativeAPI, "readAddress", &jsNativeReadAddress);
 
