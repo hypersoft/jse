@@ -15,7 +15,7 @@
 
 var genDefinitionCode = function genDefinitionCode(typedef) {
 	var code = Number(JSNative.Type[typedef.type.reference])
-	if (typedef.const) code |= JSNative.api.typeConst
+	if (typedef.type.const) code |= JSNative.api.typeConst
 	if (typedef.type.unsigned) code |= JSNative.api.typeUnsigned
 	return code;
 }
@@ -29,13 +29,17 @@ var classConstruct = function(code, name){
 		if (JSNative.Type[code] == undefined) Object.defineProperty(JSNative.Type, code, {value: this});
 		Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
 	} else if (arguments.length == 1 && code.storage == 'typedef') {
-		var d, m = extend({}, code); delete m.source; delete m.storage; delete m.declarators;
-		m.type.code = genDefintionCode(m);
-		while ((d = code.declarators.shift()) != undefined) {
-			var o = JSNative.api.setObjectPrototype(extend({}, m), JSNative.Type.prototype);
-			extend(o, {constructor:JSNative.Type,"declarator":d,"source":code.source})
-			Object.defineProperty(JSNative.Type, d.name, {value: o, enumerable:true});
+		var objects = code.declarators;
+		delete code.storage; delete code.source; delete code.declarators;
+		var c, td, prototype = JSNative.Type[code.type.reference];
+		JSNative.api.setObjectPrototype(code.type, prototype.type);
+		while ((td = objects.shift()) != undefined) {
+			var o = extend({}, code); o.declarator = td;
+			JSNative.api.setObjectPrototype(o, JSNative.Type.prototype)
+			c = genDefinitionCode(o); if (o.type.code != c) o.type.code = c;
+			Object.defineProperty(JSNative.Type, td.name, {value: o, enumerable:true});
 		}
+		return o;
 	}
 }
 
@@ -47,7 +51,7 @@ new JSNative.Class
 	{ /* class instance methods (constructor prototype) */
 		toString: function() {return this.declarator.name},
 		valueOf: function() {return this.type.code},
-		sizeOf: function() { if (this.type.size != undefined) return this.type.size; else return JSNative.Type[this.type.reference].sizeOf()},
+		sizeOf: function() { return this.type.size},
 	},
 	{ /* class methods (constructor methods) */
 		classConstruct:classConstruct,
@@ -277,6 +281,7 @@ Declaration.parse = function(source) {
 	},
 
 	declarationSpecifiers = function(){
+		if (this.type == undefined) this.type = new Object();
 		if (tokenizer.accept(syntax.storage)) {
 			storageClassSpecifier.call(this); declarationSpecifiers.call(this);
 		} else if (tokenizer.accept(syntax.qualifier)) {
@@ -303,7 +308,7 @@ Declaration.parse = function(source) {
 	},
 
 	typeQualifier = function(){
-		this[tokenizer.token] = true
+		this.type[tokenizer.token] = true
 	},
 
 	typeQualifierList = function(){
@@ -311,7 +316,6 @@ Declaration.parse = function(source) {
 	},
 
 	typeSpecifier = function(){
-		if (this.type == undefined) this.type = new Object();
 		if (tokenizer.token.match(/struct|union|enum/) != null) throw new ReferenceError("`"+tokenizer.token+"' is not an acceptable type specifier in this release")
 		else if (tokenizer.token.match(/^signed$|^unsigned$/) != null) {
 			if (tokenizer.token in this.type) {
@@ -429,13 +433,13 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef unsigned short a, b, c;');
+var dcl = Declaration.parse('typedef const unsigned short a, b, *c[24];');
 
-new JSNative.Type(dcl);
+x = new JSNative.Type(dcl);
 
-for (name in JSNative.Type) echo(name);
 
-echo(JSON.stringify(JSNative.Type['a']))
+echo(JSON.stringify(x))
+echo(x.type.size)
 
 exit(0);
 
