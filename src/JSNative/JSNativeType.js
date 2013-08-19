@@ -15,5 +15,5 @@ JSNative.api.typeDouble = 2048,
 JSNative.api.typeFunction = 4096,
 JSNative.api.typeStruct = 8192,
 JSNative.api.typeUnion = 16384,
-JSNative.api.typeEnum = 32768;
-
+JSNative.api.typeEnum = 32768,
+JSNative.api.typePointer = 65536;

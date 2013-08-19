@@ -36,7 +36,8 @@ EnumTypeDouble = 2048,
 EnumTypeFunction = 4096,
 EnumTypeStruct = 8192,
 EnumTypeUnion = 16384,
-EnumTypeEnum = 32768;
+EnumTypeEnum = 32768,
+EnumTypePointer = 65536;
 
 static JSValueRef jsNativeLoadLibrary JSToolsFunction(const char * libpath) {
 	if (argc != 1) {
