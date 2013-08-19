@@ -36,33 +36,60 @@ new JSNative.Class
 (
 	"JSNative.Type",
 	{ /* class instance methods (constructor prototype) */
-		toString: function() {return this.declarator.name},
-		valueOf: function() { return this.type.code},
-		sizeOf: function() {  return this.type.size},
+		toString: function() {return JSNative.Type.def.toString(this.value)) },
+		valueOf: function() { return this.value },
+		sizeOf: function() {  return JSNative.api.getTypeSize(this.value) },
 	},
 	{ /* class methods (constructor methods) */
 		classConstruct:classConstruct,
 		classInvoke:classInvoke,
+		def: {
+			flag: { // these flags mix with type codes
+				const: 2,
+				volatile: 65536,	// typically ignored, but the value has weight
+				storage: { 	
+					// storage is a native value property, each flag is unique for exactness
+					auto: 2,
+					register: 4,
+					'static': 8,
+					extern: 16,
+					typedef: 32,
+					isAuto: function(code){ return Boolean(this.storage.auto & code) },
+					isRegister: function(code){ return Boolean(this.storage.register & code) },
+					isStatic: function(code){ return Boolean(this.storage.static & code) },
+					isExtern: function(code){ return Boolean(this.storage.extern & code) },
+					isTypedef: function(code){ return Boolean(this.storage.typedef & code) },
+				}
+			}, // the following values determine how we interpret a memory address value
+			/* pointer, enum, function, struct, union are not significant therfore they are aliases */
+			unsigned: 4,
+			void: 8,		// each type is an object with a pointer, so this means void *
+			boolean: 16,
+			char: 32 | 4,	// chars are default unsigned
+			short: 64,
+			int: 128,
+			long: 256,
+			int64: 512,
+			'long long': 512,
+			float: 1024,
+			double: 2048,
+			/* our version of dyncall doesn't support long double /*
+			/*Type.def.*/toString: function(code) {
+				// generate a human readable string from full type code
+
+			},
+			isUnsigned: function(code){ return Boolean(this.def.unsigned & code) },
+			isSigned: function(code){ return (! Boolean(this.def.unsigned & code)) },
+			isConst: function(code){ return Boolean(this.def.flag.const & code) },
+			isVolatile: function(code){ return Boolean(this.def.flag.volatile & code) },
+			sizeOf: JSNative.api.getTypeSize.bind,
+		},
 	}
+	Object.seal(JSNative.type.def.flag.storage);
+	Object.seal(JSNative.type.def.flag);
+	Object.seal(JSNative.type.def);
 )
 
-new JSNative.Type(JSNative.api.typeVoid,		"void")
-new JSNative.Type(JSNative.api.typeBoolean,		"bool")
-new JSNative.Type(JSNative.api.typeChar,		"char")
-new JSNative.Type(JSNative.api.typeShort,		"short")
-new JSNative.Type(JSNative.api.typeShort,		"short int")
-new JSNative.Type(JSNative.api.typeShort,		"int short")
-new JSNative.Type(JSNative.api.typeInt,			"int")
-new JSNative.Type(JSNative.api.typeInt,			"signed")
-new JSNative.Type(JSNative.api.typeInt | JSNative.api.typeUnsigned,	"unsigned")
-new JSNative.Type(JSNative.api.typeLong,		"long")
-new JSNative.Type(JSNative.api.typeLong,		"long int")
-new JSNative.Type(JSNative.api.typeLong,		"int long")
-new JSNative.Type(JSNative.api.typeLongLong,	"long long")
-new JSNative.Type(JSNative.api.typeLongLong,	"long long int")
-new JSNative.Type(JSNative.api.typeLongLong,	"int long long")
-new JSNative.Type(JSNative.api.typeFloat,		"float")
-new JSNative.Type(JSNative.api.typeDouble,		"double")
 
 /* C Declaration Grammar Reference Notes
 
