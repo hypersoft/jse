@@ -1,33 +1,21 @@
 #!bin/jse
 
-// current type system does not do anything! :(
-// need methods to extract types from parsed sources, or define types,
-// as parsed sources...
-
-/* parsing algo needs to meet the following exception models
-//unsigned bool t1; //  error: both ‘unsigned’ and ‘_Bool’ in declaration specifiers
-// the above fixup is going to require type dereferencing...
-*/
-
 // tokenizer needs a SyntaxError method that automatically reports stream position.
 
 /* JS NATIVE TYPE */ (function JSNativeTypeClass() {
 
-var genDefinitionCode = function genDefinitionCode(typedef) {
-	var code = Number(JSNative.Type[typedef.type.reference])
-	if (typedef.type.const) code |= JSNative.api.typeConst
-	if (typedef.type.unsigned) code |= JSNative.api.typeUnsigned
-	return code;
-}
-
-var classConstruct = function(code, name){
-
-	code = Number(code); name = String(name);
-	extend(this, {constructor:JSNative.Type,"type":{"code":code,"size":JSNative.api.getTypeSize(code)},"declarator":{"from":"type","name":name},"source":"new JSNative.Type("+code+", '"+name+"');"})
-	Object.seal(this)
-	if (JSNative.Type[code] == undefined) Object.defineProperty(JSNative.Type, code, {value: this});
-	Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
-
+/* new JSNative.Type() == Typedef */
+var classConstruct = function(reference, name){
+	var refType = typeof reference;
+	if (refType == 'string') {
+		// parse that into a type code
+	} else if (refType == 'number') {
+		this.value = reference;
+	} else if (refType == 'object') {
+		
+	} else {
+		throw new TypeError("unhandled reference type model");
+	}
 }
 
 var classInvoke = function(code) {return this.Type[code]}
@@ -36,7 +24,7 @@ new JSNative.Class
 (
 	"JSNative.Type",
 	{ /* class instance methods (constructor prototype) */
-		toString: function() {return JSNative.Type.def.toString(this.value)) },
+		toString: function() {return JSNative.Type.def.toString(this.value) },
 		valueOf: function() { return this.value },
 		sizeOf: function() {  return JSNative.api.getTypeSize(this.value) },
 	},
@@ -46,7 +34,7 @@ new JSNative.Class
 		def: {
 			flag: { // these flags mix with type codes
 				const: 2,
-				volatile: 65536,	// typically ignored, but the value has weight
+				volatile: 65536,	// typically ignored operationally, but the value has weight
 				storage: { 	
 					// storage is a native value property, each flag is unique for exactness
 					auto: 2,
@@ -85,11 +73,12 @@ new JSNative.Class
 			sizeOf: JSNative.api.getTypeSize.bind,
 		},
 	}
-	Object.seal(JSNative.type.def.flag.storage);
-	Object.seal(JSNative.type.def.flag);
-	Object.seal(JSNative.type.def);
+
 )
 
+Object.seal(JSNative.Type.def.flag.storage);
+Object.seal(JSNative.Type.def.flag);
+Object.seal(JSNative.Type.def);
 
 /* C Declaration Grammar Reference Notes
 
