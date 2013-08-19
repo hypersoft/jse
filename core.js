@@ -22,25 +22,12 @@ var genDefinitionCode = function genDefinitionCode(typedef) {
 
 var classConstruct = function(code, name){
 
-	if (arguments.length == 2) {
-		code = Number(code); name = String(name);
-		extend(this, {constructor:JSNative.Type,"type":{"code":code,"size":JSNative.api.getTypeSize(code)},"declarator":{"from":"type","name":name},"source":"new JSNative.Type("+code+", '"+name+"');"})
-		Object.seal(this)
-		if (JSNative.Type[code] == undefined) Object.defineProperty(JSNative.Type, code, {value: this});
-		Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
-	} else if (arguments.length == 1 && code.storage == 'typedef') {
-		var objects = code.declarators;
-		delete code.storage; delete code.source; delete code.declarators;
-		var c, td, prototype = JSNative.Type[code.type.reference];
-		JSNative.api.setObjectPrototype(code.type, prototype.type);
-		while ((td = objects.shift()) != undefined) {
-			var o = extend({}, code); o.declarator = td;
-			JSNative.api.setObjectPrototype(o, JSNative.Type.prototype)
-			c = genDefinitionCode(o); if (o.type.code != c) o.type.code = c;
-			Object.defineProperty(JSNative.Type, td.name, {value: o, enumerable:true});
-		}
-		return o;
-	}
+	code = Number(code); name = String(name);
+	extend(this, {constructor:JSNative.Type,"type":{"code":code,"size":JSNative.api.getTypeSize(code)},"declarator":{"from":"type","name":name},"source":"new JSNative.Type("+code+", '"+name+"');"})
+	Object.seal(this)
+	if (JSNative.Type[code] == undefined) Object.defineProperty(JSNative.Type, code, {value: this});
+	Object.defineProperty(JSNative.Type, name, {value: this, enumerable:true});
+
 }
 
 var classInvoke = function(code) {return this.Type[code]}
@@ -50,8 +37,8 @@ new JSNative.Class
 	"JSNative.Type",
 	{ /* class instance methods (constructor prototype) */
 		toString: function() {return this.declarator.name},
-		valueOf: function() {return this.type.code},
-		sizeOf: function() { return this.type.size},
+		valueOf: function() { return this.type.code},
+		sizeOf: function() {  return this.type.size},
 	},
 	{ /* class methods (constructor methods) */
 		classConstruct:classConstruct,
@@ -76,8 +63,6 @@ new JSNative.Type(JSNative.api.typeLongLong,	"long long int")
 new JSNative.Type(JSNative.api.typeLongLong,	"int long long")
 new JSNative.Type(JSNative.api.typeFloat,		"float")
 new JSNative.Type(JSNative.api.typeDouble,		"double")
-
-})();
 
 /* C Declaration Grammar Reference Notes
 
@@ -198,7 +183,7 @@ new JSNative.Type(JSNative.api.typeDouble,		"double")
 
 */
 
-function Declaration() {}
+var Declaration = function() {}
 
 Declaration.syntax = {
 
@@ -433,13 +418,9 @@ Declaration.parse = function(source) {
 
 }
 
-var dcl = Declaration.parse('typedef const unsigned short a, b, *c[24];');
+JSNative.Type.Declaration = Declaration;
 
-x = new JSNative.Type(dcl);
-
-
-echo(JSON.stringify(x))
-echo(x.type.size)
+})();
 
 exit(0);
 
