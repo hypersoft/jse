@@ -6,7 +6,9 @@ Copyright (C) 2013 Triston J. Taylor (Hypersoft Systems); All Rights Reserved.
 -------------
 Miscellaneous Assistance Macros.
 
-	Items in this category don't carry the section heading name 'Base'. Because of this fact, one has to be very careful about (re)-naming macros defined in this section. Familiarity of content is key.
+	Items in this category don't carry the section heading name 'Base'.
+	Because of that fact, one has to be very careful about (re)-naming
+	macros defined in this section. Familiarity with content is key.
 
 * `JST(procedure name, ...)`
 
@@ -24,43 +26,43 @@ Miscellaneous Assistance Macros.
 
 	Opposite of `JST()`, this macro declares a context exception function frame. By design, these are JST interoperability  entry points.
 
-* JSTClass
+* `JSTClass`
 
 	JST's representation of a JavaScript class reference.
 
-* JSTValue
+* `JSTValue`
 
 	JST's representation of a JavaScript value reference.
-* JSTObject
+* `JSTObject`
 
 	JST's representation of a JavaScript object reference.
-* JSTContext
+* `JSTContext`
 
 	JST's representation of a JavaScript context reference.
-* JSTContextGroup
+* `JSTContextGroup`
 
 	JST's representation of a JavaScript context group reference.
-* JSTString
+* `JSTString`
 
 	JST's representation of a JavaScript string reference.
-* JSTUTF8
+* `JSTUTF8`
 
 	JST's reference model of for UTF-8 value.
-* JSTUTF16
+* `JSTUTF16`
 
 	JST's reference model of for UTF-16 value.
-* JSTUTF32
+* `JSTUTF32`
 
 	JST's reference model of for UTF-32 value.
-* JSTXPR(return expression, expressionN, ...)
+* `JSTXPR(return expression, expressionN, ...)`
 
-	Evaluate C expressions as an inline function value with return value.
+	Do C expressions as an inline function with return value. Function calls returning void are viable arguments.
 
-* JSTCND(try, true, false)
+* `JSTCND(try, true, false)`
 
-	Evaluate C expressions based on a trial condition (expression branch).
+	Do C expressions based on a trial condition (expression branch).
 
-		`JSTChoose` is a deprecated copy of this functionality.
+		`JSTChoose()` is a deprecated copy of this functionality.
 
 2. Context
 ----------
