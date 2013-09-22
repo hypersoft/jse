@@ -27,3 +27,13 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 	The provided JavaScript object `global` is populated with the standard JST scripting environment provisions.
 
 	The target function of this macro is defined as `src/JSTools.c:JSTObject JSTInit_ JSTUtility` and is declared external by `src/JSTools.h`.
+
+	The return value of this function is a context global JSTObject named "js".
+
+* Action
+
+	Variadic Macro `JSTAction(identifier, ...)`
+
+	Call `identifier` with ctx as the first parameter, followed by any number of unknown arguments.
+
+	Return value is identified by the prototype designated by `identifier`.
