@@ -6,7 +6,7 @@ Copyright (C) 2013 Triston J. Taylor (Hypersoft Systems); All Rights Reserved.
 -------------
 Miscellaneous Assistance Macros.
 
-	Items in this category don't carry the section heading name 'Base'.
+	Items in this category don't carry the section heading name 'Base'. Because of this fact, one has to be very careful about (re)-naming macros defined in this section. Familiarity of content is key.
 
 * `JST(procedure name, ...)`
 
@@ -23,6 +23,44 @@ Miscellaneous Assistance Macros.
 * `JSTUtility(...)`
 
 	Opposite of `JST()`, this macro declares a context exception function frame. By design, these are JST interoperability  entry points.
+
+* JSTClass
+
+	JST's representation of a JavaScript class reference.
+
+* JSTValue
+
+	JST's representation of a JavaScript value reference.
+* JSTObject
+
+	JST's representation of a JavaScript object reference.
+* JSTContext
+
+	JST's representation of a JavaScript context reference.
+* JSTContextGroup
+
+	JST's representation of a JavaScript context group reference.
+* JSTString
+
+	JST's representation of a JavaScript string reference.
+* JSTUTF8
+
+	JST's reference model of for UTF-8 value.
+* JSTUTF16
+
+	JST's reference model of for UTF-16 value.
+* JSTUTF32
+
+	JST's reference model of for UTF-32 value.
+* JSTXPR(return expression, expressionN, ...)
+
+	Evaluate C expressions as an inline function value with return value.
+
+* JSTCND(try, true, false)
+
+	Evaluate C expressions based on a trial condition (expression branch).
+
+		`JSTChoose` is a deprecated copy of this functionality.
 
 2. Context
 ----------
