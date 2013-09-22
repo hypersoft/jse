@@ -16,6 +16,8 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	The generated native function call must match the native function prototype of `pname` to compile properly.
 
+	This macro is typically called by other macros to reduce coding while improving quality, correctness and efficiency.
+
 * Init
 
 	Function Macro `JSTObject JSTInit(JSTObject global, int argc, char *argv[], char *envp[])`
