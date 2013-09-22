@@ -47,13 +47,13 @@ Miscellaneous Assistance Macros.
 	JST's representation of a JavaScript string reference.
 * `JSTUTF8`
 
-	JST's reference model of for UTF-8 value.
+	JST's reference model for UTF-8 values.
 * `JSTUTF16`
 
-	JST's reference model of for UTF-16 value.
+	JST's reference model for UTF-16 values.
 * `JSTUTF32`
 
-	JST's reference model of for UTF-32 value.
+	JST's reference model for UTF-32 values.
 * `JSTXPR(return expression, expressionN, ...)`
 
 	Do C expressions as an inline function with return value. Function calls returning void are viable expressionN arguments.
@@ -85,7 +85,7 @@ Tools for working with Javascript contexts.
 
 	Creates a Javascript context.
 
-* `JSTContextCreateInGroup()`
+* `JSTContextCreateInGroup(JSTContextGroup g)`
 
 	Creates a Javascript context within the specified context group.
 
@@ -99,11 +99,11 @@ Tools for working with Javascript contexts.
 
 * `JSTContextGetGlobalObject(JSTContext ctx)`
 
-	Retrieve the Javascript global object for a give context.
+	Retrieve the Javascript global object for a given Javascript context.
 
 * `JSTContextGetGroup(JSTContext ctx)`
 
-	Retrieve the context group associated with ctx.
+	Retrieve the Javascript context group associated with ctx.
 
 3. Class (JSTClass)
 -------------------
