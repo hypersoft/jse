@@ -4,3 +4,6 @@ inc/JSNative*.inc
 inc/JSTools.inc
 inc/JavaScriptCore
 inc/dyncall
+*.s
+src/*.s
+

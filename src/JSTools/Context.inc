@@ -1,0 +1,12 @@
+#define JSTContextGroupCreate JSContextGroupCreate
+#define JSTContextGroupRetain JSContextGroupRetain
+#define JSTContextGroupRelease JSContextGroupRelease
+
+#define JSTContextCreate JSGlobalContextCreate
+#define JSTContextCreateInGroup JSGlobalContextCreateInGroup
+#define JSTContextRetain JSGlobalContextRetain
+#define JSTContextRelease JSGlobalContextRelease
+
+#define JSTContextGetGlobalObject JSContextGetGlobalObject
+#define JSTContextGetGroup JSContextGetGroup
+
