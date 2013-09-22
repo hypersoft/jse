@@ -19,11 +19,11 @@ int main(int argc, char *argv[], char *envp[]) {
 	// demo a live report
 	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
 
-	iStackMachineReCast(v, iStackMachineChar);
+	iStackMachineRefactor(v, iStackMachineChar);
 	// demo a live report
 	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
 
-	iStackMachineReCast(v, iStackMachineDouble);
+	iStackMachineRefactor(v, iStackMachineDouble);
 	// demo a live report
 	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
 
