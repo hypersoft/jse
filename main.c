@@ -18,7 +18,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	iStackMachineInit(iStackMachineDouble, v2); // crack a snive smile
 
-	iStackMachineSlice(v, v2, v->index, 0);
+	iStackMachineSlice(v, v2, v->index, 1);
 
 	iStackMachinePushInt(v, "b"); // -/>
 	// demo a live report
@@ -51,6 +51,7 @@ exit(0);
 	while (iStackMachineCount(v)) printf("%s\n", iStackMachinePopInt(v)); // pop static heads
 	printf("\npop operation complete\n"); // done deal
 
+	
 return 0;
 
 }

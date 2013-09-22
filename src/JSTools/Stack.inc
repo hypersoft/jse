@@ -1,5 +1,15 @@
 // iStackMachine: Inline Variant Stack Machine; Copyright 2013 Triston J. Taylor; All Rights Reserved.
 
+#ifndef __STD_UTF_16__
+#include <uchar.h>
+#endif
+
+#ifndef JSTNativeAlignment
+#define JSTNativeAlignment sizeof(void*)
+#endif
+
+#define iStackMachineAlignment
+
 #define iStackMachineBool 1
 #define iStackMachineChar 2
 #define iStackMachineShort 3
@@ -27,20 +37,9 @@
 #define iStackMachine12 0L
 
 #define iStackMachineSize(t) iStackMachine##t
-#define iStackMachineAlign(unit) ((unit % G_MEM_ALIGN) ? (unit + G_MEM_ALIGN) - (unit % G_MEM_ALIGN) : unit)
+#define iStackMachineAlign(unit) ((unit % JSTNativeAlignment) ? (unit + JSTNativeAlignment) - (unit % JSTNativeAlignment) : unit)
 #define iStackMachinePadding(t) iStackMachineAlign(iStackMachine##t)
 
-typedef struct iStackMachine {
-	void * address;		// stack data address
-	unsigned type;		// iStackMachineX
-	unsigned width;		// iStackMachineSize(iStackMachineX)
-	unsigned units;		// stack units
-	unsigned index;		// stack top (count)
-	unsigned expand;	// unit count of automatic growth
-	void * private;		// user data
-	double swap;		// hands off: push cache (quoted string / calc. opt.)
-	bool growable;		// status: whether or not the machine can grow
-} iStackMachine;
 
 #define iStackMachineInit(t, n) \
 iStackMachine *n = malloc(sizeof(iStackMachine)); \
@@ -123,3 +122,55 @@ if (s->index) for (i = (s->index - 1), v = 0; i; i--)	\
 	true	\
 ):false)
 
+typedef struct iStackMachine {
+	void * address;		// stack data address
+	unsigned type;		// iStackMachineX
+	unsigned width;		// iStackMachineSize(iStackMachineX)
+	unsigned units;		// stack units
+	unsigned index;		// stack top (count)
+	unsigned expand;	// unit count of automatic growth
+	void * private;		// user data
+	double swap;		// hands off: push cache (quoted string / calc. opt.)
+	bool growable;		// status: whether or not the machine can grow
+} iStackMachine;
+
+
+#ifdef JSTools_h
+
+extern void iStackMachineWrite(iStackMachine * stack, unsigned index, double value);
+extern double iStackMachineRead(iStackMachine * stack, unsigned index);
+
+#else
+
+void iStackMachineWrite(iStackMachine * stack, unsigned index, register double value) {
+	register unsigned type = stack->type; register void * address = iStackMachineSlot(stack, index);
+	if (type == iStackMachineBool) *(bool*)address = value;
+	else if (type == iStackMachineChar) *(char*)address = value;
+	else if (type == iStackMachineShort) *(short*)address = value;
+	else if (type == iStackMachineInt) *(int*)address = value;
+	else if (type == iStackMachineLong) *(long*)address = value;
+	else if (type == iStackMachineLongLong) *(long long*)address = value;
+	else if (type == iStackMachineFloat) *(float*)address = value;
+	else if (type == iStackMachineDouble) *(double*)address = value;
+	else if (type == iStackMachineUTF8) *(char*)address = value;
+	else if (type == iStackMachineUTF16) *(char16_t*)address = value;
+	else if (type == iStackMachineUTF32) *(char32_t*)address = value;
+}
+
+double iStackMachineRead(iStackMachine * stack, unsigned index) {
+	register unsigned type = stack->type; register void * address = iStackMachineSlot(stack, index);
+	if (type == iStackMachineBool) return *(bool*)address;
+	else if (type == iStackMachineChar) return *(char*)address;
+	else if (type == iStackMachineShort) return *(short*)address;
+	else if (type == iStackMachineInt) return *(int*)address;
+	else if (type == iStackMachineLong) return *(long*)address;
+	else if (type == iStackMachineLongLong) return *(long long*)address;
+	else if (type == iStackMachineFloat) return *(float*)address;
+	else if (type == iStackMachineDouble) return *(double*)address;
+	else if (type == iStackMachineUTF8) return *(char*)address;
+	else if (type == iStackMachineUTF16) return *(char16_t*)address;
+	else if (type == iStackMachineUTF32) return *(char32_t*)address;
+	return 0;
+}
+
+#endif

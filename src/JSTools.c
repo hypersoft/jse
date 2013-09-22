@@ -17,39 +17,7 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i);
 bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
-void iStackMachineWrite(iStackMachine * stack, unsigned index, double value);
-double iStackMachineRead(iStackMachine * stack, unsigned index);
 
-void iStackMachineWrite(iStackMachine * stack, unsigned index, register double value) {
-	register unsigned type = stack->type; register void * address = iStackMachineSlot(stack, index);
-	if (type == iStackMachineBool) *(bool*)address = value;
-	else if (type == iStackMachineChar) *(char*)address = value;
-	else if (type == iStackMachineShort) *(short*)address = value;
-	else if (type == iStackMachineInt) *(int*)address = value;
-	else if (type == iStackMachineLong) *(long*)address = value;
-	else if (type == iStackMachineLongLong) *(long long*)address = value;
-	else if (type == iStackMachineFloat) *(float*)address = value;
-	else if (type == iStackMachineDouble) *(double*)address = value;
-	else if (type == iStackMachineUTF8) *(char*)address = value;
-	else if (type == iStackMachineUTF16) *(char16_t*)address = value;
-	else if (type == iStackMachineUTF32) *(char32_t*)address = value;
-}
-
-double iStackMachineRead(iStackMachine * stack, unsigned index) {
-	register unsigned type = stack->type; register void * address = iStackMachineSlot(stack, index);
-	if (type == iStackMachineBool) return *(bool*)address;
-	else if (type == iStackMachineChar) return *(char*)address;
-	else if (type == iStackMachineShort) return *(short*)address;
-	else if (type == iStackMachineInt) return *(int*)address;
-	else if (type == iStackMachineLong) return *(long*)address;
-	else if (type == iStackMachineLongLong) return *(long long*)address;
-	else if (type == iStackMachineFloat) return *(float*)address;
-	else if (type == iStackMachineDouble) return *(double*)address;
-	else if (type == iStackMachineUTF8) return *(char*)address;
-	else if (type == iStackMachineUTF16) return *(char16_t*)address;
-	else if (type == iStackMachineUTF32) return *(char32_t*)address;
-	return 0;
-}
 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
