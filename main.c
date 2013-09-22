@@ -1,5 +1,6 @@
 #include "JSTools.h"
 
+
 int main(int argc, char *argv[], char *envp[]) {
 
 	JSTContext ctx = JSTContextCreateInGroup(JSTContextGroupCreate(), NULL);
@@ -17,6 +18,17 @@ int main(int argc, char *argv[], char *envp[]) {
 	iStackMachinePushInt(v, "b"); // -/>
 	// demo a live report
 	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
+
+	iStackMachineReCast(v, iStackMachineChar);
+	// demo a live report
+	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
+
+	iStackMachineReCast(v, iStackMachineDouble);
+	// demo a live report
+	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
+
+exit(0);
+
 	printf("pushing a sentinel null pointer.. (%s)\n\n", (iStackMachinePushInt(v, NULL))?"true":"false");
 	// demo compression
 	iStackMachineCompress(v);

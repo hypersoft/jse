@@ -105,4 +105,11 @@ if (s->index) for (i = 0, v = 0; i < s->index; i++)	\
 if (s->index) for (i = (s->index - 1), v = 0; i; i--)	\
 	 if (! (v = iStackMachineRead(s, i), a)) break	\
 
+#define iStackMachineRefactor(s, t) (	\
+	s->index = ((s->width > iStackMachineSize(t))?s->index * s->width * iStackMachineSize(t):(s->index * s->width) / iStackMachineSize(t)),	\
+	s->units = (iStackMachineBytes(s)) / (iStackMachineSize(t)),	\
+	s->width = iStackMachineSize(t),	\
+	s->type = t,	\
+	s	\
+)
 

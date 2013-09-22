@@ -6,7 +6,7 @@ PKGCONFIG := $(shell pkg-config --silence-errors --cflags --libs ${PKGS})
 OPTIMIZE := -O3 -march=native
 DYNCALL := inc/dyncall
 BUILDNO := $(shell bin/buildnum -p)
-REQUIRES := Makefile ${DYNCALL}
+REQUIRES := Makefile ${DYNCALL} src/JSTInit.inc
 
 all: ${APPLICATION}
 
