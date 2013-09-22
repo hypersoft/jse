@@ -1,5 +1,5 @@
-JST
-===
+JST (JavascriptTools)
+=====================
 Copyright (C) 2013 Triston J. Taylor (Hypersoft Systems); All Rights Reserved.
 
 1. Base (JST)
@@ -56,7 +56,7 @@ Miscellaneous Assistance Macros.
 	JST's reference model of for UTF-32 value.
 * `JSTXPR(return expression, expressionN, ...)`
 
-	Do C expressions as an inline function with return value. Function calls returning void are viable arguments.
+	Do C expressions as an inline function with return value. Function calls returning void are viable expressionN arguments.
 
 * `JSTCND(try, true, false)`
 
@@ -66,6 +66,7 @@ Miscellaneous Assistance Macros.
 
 2. Context
 ----------
+Tools for working with Javascript contexts.
 
 * Group
   - Create()
@@ -84,8 +85,9 @@ Miscellaneous Assistance Macros.
 
 * GetGroup()
 
-3. Class
---------
+3. Class (JSTClass)
+-------------------
+Tools for working with Javascript class references.
 
 * Accessor
 
@@ -109,6 +111,7 @@ Miscellaneous Assistance Macros.
 
 4. Declare
 ----------
+Tools for declaring Javascript class properties.
 
 * Initializer()
 
@@ -132,8 +135,9 @@ Miscellaneous Assistance Macros.
 
 * Convertor()
 
-5. Type
--------
+5. Type (JSTType)
+-----------------
+Tools for working with Javascript types.
 
 * Undefined
 
@@ -147,8 +151,9 @@ Miscellaneous Assistance Macros.
 
 * Object
 
-6. Value
---------
+6. Value (JSTValue)
+-------------------
+Tools for working with Javascript values.
 
 * GetType()
 
@@ -237,8 +242,9 @@ Attributes for JSTObjectSetProperty
 
 	The property must exist as long as the object exists.
 
-8. Object
----------
+8. Object (JSTObject)
+---------------------
+Tools for working with Javascript objects.
 
 * GetPrototype()
 
@@ -270,8 +276,9 @@ Attributes for JSTObjectSetProperty
 
 * Null
 
-9. String
----------
+9. String (JSTString)
+---------------------
+Tools for working with Javascript strings.
 
 * FromUTF8
 
@@ -297,22 +304,25 @@ Attributes for JSTObjectSetProperty
 
 * FromValue()
 
-10. Function
-------------
+10. Function (JSTFunction)
+--------------------------
+Tools for working with Javascript functions.
 
 * Call()
 
 * Callback()
 
-11. Constructor
----------------
+11. Constructor (JSTConstructor)
+--------------------------------
+Tools for working with Javascript contstructors.
 
 * Call()
 
 * Callback()
 
-12. Script
-----------
+12. Script (JSTScript)
+----------------------
+Procedures for working with Javascript evaluation.
 
 * Eval()
 
