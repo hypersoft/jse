@@ -64,26 +64,46 @@ Miscellaneous Assistance Macros.
 
 		`JSTChoose()` is a deprecated copy of this functionality.
 
-2. Context
-----------
+2. Context (JSTContext)
+-----------------------
 Tools for working with Javascript contexts.
 
-* Group
-  - Create()
-  - Retain()
-  - Release()
+* Group (JSTGroup)
 
-* Create()
+	Tools for working with Javascript context groups.
+  - `JSTContextGroupCreate()`
 
-* CreateInGroup()
+	Create a Javascript context group.
+  - `JSTContextGroupRetain(JSTContextGroup)`
 
-* Retain()
+	Retains a Javascript context group.
+  - `JSTContextGroupRelease()`
 
-* Release()
+	Releases a retained reference to a Javascript context group.
 
-* GetGlobalObject()
+* `JSTContextCreate()`
 
-* GetGroup()
+	Creates a Javascript context.
+
+* `JSTContextCreateInGroup()`
+
+	Creates a Javascript context within the specified context group.
+
+* `JSTContextRetain(JSTContext ctx)`
+
+	Retains a reference to a Javascript context.
+
+* `JSTContextRelease(JSTContext ctx)`
+
+	Discards a reference to a Javascript context.
+
+* `JSTContextGetGlobalObject(JSTContext ctx)`
+
+	Retrieve the Javascript global object for a give context.
+
+* `JSTContextGetGroup(JSTContext ctx)`
+
+	Retrieve the context group associated with ctx.
 
 3. Class (JSTClass)
 -------------------
@@ -109,8 +129,8 @@ Tools for working with Javascript class references.
   - None
   - ManualPrototype
 
-4. Declare
-----------
+4. Declare (JSTDeclare)
+-----------------------
 Tools for declaring Javascript class properties.
 
 * Initializer()
