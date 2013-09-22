@@ -113,3 +113,13 @@ if (s->index) for (i = (s->index - 1), v = 0; i; i--)	\
 	s	\
 )
 
+#define iStackMachineSlice(s, d, i, c) ((s && d)?(	\
+	d->address = iStackMachineSlot(s, i),	\
+	d->type = s->type,	\
+	d->width = s->width,	\
+	d->index = 0,	\
+	d->growable = 0,	\
+	d->units = (!c || c > iStackMachineSlots(s) ? iStackMachineSlots(s) : c),	\
+	true	\
+):false)
+

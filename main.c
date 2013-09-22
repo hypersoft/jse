@@ -15,9 +15,19 @@ int main(int argc, char *argv[], char *envp[]) {
 	iStackMachineGrow(v, 16); // Generous pre buffering
 	printf("pushing a sentinel null pointer.. (%s)\n\n", (iStackMachinePushInt(v, NULL))?"true":"false");
 	iStackMachinePushInt(v, "a"); // push some static data
+
+	iStackMachineInit(iStackMachineDouble, v2); // crack a snive smile
+
+	iStackMachineSlice(v, v2, v->index, 0);
+
 	iStackMachinePushInt(v, "b"); // -/>
 	// demo a live report
 	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v), iStackMachineUnits(v), v->width, iStackMachineBytes(v), iStackMachineMass(v));
+
+	printf("stack count: %i\nstack units: %ix%i (%i bytes variant storage)\nstack total: %i (bytes header+storge)\n\n", iStackMachineCount(v2), iStackMachineUnits(v2), v2->width, iStackMachineBytes(v2), iStackMachineMass(v2));
+	printf("%s\n", iStackMachinePopInt(v2));
+
+exit(0);
 
 	iStackMachineRefactor(v, iStackMachineChar);
 	// demo a live report
