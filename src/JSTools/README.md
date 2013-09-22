@@ -68,7 +68,7 @@ Miscellaneous Assistance Macros.
 -----------------------
 Tools for working with Javascript contexts.
 
-* Group (JSTGroup)
+* Group (JSTContextGroup)
 
 	Tools for working with Javascript context groups.
   - `JSTContextGroupCreate()`
