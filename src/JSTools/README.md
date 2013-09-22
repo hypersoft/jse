@@ -156,20 +156,32 @@ JST
 
 * FromPointer()
 
-7. Property
------------
+7. Property (JSTProperty)
+-------------------------
+Attributes for JSTObjectSetProperty
 
-* Hidden
+* JSTPropertyHidden
 
-* ReadOnly
+	The property is not enumerable.
 
-* Required
+* JSTPropertyReadOnly
 
-* Const
+	The property can be read, but may not be written to.
+* JSTPropertyRequired
 
-* Private
+	The property may not be deleted from the object.
 
-* Protected
+* JSTPropertyConst
+
+	The property should be treated as a constant value.
+
+* JSTPropertyPrivate
+
+	The property is not typically consumed by external function.
+
+* JSTPropertyProtected
+
+	The property must exist as long as the object exists.
 
 8. Object
 ---------
