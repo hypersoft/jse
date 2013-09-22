@@ -1,14 +1,28 @@
 JST
 ===
+Copyright (C) 2013 Triston J. Taylor (Hypersoft Systems); All Rights Reserved.
 
-1. Base
--------
+1. Base (JST)
+-------------
+Miscellaneous Assistance Macros.
 
-* Init()
+	Items in this category don't carry the section heading name 'Base'.
 
-* Utility()
+* `JST(procedure name, ...)`
 
-* Action()
+	Call upon a context exception function frame with a varying number of intermittent arguments and return value types.
+
+* `JSTObject JSTInit(JSTObject global, int argc, char *argv[], char *envp[])`
+
+	Instruct JST to initialize all static data, and runtime operability.
+
+* `JSTAction(...)`
+
+	Call upon a JST context function frame.
+
+* `JSTUtility(...)`
+
+	Opposite of `JST()`, this macro declares a context exception function frame. By design, these are JST interoperability  entry points.
 
 2. Context
 ----------
