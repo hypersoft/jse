@@ -131,13 +131,13 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueFromString(s, f)`
 
-	Converts `JSTString s` to a JavaScript class `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
+	Converts `JSTString s` to a JavaScript value class `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
 
 * FromUTF8
 
 	Function Macro `JSTValueFromUTF8(p)`
 
-	Converts UTF-8 string pointer value `p` to the JavaScript class `String`.
+	Converts UTF-8 string pointer value `p` to the JavaScript value class `String`.
 
 * GetType
 
@@ -337,6 +337,26 @@ Tools for working with JavaScript objects.
 	Type Macro `JSTObject`
 
 	JST's representation of a JavaScript object reference.
+
+* ToValue()
+
+	Function Macro `JSTObjectToValue(o)`
+
+	Performs a type cast of `o` from `JSTObject` to `JSTValue`.
+
+	See also `JSTValueToObject()`.
+
+* Undefined
+
+	Value Macro `JSTObjectUndefined`
+
+	The JavaScript `undefined` value type cast to JavaScript value class `Object`.
+
+* Null
+
+	Value Macro `JSTObjectNull`
+
+	The JavaScript `null` value type cast to JavaScript value class `Object`.
 
 * PropertyHidden
 
