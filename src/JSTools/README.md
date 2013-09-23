@@ -341,77 +341,56 @@ Procedures for working with JavaScript evaluation.
 * Alignment
 
 * ByteOrder
-iStackMachine
-=============
+Other
+=====
 
-1. Init
--------
+1. iStackMachine
+----------------
 
-2. GetPrivate
--------------
+* Init
 
-3. SetPrivate
--------------
+* GetPrivate
 
-4. Units
---------
+* SetPrivate
 
-5. Count
---------
+* Units
 
-6. Lock
--------
+* Count
 
-7. Slots
---------
+* Lock
 
-8. Slot
--------
+* Slots
 
-9. Bytes
---------
+* Slot
 
-10. Mass
---------
+* Bytes
 
-11. Grow
---------
+* Mass
 
-12. Shrink
-----------
+* Grow
 
-13. Compress
-------------
+* Shrink
 
-14. Free
---------
+* Compress
 
-15. Push
---------
+* Free
 
-16. Pop
--------
+* Push
 
-17. PushInt
------------
+* Pop
 
-18. PopInt
-----------
+* PushInt
 
-19. Enum
---------
+* PopInt
 
-20. EnumReverse
----------------
+* Enum
 
-21. Refactor
-------------
+* EnumReverse
 
-22. Slice
----------
+* Refactor
 
-23. Read
---------
+* Slice
 
-24. Write
----------
+* Read
+
+* Write
