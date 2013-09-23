@@ -366,7 +366,7 @@ Tools for working with JavaScript objects.
 
 	Function Macro `JSTObjectSetProperty(o, p, v, a)`
 
-	Sets property `JSTValue v` as a member of `JSTObject o` by the name of UTF-8 pointer `p`, with `JSTObjectProperty* a` access attributes.
+	Sets property `JSTValue v` as a member of `JSTObject o` by the name of UTF-8 pointer `p`, with `JSTObjectProperty a` access attributes.
  
 * DeleteProperty
 
@@ -384,7 +384,7 @@ Tools for working with JavaScript objects.
 
 	Function Macro `JSTObjectSetProperty(o, i, v, a)`
 
-	Sets property `JSTValue v` as a member of `JSTObject o` by the index of `unsigned i`, with `JSTObjectProperty* a` access attributes.
+	Sets property `JSTValue v` as a member of `JSTObject o` by the index of `unsigned i`, with `JSTObjectProperty a` access attributes.
 
 * GetPrivate
 
