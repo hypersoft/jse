@@ -292,36 +292,37 @@ Tools for working with JavaScript values.
 
 	Flag `v` as a potential candidate for garbage collection.
 
-* Type (JSTValueType)
-Tools for working with JavaScript types.
-
-Each of the following Value Macros correspond to JST's notion of the specified type. One obtains the type of a `JSTValue` by calling `JSTValueGetType()`. These macros are explicitly for comparison with such results, but are also viable as an argument to an entry point defined by `JSTDeclareConvertor()`.
-  - Undefined
+* TypeUndefined
 
 	Value Macro `JSTValueTypeUndefined`
 
 	JST's notion of the JavaScript `undefined` object.
-  - Null
+
+* TypeNull
 
 	Value Macro `JSTValueTypeNull`
 
 	JST's notion of the JavaScript `null` object.
-  - Boolean
+
+* TypeBoolean
 
 	Value Macro `JSTValueTypeBoolean`
 
 	JST's notion of the JavaScript `Boolean` class value.
-  - Number
+
+* TypeNumber
 
 	Value Macro `JSTValueTypeNumber`
 
 	JST's notion of the JavaScript `Number` class value.
-  - String
+
+* TypeString
 
 	Value Macro `JSTValueTypeString`
 
 	JST's notion of the JavaScript `String` class value.
-  - Object
+
+* TypeObject
 
 	Value Macro `JSTValueTypeObject`
 
