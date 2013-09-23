@@ -328,29 +328,7 @@ Tools for working with JavaScript values.
 
 	JST's notion of the JavaScript `Object` class value.
 
-6. Property (JSTProperty)
--------------------------
-Attributes for `JSTObjectSetProperty()`
-
-* Hidden
-
-	Value Macro `JSTPropertyHidden`
-
-	The value is not enumerable.
-
-* ReadOnly
-
-	Value Macro `JSTPropertyReadOnly`
-
-	The value is not writable.
-
-* Required
-
-	Value Macro `JSTPropertyRequired`
-
-	The property may not be deleted from the object.
-
-7. Object (JSTObject)
+6. Object (JSTObject)
 ---------------------
 Tools for working with JavaScript objects.
 
@@ -360,7 +338,25 @@ Tools for working with JavaScript objects.
 
 	JST's representation of a JavaScript object reference.
 
-8. String (JSTString)
+* PropertyHidden
+
+	Value Macro `JSTObjectPropertyHidden`
+
+	The value is not enumerable.
+
+* PropertyReadOnly
+
+	Value Macro `JSTObjectPropertyReadOnly`
+
+	The value is not writable.
+
+* PropertyRequired
+
+	Value Macro `JSTObjectPropertyRequired`
+
+	The property may not be deleted from the object.
+
+7. String (JSTString)
 ---------------------
 Tools for working with JavaScript strings.
 
@@ -370,14 +366,14 @@ Tools for working with JavaScript strings.
 
 	JST's representation of a JavaScript string reference.
 
-9. Function (JSTFunction)
+8. Function (JSTFunction)
 -------------------------
 Tools for working with JavaScript functions.
 
-10. Constructor (JSTConstructor)
---------------------------------
+9. Constructor (JSTConstructor)
+-------------------------------
 Tools for working with JavaScript contstructors.
 
-11. Script (JSTScript)
+10. Script (JSTScript)
 ----------------------
 Procedures for working with JavaScript evaluation.

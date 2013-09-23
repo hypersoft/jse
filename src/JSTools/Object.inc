@@ -18,4 +18,8 @@
 #define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
 #define JSTObjectNull ((JSTObject) JSTValueNull)
 
+#define JSTObjectPropertyHidden kJSPropertyAttributeDontEnum
+#define JSTObjectPropertyReadOnly kJSPropertyAttributeReadOnly
+#define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete
+
 

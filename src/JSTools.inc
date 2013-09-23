@@ -25,7 +25,6 @@
 #include "JSTools/Declare.inc"
 #include "JSTools/Function.inc"
 #include "JSTools/Native.inc"
-#include "JSTools/Property.inc"
 #include "JSTools/Object.inc"
 #include "JSTools/Script.inc"
 #include "JSTools/Stack.inc"
