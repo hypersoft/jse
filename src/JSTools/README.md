@@ -93,7 +93,7 @@ Tools for working with JavaScript class references.
 -----------------
 Tools for working with JavaScript types.
 
-Each of the following Type Macros correspond to JST's notion of the specified type.
+Each of the following Value Macros correspond to JST's notion of the specified type.
 
 * Undefined
 
