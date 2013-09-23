@@ -28,7 +28,7 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	The target function of this macro is defined as `src/JSTools.c:JSTObject JSTInit_ JSTUtility` and is declared external by `src/JSTools.h`.
 
-	The return value of this function is a context global JSTObject named "js".
+	The return value of this function is a context global `JSTObject` named "js".
 
 * Action
 
