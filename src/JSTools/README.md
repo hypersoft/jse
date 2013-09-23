@@ -143,13 +143,13 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueGetType(v)`
 
-	Returns the `JSTType` value of `v`.
+	Returns the `JSTValueType` value of `v`.
 
 * IsBoolean
 
 	Function Macro `JSTValueIsBoolean(v)`
 
-	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeBoolean`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeBoolean`.
 
 
 * IsClassInstance
@@ -194,13 +194,13 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueIsNumber(v)`
 
-	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeNumber`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeNumber`.
 
 * IsObject
 
 	Function Macro `JSTValueIsObject(v)`
 
-	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeObject`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeObject`.
 
 
 * IsStrictEqual
@@ -213,7 +213,7 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueIsString(v)`
 
-	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeString`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeString`.
 
 
 * IsUndefined
