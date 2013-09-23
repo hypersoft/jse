@@ -149,7 +149,7 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueGetType(v)`
 
-	Returns the JSTType value of `v`.
+	Returns the `JSTType` value of `v`.
 
 * IsUndefined
 
