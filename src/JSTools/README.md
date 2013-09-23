@@ -89,6 +89,10 @@ Tools for working with JavaScript class references.
 
 	JST's notion of a JavaScript class reference.
 
+4. Declare (JSTDeclare)
+-----------------------
+Tools for declaring Javascript class properties.
+
 5. Type (JSTType)
 -----------------
 Tools for working with JavaScript types.
@@ -182,3 +186,17 @@ Tools for working with JavaScript strings.
 	Type Macro `JSTString`
 
 	JST's representation of a JavaScript string reference.
+
+10. Function (JSTFunction)
+--------------------------
+Tools for working with Javascript functions.
+
+11. Constructor (JSTConstructor)
+--------------------------------
+Tools for working with Javascript contstructors.
+
+12. Script (JSTScript)
+----------------------
+Procedures for working with Javascript evaluation.
+
+* NativeError()
