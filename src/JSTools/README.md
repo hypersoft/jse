@@ -382,7 +382,7 @@ Tools for working with JavaScript functions.
 
 	Function Macro `JSTFunctionCallback(p, f)`
 
-	Creates a native callback function to `f` with name from UTF-8 pointer `p` as a JavaScript function wrapper from an entry point declared with `JSTDeclareFunction()`.
+	Creates a native callback function to entry point `f` declared with `JSTDeclareFunction()` using UTF-8 pointer `p` the function name.
 
 9. Constructor (JSTConstructor)
 -------------------------------
@@ -400,7 +400,7 @@ Tools for working with JavaScript contstructors.
 
 	Function Macro `JSTConstructorCallback(c, f)`
 
-	Creates a native constructor callback to `f` with with `JSTClass c` as a JavaScript constructor wrapper from an entry point declared with `JSTDeclareConstructor()`.
+	Creates a native constructor callback to entry point `f` declared with `JSTDeclareConstructor()` using `JSTClass c` as the default object class.
 
 10. Script (JSTScript)
 ----------------------
