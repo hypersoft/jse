@@ -356,12 +356,18 @@ Tools for working with JavaScript objects.
 
 	Returns `bool` true if `JSTObject o` has a property by the name of UTF-8 pointer `p`.
 
-* GetProperty()
+* GetProperty
 
 	Function Macro `JSTObjectGetProperty(o, p)`
 
 	Returns the property named by UTF-8 pointer `p` in `JSTObject o` or the JavaScript value `undefined` if the property is not defined on `o`.
 
+* SetProperty
+
+	Function Macro `JSTObjectSetProperty(o, p, v, a)`
+
+	Sets property `JSTValue v` as a member of `JSTObject o` by the name of UTF-8 pointer `p`, with `JSTObjectProperty* a` access attributes.
+ 
 * ToValue
 
 	Function Macro `JSTObjectToValue(o)`
