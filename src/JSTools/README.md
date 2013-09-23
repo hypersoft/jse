@@ -103,6 +103,42 @@ Tools for working with JavaScript contexts.
 
 	Releases `JSTContextGroup cg`.
 
+* Create
+
+	Function Macro `JSTContextCreate()`
+
+	Creates a `JSTContext`.
+
+* CreateInGroup
+
+	Function Macro `JSTContextCreateInGroup(g)`
+
+	Creates a `JSTContext` within  `JSTContextGroup g`.
+
+* Retain
+
+	Function Macro `JSTContextRetain(ctx)`
+
+	Retains `JSTContext ctx`.
+
+* Release
+
+	Function Macro `JSTContextRelease(ctx)`
+
+	Releases `JSTContext ctx`.
+
+* GetGlobalObject
+
+	Function Macro `JSTContextGetGlobalObject(ctx)`
+
+	Retrieve the Javascript global object for `JSTContext ctx`.
+
+* GetGroup
+
+	Function Macro `JSTContextGetGroup(ctx)`
+
+	Retrieve the `JSTContextGroup` for `JSTContext ctx`.
+
 3. Class (JSTClass)
 -------------------
 Tools for working with JavaScript class references.
