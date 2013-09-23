@@ -211,7 +211,29 @@ Tools for working with JavaScript class references.
 
 4. Declare (JSTDeclare)
 -----------------------
-Tools for declaring native JavaScript class entry points.
+Tools for declaring native JavaScript entry points.
+
+* Initializer
+
+* Finalizer
+
+* HasProperty
+
+* GetProperty
+
+* SetProperty
+
+* DeleteProperty
+
+* GetPropertyNames
+
+* Function
+
+* Constructor
+
+* HasInstance
+
+* Convertor
 
 5. Value (JSTValue)
 -------------------
