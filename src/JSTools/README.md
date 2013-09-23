@@ -44,7 +44,7 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	This macro defines the arguments to native entry points requiring both an exception and context parameter. By default these known parameters are ALWAYS labled `exception` and `ctx` respectively.
 
-	The argument list supplied to this macro, entails the uncommon argument list of the resulting entry point. For example, a simple native procedure requiring a single object`o` requires three parameters: `ctx, o, exception`. Using `JST()` in conjunction with `JSTUtility()` one can avoid having to specify `ctx` and `exception` parameters.
+	The optional argument list supplied to this macro, entails the uncommon argument list of the resulting entry point. For example, a simple native procedure requiring a single object`o` requires three parameters: `ctx, o, exception`. Using `JST()` in conjunction with `JSTUtility()` one can avoid having to specify `ctx` and `exception` parameters.
 
 	Here is a sample function prototype:
 
@@ -53,3 +53,10 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 	which expands to somewhere around the order of:
 
 		extern JSTObject JSTInit_ (JSTContext ctx, JSTObject global, int argc, char * argv[], char * envp[], JSTValue * exception);
+
+* XPR
+
+	Variadic Macro Function `JSTXPR(return expression, expressionN, ...)`
+
+	Evaluates `expressionN-...`, and returns `expression`. This macro is useful for creating inline code blocks.
+
