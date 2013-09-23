@@ -344,11 +344,17 @@ Tools for working with JavaScript objects.
 
 	Retrieves the object prototype of `o` as a `JSTObject`
 
-* SetPrototype()
+* SetPrototype
 
 	Function Macro `JSTObjectSetPrototype(o, p)`
 
 	Sets `JSTObject p` as the prototype property of `JSTObject o`.
+
+* HasProperty
+
+	Function Macro `JSTObjectHasProperty(o, p)`
+
+	Returns `bool` true if `JSTObject o` has a property by the name of UTF-8 pointer `p`.
 
 * ToValue
 
