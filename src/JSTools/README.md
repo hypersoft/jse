@@ -37,3 +37,11 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 	Call `identifier` with ctx as the first parameter, followed by any number of unknown arguments.
 
 	Return value is identified by the prototype designated by `identifier`.
+
+* Utility
+
+	Variadic Declaration Macro `JSTUtility(...)`
+
+	This macro defines the arguments to native entry points requiring both an exception and context parameter. By default these known parameters are ALWAYS labled `exception` and `ctx` respectively.
+
+	The argument list supplied to this macro, entails the uncommon argument list of the resulting entry point. For example, a simple native procedure requiring a single object`o` requires three parameters: `ctx, o, exception`. Using `JST()` in conjunction with `JSTUtility()` one can avoid having to specify `ctx` and `exception` parameters.
