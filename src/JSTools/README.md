@@ -69,6 +69,16 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	`JSTChoose()` is a deprecated copy of this functionality.
 
+2. Context (JSTContext)
+-----------------------
+Tools for working with Javascript contexts.
+
+* Context
+
+	Type Macro `JSTContext`
+
+	JST's representation of a JavaScript context reference.
+
 3. Class (JSTClass)
 -------------------
 Tools for working with Javascript class references.
@@ -78,3 +88,33 @@ Tools for working with Javascript class references.
 	Type Macro `JSTClass`
 
 	JST's notion of a JavaScript class reference.
+
+6. Value (JSTValue)
+-------------------
+Tools for working with Javascript values.
+
+* Value
+
+	Type Macro `JSTValue`
+
+	JST's notion of a JavaScript value reference.
+
+8. Object (JSTObject)
+---------------------
+Tools for working with JavaScript objects.
+
+* Object
+
+	Type Macro `JSTObject`
+
+	JST's representation of a JavaScript object reference.
+
+9. String (JSTString)
+---------------------
+Tools for working with JavaScript strings.
+
+* String
+
+	Type Macro `JSTString`
+
+	JST's representation of a JavaScript string reference.
