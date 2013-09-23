@@ -60,3 +60,11 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	Evaluates `expressionN-...`, and returns `expression`. This macro is useful for creating inline code blocks.
 
+
+* CND
+
+	Macro Function `JSTCND(try, true, false)`
+
+	Evaluate expression `try`, if that succeeds, evaluate and return `true`. if `try` failed, evaluate and return `false`.
+
+		`JSTChoose()` is a deprecated copy of this functionality.
