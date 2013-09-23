@@ -93,49 +93,7 @@ Tools for working with JavaScript class references.
 -----------------------
 Tools for declaring native JavaScript class entry points.
 
-5. Type (JSTType)
------------------
-Tools for working with JavaScript types.
-
-Each of the following Value Macros correspond to JST's notion of the specified type. One obtains the type of a `JSTValue` by calling `JSTValueGetType()`. These macros are explicitly for comparison with such results, but are also viable as an argument to an entry point defined by `JSTDeclareConvertor()`.
-
-* Undefined
-
-	Value Macro `JSTUndefined`
-
-	JST's notion of the JavaScript `undefined` type.
-
-* Null
-
-	Value Macro `JSTNull`
-
-	JST's notion of the JavaScript `null` type.
-
-* Boolean
-
-	Value Macro `JSTBoolean`
-
-	JST's notion of the JavaScript boolean type.
-
-* Number
-
-	Value Macro `JSTNumber`
-
-	JST's notion of the JavaScript number type.
-
-* String
-
-	Value Macro `JSTString`
-
-	JST's notion of the JavaScript string type.
-
-* Object
-
-	Value Macro `JSTObject`
-
-	JST's notion of the JavaScript object type.
-
-6. Value (JSTValue)
+5. Value (JSTValue)
 -------------------
 Tools for working with JavaScript values.
 
@@ -149,37 +107,37 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueFromBoolean(b)`
 
-	Converts value `b` to the JavaScript type `Boolean`.
+	Converts value `b` to the JavaScript class `Boolean`.
 
 * FromDouble
 
 	Function Macro `JSTValueFromDouble(d)`
 
-	Converts double value `d` to the JavaScript type `Number`.
+	Converts double value `d` to the JavaScript class `Number`.
 
 * FromJSONString
 
 	Function Macro `JSTValueFromJSONString(p)`
 
-	Converts UTF-8 JSON string pointer `p` to a `JSTValue`.
+	Converts UTF-8 JSON string pointer `p` to a `JSTValue` of JavaScript class `Object`.
 
 * FromPointer
 
 	Function Macro `JSTValueFromPointer(p)`
 
-	Converts the pointer value `p` to the JavaScript value type `Number`.
+	Converts the pointer value `p` to the JavaScript class `Number`.
 
 * FromString
 
 	Function Macro `JSTValueFromString(s, f)`
 
-	Converts `JSTString s` to a JavaScript type `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
+	Converts `JSTString s` to a JavaScript class `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
 
 * FromUTF8
 
 	Function Macro `JSTValueFromUTF8(p)`
 
-	Converts UTF-8 string pointer value `p` to the JavaScript type `String`.
+	Converts UTF-8 string pointer value `p` to the JavaScript class `String`.
 
 * GetType
 
@@ -284,9 +242,9 @@ Tools for working with JavaScript values.
 
 * ToJSONString
 
-	Function Macro `JSTValueToJSONString(v)`
+	Function Macro `JSTValueToJSONString(v, i)`
 
-	Converts value `v` to UTF-8 encoded `JSON` format.
+	Converts value `v` to UTF-8 encoded `JSON` format. `i` is the number of spaces to indent.
 
 * ToObject
 
@@ -334,7 +292,42 @@ Tools for working with JavaScript values.
 
 	Flag `v` as a potential candidate for garbage collection.
 
-7. Property (JSTProperty)
+* Type (JSTValueType)
+Tools for working with JavaScript types.
+
+Each of the following Value Macros correspond to JST's notion of the specified type. One obtains the type of a `JSTValue` by calling `JSTValueGetType()`. These macros are explicitly for comparison with such results, but are also viable as an argument to an entry point defined by `JSTDeclareConvertor()`.
+  - Undefined
+
+	Value Macro `JSTValueTypeUndefined`
+
+	JST's notion of the JavaScript `undefined` object.
+  - Null
+
+	Value Macro `JSTValueTypeNull`
+
+	JST's notion of the JavaScript `null` object.
+  - Boolean
+
+	Value Macro `JSTValueTypeBoolean`
+
+	JST's notion of the JavaScript `Boolean` class value.
+  - Number
+
+	Value Macro `JSTValueTypeNumber`
+
+	JST's notion of the JavaScript `Number` class value.
+  - String
+
+	Value Macro `JSTValueTypeString`
+
+	JST's notion of the JavaScript `String` class value.
+  - Object
+
+	Value Macro `JSTValueTypeObject`
+
+	JST's notion of the JavaScript `Object` class value.
+
+6. Property (JSTProperty)
 -------------------------
 Attributes for `JSTObjectSetProperty()`
 
@@ -356,7 +349,7 @@ Attributes for `JSTObjectSetProperty()`
 
 	The property may not be deleted from the object.
 
-8. Object (JSTObject)
+7. Object (JSTObject)
 ---------------------
 Tools for working with JavaScript objects.
 
@@ -366,7 +359,7 @@ Tools for working with JavaScript objects.
 
 	JST's representation of a JavaScript object reference.
 
-9. String (JSTString)
+8. String (JSTString)
 ---------------------
 Tools for working with JavaScript strings.
 
@@ -376,14 +369,14 @@ Tools for working with JavaScript strings.
 
 	JST's representation of a JavaScript string reference.
 
-10. Function (JSTFunction)
---------------------------
+9. Function (JSTFunction)
+-------------------------
 Tools for working with JavaScript functions.
 
-11. Constructor (JSTConstructor)
+10. Constructor (JSTConstructor)
 --------------------------------
 Tools for working with JavaScript contstructors.
 
-12. Script (JSTScript)
+11. Script (JSTScript)
 ----------------------
 Procedures for working with JavaScript evaluation.

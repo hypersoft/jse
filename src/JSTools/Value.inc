@@ -2,6 +2,13 @@
 
 #define JSTValueGetType(v) JSValueGetType, v)
 
+#define JSTValueTypeUndefined kJSTypeUndefined
+#define JSTValueTypeNull kJSTypeNull
+#define JSTValueTypeBoolean kJSTypeBoolean
+#define JSTValueTypeNumber kJSTypeNumber
+#define JSTValueTypeString kJSTypeString
+#define JSTValueTypeObject kJSTypeObject
+
 #define JSTValueIsUndefined(v) JSTAction(JSValueIsUndefined, v)
 #define JSTValueIsNull(v) JSTAction(JSValueIsNull, v)
 #define JSTValueIsBoolean(v) JSTAction(JSValueIsBoolean, v)
