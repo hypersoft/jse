@@ -370,9 +370,25 @@ Tools for working with JavaScript strings.
 -------------------------
 Tools for working with JavaScript functions.
 
+* Call
+
+	Variadic Macro `JSTFunctionCall(fn, obj, ...)`
+
+	Calls `JSTObject fn` as a method of `JSTObject obj` with `JSTValue ...` arguments.
+
+	Returns the result of the call to `fn` as a `JSTValue`.
+
 9. Constructor (JSTConstructor)
 -------------------------------
 Tools for working with JavaScript contstructors.
+
+* Call
+
+	Variadic Macro `JSTConstructorCall(cn, ...)`
+
+	Calls `JSTObject cn` with `JSTValue ...` arguments.
+
+	Returns the result of the call to `cn` as a `JSTObject`.
 
 10. Script (JSTScript)
 ----------------------
