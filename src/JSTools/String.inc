@@ -1,3 +1,4 @@
+#define JSTString JSStringRef
 
 #define JSTStringFromUTF8(p) JSStringCreateWithUTF8CString(p)
 #define JSTStringToUTF8(s, r) JST(JSTStringToUTF8_, s, r)

@@ -1,3 +1,4 @@
+#define JSTValue JSValueRef
 
 #define JSTValueGetType(v) JSValueGetType, v)
 

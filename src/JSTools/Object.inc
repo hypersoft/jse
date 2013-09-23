@@ -1,3 +1,5 @@
+#define JSTObject JSObjectRef
+
 #define JSTObjectGetPrototype(o) JSTAction(JSObjectGetPrototype, o)
 #define JSTObjectSetPrototype(o, p) JSTAction(JSObjectSetPrototype, o, p)
 #define JSTObjectHasProperty(o, p) JST(JSTObjectHasProperty_, o, p)

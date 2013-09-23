@@ -1,3 +1,4 @@
+#define JSTClass JSClassRef
 
 #define JSTClassAccessor JSStaticValue
 #define JSTClassFunction JSStaticFunction

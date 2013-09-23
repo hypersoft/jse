@@ -1,3 +1,6 @@
+#define JSTContext JSContextRef
+#define JSTContextGroup JSContextGroupRef
+
 #define JSTContextGroupCreate JSContextGroupCreate
 #define JSTContextGroupRetain JSContextGroupRetain
 #define JSTContextGroupRelease JSContextGroupRelease

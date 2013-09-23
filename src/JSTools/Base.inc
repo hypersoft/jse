@@ -1,9 +1,3 @@
-#define JSTClass JSClassRef
-#define JSTValue JSValueRef
-#define JSTObject JSObjectRef
-#define JSTContext JSContextRef
-#define JSTContextGroup JSContextGroupRef
-#define JSTString JSStringRef
 #define JSTUTF8 char
 #define JSTUTF16 char16_t
 #define JSTUTF32 char32_t

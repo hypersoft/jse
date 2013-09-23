@@ -93,7 +93,7 @@ Tools for working with JavaScript class references.
 -----------------
 Tools for working with JavaScript types.
 
-Each of the following Value Macros correspond to JST's notion of the specified type. One obtains the type of a `JSTValue` by calling `JSTValueGetType()`. The following macros are explicitly for comparison with such results, but are also viable as an argument to an entry point defined by `JSTDeclareConvertor()`.
+Each of the following Value Macros correspond to JST's notion of the specified type. One obtains the type of a `JSTValue` by calling `JSTValueGetType()`. These macros are explicitly for comparison with such results, but are also viable as an argument to an entry point defined by `JSTDeclareConvertor()`.
 
 * Undefined
 
