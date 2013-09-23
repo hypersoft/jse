@@ -71,7 +71,7 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 2. Context (JSTContext)
 -----------------------
-Tools for working with Javascript contexts.
+Tools for working with JavaScript contexts.
 
 * Context
 
@@ -81,7 +81,7 @@ Tools for working with Javascript contexts.
 
 3. Class (JSTClass)
 -------------------
-Tools for working with Javascript class references.
+Tools for working with JavaScript class references.
 
 * Class
 
@@ -89,9 +89,51 @@ Tools for working with Javascript class references.
 
 	JST's notion of a JavaScript class reference.
 
+5. Type (JSTType)
+-----------------
+Tools for working with JavaScript types.
+
+Each of the following Type Macros correspond to JST's notion of the specified type.
+
+* Undefined
+
+	Value Macro `JSTUndefined`
+
+	JST's notion of the JavaScript `undefined` type.
+
+* Null
+
+	Value Macro `JSTNull`
+
+	JST's notion of the JavaScript `null` type.
+
+* Boolean
+
+	Value Macro `JSTBoolean`
+
+	JST's notion of the JavaScript boolean type.
+
+* Number
+
+	Value Macro `JSTNumber`
+
+	JST's notion of the JavaScript number type.
+
+* String
+
+	Value Macro `JSTString`
+
+	JST's notion of the JavaScript string type.
+
+* Object
+
+	Value Macro `JSTObject`
+
+	JST's notion of the JavaScript object type.
+
 6. Value (JSTValue)
 -------------------
-Tools for working with Javascript values.
+Tools for working with JavaScript values.
 
 * Value
 
