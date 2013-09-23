@@ -197,9 +197,17 @@ Tools for working with JavaScript class references.
 
 	Creates a `JSTObject` of `JSTClass c` with `void* p` as the associated private object data.
 
-* Property
-  - None
-  - ManualPrototype
+* PropertyNone
+
+	Type Macro `JSTClassPropertyNone`
+
+	A value used in class definitions to specify that a class requires no special handling by the engine internals.
+
+* PropertyManualPrototype
+
+	Type Macro `JSTClassPropertyManualPrototype`
+
+	A value used in class definitions to specify that a class's instance members should inherit nothing on construction.
 
 4. Declare (JSTDeclare)
 -----------------------
