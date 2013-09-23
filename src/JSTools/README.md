@@ -338,7 +338,19 @@ Tools for working with JavaScript objects.
 
 	JST's representation of a JavaScript object reference.
 
-* ToValue()
+* GetPrototype
+
+	Function Macro `JSTObjectGetPrototype(o)`
+
+	Retrieves the object prototype of `o` as a `JSTObject`
+
+* SetPrototype()
+
+	Function Macro `JSTObjectSetPrototype(o, p)`
+
+	Sets `JSTObject p` as the prototype property of `JSTObject o`.
+
+* ToValue
 
 	Function Macro `JSTObjectToValue(o)`
 
