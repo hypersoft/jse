@@ -151,11 +151,27 @@ Tools for working with JavaScript class references.
 
 * Accessor
 
+	Type Macro `JSTClassAccessor`
+
+	A static structure that desribes a get/set native callback pair.
+
 * Function
+
+	Type Macro `JSTClassFunction`
+
+	A static structure that desribes a class object method.
 
 * Definition
 
+	Type Macro `JSTClassDefiniton`
+
+	A static structure that desribes the host properties of a class.
+
 * EmptyDefinition
+
+	Type Macro `JSTClassEmptyDefinition`
+
+	An empty 	`JSTClassDefinition`  structure initialized to zero. Useful for creating new `JSTClassDefinition`s.
 
 * Create
 
