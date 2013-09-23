@@ -87,19 +87,19 @@ Tools for working with JavaScript contexts.
 
 * GroupCreate
 
-	Function Macro `JTContextGroupCreate()`
+	Function Macro `JSTContextGroupCreate()`
 
 	Creates a `JSTContextGroup`.
 
 * GroupRetain
 
-	Function Macro `JTContextGroupRetain(cg)`
+	Function Macro `JSTContextGroupRetain(cg)`
 
 	Retains `JSTContextGroup cg`.
 
 * GroupRelease
 
-	Function Macro `JTContextGroupRelease(cg)`
+	Function Macro `JSTContextGroupRelease(cg)`
 
 	Releases `JSTContextGroup cg`.
 
@@ -131,7 +131,7 @@ Tools for working with JavaScript contexts.
 
 	Function Macro `JSTContextGetGlobalObject(ctx)`
 
-	Retrieve the Javascript global object for `JSTContext ctx`.
+	Retrieve the JavaScript global object for `JSTContext ctx`.
 
 * GetGroup
 
