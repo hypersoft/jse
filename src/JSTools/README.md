@@ -368,6 +368,12 @@ Tools for working with JavaScript objects.
 
 	Sets property `JSTValue v` as a member of `JSTObject o` by the name of UTF-8 pointer `p`, with `JSTObjectProperty* a` access attributes.
  
+* DeleteProperty
+
+	Function Macro `JSTObjectDeleteProperty(o, p)`
+
+	Attempts to remove the property named by UTF-8 pointer `p` in `JSTObject o`.
+
 * ToValue
 
 	Function Macro `JSTObjectToValue(o)`
