@@ -2,13 +2,6 @@
 #define JSTUTF16 char16_t
 #define JSTUTF32 char32_t
 
-#define JSTPropertyHidden kJSPropertyAttributeDontEnum
-#define JSTPropertyReadOnly kJSPropertyAttributeReadOnly
-#define JSTPropertyRequired kJSPropertyAttributeDontDelete
-#define JSTPropertyConst (JSTPropertyReadOnly | JSTPropertyRequired)
-#define JSTPropertyPrivate (JSTPropertyHidden | JSTPropertyRequired)
-#define JSTPropertyProtected (JSTPropertyConst | JSTPropertyPrivate)
-
 #define JST(NAME, ...) NAME (ctx, ##__VA_ARGS__, exception)
 #define JSTAction(NAME, ...) NAME (ctx, ##__VA_ARGS__)
 
