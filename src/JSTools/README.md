@@ -115,11 +115,11 @@ Tools for working with JavaScript values.
 
 	Converts double value `d` to the JavaScript class `Number`.
 
-* FromJSONString
+* FromJSON
 
-	Function Macro `JSTValueFromJSONString(p)`
+	Function Macro `JSTValueFromJSON(p)`
 
-	Converts UTF-8 JSON string pointer `p` to a `JSTValue` of JavaScript class `Object`.
+	Converts UTF-8 `JSON` string pointer `p` to a `JSTValue` of JavaScript class `Object`.
 
 * FromPointer
 
@@ -240,9 +240,9 @@ Tools for working with JavaScript values.
 
 	Converts value `v` to native type  `double`.
 
-* ToJSONString
+* ToJSON
 
-	Function Macro `JSTValueToJSONString(v, i)`
+	Function Macro `JSTValueToJSON(v, i)`
 
 	Converts value `v` to UTF-8 encoded `JSON` format. `i` is the number of spaces to indent.
 
@@ -342,13 +342,13 @@ Tools for working with JavaScript objects.
 
 	Value Macro `JSTObjectPropertyHidden`
 
-	The value is not enumerable.
+	The property is not enumerable.
 
 * PropertyReadOnly
 
 	Value Macro `JSTObjectPropertyReadOnly`
 
-	The value is not writable.
+	The property is not writable.
 
 * PropertyRequired
 
