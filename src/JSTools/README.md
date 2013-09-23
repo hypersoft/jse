@@ -79,6 +79,24 @@ Tools for working with JavaScript contexts.
 
 	JST's representation of a JavaScript context reference.
 
+* GroupCreate
+
+	Function Macro `JTContextGroupCreate()`
+
+	Creates a `JSTContextGroup`.
+
+* GroupRetain
+
+	Function Macro `JTContextGroupRetain(cg)`
+
+	Retains `JSTContextGroup cg`.
+
+* GroupRelease
+
+	Function Macro `JTContextGroupRelease(cg)`
+
+	Releases `JSTContextGroup cg`.
+
 3. Class (JSTClass)
 -------------------
 Tools for working with JavaScript class references.
