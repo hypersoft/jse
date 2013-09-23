@@ -175,11 +175,27 @@ Tools for working with JavaScript class references.
 
 * Create
 
+	Function Macro `JSTClassCreate(d)`
+
+	Creates a `JSTClass` from `JSTClassDefinition d`.
+
 * Retain
+
+	Function Macro `JSTClassRetain(c)`
+
+	Retains `JSTClass c`.
 
 * Release
 
+	Function Macro `JSTClassRelease(c)`
+
+	Releases `JSTClass c`.
+
 * Instance
+
+	Function Macro `JSTClassInstance(c, p)`
+
+	Creates a `JSTObject` of `JSTClass c` with `void* p` as the associated private object data.
 
 * Property
   - None
