@@ -141,6 +141,28 @@ Tools for working with JavaScript values.
 
 	JST's notion of a JavaScript value reference.
 
+7. Property (JSTProperty)
+-------------------------
+Attributes for JSTObjectSetProperty
+
+* Hidden
+
+	Value Macro `JSTPropertyHidden`
+
+	The value is not enumerable.
+
+* ReadOnly
+
+	Value Macro `JSTPropertyReadOnly'
+
+	The value is not writable.
+
+* Required
+
+	Value Macro `JSTPropertyRequired`
+
+	The property may not be deleted from the object.
+
 8. Object (JSTObject)
 ---------------------
 Tools for working with JavaScript objects.
