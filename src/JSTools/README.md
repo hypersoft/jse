@@ -149,6 +149,26 @@ Tools for working with JavaScript class references.
 
 	JST's notion of a JavaScript class reference.
 
+* Accessor
+
+* Function
+
+* Definition
+
+* EmptyDefinition
+
+* Create
+
+* Retain
+
+* Release
+
+* Instance
+
+* Property
+  - None
+  - ManualPrototype
+
 4. Declare (JSTDeclare)
 -----------------------
 Tools for declaring native JavaScript class entry points.
