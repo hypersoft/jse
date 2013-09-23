@@ -145,6 +145,81 @@ Tools for working with JavaScript values.
 
 	JST's notion of a JavaScript value reference.
 
+* GetType
+
+	Function Macro `JSTValueGetType(v)`
+
+	Returns the JSTType value of `v`.
+
+* IsUndefined
+
+	Function Macro `JTValueIsUndefined(v)`
+
+	Returns boolean true if `v` is equivalent to the JavaScript value `undefined`.
+
+* IsNull
+
+	Function Macro `JTValueIsNull(v)`
+
+	Returns boolean true if `v` is equivalent to the JavaScript value `null`.
+
+* IsBoolean
+
+	Function Macro `JTValueIsBoolean(v)`
+
+	Returns boolean true if the type of `v` is equivalent to  `JSTTypeBoolean`.
+
+
+* IsNumber
+
+	Function Macro `JTValueIsNumber(v)`
+
+	Returns boolean true if the type of `v` is equivalent to  `JSTTypeNumber`.
+
+* IsString
+
+	Function Macro `JTValueIsString(v)`
+
+	Returns boolean true if the type of `v` is equivalent to  `JSTTypeString`.
+
+
+* IsObject
+
+	Function Macro `JTValueIsObject(v)`
+
+	Returns boolean true if the type of `v` is equivalent to  `JSTTypeObject`.
+
+
+* Undefined
+
+	Value Macro `JSTValueUndefined(v)`
+
+	Returns a reference to the JavaScript type `undefined`.
+
+* Null
+
+	Value Macro `JSTValueNull(v)`
+
+	Returns a reference to the JavaScript type `null`.
+
+* IsVoid
+
+	Function Macro `JTValueIsVoid(v)`
+
+	Returns boolean true if `v` is NULL, or equivalent to the JavaScript values `undefined` or `null`.
+
+* IsFunction
+
+	Function Macro `JSTValueIsFunction(v)`
+
+	Returns boolean true if `v` is a JavaScript function.
+
+* IsConstructor
+
+	Function Macro `JSTValueIsConstructor(v)`
+
+	Returns boolean true if `v` is a JavaScript object constructor.
+
 7. Property (JSTProperty)
 -------------------------
 Attributes for `JSTObjectSetProperty()`
