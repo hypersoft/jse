@@ -153,7 +153,7 @@ Tools for working with JavaScript values.
 
 * IsBoolean
 
-	Function Macro `JTValueIsBoolean(v)`
+	Function Macro `JSTValueIsBoolean(v)`
 
 	Returns boolean true if the type of `v` is equivalent to  `JSTTypeBoolean`.
 
@@ -192,19 +192,19 @@ Tools for working with JavaScript values.
 
 * IsNull
 
-	Function Macro `JTValueIsNull(v)`
+	Function Macro `JSTValueIsNull(v)`
 
 	Returns boolean true if `v` is equivalent to the JavaScript value `null`.
 
 * IsNumber
 
-	Function Macro `JTValueIsNumber(v)`
+	Function Macro `JSTValueIsNumber(v)`
 
 	Returns boolean true if the type of `v` is equivalent to  `JSTTypeNumber`.
 
 * IsObject
 
-	Function Macro `JTValueIsObject(v)`
+	Function Macro `JSTValueIsObject(v)`
 
 	Returns boolean true if the type of `v` is equivalent to  `JSTTypeObject`.
 
@@ -217,20 +217,20 @@ Tools for working with JavaScript values.
 
 * IsString
 
-	Function Macro `JTValueIsString(v)`
+	Function Macro `JSTValueIsString(v)`
 
 	Returns boolean true if the type of `v` is equivalent to  `JSTTypeString`.
 
 
 * IsUndefined
 
-	Function Macro `JTValueIsUndefined(v)`
+	Function Macro `JSTValueIsUndefined(v)`
 
 	Returns boolean true if `v` is equivalent to the JavaScript value `undefined`.
 
 * IsVoid
 
-	Function Macro `JTValueIsVoid(v)`
+	Function Macro `JSTValueIsVoid(v)`
 
 	Returns boolean true if `v` is NULL, or equivalent to the JavaScript values `undefined` or `null`.
 
