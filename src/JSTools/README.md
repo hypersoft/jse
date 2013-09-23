@@ -79,6 +79,12 @@ Tools for working with JavaScript contexts.
 
 	JST's representation of a JavaScript context reference.
 
+* ContextGroup
+
+	Type Macro `JSTContextGroup`
+
+	JST's representation of a JavaScript context group reference.
+
 * GroupCreate
 
 	Function Macro `JTContextGroupCreate()`
