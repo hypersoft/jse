@@ -91,7 +91,7 @@ Tools for working with JavaScript class references.
 
 4. Declare (JSTDeclare)
 -----------------------
-Tools for declaring JavaScript class properties.
+Tools for declaring native JavaScript class entry points.
 
 5. Type (JSTType)
 -----------------
@@ -190,6 +190,32 @@ Tools for working with JavaScript values.
 	Returns boolean true if the type of `v` is equivalent to  `JSTTypeObject`.
 
 
+* IsClassInstance
+
+	Function Macro `JSTValueIsClassInstance(v, c)`
+
+	Tests whether JavaScript `v` is an object with `JSTClass` `c` in its class chain.
+
+
+* IsEqual
+
+	Function Macro `JSTValueIsEqual(a, b)`
+
+	Returns boolean true based on the equality of `a` and `b`.
+
+* IsStrictEqual
+
+	Function Macro `JSTValueIsStrictEqual(a, b)`
+
+	Returns boolean true based on the JavaScript strict equality (`===`) of `a` and `b`.
+
+* IsConstructorInstance
+
+	Function Macro `JSTValueIsConstructorInstance(v, c)`
+
+	Returns boolean true if `c` is the constructor of `v`.
+
+
 * Undefined
 
 	Value Macro `JSTValueUndefined(v)`
@@ -273,5 +299,3 @@ Tools for working with JavaScript contstructors.
 12. Script (JSTScript)
 ----------------------
 Procedures for working with JavaScript evaluation.
-
-* NativeError()
