@@ -296,37 +296,37 @@ Tools for working with JavaScript values.
 
 	Value Macro `JSTValueTypeUndefined`
 
-	JST's notion of the JavaScript `undefined` object.
+	JST's notion of the JavaScript `undefined` value class.
 
 * TypeNull
 
 	Value Macro `JSTValueTypeNull`
 
-	JST's notion of the JavaScript `null` object.
+	JST's notion of the JavaScript `null` value class.
 
 * TypeBoolean
 
 	Value Macro `JSTValueTypeBoolean`
 
-	JST's notion of the JavaScript `Boolean` class value.
+	JST's notion of the JavaScript `Boolean` value class.
 
 * TypeNumber
 
 	Value Macro `JSTValueTypeNumber`
 
-	JST's notion of the JavaScript `Number` class value.
+	JST's notion of the JavaScript `Number` value class.
 
 * TypeString
 
 	Value Macro `JSTValueTypeString`
 
-	JST's notion of the JavaScript `String` class value.
+	JST's notion of the JavaScript `String` value class.
 
 * TypeObject
 
 	Value Macro `JSTValueTypeObject`
 
-	JST's notion of the JavaScript `Object` class value.
+	JST's notion of the JavaScript `Object` value class.
 
 6. Object (JSTObject)
 ---------------------
