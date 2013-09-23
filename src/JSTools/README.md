@@ -396,17 +396,17 @@ Tools for working with JavaScript objects.
 
 	Function Macro `JSTObjectSetPrivate(o, p)`
 
-	Sets `void * p` as the private data associated with `JSTObject o`.
+	Sets `void* p` as the private data associated with `JSTObject o`.
 
 * IsFunction
 
 	Function Macro `JSTObjectIsFunction(o)`
 
-	Returns `bool` true if `v` is a JavaScript function.
+	Returns `bool` true if `o` is a JavaScript function.
 
 * IsConstructor
 
-	Function Macro `JSTObjectIsConstructor(v)`
+	Function Macro `JSTObjectIsConstructor(c)`
 
 	Returns `bool` true if `c` is a JavaScript constructor.
 
