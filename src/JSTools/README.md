@@ -143,7 +143,7 @@ Tools for working with JavaScript values.
 
 7. Property (JSTProperty)
 -------------------------
-Attributes for JSTObjectSetProperty
+Attributes for `JSTObjectSetProperty()`
 
 * Hidden
 
@@ -153,7 +153,7 @@ Attributes for JSTObjectSetProperty
 
 * ReadOnly
 
-	Value Macro `JSTPropertyReadOnly'
+	Value Macro `JSTPropertyReadOnly`
 
 	The value is not writable.
 
