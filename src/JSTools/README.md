@@ -255,6 +255,7 @@ Tools for working with JavaScript values.
 * ToObject
 
 	Function Macro `JSTValueToObject(v)`
+
 	Qualify `v` as a `JSTObject`.
 
 * ToPointer
