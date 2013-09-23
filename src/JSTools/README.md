@@ -386,6 +386,30 @@ Tools for working with JavaScript objects.
 
 	Sets property `JSTValue v` as a member of `JSTObject o` by the index of `unsigned i`, with `JSTObjectProperty* a` access attributes.
 
+* GetPrivate
+
+	Function Macro `JSTObjectGetPrivate(o)`
+
+	Retrieves the private `void*` address associated with `JSTObject o`.
+
+* SetPrivate
+
+	Function Macro `JSTObjectSetPrivate(o, p)`
+
+	Sets `void * p` as the private data associated with `JSTObject o`.
+
+* IsFunction
+
+	Function Macro `JSTObjectIsFunction(o)`
+
+	Returns `bool` true if `v` is a JavaScript function.
+
+* IsConstructor
+
+	Function Macro `JSTObjectIsConstructor(v)`
+
+	Returns `bool` true if `c` is a JavaScript constructor.
+
 * ToValue
 
 	Function Macro `JSTObjectToValue(o)`
