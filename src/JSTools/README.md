@@ -235,361 +235,6 @@ Tools for declaring native JavaScript entry points.
 
 * Convertor
 
-5. Value (JSTValue)
--------------------
-Tools for working with JavaScript values.
-
-* Value
-
-	Type Macro `JSTValue`
-
-	JST's notion of a JavaScript value reference.
-
-* FromBoolean
-
-	Function Macro `JSTValueFromBoolean(b)`
-
-	Converts value `b` to the JavaScript class `Boolean`.
-
-* FromDouble
-
-	Function Macro `JSTValueFromDouble(d)`
-
-	Converts `double` value `d` to the JavaScript class `Number`.
-
-* FromJSON
-
-	Function Macro `JSTValueFromJSON(p)`
-
-	Converts UTF-8 `JSON` string pointer `p` to a `JSTValue` of JavaScript class `Object`.
-
-* FromPointer
-
-	Function Macro `JSTValueFromPointer(p)`
-
-	Converts the pointer value `p` to the JavaScript class `Number`.
-
-* FromString
-
-	Function Macro `JSTValueFromString(s, f)`
-
-	Converts `JSTString s` to a JavaScript value class `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
-
-* FromUTF8
-
-	Function Macro `JSTValueFromUTF8(p)`
-
-	Converts UTF-8 string pointer value `p` to the JavaScript value class `String`.
-
-* GetType
-
-	Function Macro `JSTValueGetType(v)`
-
-	Returns the `JSTValueType` value of `v`.
-
-* IsBoolean
-
-	Function Macro `JSTValueIsBoolean(v)`
-
-	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeBoolean`.
-
-
-* IsClassInstance
-
-	Function Macro `JSTValueIsClassInstance(v, c)`
-
-	Tests whether JavaScript `v` is an object with `JSTClass c` in its class chain.
-
-
-* IsConstructor
-
-	Function Macro `JSTValueIsConstructor(v)`
-
-	Returns `bool` true if `v` is a JavaScript object constructor.
-
-* IsConstructorInstance
-
-	Function Macro `JSTValueIsConstructorInstance(v, c)`
-
-	Returns `bool` true if `c` is the constructor of `v`.
-
-
-* IsEqual
-
-	Function Macro `JSTValueIsEqual(a, b)`
-
-	Returns `bool` true based on the equality (`==`) of `a` and `b`.
-
-* IsFunction
-
-	Function Macro `JSTValueIsFunction(v)`
-
-	Returns `bool` true if `v` is a JavaScript function.
-
-* IsNull
-
-	Function Macro `JSTValueIsNull(v)`
-
-	Returns `bool` true if `v` is equivalent to the JavaScript value `null`.
-
-* IsNumber
-
-	Function Macro `JSTValueIsNumber(v)`
-
-	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeNumber`.
-
-* IsObject
-
-	Function Macro `JSTValueIsObject(v)`
-
-	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeObject`.
-
-
-* IsStrictEqual
-
-	Function Macro `JSTValueIsStrictEqual(a, b)`
-
-	Returns `bool` true based on the JavaScript strict equality (`===`) of `a` and `b`.
-
-* IsString
-
-	Function Macro `JSTValueIsString(v)`
-
-	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeString`.
-
-
-* IsUndefined
-
-	Function Macro `JSTValueIsUndefined(v)`
-
-	Returns `bool` true if `v` is equivalent to the JavaScript value `undefined`.
-
-* IsVoid
-
-	Function Macro `JSTValueIsVoid(v)`
-
-	Returns `bool` true if `v` is `NULL`, or equivalent to the JavaScript values `undefined` or `null`.
-
-* ToBoolean
-
-	Function Macro `JSTValueToBoolean(v)`
-
-	Converts value `v` to native type `bool`.
-
-* ToDouble
-
-	Function Macro `JSTValueToDouble(v)`
-
-	Converts value `v` to native type  `double`.
-
-* ToJSON
-
-	Function Macro `JSTValueToJSON(v, i)`
-
-	Converts value `v` to UTF-8 encoded `JSON` format. `i` is the number of spaces to indent.
-
-* ToObject
-
-	Function Macro `JSTValueToObject(v)`
-
-	Promotes value `v` to type `JSTObject`.
-
-* ToPointer
-
-	Function Macro `JSTValueToPointer(v)`
-
-	Converts JavaScript number value `v` to type `void *`.
-
-* ToString
-
-	Function Macro `JSTValueToString(v)`
-
-	Creates a `JSTString` from `v`.
-
-	Returns the string value of `v` as a new `JSTString`.
-
-	You must free the returned `JSTString` by calling `JSTStringRelease()`.
-
-* Null
-
-	Function Macro `JSTValueNull()`
-
-	Returns a reference to the JavaScript value `null`.
-
-* Undefined
-
-	Function Macro `JSTValueUndefined()`
-
-	Returns a reference to the JavaScript value `undefined`.
-
-* Protect
-
-	Function Macro `JSTValueProtect(v)`
-
-	Protect `v` from garbage collection.
-
-* Unprotect
-
-	Function Macro `JSTValueUnprotect(v)`
-
-	Flag `v` as a potential candidate for garbage collection.
-
-* TypeUndefined
-
-	Value Macro `JSTValueTypeUndefined`
-
-	JST's notion of the JavaScript `undefined` value class.
-
-* TypeNull
-
-	Value Macro `JSTValueTypeNull`
-
-	JST's notion of the JavaScript `null` value class.
-
-* TypeBoolean
-
-	Value Macro `JSTValueTypeBoolean`
-
-	JST's notion of the JavaScript `Boolean` value class.
-
-* TypeNumber
-
-	Value Macro `JSTValueTypeNumber`
-
-	JST's notion of the JavaScript `Number` value class.
-
-* TypeString
-
-	Value Macro `JSTValueTypeString`
-
-	JST's notion of the JavaScript `String` value class.
-
-* TypeObject
-
-	Value Macro `JSTValueTypeObject`
-
-	JST's notion of the JavaScript `Object` value class.
-
-6. Object (JSTObject)
----------------------
-Tools for working with JavaScript objects.
-
-* Object
-
-	Type Macro `JSTObject`
-
-	JST's representation of a JavaScript object reference.
-
-* GetPrototype
-
-	Function Macro `JSTObjectGetPrototype(o)`
-
-	Retrieves the object prototype of `o` as a `JSTObject`
-
-* SetPrototype
-
-	Function Macro `JSTObjectSetPrototype(o, p)`
-
-	Sets `JSTObject p` as the prototype property of `JSTObject o`.
-
-* HasProperty
-
-	Function Macro `JSTObjectHasProperty(o, p)`
-
-	Returns `bool` true if `JSTObject o` has a property by the name of UTF-8 pointer `p`.
-
-* GetProperty
-
-	Function Macro `JSTObjectGetProperty(o, p)`
-
-	Returns the property named by UTF-8 pointer `p` in `JSTObject o` or the JavaScript value `undefined` if the property is not defined on `o`.
-
-* SetProperty
-
-	Function Macro `JSTObjectSetProperty(o, p, v, a)`
-
-	Sets property `JSTValue v` as a member of `JSTObject o` by the name of UTF-8 pointer `p`, with `JSTObjectProperty a` access attributes.
- 
-* DeleteProperty
-
-	Function Macro `JSTObjectDeleteProperty(o, p)`
-
-	Attempts to remove the property named by UTF-8 pointer `p` in `JSTObject o`.
-
-* GetPropertyAtIndex
-
-	Function Macro `JSTObjectGetPropertyAtIndex(o, i)`
-
-	Returns the property index specified by `unsigned i` in `JSTObject o` or the JavaScript value `undefined` if the property is not defined on `o`.
-
-* SetPropertyAtIndex
-
-	Function Macro `JSTObjectSetProperty(o, i, v, a)`
-
-	Sets property `JSTValue v` as a member of `JSTObject o` by the index of `unsigned i`, with `JSTObjectProperty a` access attributes.
-
-* GetPrivate
-
-	Function Macro `JSTObjectGetPrivate(o)`
-
-	Retrieves the private `void*` address associated with `JSTObject o`.
-
-* SetPrivate
-
-	Function Macro `JSTObjectSetPrivate(o, p)`
-
-	Sets `void* p` as the private data associated with `JSTObject o`.
-
-* IsFunction
-
-	Function Macro `JSTObjectIsFunction(o)`
-
-	Returns `bool` true if `o` is a JavaScript function.
-
-* IsConstructor
-
-	Function Macro `JSTObjectIsConstructor(c)`
-
-	Returns `bool` true if `c` is a JavaScript constructor.
-
-* ToValue
-
-	Function Macro `JSTObjectToValue(o)`
-
-	Performs a type cast of `o` from `JSTObject` to `JSTValue`.
-
-	See also `JSTValueToObject()`.
-
-* Undefined
-
-	Value Macro `JSTObjectUndefined`
-
-	The JavaScript `undefined` value type cast to JavaScript value class `Object`.
-
-* Null
-
-	Value Macro `JSTObjectNull`
-
-	The JavaScript `null` value type cast to JavaScript value class `Object`.
-
-* PropertyHidden
-
-	Value Macro `JSTObjectPropertyHidden`
-
-	The property is not enumerable.
-
-* PropertyReadOnly
-
-	Value Macro `JSTObjectPropertyReadOnly`
-
-	The property is not writable.
-
-* PropertyRequired
-
-	Value Macro `JSTObjectPropertyRequired`
-
-	The property may not be deleted from the object.
-
 7. String (JSTString)
 ---------------------
 Tools for working with JavaScript strings.
@@ -599,6 +244,30 @@ Tools for working with JavaScript strings.
 	Type Macro `JSTString`
 
 	JST's representation of a JavaScript string reference.
+
+* FromUTF8
+
+* ToUTF8
+
+* FreeUTF8
+
+* FromUTF16
+
+* UTF16
+
+* UTF16Length
+
+* Retain
+
+* Release
+
+* Compare
+
+* CompareToUTF8
+
+* ToValue
+
+* FromValue
 
 8. Function (JSTFunction)
 -------------------------
@@ -639,3 +308,36 @@ Tools for working with JavaScript contstructors.
 10. Script (JSTScript)
 ----------------------
 Procedures for working with JavaScript evaluation.
+
+* Eval
+
+* CheckSyntax
+
+* NativeEval
+
+* Error
+
+* EvalError
+
+* RangeError
+
+* ReferenceError
+
+* SyntaxError
+
+* TypeError
+
+* URIError
+
+* SetError
+
+* HasError
+
+* Function
+
+11. Native
+----------
+
+* Alignment
+
+* ByteOrder
