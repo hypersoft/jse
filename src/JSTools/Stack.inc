@@ -8,8 +8,6 @@
 #define JSTNativeAlignment sizeof(void*)
 #endif
 
-#define iStackMachineAlignment
-
 #define iStackMachineBool 1
 #define iStackMachineChar 2
 #define iStackMachineShort 3

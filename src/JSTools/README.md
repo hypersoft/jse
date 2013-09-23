@@ -67,4 +67,4 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	Evaluate expression `try`, if that succeeds, evaluate and return `true`. if `try` failed, evaluate and return `false`.
 
-		`JSTChoose()` is a deprecated copy of this functionality.
+	`JSTChoose()` is a deprecated copy of this functionality.
