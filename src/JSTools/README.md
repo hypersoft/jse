@@ -91,7 +91,7 @@ Tools for working with JavaScript class references.
 
 4. Declare (JSTDeclare)
 -----------------------
-Tools for declaring Javascript class properties.
+Tools for declaring JavaScript class properties.
 
 5. Type (JSTType)
 -----------------
@@ -189,14 +189,14 @@ Tools for working with JavaScript strings.
 
 10. Function (JSTFunction)
 --------------------------
-Tools for working with Javascript functions.
+Tools for working with JavaScript functions.
 
 11. Constructor (JSTConstructor)
 --------------------------------
-Tools for working with Javascript contstructors.
+Tools for working with JavaScript contstructors.
 
 12. Script (JSTScript)
 ----------------------
-Procedures for working with Javascript evaluation.
+Procedures for working with JavaScript evaluation.
 
 * NativeError()
