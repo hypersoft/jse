@@ -374,6 +374,12 @@ Tools for working with JavaScript objects.
 
 	Attempts to remove the property named by UTF-8 pointer `p` in `JSTObject o`.
 
+* GetPropertyAtIndex
+
+	Function Macro `JSTObjectGetPropertyAtIndex(o, i)`
+
+	Returns the property index specified by `unsigned i` in `JSTObject o` or the JavaScript value `undefined` if the property is not defined on `o`.
+
 * ToValue
 
 	Function Macro `JSTObjectToValue(o)`
