@@ -145,6 +145,42 @@ Tools for working with JavaScript values.
 
 	JST's notion of a JavaScript value reference.
 
+* FromBoolean
+
+	Function Macro `JSTValueFromBoolean(b)`
+
+	Converts value `b` to the JavaScript type `Boolean`.
+
+* FromDouble
+
+	Function Macro `JSTValueFromDouble(d)`
+
+	Converts double value `d` to the JavaScript type `Number`.
+
+* FromJSONString
+
+	Function Macro `JSTValueFromJSONString(p)`
+
+	Converts UTF-8 JSON string pointer `p` to a `JSTValue`.
+
+* FromPointer
+
+	Function Macro `JSTValueFromPointer(p)`
+
+	Converts the pointer value `p` to the JavaScript value type `Number`.
+
+* FromString
+
+	Function Macro `JSTValueFromString(s, f)`
+
+	Converts `JSTString s` to a JavaScript type `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
+
+* FromUTF8
+
+	Function Macro `JSTValueFromUTF8(p)`
+
+	Converts UTF-8 string pointer value `p` to the JavaScript type `String`.
+
 * GetType
 
 	Function Macro `JSTValueGetType(v)`
@@ -256,7 +292,7 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueToObject(v)`
 
-	Qualify `v` as a `JSTObject`.
+	Promote value `v` to type `JSTObject`.
 
 * ToPointer
 
