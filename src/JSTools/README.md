@@ -113,7 +113,7 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueFromDouble(d)`
 
-	Converts double value `d` to the JavaScript class `Number`.
+	Converts `double` value `d` to the JavaScript class `Number`.
 
 * FromJSON
 
@@ -272,13 +272,13 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueNull()`
 
-	Returns a reference to the JavaScript type `null`.
+	Returns a reference to the JavaScript value `null`.
 
 * Undefined
 
 	Function Macro `JSTValueUndefined()`
 
-	Returns a reference to the JavaScript type `undefined`.
+	Returns a reference to the JavaScript value `undefined`.
 
 * Protect
 
