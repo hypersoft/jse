@@ -191,102 +191,102 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueIsBoolean(v)`
 
-	Returns boolean true if the type of `v` is equivalent to  `JSTTypeBoolean`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeBoolean`.
 
 
 * IsClassInstance
 
 	Function Macro `JSTValueIsClassInstance(v, c)`
 
-	Tests whether JavaScript `v` is an object with `JSTClass` `c` in its class chain.
+	Tests whether JavaScript `v` is an object with `JSTClass c` in its class chain.
 
 
 * IsConstructor
 
 	Function Macro `JSTValueIsConstructor(v)`
 
-	Returns boolean true if `v` is a JavaScript object constructor.
+	Returns `bool` true if `v` is a JavaScript object constructor.
 
 * IsConstructorInstance
 
 	Function Macro `JSTValueIsConstructorInstance(v, c)`
 
-	Returns boolean true if `c` is the constructor of `v`.
+	Returns `bool` true if `c` is the constructor of `v`.
 
 
 * IsEqual
 
 	Function Macro `JSTValueIsEqual(a, b)`
 
-	Returns boolean true based on the equality of `a` and `b`.
+	Returns `bool` true based on the equality (`==`) of `a` and `b`.
 
 * IsFunction
 
 	Function Macro `JSTValueIsFunction(v)`
 
-	Returns boolean true if `v` is a JavaScript function.
+	Returns `bool` true if `v` is a JavaScript function.
 
 * IsNull
 
 	Function Macro `JSTValueIsNull(v)`
 
-	Returns boolean true if `v` is equivalent to the JavaScript value `null`.
+	Returns `bool` true if `v` is equivalent to the JavaScript value `null`.
 
 * IsNumber
 
 	Function Macro `JSTValueIsNumber(v)`
 
-	Returns boolean true if the type of `v` is equivalent to  `JSTTypeNumber`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeNumber`.
 
 * IsObject
 
 	Function Macro `JSTValueIsObject(v)`
 
-	Returns boolean true if the type of `v` is equivalent to  `JSTTypeObject`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeObject`.
 
 
 * IsStrictEqual
 
 	Function Macro `JSTValueIsStrictEqual(a, b)`
 
-	Returns boolean true based on the JavaScript strict equality (`===`) of `a` and `b`.
+	Returns `bool` true based on the JavaScript strict equality (`===`) of `a` and `b`.
 
 * IsString
 
 	Function Macro `JSTValueIsString(v)`
 
-	Returns boolean true if the type of `v` is equivalent to  `JSTTypeString`.
+	Returns `bool` true if the type of `v` is equivalent to  `JSTTypeString`.
 
 
 * IsUndefined
 
 	Function Macro `JSTValueIsUndefined(v)`
 
-	Returns boolean true if `v` is equivalent to the JavaScript value `undefined`.
+	Returns `bool` true if `v` is equivalent to the JavaScript value `undefined`.
 
 * IsVoid
 
 	Function Macro `JSTValueIsVoid(v)`
 
-	Returns boolean true if `v` is NULL, or equivalent to the JavaScript values `undefined` or `null`.
+	Returns type `bool` true if `v` is `NULL`, or equivalent to the JavaScript values `undefined` or `null`.
 
 * ToBoolean
 
 	Function Macro `JSTValueToBoolean(v)`
 
-	Converts the value `v` to native `bool` type.
+	Converts the value `v` to native type `bool`.
 
 * ToDouble
 
 	Function Macro `JSTValueToDouble(v)`
 
-	Converts the value `v` to native `double` type.
+	Converts the value `v` to native type  `double`.
 
 * ToJSONString
 
 	Function Macro `JSTValueToJSONString(v)`
 
-	Converts value `v` to `UTF-8` encoded `JSON` format.
+	Converts value `v` to UTF-8 encoded `JSON` format.
 
 * ToObject
 
