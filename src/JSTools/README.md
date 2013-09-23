@@ -380,6 +380,12 @@ Tools for working with JavaScript objects.
 
 	Returns the property index specified by `unsigned i` in `JSTObject o` or the JavaScript value `undefined` if the property is not defined on `o`.
 
+* SetPropertyAtIndex
+
+	Function Macro `JSTObjectSetProperty(o, i, v, a)`
+
+	Sets property `JSTValue v` as a member of `JSTObject o` by the index of `unsigned i`, with `JSTObjectProperty* a` access attributes.
+
 * ToValue
 
 	Function Macro `JSTObjectToValue(o)`
