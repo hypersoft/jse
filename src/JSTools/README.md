@@ -273,13 +273,13 @@ Tools for working with JavaScript values.
 .
 * Null
 
-	Value Macro `JSTValueNull(v)`
+	Function Macro `JSTValueNull()`
 
 	Returns a reference to the JavaScript type `null`.
 
 * Undefined
 
-	Value Macro `JSTValueUndefined(v)`
+	Function Macro `JSTValueUndefined()`
 
 	Returns a reference to the JavaScript type `undefined`.
 
