@@ -68,3 +68,13 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 	Evaluate expression `try`, if that succeeds, evaluate and return `true`. if `try` failed, evaluate and return `false`.
 
 	`JSTChoose()` is a deprecated copy of this functionality.
+
+3. Class (JSTClass)
+-------------------
+Tools for working with Javascript class references.
+
+* Class
+
+	Type Macro `JSTClass`
+
+	JST's notion of a JavaScript class reference.
