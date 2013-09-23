@@ -268,19 +268,19 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueIsVoid(v)`
 
-	Returns type `bool` true if `v` is `NULL`, or equivalent to the JavaScript values `undefined` or `null`.
+	Returns `bool` true if `v` is `NULL`, or equivalent to the JavaScript values `undefined` or `null`.
 
 * ToBoolean
 
 	Function Macro `JSTValueToBoolean(v)`
 
-	Converts the value `v` to native type `bool`.
+	Converts value `v` to native type `bool`.
 
 * ToDouble
 
 	Function Macro `JSTValueToDouble(v)`
 
-	Converts the value `v` to native type  `double`.
+	Converts value `v` to native type  `double`.
 
 * ToJSONString
 
@@ -292,13 +292,13 @@ Tools for working with JavaScript values.
 
 	Function Macro `JSTValueToObject(v)`
 
-	Promote value `v` to type `JSTObject`.
+	Promotes value `v` to type `JSTObject`.
 
 * ToPointer
 
 	Function Macro `JSTValueToPointer(v)`
 
-	Converts the JavaScript number value `v` to the type `void *`.
+	Converts JavaScript number value `v` to type `void *`.
 
 * ToString
 
@@ -306,8 +306,10 @@ Tools for working with JavaScript values.
 
 	Creates a `JSTString` from `v`.
 
-	Returns the new `JSTString`
-.
+	Returns the string value of `v` as a new `JSTString`.
+
+	You must free the returned `JSTString` by calling `JSTStringRelease()`.
+
 * Null
 
 	Function Macro `JSTValueNull()`
