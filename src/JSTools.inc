@@ -29,6 +29,7 @@
 #include "JSTools/Script.inc"
 #include "JSTools/Stack.inc"
 #include "JSTools/String.inc"
+#include "JSTools/Type.inc"
 #include "JSTools/Value.inc"
 
 #endif

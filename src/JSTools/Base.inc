@@ -9,13 +9,6 @@
 #define JSTPropertyPrivate (JSTPropertyHidden | JSTPropertyRequired)
 #define JSTPropertyProtected (JSTPropertyConst | JSTPropertyPrivate)
 
-#define JSTTypeUndefined kJSTypeUndefined
-#define JSTTypeNull kJSTypeNull
-#define JSTTypeBoolean kJSTypeBoolean
-#define JSTTypeNumber kJSTypeNumber
-#define JSTTypeString kJSTypeString
-#define JSTTypeObject kJSTypeObject
-
 #define JST(NAME, ...) NAME (ctx, ##__VA_ARGS__, exception)
 #define JSTAction(NAME, ...) NAME (ctx, ##__VA_ARGS__)
 
