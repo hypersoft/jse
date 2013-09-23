@@ -58,7 +58,7 @@ Items in this category don't carry the section heading name 'Base'. Because of t
 
 	Variadic Macro Function `JSTXPR(return expression, expressionN, ...)`
 
-	Evaluates `expressionN-...`, and returns `expression`. This macro is useful for creating inline code blocks.
+	Evaluates `expressionN` through `...` (in that order), and returns `expression`. This macro is useful for creating inline code blocks.
 
 
 * CND
