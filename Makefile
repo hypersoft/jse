@@ -30,7 +30,7 @@ install:
 	@cp -vt /bin bin/jse
 
 source:
-	gcc -E -DBUILDNO='"${BUILDNO}"' -I inc -I src main.c ${OPTIMIZE} -ldl ${PKGCONFIG}
+	gcc -E ${BUILDCOMMON} main.c -ldl ${PKGCONFIG}
 
 src/JSTools.s: ${JSTDEPENDS}
 	gcc -S -fverbose-asm -masm=intel ${BUILDCOMMON} -o src/JSTools.s src/JSTools.c -lpthread -ldl ${PKGCONFIG}
