@@ -1,5 +1,6 @@
 bin/jse
 bin/lib*
+bin/*.o
 inc/JavaScriptCore
 inc/dyncall
 *.s
