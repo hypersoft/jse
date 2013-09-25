@@ -169,7 +169,7 @@ Tools for working with JavaScript class references.
 
 * EmptyDefinition
 
-	Type Macro `JSTClassEmptyDefinition`
+	Struct Initializer Macro `JSTClassEmptyDefinition`
 
 	An empty 	`JSTClassDefinition`  structure initialized to zero. Useful for creating new `JSTClassDefinition`s.
 
@@ -342,56 +342,104 @@ Procedures for working with JavaScript evaluation.
 
 * ByteOrder
 
+
 Other
 =====
 
-1. iStackMachine
-----------------
 
-* Init
+iStackMachine
+=============
 
-* GetPrivate
+1. Init
+-------
 
-* SetPrivate
+2. GetPrivate
+-------------
 
-* Units
+3. SetPrivate
+-------------
 
-* Count
+4. Units
+--------
 
-* Lock
+5. Count
+--------
 
-* Slots
+6. Lock
+-------
 
-* Slot
+7. Slots
+--------
 
-* Bytes
+8. Slot
+-------
 
-* Mass
+9. Bytes
+--------
 
-* Grow
+10. Mass
+--------
 
-* Shrink
+11. Grow
+--------
 
-* Compress
+12. Shrink
+----------
 
-* Free
+13. Compress
+------------
 
-* Push
+14. Free
+--------
 
-* Pop
+15. Push
+--------
 
-* PushInt
+16. Pop
+-------
 
-* PopInt
+17. PushInt
+-----------
 
-* Enum
+18. PopInt
+----------
 
-* EnumReverse
+19. Enum
+--------
 
-* Refactor
+20. EnumReverse
+---------------
 
-* Slice
+21. Refactor
+------------
 
-* Read
+22. Slice
+---------
 
-* Write
+23. Read
+--------
+
+24. Write
+---------
+Runtime
+=======
+
+js
+==
+
+1. init
+-------
+
+Static runtime constants inherited from application startup.
+
+* argc
+
+* argv
+
+* envp
+
+* pid
+
+* uid
+
+* euid

@@ -4,10 +4,6 @@
 #include <uchar.h>
 #endif
 
-#ifndef JSTNativeAlignment
-#define JSTNativeAlignment sizeof(void*)
-#endif
-
 #define iStackMachineBool 1
 #define iStackMachineChar 2
 #define iStackMachineShort 3
@@ -35,16 +31,13 @@
 #define iStackMachine12 0L
 
 #define iStackMachineSize(t) iStackMachine##t
-#define iStackMachineAlign(unit) ((unit % JSTNativeAlignment) ? (unit + JSTNativeAlignment) - (unit % JSTNativeAlignment) : unit)
-#define iStackMachinePadding(t) iStackMachineAlign(iStackMachine##t)
-
 
 #define iStackMachineInit(t, n) \
 iStackMachine *n = malloc(sizeof(iStackMachine)); \
 memset(n, 0, sizeof(iStackMachine)), \
 n->width = iStackMachineSize(t), \
 n->type = t, n->growable = 1, \
-n->expand = JSTNativeAlignment
+n->expand = sizeof(void*)
 
 #define iStackMachinePrivate(s) s->private
 #define iStackMachineSetPrivate(s, p) (s->private = p)

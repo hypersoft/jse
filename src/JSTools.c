@@ -21,7 +21,7 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(js, "native", native, JSTPropertyRequired);
+	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 	return native;
 }
 
@@ -36,9 +36,9 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
-	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), JSTPropertyConst);
-	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), JSTPropertyConst);
-	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), JSTPropertyConst);
+	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTNativeInit(js);
 
