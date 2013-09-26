@@ -3,7 +3,7 @@ DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --silence-errors --cflags --libs javascriptcoregtk-3.0)
 JSTDEPENDS := ${DYNCALL} $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc
 
-BUILDCOMMON := -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
+BUILDCOMMON := -lpthread -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 
 all: bin/jse
 
@@ -21,7 +21,7 @@ bin/JSTools.o: ${JSTDEPENDS}
 
 bin/jse: Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
 	@echo compiling JSE
-	gcc  ${BUILDCOMMON} -o "bin/jse" main.c bin/*.a bin/*.o -lpthread -ldl ${PKGCONFIG}
+	gcc  ${BUILDCOMMON} -o "bin/jse" main.c bin/*.a bin/*.o
 	@bin/buildnum -q;
 	@echo ''
 
@@ -33,10 +33,10 @@ source:
 	gcc -E ${BUILDCOMMON} main.c -ldl ${PKGCONFIG}
 
 src/JSTools.s: ${JSTDEPENDS}
-	gcc -S -fverbose-asm -masm=intel ${BUILDCOMMON} -o src/JSTools.s src/JSTools.c -lpthread -ldl ${PKGCONFIG}
+	gcc -S -fverbose-asm -masm=intel ${BUILDCOMMON} -o src/JSTools.s src/JSTools.c
 
 main.s: main.c src/JSTools.h
-	gcc -S -fverbose-asm -masm=intel ${BUILDCOMMON} -o main.s main.c -lpthread -ldl ${PKGCONFIG}
+	gcc -S -fverbose-asm -masm=intel ${BUILDCOMMON} -o main.s main.c
 
 asm: main.s src/JSTools.s
 
