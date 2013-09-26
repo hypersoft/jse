@@ -19,7 +19,7 @@ bin/JSTools.o: ${JSTDEPENDS}
 	gcc  ${BUILDCOMMON} -c src/JSTools.c -o $@
 	@echo ''
 
-bin/jse: Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
+bin/jse: Makefile main.c bin/JSTools.o src/JSTools.h src/JSTools/*.inc inc/*.inc
 	@echo compiling JSE
 	gcc  ${BUILDCOMMON} -o "bin/jse" main.c bin/*.a bin/*.o
 	@bin/buildnum -q;
