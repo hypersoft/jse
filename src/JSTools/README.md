@@ -600,23 +600,65 @@ Procedures for working with JavaScript evaluation.
 
 * CheckSyntax
 
+	Function Macro `JSTScriptCheckSyntax(script, url, line)`
+
+	Evaluates a JavaScript for syntax errors. See `JSTScriptEval()` for details on these parameters.
+
 * NativeEval
+
+	Function Macro `JSTScriptNativeEval(script, object)`
+
+	Evaluates JavaScript as `JSTScriptEval()` would only, the compiler automatically supplies the URL and starting line number.
 
 * Error
 
+	Function Macro `JSTScriptError(p)`
+
+	Constructs a new generic JavaScript Error object with an error message defined by UTF8 charachter buffer pointer `p`.
+
 * EvalError
+
+	Function Macro `JSTScriptEvalError(p)`
+
+	Constructs a new generic JavaScript EvalError object with an error message defined by UTF8 charachter buffer pointer `p`.
 
 * RangeError
 
+	Function Macro `JSTScriptRangeError(p)`
+
+	Constructs a new generic JavaScript RangeError object with an error message defined by UTF8 charachter buffer pointer `p`.
+
 * ReferenceError
+
+	Function Macro `JSTScriptReferenceError(p)`
+
+	Constructs a new generic JavaScript ReferenceError object with an error message defined by UTF8 charachter buffer pointer `p`.
 
 * SyntaxError
 
+	Function Macro `JSTScriptSyntaxError(p)`
+
+	Constructs a new generic JavaScript SyntaxError object with an error message defined by UTF8 charachter buffer pointer `p`.
+
 * TypeError
+
+	Function Macro `JSTScriptTypeError(p)`
+
+	Constructs a new generic JavaScript TypeError object with an error message defined by UTF8 charachter buffer pointer `p`.
 
 * URIError
 
+	Function Macro `JSTScriptURIError(p)`
+
+	Constructs a new generic JavaScript URIError object with an error message defined by UTF8 charachter buffer pointer `p`.
+
 * NativeError()
+
+	Function Macro `JSTScriptNativeError()`
+
+	Constructs a new generic JavaScript Error object with an error message defined by `errno` and `strerror`.
+
+	Not currently implemented.
 
 * SetError
 
