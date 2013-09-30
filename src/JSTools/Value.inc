@@ -41,7 +41,7 @@
 #define JSTValueIsFunction(v) (v && JSTValueIsObject(v) && JSTObjectIsFunction(v))
 #define JSTValueIsConstructor(v) (v && JSTValueIsObject(v) && JSTObjectIsConstructor(v))
 
-#define JSTValueToPointer(v) ((void*)((long)JSTValueToDouble(v)))
+#define JSTValueToPointer(v) ((void*)((unsigned long)JSTValueToDouble(v)))
 #define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((long) p)))
 
 

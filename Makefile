@@ -5,7 +5,7 @@ PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 JSTDEPENDS := ${DYNCALL} $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
 
-BUILDCOMMON := -lpthread -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
+BUILDCOMMON := -g -v -da -Q -lpthread -ldl ${PKGCONFIG} -Isrc -Iinc -O0 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 ASM := -S -fverbose-asm -masm=intel
 
 all: bin/jse
