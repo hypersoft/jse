@@ -508,7 +508,7 @@ Tools for working with JavaScript strings.
 
 	Function Macro `JSTStringUTF16(s)`
 
-	Retrieves the UTF16 character buffer of a `JSTString`.
+	Retrieves the UTF16 character buffer of `JSTString s`.
 
 * UTF16Length
 
