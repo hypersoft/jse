@@ -94,14 +94,14 @@ static JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] s
 		type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(signature, sigIndex++));
 		if (type >= JSTNativeTypeUnsigned) type -= JSTNativeTypeUnsigned; // JSTNativeTypeUnsigned is removed, sign does not matter here
 		JSTValue value = argv[sigIndex + 1];
-		if (type & JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
-		else if (type & JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
-		else if (type & JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
+		if (type == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
+		else if (type == JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
 	}
 	return JSTValueFromBoolean(true);
 }
