@@ -13,16 +13,30 @@
 #define JSTNativeTypeFloat 7
 #define JSTNativeTypeDouble 8
 #define JSTNativeTypeUTF8 9
-#define JSTNativeTypeUTF16 10
+#define JSTNativeTypeUTFJSTNativeTypeUnsigned 10
 #define JSTNativeTypeUTF32 11
 #define JSTNativeTypeVoid 12
-#define JSTNativeTypeUnsigned 16
+#define JSTNativeTypeEllipsis 13
+#define JSTNativeTypeStruct 14
+#define JSTNativeTypeUnion 15
+#define JSTNativeTypeUnsigned 32
 
-#ifndef JSTools_h
+#ifdef JSTools_h
+
+extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
+extern int JSTNativeTypeSize[JSTNativeTypeVoid];
+
+#else
+
+int JSTNativeTypeSize[] = {
+	0, sizeof(bool), sizeof(char), sizeof(short), sizeof(int), sizeof(long),
+	sizeof(long long), sizeof(float), sizeof(double), sizeof(char), sizeof(char16_t),
+	sizeof(char32_t), 0
+};
 
 #include "JSTNative.inc"
 
-JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
+static JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	// must have one arg of type String
 	char * buffer = JSTStringToUTF8(JSTValueToString(argv[0]), true);
 	JSValueRef result = JSTValueFromPointer(dlLoadLibrary(buffer));
@@ -30,12 +44,12 @@ JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	return result;
 }
 
-JSTValue jsNativeLibraryFree JSTDeclareFunction(Pointer library) {
+static JSTValue jsNativeLibraryFree JSTDeclareFunction(Pointer library) {
 	// must have one arg of type Number
 	dlFreeLibrary(JSTValueToPointer(argv[0])); return JSTValueUndefined;
 }
 
-JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, String symbol) {
+static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, String symbol) {
 	// must have first arg of type Number
 	// must have second arg of type String
 	char * buffer = JSTStringToUTF8(JSTValueToString(argv[1]), true);
@@ -44,32 +58,32 @@ JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, String sy
 	return result;
 }
 
-JSTValue jsNativeCallVMCreate JSTDeclareFunction(Number stackSize) {
+static JSTValue jsNativeCallVMCreate JSTDeclareFunction(Number stackSize) {
 	// must have first arg of type Number
 	return JSTValueFromPointer(dcNewCallVM(JSTValueToDouble(argv[0])));
 }
 
-JSTValue jsNativeCallVMFree JSTDeclareFunction(Pointer callVM) {
+static JSTValue jsNativeCallVMFree JSTDeclareFunction(Pointer callVM) {
 	// must have first arg of type Number
 	dcFree(JSTValueToPointer(argv[0])); return JSTValueUndefined;
 }
 
-JSTValue jsNativeCallVMGetError JSTDeclareFunction(Pointer callVM) {
+static JSTValue jsNativeCallVMGetError JSTDeclareFunction(Pointer callVM) {
 	// must have first arg of type Number
 	return JSTValueFromDouble(dcGetError(JSTValueToPointer(argv[0])));
 }
 
-JSTValue jsNativeCallVMSetMode JSTDeclareFunction(Pointer callVM, Number mode) {
+static JSTValue jsNativeCallVMSetMode JSTDeclareFunction(Pointer callVM, Number mode) {
 	// must have two args of type Number
 	dcMode(JSTValueToPointer(argv[0]), JSTValueToDouble(argv[1])); return JSTValueUndefined;
 }
 
-JSTValue jsNativeCallVMReset JSTDeclareFunction(Pointer callVM) {
+static JSTValue jsNativeCallVMReset JSTDeclareFunction(Pointer callVM) {
 	// must have first arg of type Number
 	dcReset(JSTValueToPointer(argv[0])); return JSTValueUndefined;
 }
 
-JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] signature, Number value) {
+static JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] signature, Number value) {
 	// must have first arg of type Number
 	// must have second arg of type Array (items must be numbers)
 	// must be followed by a total number of Number arguments equal to signature.length
@@ -78,7 +92,7 @@ JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] signatur
 	int type = 0; size_t sigIndex = 0, sigCount = JSTValueToDouble(JSTObjectGetProperty(signature, "length"));
 	while (sigIndex < sigCount) {
 		type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(signature, sigIndex++));
-		if (type >= 16) type -= 16; // 16 is removed, sign does not matter here
+		if (type >= JSTNativeTypeUnsigned) type -= JSTNativeTypeUnsigned; // JSTNativeTypeUnsigned is removed, sign does not matter here
 		JSTValue value = argv[sigIndex + 1];
 		if (type & JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
 		else if (type & JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
@@ -92,15 +106,15 @@ JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] signatur
 	return JSTValueFromBoolean(true);
 }
 
-JSTValue jsNativeCallVMCall JSTDeclareFunction(Pointer callVM, Number type, Pointer fn) {
+static JSTValue jsNativeCallVMCall JSTDeclareFunction(Pointer callVM, Number type, Pointer fn) {
 	// must have first arg of type Number
 	// must have second arg of type Number
 	// must have third arg of type Number
 	void * callVM = JSTValueToPointer(argv[0]);
 	int type = JSTValueToDouble(argv[1]);
 	void * fn = JSTValueToPointer(argv[2]);
-	bool unsign = (type >= 16);
-	if (unsign) type -= 16;
+	bool unsign = (type >= JSTNativeTypeUnsigned);
+	if (unsign) type -= JSTNativeTypeUnsigned;
 	if (type == JSTNativeTypeBoolean) return JSTValueFromBoolean(dcCallBool(callVM, fn));
 	else if (type == JSTNativeTypeChar) return JSTValueFromDouble((double) (unsign)?dcCallChar(callVM, fn):(signed char)dcCallChar(callVM, fn));
 	else if (type == JSTNativeTypeShort) return JSTValueFromDouble((double) (unsign)?(unsigned short)dcCallShort(callVM, fn):dcCallShort(callVM, fn));
@@ -119,7 +133,7 @@ static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
 	// must have second arg of type Number
 	void * address = JSTValueToPointer(argv[0]);
 	int type = JSTValueToDouble(argv[1]);
-	bool unsign = type >= 16; if (unsign) type -= 16;
+	bool unsign = type >= JSTNativeTypeUnsigned; if (unsign) type -= JSTNativeTypeUnsigned;
 	if (type == JSTNativeTypeBoolean) return JSTValueFromDouble((double) *(bool*)(address));
 	else if (type == JSTNativeTypeChar) return JSTValueFromDouble((double) (unsign)?*(char*)(address):*(signed char*)(address));
 	else if (type == JSTNativeTypeShort) return JSTValueFromDouble((double) (unsign)?*(unsigned short*)(address):*(short*)(address));
@@ -154,6 +168,22 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 
 }
 
+static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
+	unsigned int i = JSTValueToDouble(argv[0]);
+	if (i >= JSTNativeTypeVoid) i = 0;
+	return JSTValueFromDouble(JSTNativeTypeSize[i]);
+}
+
+static JSTValue jsNativeUTF8Copy JSTDeclareFunction(Value target) {
+	// must have one arg of type String
+	return JSTValueFromPointer(JSTStringToUTF8(JSTValueToString(argv[0]), true));
+}
+
+static JSTValue jsNativeUTF8Free JSTDeclareFunction(Pointer target) {
+	void *p = JSTValueToPointer(argv[0]); if (p) free(p);
+	return JSTValueFromBoolean(p);
+}
+
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	JSTObject native = JSTClassInstance(NULL, NULL);
@@ -164,6 +194,10 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	JSTObjectSetProperty(native, "alignment", JSTValueFromDouble(G_MEM_ALIGN), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "byteOrder", JSTValueFromDouble(G_BYTE_ORDER), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+
+	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "utf8Copy", JSTFunctionCallback("utf8Copy", jsNativeUTF8Copy), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "utf8Free", JSTFunctionCallback("utf8Free", jsNativeUTF8Free), JSTObjectPropertyRequired);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);
