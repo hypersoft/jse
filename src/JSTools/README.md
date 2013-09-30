@@ -482,27 +482,75 @@ Tools for working with JavaScript strings.
 
 * FromUTF8
 
+	Function Macro `JSTStringFromUTF8(p)`
+
+	Converts UTF8 string pointer `p` to a `JSTString`.
+
 * ToUTF8
+
+	Function Macro `JSTStringToUTF8(s)`
+
+	Converts `JSTString` reference `s` to a UTF8 character buffer. You must free this buffer with `JSTStringFreeUTF8()`.
 
 * FreeUTF8
 
+	Function Macro `JSTStringFreeUTF8(p)`
+
+	Deallocates the buffer backing UTF8 buffer pointer `p`.
+
 * FromUTF16
+
+	Function Macro `JSTStringFromUTF16(p)`
+
+	Creates a `JSTString` from UTF16 character buffer `p`.
 
 * UTF16
 
+	Function Macro `JSTStringUTF16(s)`
+
+	Retrieves the UTF16 character buffer of a `JSTString`.
+
 * UTF16Length
+
+	Function Macro `JSTStringUTF16Length(s)`
+
+	Retrieves the UTF16 buffer length of `JSTString s`.
 
 * Retain
 
+	Function Macro `JSTStringRetain(s)`
+
+	Protects `JSTString s` from deallocation.
+
 * Release
+
+	Function Macro `JSTStringRelease(s)`
+
+	Unprotects `JSTString s` from deallocation.
 
 * Compare
 
+	Function Macro `JSTStringCompare(a, b)`
+
+	Compares `JSTString a` to `JSTString b`.
+
 * CompareToUTF8
+
+	Function Macro `JSTStringCompareToUTF8(s, p)`
+
+	Compares `JSTString s` to UTF8 character buffer `p`.
 
 * ToValue
 
+	Function Macro `JSTStringToValue(s)`
+
+	Converts `JSTString s` to a JavaScript value of class string.
+
 * FromValue
+
+	Function Macro `JSTStringFromValue(v)`
+
+	Converts `JSTValue v` to a `JSTString`.
 
 8. Function (JSTFunction)
 -------------------------
@@ -563,6 +611,8 @@ Procedures for working with JavaScript evaluation.
 * TypeError
 
 * URIError
+
+* NativeError()
 
 * SetError
 
