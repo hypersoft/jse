@@ -11,5 +11,3 @@
 #define JSTDeclareHasInstance(n) bool n (JSTContext ctx, JSTObject constructor, JSTValue possibleInstance, JSTValue* exception)
 #define JSTDeclareConvertor(n) JSTValue n (JSTContext ctx, JSTObject object, JSType type, JSTValue* exception)
 
-//#define JSToolsDeclareFunction(...) (JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
-

@@ -215,25 +215,71 @@ Tools for declaring native JavaScript entry points.
 
 * Initializer
 
+	Prototype Compliance Macro `JSTDeclareInitializer(name)`
+
+	This macro declares a class initialization entry point.
+
 * Finalizer
+
+	Prototype Compliance Macro `JSTDeclareFinalizer(name)`
+
+	This macro declares a class finalization entry point.
 
 * HasProperty
 
+	Prototype Compliance Macro `JSTDeclareHasProperty(name)`
+
+	This macro declares a class property existence handler/entry point.
+
 * GetProperty
+
+	Prototype Compliance Macro `JSTDeclareGetProperty(name)`
+
+	This macro declares a class property retrieval entry point.
 
 * SetProperty
 
+	Prototype Compliance Macro `JSTDeclareSetProperty(name)`
+
+	This macro declares a class property declarator entry point.
+
 * DeleteProperty
+
+	Prototype Compliance Macro `JSTDeclareDeleteProperty(name)`
+
+	This property declares a class delete property entry point.
 
 * GetPropertyNames
 
+	Prototype Compliance Macro `JSTDeclareGetPropertyNames(name)`
+
+	This macro defines a class property name enumerator entry point.
+
 * Function
+
+	Prototype Compliance Macro `JSTDeclareFunction()`
+
+	This macro declares a generic native function entry point.
+
+	Note that you do not supply a name to this procedure, so your entry point name and return type must precede this declaration. Arguments to this macro are to be strictly considered incoming JavaScript parameter hints.
 
 * Constructor
 
+	Prototype Compliance Macro `JSTDeclareConstructor(name)`
+
+	This macro declares a class contructor entry point.
+
 * HasInstance
 
+	Prototype Compliance Macro `JSTDeclare`
+
+	This macro declares a class instance comparator entry point.
+
 * Convertor
+
+	Prototype Compliance Macro `JSTDeclare`
+
+	This macro declares a class type conversion entry point.
 
 5. Value (JSTValue)
 -------------------
