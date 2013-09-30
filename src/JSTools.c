@@ -18,30 +18,33 @@ JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i);
 bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 
-
-JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
-	JSTObject native = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
-	return native;
-}
+#include "JSTools/Native.inc"
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	static bool initialized;
+	char buffer[PATH_MAX];
 
-	if (! initialized ) {
-		initialized++;
-	}
+	if (! initialized )	initialized++;
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 
+
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
+
 	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", NULL), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTNativeInit(js);
 
+	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	return js;
 
 }
@@ -146,3 +149,4 @@ JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method,
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
 	argv[count] = NULL; return JST(JSObjectCallAsFunction, method, object, argc, argv);
 }
+

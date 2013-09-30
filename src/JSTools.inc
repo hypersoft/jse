@@ -24,7 +24,6 @@
 #include "JSTools/Context.inc"
 #include "JSTools/Declare.inc"
 #include "JSTools/Function.inc"
-#include "JSTools/Native.inc"
 #include "JSTools/Object.inc"
 #include "JSTools/Script.inc"
 #include "JSTools/Stack.inc"
@@ -53,3 +52,5 @@ extern bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 extern JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 
 #endif
+
+

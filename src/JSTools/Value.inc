@@ -1,4 +1,3 @@
-#define JSTValue JSValueRef
 
 #define JSTValueGetType(v) JSValueGetType, v)
 
@@ -30,7 +29,7 @@
 #define JSTValueFromJSON(p) JST(JSTValueFromJSON, p)
 
 #define JSTValueToJSON(v, indent) JSTStringToUTF8(JST(JSValueCreateJSONString, v, indent), true)
-#define JSTValueToBoolean(v) JST(JSValueToBoolean, v)
+#define JSTValueToBoolean(v) JSTAction(JSValueToBoolean, v)
 #define JSTValueToDouble(v) JST(JSValueToNumber, v)
 #define JSTValueToString(v) JST(JSValueToStringCopy, v)
 #define JSTValueToObject(v) JST(JSValueToObject, v)

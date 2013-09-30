@@ -65,7 +65,7 @@ n->expand = sizeof(void*)
 
 #define iStackMachineCompress(s) iStackMachineShrink(s, iStackMachineSlots(s))
 
-#define iStackMachineFree(s) JSTCND(!s, false, \
+#define iStackMachineFree(s) JSTCND(!s, true, \
 	JSTXPR(true, free(s->address), free(s), s = NULL) \
 )
 

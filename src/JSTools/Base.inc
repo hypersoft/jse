@@ -2,6 +2,9 @@
 #define JSTUTF16 char16_t
 #define JSTUTF32 char32_t
 
+#define JSTValue JSValueRef
+#define JSTObject JSObjectRef
+
 #define JST(NAME, ...) NAME (ctx, ##__VA_ARGS__, exception)
 #define JSTAction(NAME, ...) NAME (ctx, ##__VA_ARGS__)
 

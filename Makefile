@@ -24,7 +24,7 @@ bin/JSTools.o: ${JSTDEPENDS}
 
 bin/jse: ${JSEDEPENDS}
 	@echo compiling JSE
-	gcc  ${BUILDCOMMON} main.c bin/*.a bin/*.o -o $@
+	gcc  ${BUILDCOMMON} bin/*.o bin/*.a main.c -o $@
 	@bin/buildnum -q;
 	@echo ''
 

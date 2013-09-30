@@ -6,8 +6,10 @@
 #define JSTDeclareSetProperty(n) bool n (JSTContext ctx, JSTObject object, JSTString propertyName, JSTValue value, JSTValue* exception)
 #define JSTDeclareDeleteProperty(n) bool n (JSTContext ctx, JSTObject object, JSTString propertyName, JSTValue* exception)
 #define JSTDeclareGetPropertyNames(n) void n (JSTContext ctx, JSTObject object, JSPropertyNameAccumulatorRef propertyNames)
-#define JSTDeclareFunction(n) JSTValue n (JSTContext ctx, JSTObject function, JSTObject thisObject, size_t argumentCount, const JSTValue arguments[], JSTValue* exception)
+#define JSTDeclareFunction(...) (JSTContext ctx, JSObjectRef function, JSObjectRef this, size_t argc, const JSTValue argv[], JSTValue* exception)
 #define JSTDeclareConstructor(n) JSTObject n (JSTContext ctx, JSTObject constructor, size_t argumentCount, const JSTValue arguments[], JSTValue* exception)
 #define JSTDeclareHasInstance(n) bool n (JSTContext ctx, JSTObject constructor, JSTValue possibleInstance, JSTValue* exception)
 #define JSTDeclareConvertor(n) JSTValue n (JSTContext ctx, JSTObject object, JSType type, JSTValue* exception)
+
+//#define JSToolsDeclareFunction(...) (JSContextRef ctx, ##__VA_ARGS__, JSValueRef * exception)
 
