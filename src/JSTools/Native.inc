@@ -174,12 +174,17 @@ static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 	return JSTValueFromDouble(JSTNativeTypeSize[i]);
 }
 
-static JSTValue jsNativeUTF8Copy JSTDeclareFunction(Value target) {
+static JSTValue jsNativeToUTF8 JSTDeclareFunction(Value target) {
 	// must have one arg of type String
 	return JSTValueFromPointer(JSTStringToUTF8(JSTValueToString(argv[0]), true));
 }
 
-static JSTValue jsNativeUTF8Free JSTDeclareFunction(Pointer target) {
+static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
+	// must have one arg of type char *
+	return JSTValueFromString(JSTStringFromUTF8(JSTValueToPointer(argv[0])), true);
+}
+
+static JSTValue jsNativeFreeUTF8 JSTDeclareFunction(Pointer target) {
 	void *p = JSTValueToPointer(argv[0]); if (p) free(p);
 	return JSTValueFromBoolean(p);
 }
@@ -196,8 +201,9 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(native, "byteOrder", JSTValueFromDouble(G_BYTE_ORDER), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "utf8Copy", JSTFunctionCallback("utf8Copy", jsNativeUTF8Copy), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "utf8Free", JSTFunctionCallback("utf8Free", jsNativeUTF8Free), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "toUTF8", JSTFunctionCallback("toUTF8", jsNativeToUTF8), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "fromUTF8", JSTFunctionCallback("fromUTF8", jsNativeFromUTF8), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "freeUTF8", JSTFunctionCallback("freeUTF8", jsNativeFreeUTF8), JSTObjectPropertyRequired);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);
