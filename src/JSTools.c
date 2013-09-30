@@ -29,7 +29,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 
-
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
 
 	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
