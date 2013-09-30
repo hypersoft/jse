@@ -488,9 +488,9 @@ Tools for working with JavaScript strings.
 
 * ToUTF8
 
-	Function Macro `JSTStringToUTF8(s)`
+	Function Macro `JSTStringToUTF8(s, r)`
 
-	Converts `JSTString` reference `s` to a UTF8 character buffer. You must free this buffer with `JSTStringFreeUTF8()`.
+	Converts `JSTString` reference `s` to a UTF8 character buffer. You must free this buffer with `JSTStringFreeUTF8()`. If boolean `r` is equal to true then, `JSTString s` will be automatically released.
 
 * FreeUTF8
 
@@ -542,9 +542,9 @@ Tools for working with JavaScript strings.
 
 * ToValue
 
-	Function Macro `JSTStringToValue(s)`
+	Function Macro `JSTStringToValue(s, r)`
 
-	Converts `JSTString s` to a JavaScript value of class string.
+	Converts `JSTString s` to a JavaScript value of class string. If boolean `r` is equal to true then, `JSTString s` will be automatically released.
 
 * FromValue
 
