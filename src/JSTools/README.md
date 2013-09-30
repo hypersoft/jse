@@ -596,7 +596,7 @@ Procedures for working with JavaScript evaluation.
 
 	Function Macro `JSTScriptEval(script, object, url, line)`
 
-	Evaluates UTF8 character buffer pointer `script` in the context of `JSTObject object` with an error reporting URL defined by UTF8 character buffer pointer `url` with a starting line number indicated by integer value `line`.
+	Evaluates UTF8 buffer pointer `script` in the context of `JSTObject object` with an error reporting URL defined by UTF8 buffer pointer `url` with a starting line number indicated by integer value `line`.
 
 * CheckSyntax
 
@@ -614,43 +614,43 @@ Procedures for working with JavaScript evaluation.
 
 	Function Macro `JSTScriptError(p)`
 
-	Constructs a new generic JavaScript Error object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript Error object with an error message defined by UTF8 buffer pointer `p`.
 
 * EvalError
 
 	Function Macro `JSTScriptEvalError(p)`
 
-	Constructs a new generic JavaScript EvalError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript EvalError object with an error message defined by UTF8 buffer pointer `p`.
 
 * RangeError
 
 	Function Macro `JSTScriptRangeError(p)`
 
-	Constructs a new generic JavaScript RangeError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript RangeError object with an error message defined by UTF8 buffer pointer `p`.
 
 * ReferenceError
 
 	Function Macro `JSTScriptReferenceError(p)`
 
-	Constructs a new generic JavaScript ReferenceError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript ReferenceError object with an error message defined by UTF8 buffer pointer `p`.
 
 * SyntaxError
 
 	Function Macro `JSTScriptSyntaxError(p)`
 
-	Constructs a new generic JavaScript SyntaxError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript SyntaxError object with an error message defined by UTF8 buffer pointer `p`.
 
 * TypeError
 
 	Function Macro `JSTScriptTypeError(p)`
 
-	Constructs a new generic JavaScript TypeError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript TypeError object with an error message defined by UTF8 buffer pointer `p`.
 
 * URIError
 
 	Function Macro `JSTScriptURIError(p)`
 
-	Constructs a new generic JavaScript URIError object with an error message defined by UTF8 charachter buffer pointer `p`.
+	Constructs a new generic JavaScript URIError object with an error message defined by UTF8 buffer pointer `p`.
 
 * NativeError()
 
