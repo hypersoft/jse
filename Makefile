@@ -2,10 +2,10 @@
 DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 
-JSTDEPENDS := ${DYNCALL} $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc
+JSTDEPENDS := Makefile ${DYNCALL} $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
 
-BUILDCOMMON := -g -v -da -Q -lpthread -ldl ${PKGCONFIG} -Isrc -Iinc -O0 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
+BUILDCOMMON := -fno-strict-aliasing -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 ASM := -S -fverbose-asm -masm=intel
 
 all: bin/jse
@@ -16,6 +16,9 @@ ${DYNCALL}:
 
 src/JSTInit.inc: src/JSTInit.js
 	@bin/bin2inc JSTInitScript $< > $@;
+
+src/JSTNative.inc: src/JSTNative.js
+	@bin/bin2inc JSTNativeScript $< > $@;
 
 bin/JSTools.o: ${JSTDEPENDS}
 	@echo compiling JSTools '(Brigadier)'

@@ -25,6 +25,7 @@ var jsCallStackParse = function parse(c) {
 }
 
 var js = Object.defineProperties(new Object(), {
+	io: {value:{}, enumerable:true},
 	callStack: {get: function() {
 		var trace = [];
 		try { throw Error('n/a') } catch(err) {

@@ -20,6 +20,8 @@
 
 #ifndef JSTools_h
 
+#include "JSTNative.inc"
+
 JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	// must have one arg of type String
 	char * buffer = JSTStringToUTF8(JSTValueToString(argv[0]), true);
@@ -67,22 +69,26 @@ JSTValue jsNativeCallVMReset JSTDeclareFunction(Pointer callVM) {
 	dcReset(JSTValueToPointer(argv[0])); return JSTValueUndefined;
 }
 
-JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, type, v) {
+JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] signature, Number value) {
 	// must have first arg of type Number
 	// must have second arg of type Array (items must be numbers)
 	// must be followed by a total number of Number arguments equal to signature.length
 	void * callVM = JSTValueToPointer(argv[0]);
-	int type = JSTValueToDouble(argv[1]);
-	JSTValue value = argv[2];
-	if (type == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
-	else if (type == JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
-	else if (type == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
-	else puts("callVM Push: uh-oh uncaught type");
+	JSTObject signature = JSTValueToObject(argv[1]);
+	int type = 0; size_t sigIndex = 0, sigCount = JSTValueToDouble(JSTObjectGetProperty(signature, "length"));
+	while (sigIndex < sigCount) {
+		type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(signature, sigIndex++));
+		if (type >= 16) type -= 16; // 16 is removed, sign does not matter here
+		JSTValue value = argv[sigIndex + 1];
+		if (type & JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
+		else if (type & JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
+		else if (type & JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
+	}
 	return JSTValueFromBoolean(true);
 }
 
@@ -153,6 +159,9 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
+	JSTObject lib = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
+
 	JSTObjectSetProperty(native, "alignment", JSTValueFromDouble(G_MEM_ALIGN), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "byteOrder", JSTValueFromDouble(G_BYTE_ORDER), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
@@ -176,6 +185,8 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(native, "address", address, JSTObjectPropertyRequired);
 	JSTObjectSetProperty(address, "read", JSTFunctionCallback("read", jsNativeAddressRead), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(address, "write", JSTFunctionCallback("write", jsNativeAddressWrite), JSTObjectPropertyRequired);
+
+	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
 
 	return native;
 

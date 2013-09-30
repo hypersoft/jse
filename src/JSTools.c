@@ -28,6 +28,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	if (! initialized )	initialized++;
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
+	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
 
@@ -43,7 +44,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTNativeInit(js);
 
-	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 	return js;
 
 }

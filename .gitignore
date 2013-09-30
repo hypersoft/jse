@@ -6,4 +6,4 @@ inc/dyncall
 *.s
 src/*.s
 src/JSTInit.inc
-
+src/JSTNative.inc
