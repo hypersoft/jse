@@ -235,6 +235,241 @@ Tools for declaring native JavaScript entry points.
 
 * Convertor
 
+5. Value (JSTValue)
+-------------------
+Tools for working with JavaScript values.
+
+* Value
+
+	Type Macro `JSTValue`
+
+	JST's notion of a JavaScript value reference.
+
+* FromBoolean
+
+	Function Macro `JSTValueFromBoolean(b)`
+
+	Converts value `b` to the JavaScript class `Boolean`.
+
+* FromDouble
+
+	Function Macro `JSTValueFromDouble(d)`
+
+	Converts `double` value `d` to the JavaScript class `Number`.
+
+* FromJSON
+
+	Function Macro `JSTValueFromJSON(p)`
+
+	Converts UTF-8 `JSON` string pointer `p` to a `JSTValue` of JavaScript class `Object`.
+
+* FromPointer
+
+	Function Macro `JSTValueFromPointer(p)`
+
+	Converts the pointer value `p` to the JavaScript class `Number`.
+
+* FromString
+
+	Function Macro `JSTValueFromString(s, f)`
+
+	Converts `JSTString s` to a JavaScript value class `String` and if `f` evaluates to true, `JSTStringRelease()` will be called with `s` to trigger string deallocation.
+
+* FromUTF8
+
+	Function Macro `JSTValueFromUTF8(p)`
+
+	Converts UTF-8 string pointer value `p` to the JavaScript value class `String`.
+
+* GetType
+
+	Function Macro `JSTValueGetType(v)`
+
+	Returns the `JSTValueType` value of `v`.
+
+* IsBoolean
+
+	Function Macro `JSTValueIsBoolean(v)`
+
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeBoolean`.
+
+
+* IsClassInstance
+
+	Function Macro `JSTValueIsClassInstance(v, c)`
+
+	Tests whether JavaScript `v` is an object with `JSTClass c` in its class chain.
+
+
+* IsConstructor
+
+	Function Macro `JSTValueIsConstructor(v)`
+
+	Returns `bool` true if `v` is a JavaScript object constructor.
+
+* IsConstructorInstance
+
+	Function Macro `JSTValueIsConstructorInstance(v, c)`
+
+	Returns `bool` true if `c` is the constructor of `v`.
+
+
+* IsEqual
+
+	Function Macro `JSTValueIsEqual(a, b)`
+
+	Returns `bool` true based on the equality (`==`) of `a` and `b`.
+
+* IsFunction
+
+	Function Macro `JSTValueIsFunction(v)`
+
+	Returns `bool` true if `v` is a JavaScript function.
+
+* IsNull
+
+	Function Macro `JSTValueIsNull(v)`
+
+	Returns `bool` true if `v` is equivalent to the JavaScript value `null`.
+
+* IsNumber
+
+	Function Macro `JSTValueIsNumber(v)`
+
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeNumber`.
+
+* IsObject
+
+	Function Macro `JSTValueIsObject(v)`
+
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeObject`.
+
+
+* IsStrictEqual
+
+	Function Macro `JSTValueIsStrictEqual(a, b)`
+
+	Returns `bool` true based on the JavaScript strict equality (`===`) of `a` and `b`.
+
+* IsString
+
+	Function Macro `JSTValueIsString(v)`
+
+	Returns `bool` true if the type of `v` is equivalent to  `JSTValueTypeString`.
+
+
+* IsUndefined
+
+	Function Macro `JSTValueIsUndefined(v)`
+
+	Returns `bool` true if `v` is equivalent to the JavaScript value `undefined`.
+
+* IsVoid
+
+	Function Macro `JSTValueIsVoid(v)`
+
+	Returns `bool` true if `v` is `NULL`, or equivalent to the JavaScript values `undefined` or `null`.
+
+* ToBoolean
+
+	Function Macro `JSTValueToBoolean(v)`
+
+	Converts value `v` to native type `bool`.
+
+* ToDouble
+
+	Function Macro `JSTValueToDouble(v)`
+
+	Converts value `v` to native type  `double`.
+
+* ToJSON
+
+	Function Macro `JSTValueToJSON(v, i)`
+
+	Converts value `v` to UTF-8 encoded `JSON` format. `i` is the number of spaces to indent.
+
+* ToObject
+
+	Function Macro `JSTValueToObject(v)`
+
+	Promotes value `v` to type `JSTObject`.
+
+* ToPointer
+
+	Function Macro `JSTValueToPointer(v)`
+
+	Converts JavaScript number value `v` to type `void *`.
+
+* ToString
+
+	Function Macro `JSTValueToString(v)`
+
+	Creates a `JSTString` from `v`.
+
+	Returns the string value of `v` as a new `JSTString`.
+
+	You must free the returned `JSTString` by calling `JSTStringRelease()`.
+
+* Null
+
+	Function Macro `JSTValueNull()`
+
+	Returns a reference to the JavaScript value `null`.
+
+* Undefined
+
+	Function Macro `JSTValueUndefined()`
+
+	Returns a reference to the JavaScript value `undefined`.
+
+* Protect
+
+	Function Macro `JSTValueProtect(v)`
+
+	Protect `v` from garbage collection.
+
+* Unprotect
+
+	Function Macro `JSTValueUnprotect(v)`
+
+	Flag `v` as a potential candidate for garbage collection.
+
+* TypeUndefined
+
+	Value Macro `JSTValueTypeUndefined`
+
+	JST's notion of the JavaScript `undefined` value class.
+
+* TypeNull
+
+	Value Macro `JSTValueTypeNull`
+
+	JST's notion of the JavaScript `null` value class.
+
+* TypeBoolean
+
+	Value Macro `JSTValueTypeBoolean`
+
+	JST's notion of the JavaScript `Boolean` value class.
+
+* TypeNumber
+
+	Value Macro `JSTValueTypeNumber`
+
+	JST's notion of the JavaScript `Number` value class.
+
+* TypeString
+
+	Value Macro `JSTValueTypeString`
+
+	JST's notion of the JavaScript `String` value class.
+
+* TypeObject
+
+	Value Macro `JSTValueTypeObject`
+
+	JST's notion of the JavaScript `Object` value class.
+
 7. String (JSTString)
 ---------------------
 Tools for working with JavaScript strings.
@@ -341,105 +576,118 @@ Procedures for working with JavaScript evaluation.
 * Alignment
 
 * ByteOrder
-
-
+Procedures for working with JavaScript evaluation.
 Other
 =====
+Procedures for working with JavaScript evaluation.
+
+1. iStackMachine
+----------------
+
+Inline stack procedures. Allocated or static. Bidirectional Enumeration, Memory address type recasting... push, pop, slice, read, write by type index...
+
+A Swiss army knife of typed C block memory access macros and native support procedures for DIY DATA CODING methodology.
+
+* Init
+
+	This procedure allocates initializes an `iStackMachine` header. The header keeps track of the static information about the dynamically allocated stack such as what type of unit the stack is known to contain, how many units are in the stack, the current stack index... so on and so forth...
 
 
-iStackMachine
-=============
+* GetPrivate
 
-1. Init
--------
+* SetPrivate
 
-2. GetPrivate
--------------
+* Units
 
-3. SetPrivate
--------------
+* Count
 
-4. Units
---------
+* Lock
 
-5. Count
---------
+* Slots
 
-6. Lock
--------
+* Slot
 
-7. Slots
---------
+* Bytes
 
-8. Slot
--------
+* Mass
 
-9. Bytes
---------
+* Grow
 
-10. Mass
---------
+* Shrink
 
-11. Grow
---------
+* Compress
 
-12. Shrink
-----------
+* Free
 
-13. Compress
-------------
+* Push
 
-14. Free
---------
+* Pop
 
-15. Push
---------
+* PushInt
 
-16. Pop
--------
+* PopInt
 
-17. PushInt
------------
+* Enum
 
-18. PopInt
-----------
+* EnumReverse
 
-19. Enum
---------
+* Refactor
 
-20. EnumReverse
----------------
+* Slice
 
-21. Refactor
-------------
+* Read
 
-22. Slice
----------
+* Write
 
-23. Read
---------
+	This procedure allocates initializes an `iStackMachine` header. The header keeps track of the static information about the dynamically allocated stack such as what type of unit the stack is known to contain, how many units are in the stack, the current stack index... so on and so forth...
 
-24. Write
----------
-Runtime
-=======
+Runtime (js)
+============
 
-js
-==
+A JSE provided host object utility set.
 
 1. init
 -------
 
-Static runtime constants inherited from application startup.
+	Static runtime constants inherited from application startup.
 
 * argc
 
+	Constant Number `js.init.argc`
+
+	the number of command arguments supplied to JSE at startup.
+
 * argv
+
+
+	Constant Pointer `js.init.argv`
+
+	Native pointer to the string arguments array supplied to the application.
 
 * envp
 
+
+	Constant Pointer `js.init.envp`
+
+	Pointer to the environment variables table.
+
 * pid
+
+
+	Constant Number `js.init.pid`
+
+	The process identifier of this application.
 
 * uid
 
+
+	Constant Number `js.init.uid`
+
+	The user identifier of this application.
+
 * euid
+
+
+	Constant Number `js.init.euid`
+
+	The effective user identifier of this application.
