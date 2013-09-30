@@ -594,6 +594,10 @@ Procedures for working with JavaScript evaluation.
 
 * Eval
 
+	Function Macro `JSTScriptEval(script, object, url, line)`
+
+	Evaluates UTF8 character buffer pointer `script` in the context of `JSTObject object` with an error reporting URL defined by UTF8 character buffer pointer `url` with a starting line number indicated by integer value `line`.
+
 * CheckSyntax
 
 * NativeEval
