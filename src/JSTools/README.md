@@ -656,12 +656,24 @@ Procedures for working with JavaScript evaluation.
 
 	Function Macro `JSTScriptNativeError()`
 
-	Constructs a new generic JavaScript Error object with an error message defined by `errno` and `strerror`.
+	Constructs a new JavaScript Error object with an error message defined by `errno` and `strerror`.
 
 	Not currently implemented.
 
 * SetError
 
+	Function Macro `JSTScriptSetError(o)`
+
+	Assigns `JSTObject o` as the exception object of the currently executing JavaScript entry point.
+
 * HasError
 
+	Function Macro `JSTScriptHasError()`
+
+	Returns boolean true if the current JavaScript entry point has been assigned an exception.
+
 * Function
+
+	Function Macro `JSTScriptFunction(name, argc, argNames, script, url, line)`
+
+	Constructs a JavaScript function from JSTString data. This function is undocumented because its use is not recommended. Use `JSTScriptEval()` or the like to construct script functions.
