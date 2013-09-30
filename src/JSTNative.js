@@ -1,13 +1,14 @@
 
 function SharedLibrary(s) {
+	var cache = js.native.lib;
 	if (s == undefined || s == null) s = '';
 	this.name = (s == '') ? "jse" : s;
-	if (this.name in js.native.lib) {
-		js.native.lib[this.name].retainers++;
-		return js.native.lib[this.name];
+	if (this.name in cache) {
+		cache[this.name].retainers++;
+		return cache[this.name];
 	}
 	this.pointer = js.native.library.load(s);
-	js.native.lib[this.name] = this;
+	cache[this.name] = this;
 }
 
 SharedLibrary.prototype = js.extendPrototype({}, {
