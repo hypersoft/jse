@@ -10,7 +10,7 @@ cvm.call(4, lib.find("puts"));
 
 js.native.freeUTF8(utf8);
 cvm.free();
-lib.unload();
+lib.release();
 
 // exceptions will hurt you unless you develop an allocation stack to keep track of pointers
 // and catch those exceptions!

@@ -2,17 +2,25 @@
 function SharedLibrary(s) {
 	if (s == undefined || s == null) s = '';
 	this.name = (s == '') ? "jse" : s;
-	if (this.name in js.native.lib) return js.native.lib[this.name];
+	if (this.name in js.native.lib) {
+		js.native.lib[this.name].retainers++;
+		return js.native.lib[this.name];
+	}
 	this.pointer = js.native.library.load(s);
 	js.native.lib[this.name] = this;
 }
 
 SharedLibrary.prototype = js.extendPrototype({}, {
-	constructor: SharedLibrary,
-	unload: function() {
-		js.native.library.free(this.pointer);
-		for (name in this) delete this[name];
-		return true;
+	constructor: SharedLibrary, retainers: 1,
+	retain: function() {this.retainers++},
+	release: function() {
+		this.retainers--;
+		if (this.retainers == 0) {
+			js.native.library.free(this.pointer);
+			delete js.native.lib[this.name];
+			for (name in this) delete this[name];
+			return true;
+		} else return false;
 	},
 	find: function(s) {
 		if (s in this) return this[s];
