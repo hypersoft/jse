@@ -26,6 +26,7 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 		} else return false;
 	},
 	find: function(s) {
+		if (s == undefined || s == null || s == '') return s;
 		if (s in this) return this[s];
 		else return this[s] = js.native.library.findSymbol(this.pointer, s);
 	},
@@ -34,14 +35,15 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 });
 
 function CallVM(i) {
-	var localMode = 0;
+	var localMode = 0, cache = js.native.callVM;
 	Object.defineProperty(this, "mode",
 		{get: function() { return localMode; }, set: function(m) {
 			localMode = m;
-			js.native.callVM.setMode(this.pointer, localMode);
+			cache.setMode(this.pointer, localMode);
 		}, enumerable:true}
 	)
-	this.pointer = js.native.callVM.create(i);
+	this.pointer = cache.create(i);
+	this.stackSize = i;
 }
 
 CallVM.prototype = js.extendPrototype(Object.defineProperties({
