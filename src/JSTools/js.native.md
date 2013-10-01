@@ -1,11 +1,11 @@
 js.native
 =========
 
-	Native API
+Native API
 1. library
 ----------
 
-	Native Shared Library Utilities.
+Native Shared Library Utilities.
 
 * load
 
@@ -22,7 +22,7 @@ js.native
 2. callVM
 ---------
 
-	Native Function Invocation Utilities.
+Native Function Invocation Utilities.
 
 * create
 
