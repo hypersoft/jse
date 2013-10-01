@@ -271,13 +271,13 @@ Tools for declaring native JavaScript entry points.
 
 * HasInstance
 
-	Prototype Compliance Macro `JSTDeclare`
+	Prototype Compliance Macro `JSTDeclareHasInstance(name)`
 
 	This macro declares a class instance comparator entry point.
 
 * Convertor
 
-	Prototype Compliance Macro `JSTDeclare`
+	Prototype Compliance Macro `JSTDeclareConvertor(name)`
 
 	This macro declares a class type conversion entry point.
 
