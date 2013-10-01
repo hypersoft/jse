@@ -12,10 +12,11 @@ function SharedLibrary(s) {
 }
 
 SharedLibrary.prototype = js.extendPrototype({}, {
-	constructor: SharedLibrary, retainers: 1,
+	constructor: SharedLibrary, retainers: 1, pointer: null,
 	retain: function() {this.retainers++},
 	release: function() {
-		this.retainers--;
+		if (this.pointer == null) return true;
+		if (this.retainers != 0) this.retainers--;
 		if (this.retainers == 0) {
 			js.native.library.free(this.pointer);
 			delete js.native.lib[this.name];
