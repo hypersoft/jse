@@ -15,10 +15,11 @@
 #define JSTNativeTypeUTF8 9
 #define JSTNativeTypeUTFJSTNativeTypeUnsigned 10
 #define JSTNativeTypeUTF32 11
-#define JSTNativeTypeVoid 12
-#define JSTNativeTypeEllipsis 13
+#define JSTNativeTypePointer 12
+#define JSTNativeTypeVoid 13
 #define JSTNativeTypeStruct 14
 #define JSTNativeTypeUnion 15
+#define JSTNativeTypeEllipsis 16
 #define JSTNativeTypeUnsigned 32
 
 #ifdef JSTools_h
@@ -31,7 +32,7 @@ extern int JSTNativeTypeSize[JSTNativeTypeVoid];
 int JSTNativeTypeSize[] = {
 	0, sizeof(bool), sizeof(char), sizeof(short), sizeof(int), sizeof(long),
 	sizeof(long long), sizeof(float), sizeof(double), sizeof(char), sizeof(char16_t),
-	sizeof(char32_t), 0
+	sizeof(char32_t), sizeof(void*), 0, 0, 0, 0
 };
 
 #include "JSTNative.inc"
@@ -102,6 +103,7 @@ static JSTValue jsNativeCallVMPush JSTDeclareFunction(Pointer callVM, Number[] s
 		else if (type == JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
 		else if (type == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
 		else if (type == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
+		else if (type == JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 	}
 	return JSTValueFromBoolean(true);
 }
@@ -123,6 +125,7 @@ static JSTValue jsNativeCallVMCall JSTDeclareFunction(Pointer callVM, Number typ
 	else if (type == JSTNativeTypeLongLong) return JSTValueFromDouble((double) (unsign)?(unsigned long long)dcCallLongLong(callVM, fn):dcCallLongLong(callVM, fn));
 	else if (type == JSTNativeTypeFloat) return JSTValueFromDouble(dcCallFloat(callVM, fn));
 	else if (type == JSTNativeTypeDouble) return JSTValueFromDouble(dcCallDouble(callVM, fn));
+	else if (type == JSTNativeTypePointer) return JSTValueFromPointer(dcCallPointer(callVM, fn));
 	else if (type == JSTNativeTypeVoid) dcCallVoid(callVM, fn);
 	return JSTValueUndefined;
 
@@ -142,6 +145,7 @@ static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
 	else if (type == JSTNativeTypeLongLong) return JSTValueFromDouble((double) (unsign)?*(unsigned long long*)(address):*(long long*)(address));
 	else if (type == JSTNativeTypeFloat) return JSTValueFromDouble((double) *(float*)(address));
 	else if (type == JSTNativeTypeDouble) return JSTValueFromDouble((double) *(double*)(address));
+	else if (type == JSTNativeTypePointer) return JSTValueFromPointer(*(intptr_t*)(address));
 	return NULL;
 
 }
@@ -164,6 +168,7 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 	else if (type == JSTNativeTypeLongLong) { *(long long*)(address) = (long long) JSValueToNumber(ctx, value, exception); return JSTValueFromBoolean(true); } 
 	else if (type == JSTNativeTypeFloat) { *(float*)(address) = (float) JSValueToNumber(ctx, value, exception); return JSTValueFromBoolean(true); } 
 	else if (type == JSTNativeTypeDouble) { *(double*)(address) = JSValueToNumber(ctx, value, exception); return JSTValueFromBoolean(true); } 
+	else if (type == JSTNativeTypePointer) { *(intptr_t*)(address) = (intptr_t)JSTValueToPointer(value); return JSTValueFromBoolean(true); } 
 	return JSTValueFromBoolean(false);
 
 }
