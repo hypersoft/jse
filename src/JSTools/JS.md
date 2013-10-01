@@ -1,11 +1,11 @@
 js
 ==
 
-	The root namespace of JSE's JavaScript additions.
+The root namespace of JSE's JavaScript additions.
 1. run
 ------
 
-	Runtime initialization records.
+Runtime initialization records.
 * argc
 
 	The number of application command line arguments recieved at startup.
@@ -41,4 +41,4 @@ js
 2. native
 ---------
 
-	Just a link here please...
+Just a link here please...
