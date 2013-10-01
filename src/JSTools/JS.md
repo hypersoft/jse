@@ -41,4 +41,4 @@ Runtime initialization records.
 2. native
 ---------
 
-Just a link here please...
+Available [here](./js.native.md "js.native")
