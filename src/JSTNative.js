@@ -21,6 +21,7 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 			js.native.library.free(this.pointer);
 			delete js.native.lib[this.name];
 			for (name in this) delete this[name];
+			this.pointer = null;
 			return true;
 		} else return false;
 	},
