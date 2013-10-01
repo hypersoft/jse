@@ -86,4 +86,4 @@ Runtime initialization records.
 
 * More...
 
-Available [here](./js.native.md "js.native")
+	The depth of this tree exceeds the limitations of markdown. The rest of this section is available [here](./js.native.md "js.native").
