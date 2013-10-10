@@ -1,4 +1,5 @@
 
+
 function SharedLibrary(s) {
 	var cache = js.native.lib;
 	if (s == undefined || s == null) s = '';

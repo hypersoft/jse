@@ -19,6 +19,7 @@ bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 
 #include "JSTools/Native.inc"
+#include <seed.h>
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
@@ -26,6 +27,9 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	char buffer[PATH_MAX];
 
 	if (! initialized )	initialized++;
+
+	// The argument that gtk could be used easily from scripting was far too compelling.
+	seed_init_with_context (&argc, &argv, (SeedGlobalContext) ctx);
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);

@@ -1,6 +1,6 @@
 
 DYNCALL := inc/dyncall
-PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
+PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0 seed)
 
 JSTDEPENDS := Makefile ${DYNCALL} $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc

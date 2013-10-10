@@ -14,6 +14,7 @@ char * ioFileReadAllText(char * file) {
 
 int main(int argc, char *argv[], char *envp[]) {
 
+
 	JSTContext ctx = JSTContextCreateInGroup(JSTContextGroupCreate(), NULL);
 	JSTObject global = JSTContextGetGlobalObject(ctx);
 	JSTObject e = NULL; JSTValue *exception = (void*)&e;
