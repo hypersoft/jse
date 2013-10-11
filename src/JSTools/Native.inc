@@ -190,9 +190,10 @@ static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
 }
 
 static JSTValue jsNativeFree JSTDeclareFunction(Pointer target, ...) {
-	void *p; JSTObject o, f; JSTValue v;
-	while (argc) {
-		v = argv[--argc];
+	void *p; JSTObject o; JSTValue v;
+	size_t i = 0;
+	while (i < argc) {
+		v = argv[i++];
 		if (JSTValueIsVoid(v)) continue;
 		if (JSTValueIsObject(v)) {
 			o = JSTValueToObject(v);
