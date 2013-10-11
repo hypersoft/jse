@@ -210,6 +210,7 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 				JSTStringFreeUTF8(exec_child_err);
 			} 
 		}
+		argc = sizeof(nargv);
 		i = 0; while (i < argc) JSTStringFreeUTF8(nargv[i++]);
 	}
 
