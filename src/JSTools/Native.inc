@@ -13,7 +13,7 @@
 #define JSTNativeTypeFloat 7
 #define JSTNativeTypeDouble 8
 #define JSTNativeTypeUTF8 9
-#define JSTNativeTypeUTFJSTNativeTypeUnsigned 10
+#define JSTNativeTypeUTF16 10
 #define JSTNativeTypeUTF32 11
 #define JSTNativeTypePointer 12
 #define JSTNativeTypeVoid 13
@@ -211,7 +211,7 @@ static JSTValue jsNativeFree JSTDeclareFunction(Pointer target, ...) {
 			p = JSTValueToPointer(v); if (p) free(p);
 		}
 	}
-	return JSTValueFromBoolean(p);
+	return JSTValueUndefined;
 }
 
 static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
