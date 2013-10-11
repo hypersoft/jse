@@ -55,9 +55,11 @@ static JSTValue jsNativeSignalTrap JSTDeclareFunction(Object obj, Function, fn) 
 
 static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
 	int number, i = 0, r = 0;
-	while (i < argc)
-	if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
-	else r++;
+	if (sigctx) {
+		while (i < argc)
+		if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
+		else r++;
+	}
 	return JSTValueFromDouble(r);
 }
 
