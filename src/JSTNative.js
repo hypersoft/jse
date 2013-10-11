@@ -1,4 +1,15 @@
+js.exec.prototype = {
+	toString:function(){return this.stdout || this.stderr || this.status},
+	valueOf:function(){return this.status}
+}
 
+var Command = function(command) {
+	this.argv = Array.apply(null, arguments);
+	this.argc = this.argv.length;
+	var bound = js.exec.bind(this); bound.capture = this;
+	bound.toString = function(){return command};
+	return bound;
+}
 
 function SharedLibrary(s) {
 	var cache = js.native.lib;
@@ -62,4 +73,10 @@ CallVM.prototype = js.extendPrototype(Object.defineProperties({
 	reset: function() {js.native.callVM.reset(this.pointer); return true; },
 });
 
+function exit(num) {
+	var jse = new SharedLibrary(); var cvm = new CallVM(4);
+	cvm.push([4], num); cvm.call(4, jse.find('exit'));
+}
 
+var print = new Command('echo', '-n');
+var printf = new Command('printf');

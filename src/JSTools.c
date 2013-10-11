@@ -17,6 +17,7 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i);
 bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
+static JSValueRef jsExecute JSTDeclareFunction ();
 
 #include "JSTools/Native.inc"
 #include <seed.h>
@@ -33,6 +34,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+
+	JSTObjectSetProperty(js, "exec", JSTFunctionCallback("exec", jsExecute), JSTObjectPropertyRequired);
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
 
@@ -151,5 +154,67 @@ JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method,
 	if (argc > 32) return JSTValueUndefined; JSTValue argv[argc+1];
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
 	argv[count] = NULL; return JST(JSObjectCallAsFunction, method, object, argc, argv);
+}
+
+static JSValueRef jsExecute JSTDeclareFunction () {
+
+	int child_status = 0, i = 0;
+	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
+
+	JSObjectRef exec = JSTObjectUndefined;
+
+	bool captureOut = false, captureError = false;
+
+	captureOut = JSTObjectHasProperty(this, "output");
+	captureError = JSTObjectHasProperty(this, "error");
+
+	int oargc = JSTValueToDouble(JSTObjectGetProperty(this, "argc"));
+	JSObjectRef oargv = (JSTObject) JSTObjectGetProperty(this, "argv");
+	JSTObject unshift = (JSTObject) JSTObjectGetProperty(oargv, "shift");
+
+	char * nargv[oargc + argc + 1];
+	char ** dest = nargv;
+
+	while (i < oargc) {
+		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTFunctionCall(unshift, oargv)), true);
+		i++;
+	}
+
+	dest = nargv + oargc; i=0;
+
+	while (i < argc) {
+		dest[i] = JSTStringToUTF8(JSTValueToString(argv[i]), true);
+		i++;
+	}
+
+	dest[i] = NULL;
+
+	if (true) {
+		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
+			exec_child_status = WEXITSTATUS(exec_child_status);
+			bool success = (exec_child_status == 0);
+			exec = JSTClassInstance(NULL, NULL);
+
+			if (success) {
+				JSTObjectSetProperty(exec, "status", JSTValueFromBoolean(success), 0);
+			} else {
+				JSTObjectSetProperty(exec, "status", JSTValueFromDouble(exec_child_status), 0);
+			}
+
+			if (captureOut && exec_child_out) {
+				JSTObjectSetProperty(exec, "stdout", JSTValueFromString(JSTStringFromUTF8(exec_child_out), 0), true);
+				JSTStringFreeUTF8(exec_child_out);
+			}
+			if (captureError && exec_child_err) {
+				JSTObjectSetProperty(exec, "stderr", JSTValueFromString(JSTStringFromUTF8(exec_child_err), 0), true);
+				JSTStringFreeUTF8(exec_child_err);
+			} 
+		}
+		i = 0; while (i < argc) JSTStringFreeUTF8(nargv[i++]);
+	}
+
+	JSTObjectSetPrototype(exec, JSTScriptNativeEval("js.exec.prototype", NULL));
+
+	return (JSValueRef) exec;
 }
 
