@@ -170,13 +170,12 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 
 	JSObjectRef oargv = (JSTObject) JSTObjectGetProperty(this, "argv");
 	int oargc = JSTValueToDouble(JSTObjectGetProperty(oargv, "length"));
-	JSTObject shift = (JSTObject) JSTObjectGetProperty(oargv, "shift");
 
 	char * nargv[oargc + argc + 1];
 	char ** dest = nargv;
 
 	while (i < oargc) {
-		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTFunctionCall(shift, oargv)), true);
+		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTObjectGetPropertyAtIndex(oargv, i)), true);
 		i++;
 	}
 
@@ -210,7 +209,7 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 				JSTStringFreeUTF8(exec_child_err);
 			} 
 		}
-		argc = sizeof(nargv);
+		argc += oargc + 1;
 		i = 0; while (i < argc) JSTStringFreeUTF8(nargv[i++]);
 	}
 
