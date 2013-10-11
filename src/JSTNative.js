@@ -8,7 +8,7 @@ var Command = function(command) {
 	var bound = js.exec.bind(this);
 	bound.capture = this;
 	bound.argv = this.argv;
-	bound.toString = function(){return command};
+	bound.toString = function(){return this.argv[0]};
 	return bound;
 }
 
