@@ -26,12 +26,12 @@ bin/UTF.o: src/UTF.c
 	@echo ''
 
 bin/JSTools.o: ${JSTDEPENDS}
-	@echo compiling JSTools '(Brigadier)'
+	@echo compiling Hypersoft Systems JSTools
 	gcc  ${BUILDCOMMON} -c src/JSTools.c -o $@
 	@echo ''
 
 bin/jse: ${JSEDEPENDS}
-	@echo compiling JSE
+	@echo compiling Hypersoft Systems JSE
 	gcc  ${BUILDCOMMON} bin/*.o bin/*.a main.c -o $@
 	@bin/buildnum -q;
 	@echo ''
