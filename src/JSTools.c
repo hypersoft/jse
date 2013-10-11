@@ -118,6 +118,18 @@ static JSValueRef jsToolsEnvKeys JSTDeclareFunction (string) {
 	return result;
 }
 
+static JSValueRef jsToolsEnvCWD JSTDeclareFunction () {
+	char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
+	return JSTValueFromUTF8(buffer);
+}
+
+static JSValueRef jsToolsEnvChDir JSTDeclareFunction () {
+	char * val; JSValueRef
+	result = JSTValueFromDouble(chdir(JSTStringToUTF8(JSTStringFromValue(argv[0]), true)));
+	JSTStringFreeUTF8(val);
+	return result;
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	static bool initialized;
@@ -140,6 +152,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(env, "write", JSTFunctionCallback("write", jsToolsEnvWrite), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(env, "keys", JSTFunctionCallback("keys", jsToolsEnvKeys), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(env, "delete", JSTFunctionCallback("delete", jsToolsEnvDelete), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(env, "cwd", JSTFunctionCallback("cwd", jsToolsEnvCWD), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(env, "chdir", JSTFunctionCallback("chdir", jsToolsEnvChDir), JSTObjectPropertyRequired);
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
 
