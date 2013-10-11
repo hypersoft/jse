@@ -12,6 +12,7 @@
 #include <wchar.h>
 #include <uchar.h>
 #include <pwd.h>
+#include <signal.h>
 
 #include "UTF.h"
 

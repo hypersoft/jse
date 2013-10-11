@@ -37,6 +37,30 @@ int JSTNativeTypeSize[] = {
 
 #include "JSTNative.inc"
 
+static JSTContext sigctx = NULL;
+static JSTObject sigfn = NULL;
+static JSTObject sigob = NULL;
+
+static void signal_handler (int signum) {
+	JSTContext ctx = sigctx; void * exception = NULL;
+	if (sigfn) JSTFunctionCall(sigfn, sigob, JSTValueFromDouble(signum));
+	else signal(signum, SIG_IGN);
+}
+
+static JSTValue jsNativeSignalTrap JSTDeclareFunction(Object obj, Function, fn) {
+	if (!sigfn) sigfn = JSTValueToObject(argv[0]), sigob = JSTValueToObject(argv[1]);
+	else return JSTValueFromBoolean(false);
+	return JSTValueFromBoolean(true);
+}
+
+static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
+	int number, i = 0, r = 0;
+	while (i < argc)
+	if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
+	else r++;
+	return JSTValueFromDouble(r);
+}
+
 static JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	// must have one arg of type String
 	char * buffer = JSTStringToUTF8(JSTValueToString(argv[0]), true);
@@ -246,10 +270,16 @@ static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
+	sigctx = ctx; // for global signal callback
+
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
 	JSTObject lib = JSTClassInstance(NULL, NULL);
+
+	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
+
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "alignment", JSTValueFromDouble(G_MEM_ALIGN), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
