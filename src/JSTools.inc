@@ -12,13 +12,11 @@
 #include <wchar.h>
 #include <uchar.h>
 
-#include <iconv.h>
+#include "UTF.h"
 
 #include "JavaScriptCore.inc"
 #include "glib.inc"
 #include "dyncall.inc"
-
-#include "UTF.h"
 
 #include "JSTools/Base.inc"
 #include "JSTools/Class.inc"

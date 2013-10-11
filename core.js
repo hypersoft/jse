@@ -3,11 +3,14 @@
 // exceptions will hurt you unless you develop an allocation stack to keep track of pointers
 // and catch those exceptions!
 
-var lib = new SharedLibrary("libc.so.6");
+var lib = new SharedLibrary(); // no name gets symbols from JSE ...
+
 var cvm = new CallVM(8);
-var utf8 = js.native.toUTF8("Hello World");
-cvm.push([4], utf8);      /* 4 == int_t */
-cvm.call(4, lib.find("puts"));
+var utf8 = js.native.toUTF8("%ls\n");
+var utf32 = js.native.toUTF32("Hello World");
+
+cvm.push([4, 4], utf8, utf32);      /* 4 == int_t */
+cvm.call(4, lib.find("printf"));
 
 // yeah.. so clean that shit up...
 

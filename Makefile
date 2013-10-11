@@ -2,7 +2,7 @@
 DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0 seed)
 
-JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc bin/UTF.o src/UTF.h
+JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc bin/UTF.o
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
 
 BUILDCOMMON := -fno-strict-aliasing -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
@@ -22,17 +22,17 @@ src/JSTNative.inc: src/JSTNative.js
 
 bin/UTF.o: src/UTF.c
 	@echo compiling Unicode Inc. UTF Conversion Routines
-	gcc  ${BUILDCOMMON} -c src/UTF.c -o $@
+	gcc -c src/UTF.c -o $@ ${BUILDCOMMON}
 	@echo ''
 
 bin/JSTools.o: ${JSTDEPENDS}
 	@echo compiling Hypersoft Systems JSTools
-	gcc  ${BUILDCOMMON} -c src/JSTools.c -o $@
+	gcc -c src/JSTools.c -o $@ ${BUILDCOMMON}
 	@echo ''
 
 bin/jse: ${JSEDEPENDS}
 	@echo compiling Hypersoft Systems JSE
-	gcc  ${BUILDCOMMON} bin/*.o bin/*.a main.c -o $@
+	gcc  bin/*.o bin/*.a main.c -o $@ ${BUILDCOMMON} 
 	@bin/buildnum -q;
 	@echo ''
 

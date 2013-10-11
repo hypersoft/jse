@@ -194,6 +194,34 @@ static JSTValue jsNativeFreeUTF8 JSTDeclareFunction(Pointer target) {
 	return JSTValueFromBoolean(p);
 }
 
+static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
+	// must have one arg of type String
+
+	JSTString jss = JSTValueToString(argv[0]);
+
+	long utf16bytes = JSTStringUTF16Length(jss);
+	long utf32bytes = ((utf16bytes) * 2) + 16; // 4 wchars padding
+
+	const UTF16 * utf16 = JSTStringUTF16(jss);
+	const UTF16 * utf16in = utf16;
+
+	UTF32 * utf32 = malloc(utf32bytes);
+	UTF32 * utf32out = utf32;
+	
+	ConvertUTF16toUTF32(
+		&utf16in, utf16in + utf16bytes,
+		&utf32out, utf32out + utf32bytes,
+		0
+	);
+
+	JSTStringRelease(jss);
+
+	*(utf32out) = L'\0';
+
+	return JSTValueFromPointer(utf32);
+
+}
+
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	JSTObject native = JSTClassInstance(NULL, NULL);
@@ -209,6 +237,8 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(native, "toUTF8", JSTFunctionCallback("toUTF8", jsNativeToUTF8), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "fromUTF8", JSTFunctionCallback("fromUTF8", jsNativeFromUTF8), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "freeUTF8", JSTFunctionCallback("freeUTF8", jsNativeFreeUTF8), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "toUTF32", JSTFunctionCallback("toUTF32", jsNativeToUTF32), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "freeUTF32", JSTFunctionCallback("freeUTF32", jsNativeFreeUTF8), JSTObjectPropertyRequired);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);
