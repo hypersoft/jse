@@ -58,7 +58,10 @@ static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
 	if (sigctx) {
 		while (i < argc)
 		if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
-		else r++;
+		else {
+			JSTObjectSetPropertyAtIndex(sigob, number, JSTValueUndefined);
+			r++;
+		}
 	}
 	return JSTValueFromDouble(r);
 }
@@ -290,9 +293,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "toUTF8", JSTFunctionCallback("toUTF8", jsNativeToUTF8), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "fromUTF8", JSTFunctionCallback("fromUTF8", jsNativeFromUTF8), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "freeUTF8", JSTFunctionCallback("freeUTF8", jsNativeFree), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "toUTF32", JSTFunctionCallback("toUTF32", jsNativeToUTF32), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "freeUTF32", JSTFunctionCallback("freeUTF32", jsNativeFree), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "free", JSTFunctionCallback("free", jsNativeFree), JSTObjectPropertyRequired);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
