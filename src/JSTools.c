@@ -287,8 +287,9 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 
 	JSObjectRef exec = JSTObjectUndefined;
 
-	bool captureOut = false, captureError = false;
+	bool captureOut = false, captureError = false, captureTime = false;
 
+	captureTime = JSTObjectHasProperty(this, "time");
 	captureOut = JSTObjectHasProperty(this, "output");
 	captureError = JSTObjectHasProperty(this, "error");
 
@@ -313,10 +314,11 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 	dest[i] = NULL;
 
 	if (true) {
+		exec = JSTClassInstance(NULL, NULL);
+		if (captureTime) JSTScriptNativeEval("this.startTime = Object.freeze(new Date())", exec);
 		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
 			exec_child_status = WEXITSTATUS(exec_child_status);
 			bool success = (exec_child_status == 0);
-			exec = JSTClassInstance(NULL, NULL);
 
 			if (success) {
 				JSTObjectSetProperty(exec, "status", JSTValueFromBoolean(success), 0);
@@ -333,6 +335,7 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 				JSTStringFreeUTF8(exec_child_err);
 			} 
 		}
+		if (captureTime) JSTScriptNativeEval("this.endTime = Object.freeze(new Date())", exec);
 		argc += oargc + 1;
 		i = 0; while (i < argc) JSTStringFreeUTF8(nargv[i++]);
 	}
