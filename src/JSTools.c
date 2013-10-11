@@ -130,6 +130,11 @@ static JSValueRef jsToolsEnvChDir JSTDeclareFunction () {
 	return result;
 }
 
+static JSTValue jsToolsEnvUser JSTDeclareFunction () {
+	if (JSTValueIsNumber(argv[0])) return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
+	return JSTValueUndefined;
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	static bool initialized;
@@ -154,6 +159,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(env, "delete", JSTFunctionCallback("delete", jsToolsEnvDelete), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(env, "cwd", JSTFunctionCallback("cwd", jsToolsEnvCWD), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(env, "chdir", JSTFunctionCallback("chdir", jsToolsEnvChDir), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(env, "user", JSTFunctionCallback("user", jsToolsEnvUser), JSTObjectPropertyRequired);
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
 
