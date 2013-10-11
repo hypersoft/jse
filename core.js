@@ -13,8 +13,5 @@ cvm.push([4, 4], utf8, utf32);      /* 4 == int_t */
 cvm.call(4, lib.find("printf"));
 
 // yeah.. so clean that shit up...
-
-js.native.freeUTF8(utf8);
-cvm.free();
-lib.release();
+js.native.free(utf8, utf32, cvm, lib);
 
