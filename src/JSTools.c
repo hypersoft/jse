@@ -170,13 +170,13 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 
 	int oargc = JSTValueToDouble(JSTObjectGetProperty(this, "argc"));
 	JSObjectRef oargv = (JSTObject) JSTObjectGetProperty(this, "argv");
-	JSTObject unshift = (JSTObject) JSTObjectGetProperty(oargv, "shift");
+	JSTObject shift = (JSTObject) JSTObjectGetProperty(oargv, "shift");
 
 	char * nargv[oargc + argc + 1];
 	char ** dest = nargv;
 
 	while (i < oargc) {
-		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTFunctionCall(unshift, oargv)), true);
+		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTFunctionCall(shift, oargv)), true);
 		i++;
 	}
 
