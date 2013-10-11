@@ -5,8 +5,9 @@ js.exec.prototype = {
 
 var Command = function(command) {
 	this.argv = Array.apply(null, arguments);
-	this.argc = this.argv.length;
-	var bound = js.exec.bind(this); bound.capture = this;
+	var bound = js.exec.bind(this);
+	bound.capture = this;
+	bound.argv = this.argv;
 	bound.toString = function(){return command};
 	return bound;
 }

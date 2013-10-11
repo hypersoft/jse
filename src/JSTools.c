@@ -168,8 +168,8 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 	captureOut = JSTObjectHasProperty(this, "output");
 	captureError = JSTObjectHasProperty(this, "error");
 
-	int oargc = JSTValueToDouble(JSTObjectGetProperty(this, "argc"));
 	JSObjectRef oargv = (JSTObject) JSTObjectGetProperty(this, "argv");
+	int oargc = JSTValueToDouble(JSTObjectGetProperty(oargv, "length"));
 	JSTObject shift = (JSTObject) JSTObjectGetProperty(oargv, "shift");
 
 	char * nargv[oargc + argc + 1];
