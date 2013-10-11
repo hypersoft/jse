@@ -11,6 +11,7 @@
 #include <string.h>
 #include <wchar.h>
 #include <uchar.h>
+#include <pwd.h>
 
 #include "UTF.h"
 

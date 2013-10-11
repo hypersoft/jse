@@ -3,11 +3,7 @@
 // exceptions will hurt you unless you develop an allocation stack to keep track of pointers
 // and catch those exceptions!
 
-var lsa = new Command('ls', '-a');
-
-lsa.capture.output = true;
-
-print(lsa())
+printf("Hello %s\nIt appears your favorite shell is %s...\n", js.user.name, js.user.shell);
 
 exit(0);
 

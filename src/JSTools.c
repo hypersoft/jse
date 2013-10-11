@@ -22,6 +22,26 @@ static JSValueRef jsExecute JSTDeclareFunction ();
 #include "JSTools/Native.inc"
 #include <seed.h>
 
+JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exception) {
+	JSObjectRef result = JSTClassInstance(NULL, NULL);
+	struct passwd * pws = getpwuid(uid);
+	if (pws) {
+		JSTObjectSetProperty(result, "name", JSTValueFromUTF8(pws->pw_name), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "password", JSTValueFromUTF8(pws->pw_passwd), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "id", JSTValueFromDouble(uid), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "gid", JSTValueFromDouble(pws->pw_gid), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "comment", JSTValueFromUTF8(pws->pw_gecos), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "home", JSTValueFromUTF8(pws->pw_dir), JSTObjectPropertyRequired);
+		JSTObjectSetProperty(result, "shell", JSTValueFromUTF8(pws->pw_shell), JSTObjectPropertyRequired);
+	} else {
+		char out[PATH_MAX];
+		sprintf(out, "%s: errno %lu", "JSE: unable to construct system user object", errno);
+		JSTScriptReferenceError(out);
+		return JSTObjectUndefined;
+	}
+	return result;
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	static bool initialized;
@@ -35,6 +55,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
+	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(js, "exec", JSTFunctionCallback("exec", jsExecute), JSTObjectPropertyRequired);
 
 	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
