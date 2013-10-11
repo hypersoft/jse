@@ -18,6 +18,8 @@
 #include "glib.inc"
 #include "dyncall.inc"
 
+#include "UTF.h"
+
 #include "JSTools/Base.inc"
 #include "JSTools/Class.inc"
 #include "JSTools/Constructor.inc"
