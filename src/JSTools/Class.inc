@@ -12,6 +12,6 @@
 #define JSTClassInstance(c, p) JSTAction(JSObjectMake, c, p)
 
 #define JSTClassPropertyNone kJSClassAttributeNone
-#define JSTClassPropertyManuaPrototype kJSClassAttributeNoAutomaticPrototype
+#define JSTClassPropertyManualPrototype kJSClassAttributeNoAutomaticPrototype
 
 

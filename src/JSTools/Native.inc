@@ -108,7 +108,7 @@ static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
 static JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	// must have one arg of type String
 	char * buffer = JSTValueToUTF8(argv[0]);
-	JSValueRef result = JSTValueFromPointer(dlLoadLibrary(buffer));
+	JSTValue result = JSTValueFromPointer(dlLoadLibrary(buffer));
 	JSTStringFreeUTF8(buffer);
 	return result;
 }
@@ -122,7 +122,7 @@ static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, St
 	// must have first arg of type Number
 	// must have second arg of type String
 	char * buffer = JSTValueToUTF8(argv[1]);
-	JSValueRef result = JSTValueFromPointer(dlFindSymbol(JSTValueToPointer(argv[0]), buffer));
+	JSTValue result = JSTValueFromPointer(dlFindSymbol(JSTValueToPointer(argv[0]), buffer));
 	JSTStringFreeUTF8(buffer);
 	return result;
 }
@@ -212,7 +212,7 @@ done:
 
 }
 
-static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
+static JSTValue jsNativeAddressRead JSTDeclareFunction (address, type) {
 
 	const char * fname = "js.native.address.read";
 	const char * job = "unable to read pointer contents";
@@ -246,7 +246,7 @@ static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
 
 }
 
-static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
+static JSTValue jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
 
 	const char * fname = "js.native.address.write";
 	const char * job = "unable to write pointer contents";
@@ -374,8 +374,8 @@ static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 
 static JSTDeclareConvertor(jsNativeContainerConvert) {
 
-	JSValueRef conversion;
-	JSObjectRef convert = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "convert");
+	JSTValue conversion;
+	JSTObject convert = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "convert");
 	if (JSTValueIsVoid(convert)) return false;
 	else if (kJSTypeString == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("String", NULL));
 	else if (kJSTypeNumber == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Number", NULL));
@@ -390,7 +390,7 @@ static JSTDeclareDeleteProperty(jsNativeContainerDelete) {
 
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
 	bool result = false;
-	JSObjectRef delete = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "delete");
+	JSTObject delete = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "delete");
 	if (JSTObjectIsFunction(delete)) result = JSTValueToBoolean(JSTFunctionCall(delete, object, JSTStringToValue(propertyName, false)));
 	requestInProgress = false; return result;
 
@@ -399,8 +399,8 @@ static JSTDeclareDeleteProperty(jsNativeContainerDelete) {
 static JSTDeclareGetProperty(jsNativeContainerGet) {
 
 	static bool requestInProgress; if (requestInProgress) return NULL; else requestInProgress = true;
-	JSValueRef result = NULL;
-	JSObjectRef get = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
+	JSTValue result = NULL;
+	JSTObject get = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
 	if (JSTObjectIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
 	requestInProgress = false; return (JSTValueIsNull(result))?NULL:result;
 
@@ -410,7 +410,7 @@ static JSTDeclareSetProperty(jsNativeContainerSet) {
 
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
  	bool result = false;
-	JSObjectRef set = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "set");
+	JSTObject set = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "set");
 	if (JSTObjectIsFunction(set)) result = JSTValueToBoolean(JSTFunctionCall(set, object, JSTStringToValue(propertyName, false), value));
 	requestInProgress = false; return result;
 
@@ -421,9 +421,9 @@ static JSTDeclareSetProperty(jsNativeContainerSet) {
 static JSTDeclareGetPropertyNames(jsNativeContainerEnumerate) {
 	static bool requestInProgress; if (requestInProgress) return; else requestInProgress = true;
 	void * exception = NULL;
-	JSObjectRef enumerate = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "enumerate");
+	JSTObject enumerate = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "enumerate");
 	if (JSTObjectIsFunction(enumerate)) {
-		JSObjectRef names = (JSTObject)JSTFunctionCall(enumerate, object); // must return numeric indexed pseudo array with length
+		JSTObject names = (JSTObject)JSTFunctionCall(enumerate, object); // must return numeric indexed pseudo array with length
 		register long length = JSTValueToDouble(JSTObjectGetProperty(names, "length"));
 		JSStringRef name = NULL;
 		register long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
@@ -439,7 +439,7 @@ static JSTDeclareHasProperty(jsNativeContainerQuery) {
 
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
 	void * exception = NULL; bool result = false;
-	JSObjectRef query = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
+	JSTObject query = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
 	if (JSTObjectIsFunction(query)) result = JSTValueToBoolean(JSTFunctionCall(query, object, JSTStringToValue(propertyName, false)));
 	requestInProgress = false; return result;
 
@@ -450,13 +450,13 @@ static JSTDeclareFinalizer(jsNativeContainerDeallocate) {
 	if (unload) free(unload), JSTObjectSetPrivate(object, NULL);
 }
 
-static JSValueRef jsNativeContainer JSTDeclareFunction () {
+static JSTValue jsNativeContainer JSTDeclareFunction () {
 
 	JSTObject definition = JSTValueToObject(argv[0]);
 	char * name = JSTValueToUTF8(JSTObjectGetProperty(definition, "name"));
 	
-	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
-	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype, jsClass.className = name;
+	JSTClassDefinition jsClass = JSTClassDefinitionEmpty;
+	jsClass.attributes = JSTClassPropertyManualPrototype, jsClass.className = name;
 
 	// define these properties on your constructor function (passed to this callback)
 	// to enable desired custom container features
@@ -474,41 +474,47 @@ static JSValueRef jsNativeContainer JSTDeclareFunction () {
 
 }
 
-static JSValueRef jsNativeInstance JSTDeclareFunction() {
+static JSTValue jsNativeInstance JSTDeclareFunction() {
 	return JSTClassInstance(JSTValueToPointer(argv[0]), JSTValueToPointer(argv[1]));
 }
 
-static JSValueRef jsNativeSetPrototype JSTDeclareFunction() {
+static JSTValue jsNativeSetPrototype JSTDeclareFunction() {
 	JSTObjectSetPrototype((JSTObject)argv[1], argv[2]); return argv[1];
 }
 
-static JSValueRef jsNativeGetPrototype JSTDeclareFunction() {
-	return (JSValueRef) JSTObjectGetPrototype((JSTObject)argv[1]);
+static JSTValue jsNativeGetPrototype JSTDeclareFunction() {
+	return (JSTValue) JSTObjectGetPrototype((JSTObject)argv[1]);
 }
 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
-	sigctx = ctx; // for global signal callback
 
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
 	char * jsNativeTypes = JSTConstructUTF8("js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; Object.freeze(js.call); js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i};",
 		JSTNativeAlignment, JSTNativeByteOrder,
-		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD, DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS, DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV, DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB, DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32, DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32,
+		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,
+		DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS,
+		DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV,
+		DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB,
+		DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32,
+		DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32,
 		0, JSTNativeTypeUnsigned, JSTNativeTypePointer, JSTNativeTypeEllipsis, JSTNativeTypeBoolean,
-		JSTNativeTypeChar, JSTNativeTypeShort, JSTNativeTypeInt, JSTNativeTypeLong, JSTNativeTypeLongLong,
-		JSTNativeTypeFloat, JSTNativeTypeDouble, JSTNativeTypeSize, JSTNativeTypeUTF8, JSTNativeTypeUTF16,
-		JSTNativeTypeUTF32, JSTNativeTypeStruct, JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString
+		JSTNativeTypeChar, JSTNativeTypeShort, JSTNativeTypeInt, JSTNativeTypeLong,
+		JSTNativeTypeLongLong, JSTNativeTypeFloat, JSTNativeTypeDouble, JSTNativeTypeSize,
+		JSTNativeTypeUTF8, JSTNativeTypeUTF16,JSTNativeTypeUTF32, JSTNativeTypeStruct,
+		JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString
 	);
 
 	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
-	if (*exception) {
+	if (JSTScriptHasError) {
 		return (JSTObject) JSTScriptReportException(); exit(1);
 	}
 
-	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
+//	sigctx = ctx; // for global signal callback
+//	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
+//	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "container", JSTFunctionCallback("container", jsNativeContainer), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "instance", JSTFunctionCallback("instance", jsNativeInstance), JSTObjectPropertyRequired);
