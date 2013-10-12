@@ -11,9 +11,7 @@ char * ioFileReadAllText(char * file) {
 	else return NULL;
 }
 
-
 int main(int argc, char *argv[], char *envp[]) {
-
 
 	JSTContext ctx = JSTContextCreateInGroup(JSTContextGroupCreate(), NULL);
 	JSTObject global = JSTContextGetGlobalObject(ctx);
@@ -34,5 +32,4 @@ int main(int argc, char *argv[], char *envp[]) {
 	if (e) JSTScriptReportException();
 
 }
-
 
