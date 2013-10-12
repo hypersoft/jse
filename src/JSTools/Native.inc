@@ -455,7 +455,7 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 	JSTObject definition = JSTValueToObject(argv[0]);
 	char * name = JSTValueToUTF8(JSTObjectGetProperty(definition, "name"));
 	
-	JSTClassDefinition jsClass = JSTClassDefinitionEmpty;
+	JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 	jsClass.attributes = JSTClassPropertyManualPrototype, jsClass.className = name;
 
 	// define these properties on your constructor function (passed to this callback)
@@ -486,8 +486,12 @@ static JSTValue jsNativeGetPrototype JSTDeclareFunction() {
 	return (JSTValue) JSTObjectGetPrototype((JSTObject)argv[1]);
 }
 
-JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
+static JSTValue jsNativeSetPrivate JSTDeclareFunction() {
+	JSTObjectSetPrivate((JSTObject) argv[0], JSTValueToPointer(argv[1]));
+	return JSTValueFromBoolean(1);
+}
 
+JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
@@ -509,7 +513,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
 	if (JSTScriptHasError) {
-		return (JSTObject) JSTScriptReportException(); exit(1);
+		JSTScriptReportException(); exit(1);
 	}
 
 //	sigctx = ctx; // for global signal callback

@@ -12,7 +12,7 @@
 #define JST(NAME, ...) NAME (ctx, ##__VA_ARGS__, exception)
 #define JSTAction(NAME, ...) NAME (ctx, ##__VA_ARGS__)
 
-#define JSTUtility(...) (JSTContext ctx, ##__VA_ARGS__, JSTValue *exception)
+#define JSTUtility(...) (register JSTContext ctx, ##__VA_ARGS__, JSTValue *exception)
 #define JSTChoose(condition, primary, secondary) ((condition)?(primary):(secondary))
 
 #define JSTInit(o, c, a, e) JST(JSTInit_, o, c, a, e)

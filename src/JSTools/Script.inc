@@ -42,20 +42,16 @@ JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i) {
 	return result;
 }
 
-void JSTScriptNativeError_(JSTContext ctx, JSTValue *exception, char * file, int line, char * format, ...) {
+void JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception, char * file, int line, char * format, ...) {
 	va_list ap; va_start(ap, format); char * message = NULL;
 	vasprintf(&message, format, ap);
 	JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
 	free(message);
 }
 
-void JSTScriptReportException_(JSTContext ctx, JSTValue *exception) {
-	if (JSTScriptHasError) {
-		char *b = JSTStringToUTF8(JSTValueToString(JSTScriptNativeEval("JSON.stringify(this, ['message', 'line', 'sourceURL', 'stack'], 2)", (JSTObject)*exception)), true);
-		fprintf(stderr, "JSE Fatal Error Dump: %s", b);
-		free(b);
-		*exception = NULL;
-	}
+void JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
+	register char *b = JSTStringToUTF8(JSTValueToString(JSTScriptNativeEval("JSON.stringify(this, ['message', 'line', 'sourceURL', 'stack'], 2)", (JSTObject)*exception)), true);
+	fprintf(stderr, "JSE Fatal Error Dump: %s", b); free(b); *exception = NULL;
 }
 
 #endif
