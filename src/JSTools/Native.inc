@@ -22,9 +22,8 @@
 #define JSTNativeTypeUTF32 (1 << 13)
 #define JSTNativeTypeValue (1 << 14)
 #define JSTNativeTypeString (1 << 15)
-#define JSTNativeTypeException (1 << 16)
-#define JSTNativeTypeStruct (1 << 17)
-#define JSTNativeTypeUnion (1 << 18)
+#define JSTNativeTypeStruct (1 << 16)
+#define JSTNativeTypeUnion (1 << 17)
 
 #ifdef JSTools_h
 
@@ -37,12 +36,10 @@ extern const char * JSTNativeTypeNameUTF8(int t);
 #include "JSTNative.inc"
 
 int JSTNativeTypeGetSize(int t) {
-	if (t == 0) return t;
-	else if (t & JSTNativeTypePointer
+	if (t == 0) return t; else if (t & JSTNativeTypePointer
 		|| t == JSTNativeTypeValue
 		|| t == JSTNativeTypeString
-		|| t == JSTNativeTypeException)
-	return sizeof(void*);
+	) return sizeof(void*);
 	else if (t == JSTNativeTypeBoolean) return sizeof(bool);
 	else if (t & JSTNativeTypeChar) return sizeof(char);
 	else if (t & JSTNativeTypeShort) return sizeof(short);
@@ -59,12 +56,10 @@ int JSTNativeTypeGetSize(int t) {
 }
 
 const char * JSTNativeTypeNameUTF8(int t) {
-	if (t == 0) return "void";
-	else if (t & JSTNativeTypePointer
+	if (t == 0) return "void"; else if (t & JSTNativeTypePointer
 		|| t == JSTNativeTypeValue
 		|| t == JSTNativeTypeString
-		|| t == JSTNativeTypeException)
-	return "pointer";
+	) return "pointer";
 	else if (t == JSTNativeTypeEllipsis) return "ellipsis";
 	else if (t == JSTNativeTypeBoolean) return "bool";
 	else if (t & JSTNativeTypeChar) return (t & JSTNativeTypeUnsigned)?"char":"schar";
@@ -112,7 +107,7 @@ static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
 
 static JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
 	// must have one arg of type String
-	char * buffer = JSTStringToUTF8(JSTValueToString(argv[0]), true);
+	char * buffer = JSTValueToUTF8(argv[0]);
 	JSValueRef result = JSTValueFromPointer(dlLoadLibrary(buffer));
 	JSTStringFreeUTF8(buffer);
 	return result;
@@ -126,7 +121,7 @@ static JSTValue jsNativeLibraryFree JSTDeclareFunction(Pointer library) {
 static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, String symbol) {
 	// must have first arg of type Number
 	// must have second arg of type String
-	char * buffer = JSTStringToUTF8(JSTValueToString(argv[1]), true);
+	char * buffer = JSTValueToUTF8(argv[1]);
 	JSValueRef result = JSTValueFromPointer(dlFindSymbol(JSTValueToPointer(argv[0]), buffer));
 	JSTStringFreeUTF8(buffer);
 	return result;
@@ -147,10 +142,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	int stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
 	int callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode"));
 
-	void * callVM  = dcNewCallVM(stackSize);
-
-	dcMode(callVM, callVMMode);
-
+	void * callVM  = dcNewCallVM(stackSize); dcMode(callVM, callVMMode);
 	if (dcGetError(callVM) == DC_ERROR_UNSUPPORTED_MODE) {
 		result = JSTScriptNativeError("%s: %s: `%i' is an invalid or unknown virtual call mode", fname, job, callVMMode);
 		goto bail;
@@ -159,14 +151,11 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	int stackItem = 0, stackIndex = 0;
 	bool ellipsis = false, unsign = (returnType & JSTNativeTypeUnsigned);
 
-	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length")), bump = 0;
+	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
 
 	while (stackIndex < protoLen) {
-		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex + bump));
+		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex));
 		if (stackItem > JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
-		else if (stackItem == JSTNativeTypeException) {
-			dcArgPointer(callVM, &exception); bump++, protoLen--; continue;
-		}
 		JSTValue value = argv[stackIndex++];
 		if (stackItem & JSTNativeTypeUTF8) {
 			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
@@ -190,7 +179,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		else if (stackItem == JSTNativeTypeValue) dcArgPointer(callVM, (void*) value);
 		else if (stackItem == JSTNativeTypeString) dcArgPointer(callVM, (void*) value);
 		else {
-			result = JSTScriptNativeError("%s: %s: argument #%i (%i) is an unknown type", fname, job, stackIndex, stackItem);
+			result = JSTScriptNativeError("%s: %s: argument #%i (%i) is an unknown or invalid argument type", fname, job, stackIndex, stackItem);
 			goto bail;
 		}
 	}
@@ -209,9 +198,8 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	else if (returnType == JSTNativeTypeVoid) { result = JSTValueUndefined; dcCallVoid(callVM, fn); }
 	else if (returnType == JSTNativeTypeValue) result = (JSTValue) dcCallPointer(callVM, fn);
 	else if (returnType == JSTNativeTypeString) result =  JSTValueFromPointer(dcCallPointer(callVM, fn));
-	else if (returnType == JSTNativeTypeException) result = (JSTValue) dcCallPointer(callVM, fn);
 	else {
-		result = JSTScriptNativeError("%s: %s: procedure return type `%i' is an unknown type", fname, job, returnType);
+		result = JSTScriptNativeError("%s: %s: procedure return type `%i' is an unknown or invalid return type", fname, job, returnType);
 		goto bail;
 	}
 
@@ -253,7 +241,6 @@ static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
 	else if (type == JSTNativeTypeUTF32) return JSTValueFromDouble((double) *(UTF32*)(address));
 	else if (type == JSTNativeTypeValue) return ((JSTValue)*(intptr_t*)(address));
 	else if (type == JSTNativeTypeString) return JSTValueFromPointer(*(intptr_t*)(address));
-	else if (type == JSTNativeTypeException) return JSTValueFromPointer(*(intptr_t*)(address));
 	else if (unsign) return JSTScriptNativeError("%s: %s: `%i' is not a known or signable integer type", fname, job, type);
 	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
 
@@ -269,7 +256,6 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 	// must have first arg of type Number
 	// must have second arg of type Number
 	// must have third arg of type Number
-
 	void * address = JSTValueToPointer(argv[0]);
 	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
 
@@ -291,7 +277,6 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 	else if (type == JSTNativeTypeUTF32) *(UTF32*)(address) = (UTF32) value;
 	else if (type == JSTNativeTypeValue) *(intptr_t*)(address) = ((intptr_t)value);
 	else if (type == JSTNativeTypeString) *(intptr_t*)(address) = ((intptr_t)value);
-	else if (type == JSTNativeTypeException) *(intptr_t*)(address) = ((intptr_t)value);
 	else if (type & JSTNativeTypeUnsigned) return JSTScriptNativeError("%s: %s: `%i' is not a known or signable integer type", fname, job, type);
 	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
 
@@ -301,12 +286,11 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 
 static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 	int t = JSTValueToDouble(argv[0]);
-	if (t == 0) return JSTValueFromDouble(0);
-	else if (t & JSTNativeTypePointer
+	if (t == 0) return JSTValueFromDouble(0); else if (
+		t & JSTNativeTypePointer
 		|| t == JSTNativeTypeValue
 		|| t == JSTNativeTypeString
-		|| t == JSTNativeTypeException)
-	return JSTValueFromDouble(sizeof(void*));
+	) return JSTValueFromDouble(sizeof(void*));
 	else if (t == JSTNativeTypeUnsigned) return JSTValueFromDouble(sizeof(int));
 	else if (t == JSTNativeTypeBoolean) return JSTValueFromDouble(sizeof(bool));
 	else if (t & JSTNativeTypeChar) return JSTValueFromDouble(sizeof(char));
@@ -325,12 +309,12 @@ static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 
 static JSTValue jsNativeToUTF8 JSTDeclareFunction(Value target) {
 	// must have one arg of type String
-	return JSTValueFromPointer(JSTStringToUTF8(JSTValueToString(argv[0]), true));
+	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));
 }
 
 static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
 	// must have one arg of type char *
-	return JSTValueFromString(JSTStringFromUTF8(JSTValueToPointer(argv[0])), true);
+	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
 }
 
 static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
@@ -371,13 +355,13 @@ static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 	const UTF16 * utf16 = JSTStringUTF16(jss);
 	const UTF16 * utf16in = utf16;
 
-	UTF32 * utf32 = malloc(utf32bytes + 4); // pad terminate
+	UTF32 * utf32 = malloc(utf32bytes + sizeof(UTF32)); // pad terminate
 	UTF32 * utf32out = utf32;
 	
 	ConvertUTF16toUTF32(
 		&utf16in, utf16in + utf16bytes,
 		&utf32out, utf32out + utf32bytes,
-		0
+		0 // strict conversion
 	);
 
 	JSTStringRelease(jss);
@@ -388,6 +372,106 @@ static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 
 }
 
+static JSTDeclareConvertor(jsNativeContainerConvert) {
+
+	JSValueRef conversion;
+	JSObjectRef convert = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "convert");
+	if (JSTValueIsVoid(convert)) return false;
+	else if (kJSTypeString == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("String", NULL));
+	else if (kJSTypeNumber == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Number", NULL));
+	else if (kJSTypeBoolean == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Boolean", NULL));
+	else if (kJSTypeObject == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Object", NULL));
+	if (JSTValueIsVoid(conversion)) return false;
+	return conversion;
+
+}
+
+static JSTDeclareDeleteProperty(jsNativeContainerDelete) {
+
+	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
+	bool result = false;
+	JSObjectRef delete = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "delete");
+	if (JSTObjectIsFunction(delete)) result = JSTValueToBoolean(JSTFunctionCall(delete, object, JSTStringToValue(propertyName, false)));
+	requestInProgress = false; return result;
+
+}
+
+static JSTDeclareGetProperty(jsNativeContainerGet) {
+
+	static bool requestInProgress; if (requestInProgress) return NULL; else requestInProgress = true;
+	JSValueRef result = NULL;
+	JSObjectRef get = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
+	if (JSTObjectIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
+	requestInProgress = false; return (JSTNull(result))?NULL:result;
+
+}
+
+static JSTDeclareSetProperty(jsNativeContainerSet) {
+
+	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
+ 	bool result = false;
+	JSObjectRef set = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "set");
+	if (JSTObjectIsFunction(set)) result = JSTValueToBoolean(JSTFunctionCall(set, object, JSTStringToValue(propertyName, false), value));
+	requestInProgress = false; return result;
+
+}
+
+// The array of names returned by 'enumerate', must be handled by 'get' in order to show up 
+// in the resulting list of enumerated property names.
+static JSTDeclareGetPropertyNames(jsNativeContainerEnumerate) {
+	static bool requestInProgress; if (requestInProgress) return; else requestInProgress = true;
+	void * exception = NULL;
+	JSObjectRef enumerate = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "enumerate");
+	if (JSTObjectIsFunction(enumerate)) {
+		JSObjectRef names = (JSTObject)JSTFunctionCall(enumerate, object); // must return numeric indexed pseudo array with length
+		register long length = JSTValueToDouble(JSTObjectGetProperty(names, "length"));
+		JSStringRef name = NULL;
+		register long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
+			propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(names, i)))
+		);
+			JSTStringRelease(name);
+		};
+	}
+	requestInProgress = false;
+}
+
+static JSTDeclareHasProperty(jsNativeContainerQuery) {
+
+	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
+	void * exception = NULL; bool result = false;
+	JSObjectRef query = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
+	if (JSTFunction(query)) result = JSTValueToBoolean(JSTFunctionCall(query, object, JSTStringToValue(propertyName, false)));
+	requestInProgress = false; return result;
+
+}
+
+static JSTDeclareFinalizer(jsNativeContainerDeallocate) {
+	void * unload = JSTObjectGetPrivate(object);
+	if (unload) free(unload), JSTObjectSetPrivate(object, NULL);
+}
+
+static JSValueRef jsNativeContainerCreate JSTDeclareFunction () {
+
+	JSTObject definition = JSTValueToObject(argv[0]);
+	char * name = JSTValueToUTF8(JSTObjectGetProperty(definition, "name"));
+	
+	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
+	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype, jsClass.className = name;
+
+	if (JSTObjectHasProperty(definition, "convert")) jsClass.convertToType = &jsNativeContainerConvert;
+	if (JSTObjectHasProperty(definition, "delete")) jsClass.deleteProperty = &jsNativeContainerDelete;
+	if (JSTObjectHasProperty(definition, "get")) jsClass.getProperty = &jsNativeContainerGet;
+	if (JSTObjectHasProperty(definition, "set")) jsClass.setProperty = &jsNativeContainerSet;
+	if (JSTObjectHasProperty(definition, "enumerate")) jsClass.getPropertyNames = &jsNativeContainerEnumerate;
+	if (JSTObjectHasProperty(definition, "query")) jsClass.hasProperty = &jsNativeContainerQuery;
+	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
+
+	JSClassRef container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
+
+	return JSTValueFromPointer(container);
+
+}
+
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 
 	sigctx = ctx; // for global signal callback
@@ -395,18 +479,16 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
-	char * jsNativeTypes = JSTConstructUTF8("js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i, exception: %i }",
-		G_MEM_ALIGN, G_BYTE_ORDER,
+	char * jsNativeTypes = JSTConstructUTF8("js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; Object.freeze(js.call); js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i};",
+		JSTNativeAlignment, JSTNativeByteOrder,
 		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD, DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS, DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV, DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB, DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32, DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32,
 		0, JSTNativeTypeUnsigned, JSTNativeTypePointer, JSTNativeTypeEllipsis, JSTNativeTypeBoolean,
 		JSTNativeTypeChar, JSTNativeTypeShort, JSTNativeTypeInt, JSTNativeTypeLong, JSTNativeTypeLongLong,
 		JSTNativeTypeFloat, JSTNativeTypeDouble, JSTNativeTypeSize, JSTNativeTypeUTF8, JSTNativeTypeUTF16,
-		JSTNativeTypeUTF32, JSTNativeTypeStruct, JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString,
-		JSTNativeTypeException
+		JSTNativeTypeUTF32, JSTNativeTypeStruct, JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString
 	);
 
 	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
-
 	if (*exception) {
 		return (JSTObject) JSTScriptReportException(); exit(1);
 	}

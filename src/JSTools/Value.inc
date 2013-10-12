@@ -47,7 +47,7 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 #define JSTValueToDouble(v) JST(JSValueToNumber, v)
 #define JSTValueToString(v) JST(JSValueToStringCopy, v)
 #define JSTValueToObject(v) JST(JSValueToObject, v)
-
+#define JSTValueToUTF8(v) JSTStringToUTF8(JSTValueToString(v), true)
 #define JSTValueProtect(v) JSTAction(JSValueProtect, v)
 #define JSTValueUnprotect(v) JSTAction(JSValueUnprotect, v)
 
