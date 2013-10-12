@@ -402,7 +402,7 @@ static JSTDeclareGetProperty(jsNativeContainerGet) {
 	JSValueRef result = NULL;
 	JSObjectRef get = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
 	if (JSTObjectIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
-	requestInProgress = false; return (JSTNull(result))?NULL:result;
+	requestInProgress = false; return (JSTValueIsNull(result))?NULL:result;
 
 }
 
@@ -440,7 +440,7 @@ static JSTDeclareHasProperty(jsNativeContainerQuery) {
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
 	void * exception = NULL; bool result = false;
 	JSObjectRef query = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
-	if (JSTFunction(query)) result = JSTValueToBoolean(JSTFunctionCall(query, object, JSTStringToValue(propertyName, false)));
+	if (JSTObjectIsFunction(query)) result = JSTValueToBoolean(JSTFunctionCall(query, object, JSTStringToValue(propertyName, false)));
 	requestInProgress = false; return result;
 
 }
@@ -450,7 +450,7 @@ static JSTDeclareFinalizer(jsNativeContainerDeallocate) {
 	if (unload) free(unload), JSTObjectSetPrivate(object, NULL);
 }
 
-static JSValueRef jsNativeContainerCreate JSTDeclareFunction () {
+static JSValueRef jsNativeContainer JSTDeclareFunction () {
 
 	JSTObject definition = JSTValueToObject(argv[0]);
 	char * name = JSTValueToUTF8(JSTObjectGetProperty(definition, "name"));
@@ -458,6 +458,8 @@ static JSValueRef jsNativeContainerCreate JSTDeclareFunction () {
 	JSClassDefinition jsClass = kJSClassDefinitionEmpty;
 	jsClass.attributes = kJSClassAttributeNoAutomaticPrototype, jsClass.className = name;
 
+	// define these properties on your constructor function (passed to this callback)
+	// to enable desired custom container features
 	if (JSTObjectHasProperty(definition, "convert")) jsClass.convertToType = &jsNativeContainerConvert;
 	if (JSTObjectHasProperty(definition, "delete")) jsClass.deleteProperty = &jsNativeContainerDelete;
 	if (JSTObjectHasProperty(definition, "get")) jsClass.getProperty = &jsNativeContainerGet;
@@ -470,6 +472,18 @@ static JSValueRef jsNativeContainerCreate JSTDeclareFunction () {
 
 	return JSTValueFromPointer(container);
 
+}
+
+static JSValueRef jsNativeInstance JSTDeclareFunction() {
+	return JSTClassInstance(JSTValueToPointer(argv[0]), JSTValueToPointer(argv[1]));
+}
+
+static JSValueRef jsNativeSetPrototype JSTDeclareFunction() {
+	JSTObjectSetPrototype((JSTObject)argv[1], argv[2]); return argv[1];
+}
+
+static JSValueRef jsNativeGetPrototype JSTDeclareFunction() {
+	return (JSValueRef) JSTObjectGetPrototype((JSTObject)argv[1]);
 }
 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
@@ -493,11 +507,15 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 		return (JSTObject) JSTScriptReportException(); exit(1);
 	}
 
-	JSTObject lib = JSTClassInstance(NULL, NULL);
-
 	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
 
+	JSTObjectSetProperty(native, "container", JSTFunctionCallback("container", jsNativeContainer), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "instance", JSTFunctionCallback("instance", jsNativeInstance), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "setPrototype", JSTFunctionCallback("setPrototype", jsNativeSetPrototype), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(native, "getPrototype", JSTFunctionCallback("getPrototype", jsNativeGetPrototype), JSTObjectPropertyRequired);
+
+	JSTObject lib = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
