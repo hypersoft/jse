@@ -1,4 +1,18 @@
 
+#ifdef JSTools_h
+
+extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
+
+#else
+
+JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
+	JSTValue result = JSTAction(JSValueMakeString, s);
+	if (release) JSTStringRelease(s);
+	return result;
+}
+
+#endif
+
 #define JSTValueGetType(v) JSValueGetType, v)
 
 #define JSTValueTypeUndefined kJSTypeUndefined

@@ -29,13 +29,10 @@ int main(int argc, char *argv[], char *envp[]) {
 			while ((c = *script) && c != '\n') script++;
 		}
 		JSTScriptEval(script, NULL, argv[1], 1);
-	} else puts("unable to read source file");
+	} else { JSTScriptNativeError("unable to read user script: `%s'", argv[1]); }
 
-	if (e) {
-		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "title")), true));
-		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "message")), true));
-		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "line")), true));
-	}
+	if (e) JSTScriptReportException();
+
 }
 
 

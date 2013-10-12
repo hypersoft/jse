@@ -74,10 +74,40 @@ CallVM.prototype = js.extendPrototype(Object.defineProperties({
 	reset: function() {js.native.callVM.reset(this.pointer); return true; },
 });
 
-function exit(num) {
-	var jse = new SharedLibrary(); var cvm = new CallVM(4);
-	cvm.push([4], num); cvm.call(4, jse.find('exit'));
+
+Object.defineProperties(this, {jse:{value:new SharedLibrary(), enumerable:true}});
+
+jse.call = {native: 0};
+jse.proto = {
+
+	bool:1, char:2, short:3, int:4, long:5, int64:6, float:7, double:8,
+	utf8:9, utf16:10, utf32:11, pointer:12, 'void':13, struct:14, union:15, ellipsis:16,
+	unsigned:32,
+
+	schar:2, sshort:3, sint:4, slong:5, sint64:6,
+
 }
 
-var print = new Command('echo', '-n');
-var printf = new Command('printf');
+js.extend(jse.proto, {
+	uchar:jse.proto.unsigned + jse.char,
+	ushort:jse.proto.unsigned + jse.short,
+	uint:jse.proto.unsigned + jse.int,
+	ulong:jse.proto.unsigned + jse.long,
+	uint64:jse.proto.unsigned + jse.int64,
+})
+
+function Procedure(lib, name, mode, proto) {
+	var proc = new Object(lib.find(name));
+	proc.proto = new Array();
+	proc.mode = (typeof mode == 'string') ? jse.call[mode] : mode;
+	for (item in proto) proc.proto[item] = (typeof proto[item] == 'string') ? jse.proto[proto[item]] : proto[item];
+	proc.return = proc.proto.shift();
+	proc.length = proc.proto.length, proc.size = 0;
+	for (item in proc.proto) proc.size += js.native.typeSize(proc.proto[item]);
+	var bound = js.native.callVM.exec.bind(proc);
+	// bound.proc = proc; need property accessors on proc to validate data
+	return bound;
+}
+
+var exit = new Procedure(jse, 'exit', 0, [4, 4]);
+

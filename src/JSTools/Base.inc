@@ -1,9 +1,13 @@
 #define JSTUTF8 char
 #define JSTUTF16 char16_t
 #define JSTUTF32 char32_t
+#define JSTString JSStringRef
 
+#define JSTContext JSContextRef
 #define JSTValue JSValueRef
 #define JSTObject JSObjectRef
+#define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
+#define JSTValueUndefined JSValueMakeUndefined(ctx)
 
 #define JST(NAME, ...) NAME (ctx, ##__VA_ARGS__, exception)
 #define JSTAction(NAME, ...) NAME (ctx, ##__VA_ARGS__)

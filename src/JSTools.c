@@ -1,26 +1,27 @@
+const char * JSTReservedAddress = "Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
+
 #include "JSTools.inc"
 #include "JSTInit.inc"
 
-const char * JSTReservedAddress = "Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
-
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]);
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
-char * JSTStringToUTF8_ JSTUtility(JSTString s, bool release);
-JSTObject JSTConstructorCall_(JSTContext ctx, JSTValue *exception, JSTObject c, ...);
 JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
 JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
-JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
 bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
 void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
 JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
 bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
-JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i);
-bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 static JSValueRef jsExecute JSTDeclareFunction ();
+char * JSTConstructUTF8(char * format, ...);
 
 #include "JSTools/Native.inc"
 #include <seed.h>
+
+char * JSTConstructUTF8(char * format, ...) {
+	va_list ap; va_start(ap, format); char * message = NULL;
+	vasprintf(&message, format, ap); return message;
+}
 
 JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exception) {
 	JSObjectRef result = JSTClassInstance(NULL, NULL);
@@ -146,6 +147,11 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	seed_init_with_context (&argc, &argv, (SeedGlobalContext) ctx);
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
+
+	if (*exception) {
+		JSTScriptReportException(); exit(1);
+	}
+
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyRequired);
@@ -186,19 +192,6 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
 		result = JSTAction(JSValueMakeFromJSONString, s);
 		JSTStringRelease(s);
 	}
-	return result;
-}
-
-bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i) {
-	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
-	bool result = JST(JSCheckScriptSyntax, s[0], s[1], i);
-	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
-}
-
-JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i) {
-	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
-	JSTValue result = JST(JSEvaluateScript, s[0], o, s[1], i);
-	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
 	return result;
 }
 
@@ -248,28 +241,6 @@ JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f) {
 		JSTStringRelease(s);
 	}
 	return result;
-}
-
-JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
-	JSTValue result = JSTAction(JSValueMakeString, s);
-	if (release) JSTStringRelease(s);
-	return result;
-}
-
-char * JSTStringToUTF8_ JSTUtility(JSTString s, bool release) {
-	register size_t bufferLength = 0; register void * buffer = NULL;
-	if (s && (bufferLength = JSStringGetMaximumUTF8CStringSize(s)))
-		JSStringGetUTF8CString(s, (buffer = malloc(bufferLength)), bufferLength);
-	if (release) JSTStringRelease(s);
-	return buffer;
-}
-
-JSTObject JSTConstructorCall_(JSTContext ctx, JSTValue *exception, JSTObject c, ...) {
-	va_list ap; register size_t argc = 0, count = 0; va_start(ap, c); 
-	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, c);
-	if (argc > 32) return JSTObjectUndefined; JSTValue argv[argc+1];
-	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
-	argv[count] = NULL; return JST(JSObjectCallAsConstructor, c, argc, argv);
 }
 
 JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...) {

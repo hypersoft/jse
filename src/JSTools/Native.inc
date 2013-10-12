@@ -161,36 +161,29 @@ static JSTValue jsNativeCallVMCall JSTDeclareFunction(Pointer callVM, Number typ
 }
 
 // This procedure is lacking a plethora of error checking and functional logic
-static JSTValue jsNativeCallVMExec JSTDeclareFunction(Pointer fn, Number mode, Array proto, ...) {
+static JSTValue jsNativeCallVMExec JSTDeclareFunction(...) {
 
-	void * callVM = NULL, * fn = JSTValueToPointer(this); // check that this is a number!
-	// int callVMMode = JSTValueToDouble(argv[0]);
-	JSTValue result = NULL;
-	JSTObject proto = JSTValueToObject(argv[1]);
+	JSTValue result = JSTValueNull;
+
+	void * fn = JSTValueToPointer(this); // check that this is a number!
+	int returnType = JSTValueToDouble(JSTObjectGetProperty(this, "return"));
+	JSTObject proto = JSTValueToObject(JSTObjectGetProperty(this, "proto"));
+
+	int stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
+	int callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode"));
+
+	void * callVM  = dcNewCallVM(stackSize);
+	dcMode(callVM, callVMMode);
+
+	int stackItem = 0, stackIndex = 0;
+	bool ellipsis = false, unsign = (returnType > JSTNativeTypeUnsigned);
 
 	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
-	int stackItem = 0, stackSize = 0, stackIndex = 0, returnType = 0;
-	bool ellipsis = false, unsign = false;
 
 	while (stackIndex < protoLen) {
-		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++));
-		if (ellipsis = (stackItem == JSTNativeTypeEllipsis)) { 
-			// need to count & scan argv items here or only support integers
-			// DO NOT USE!
-			break;
-		}
+		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex));
 		if (stackItem > JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
-		stackSize += JSTNativeTypeSize[stackItem];
-	}
-
-	dcMode(callVM = dcNewCallVM(stackSize), JSTValueToDouble(argv[0])), stackIndex = 0,
-	returnType = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++)),
-	(unsign = (returnType >= JSTNativeTypeUnsigned))?returnType -= JSTNativeTypeUnsigned:0;
-
-	while (stackIndex < protoLen) {
-		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++));
-		if (stackItem >= JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
-		JSTValue value = argv[stackIndex];
+		JSTValue value = argv[stackIndex++];
 		if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
 		else if (stackItem == JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
 		else if (stackItem == JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
@@ -202,6 +195,8 @@ static JSTValue jsNativeCallVMExec JSTDeclareFunction(Pointer fn, Number mode, A
 		else if (stackItem == JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 		else break; // error!
 	}
+
+	if (unsign) returnType -= JSTNativeTypeUnsigned;
 
 	if (returnType == JSTNativeTypeBoolean) result = JSTValueFromBoolean(dcCallBool(callVM, fn));
 	else if (returnType == JSTNativeTypeChar) result = JSTValueFromDouble((double) (unsign)?dcCallChar(callVM, fn):(signed char)dcCallChar(callVM, fn));
@@ -263,6 +258,7 @@ static JSValueRef jsNativeAddressWrite JSTDeclareFunction (address, type, value)
 
 static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 	unsigned int i = JSTValueToDouble(argv[0]);
+	if (i > JSTNativeTypeUnsigned) i -= JSTNativeTypeUnsigned;
 	if (i >= JSTNativeTypeVoid) i = 0;
 	return JSTValueFromDouble(JSTNativeTypeSize[i]);
 }
@@ -378,6 +374,10 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(address, "write", JSTFunctionCallback("write", jsNativeAddressWrite), JSTObjectPropertyRequired);
 
 	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
+
+	if (*exception) {
+		JSTScriptReportException(); exit(1);
+	}
 
 	return native;
 
