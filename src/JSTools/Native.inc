@@ -5,26 +5,26 @@
 #define JSTNativeByteOrder G_BYTE_ORDER
 
 #define JSTNativeTypeVoid 0
-#define JSTNativeTypeUnsigned (1 << 1)
-#define JSTNativeTypePointer (1 << 2)
+#define JSTNativeTypeUnsigned (1 << 0)
+#define JSTNativeTypePointer (1 << 1)
 #define JSTNativeTypeEllipsis 3
-#define JSTNativeTypeBoolean (1 << 3)
-#define JSTNativeTypeChar ((1 << 4) | JSTNativeTypeUnsigned)
-#define JSTNativeTypeShort (1 << 5)
-#define JSTNativeTypeInt (1 << 6)
-#define JSTNativeTypeLong (1 << 7)
-#define JSTNativeTypeLongLong (1 << 8)
+#define JSTNativeTypeBoolean (1 << 2)
+#define JSTNativeTypeChar ((1 << 3) | JSTNativeTypeUnsigned)
+#define JSTNativeTypeShort (1 << 4)
+#define JSTNativeTypeInt (1 << 5)
+#define JSTNativeTypeLong (1 << 6)
+#define JSTNativeTypeLongLong (1 << 7)
+#define JSTNativeTypeSize (1 << 8)
 #define JSTNativeTypeFloat (1 << 9)
 #define JSTNativeTypeDouble (1 << 10)
-#define JSTNativeTypeSize (1 << 11)
-#define JSTNativeTypeUTF8 (1 << 12)
-#define JSTNativeTypeUTF16 (1 << 13)
-#define JSTNativeTypeUTF32 (1 << 14)
-#define JSTNativeTypeStruct (1 << 15)
-#define JSTNativeTypeUnion (1 << 16)
-#define JSTNativeTypeValue (1 << 17)
-#define JSTNativeTypeString (1 << 18)
-#define JSTNativeTypeException (1 << 19)
+#define JSTNativeTypeUTF8 (1 << 11)
+#define JSTNativeTypeUTF16 (1 << 12)
+#define JSTNativeTypeUTF32 (1 << 13)
+#define JSTNativeTypeValue (1 << 14)
+#define JSTNativeTypeString (1 << 15)
+#define JSTNativeTypeException (1 << 16)
+#define JSTNativeTypeStruct (1 << 17)
+#define JSTNativeTypeUnion (1 << 18)
 
 #ifdef JSTools_h
 
@@ -43,16 +43,15 @@ int JSTNativeTypeGetSize(int t) {
 		|| t == JSTNativeTypeString
 		|| t == JSTNativeTypeException)
 	return sizeof(void*);
-	else if (t == JSTNativeTypeUnsigned) return sizeof(int);
 	else if (t == JSTNativeTypeBoolean) return sizeof(bool);
 	else if (t & JSTNativeTypeChar) return sizeof(char);
 	else if (t & JSTNativeTypeShort) return sizeof(short);
-	else if (t & JSTNativeTypeInt) return sizeof(int);
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) return sizeof(int);
 	else if (t & JSTNativeTypeLong) return sizeof(long);
 	else if (t & JSTNativeTypeLongLong) return sizeof(long long);
+	else if (t & JSTNativeTypeSize) return sizeof(size_t);
 	else if (t == JSTNativeTypeFloat) return sizeof(float);
 	else if (t == JSTNativeTypeDouble) return sizeof(double);
-	else if (t & JSTNativeTypeSize) return sizeof(size_t);
 	else if (t == JSTNativeTypeUTF8) return sizeof(UTF8);
 	else if (t == JSTNativeTypeUTF16) return sizeof(UTF16);
 	else if (t == JSTNativeTypeUTF32) return sizeof(UTF32);
@@ -66,17 +65,16 @@ const char * JSTNativeTypeNameUTF8(int t) {
 		|| t == JSTNativeTypeString
 		|| t == JSTNativeTypeException)
 	return "pointer";
-	else if (t == JSTNativeTypeUnsigned) return "int";
 	else if (t == JSTNativeTypeEllipsis) return "ellipsis";
 	else if (t == JSTNativeTypeBoolean) return "bool";
 	else if (t & JSTNativeTypeChar) return (t & JSTNativeTypeUnsigned)?"char":"schar";
 	else if (t & JSTNativeTypeShort) return (t & JSTNativeTypeUnsigned)?"ushort":"short";
-	else if (t & JSTNativeTypeInt) return (t & JSTNativeTypeUnsigned)?"uint":"int";
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) return (t & JSTNativeTypeUnsigned)?"uint":"int";
 	else if (t & JSTNativeTypeLong) return (t & JSTNativeTypeUnsigned)?"ulong":"long";
 	else if (t & JSTNativeTypeLongLong) return (t & JSTNativeTypeUnsigned)?"uint64":"int64";
+	else if (t & JSTNativeTypeSize) return (t & JSTNativeTypeUnsigned)?"size":"ssize";
 	else if (t == JSTNativeTypeFloat) return "float";
 	else if (t == JSTNativeTypeDouble) return "double";
-	else if (t & JSTNativeTypeSize) return (t & JSTNativeTypeUnsigned)?"size":"ssize";
 	else if (t == JSTNativeTypeUTF8) return "utf8";
 	else if (t == JSTNativeTypeUTF16) return "utf16";
 	else if (t == JSTNativeTypeUTF32) return "utf32";
@@ -86,8 +84,6 @@ const char * JSTNativeTypeNameUTF8(int t) {
 static JSTContext sigctx = NULL;
 static JSTObject sigfn = NULL;
 static JSTObject sigob = NULL;
-
-JSTObject JSTNativeCache = NULL;
 
 static void signal_handler (int signum) {
 	JSTContext ctx = sigctx; void * exception = NULL;
@@ -139,6 +135,9 @@ static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, St
 // This procedure is lacking a plethora of error checking and functional logic
 static JSTValue jsNativeExec JSTDeclareFunction(...) {
 
+	const char * fname = "js.native.exec";
+	const char * job = "type error";
+
 	JSTValue result = JSTValueNull;
 
 	void * fn = JSTValueToPointer(this); // check that this is a number!
@@ -149,31 +148,54 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	int callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode"));
 
 	void * callVM  = dcNewCallVM(stackSize);
+
 	dcMode(callVM, callVMMode);
+
+	if (dcGetError(callVM) == DC_ERROR_UNSUPPORTED_MODE) {
+		result = JSTScriptNativeError("%s: %s: `%i' is an invalid or unknown virtual call mode", fname, job, callVMMode);
+		goto bail;
+	}
 
 	int stackItem = 0, stackIndex = 0;
 	bool ellipsis = false, unsign = (returnType & JSTNativeTypeUnsigned);
 
-	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
+	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length")), bump = 0;
 
 	while (stackIndex < protoLen) {
-		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex));
+		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex + bump));
 		if (stackItem > JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
+		else if (stackItem == JSTNativeTypeException) {
+			dcArgPointer(callVM, &exception); bump++, protoLen--; continue;
+		}
 		JSTValue value = argv[stackIndex++];
-		if (stackItem & JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
+		if (stackItem & JSTNativeTypeUTF8) {
+			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
+			else dcArgChar(callVM, JSTValueToDouble(value));
+		} else if (stackItem & JSTNativeTypeUTF16) {
+			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
+			else dcArgShort(callVM, JSTValueToDouble(value));
+		} else if (stackItem & JSTNativeTypeUTF32) {
+			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
+			else dcArgLong(callVM, JSTValueToDouble(value));
+		} else if (stackItem & JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 		else if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
 		else if (stackItem & JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
 		else if (stackItem & JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
 		else if (stackItem & JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
 		else if (stackItem & JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
 		else if (stackItem & JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
+		else if (stackItem & JSTNativeTypeSize) dcArgLong(callVM, JSTValueToDouble(value));
 		else if (stackItem == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
 		else if (stackItem == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
-		else break; // error!
+		else if (stackItem == JSTNativeTypeValue) dcArgPointer(callVM, (void*) value);
+		else if (stackItem == JSTNativeTypeString) dcArgPointer(callVM, (void*) value);
+		else {
+			result = JSTScriptNativeError("%s: %s: argument #%i (%i) is an unknown type", fname, job, stackIndex, stackItem);
+			goto bail;
+		}
 	}
 
 	if (unsign) returnType -= JSTNativeTypeUnsigned;
-
 	if (returnType & JSTNativeTypePointer) result = JSTValueFromPointer(dcCallPointer(callVM, fn));
 	else if (returnType == JSTNativeTypeBoolean) result = JSTValueFromBoolean(dcCallBool(callVM, fn));
 	else if (returnType & JSTNativeTypeChar) result = JSTValueFromDouble((double) (unsign)?dcCallChar(callVM, fn):(signed char)dcCallChar(callVM, fn));
@@ -181,12 +203,24 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	else if (returnType & JSTNativeTypeInt) result = JSTValueFromDouble((double) (unsign)?(unsigned int)dcCallInt(callVM, fn):dcCallInt(callVM, fn));
 	else if (returnType & JSTNativeTypeLong) result = JSTValueFromDouble(dcCallLong(callVM, fn));
 	else if (returnType & JSTNativeTypeLongLong) result = JSTValueFromDouble((double) (unsign)?(unsigned long long)dcCallLongLong(callVM, fn):dcCallLongLong(callVM, fn));
+	else if (returnType & JSTNativeTypeSize) result = JSTValueFromDouble(dcCallLong(callVM, fn));
 	else if (returnType == JSTNativeTypeFloat) result = JSTValueFromDouble(dcCallFloat(callVM, fn));
 	else if (returnType == JSTNativeTypeDouble) result = JSTValueFromDouble(dcCallDouble(callVM, fn));
 	else if (returnType == JSTNativeTypeVoid) { result = JSTValueUndefined; dcCallVoid(callVM, fn); }
-	//else ; // error!
+	else if (returnType == JSTNativeTypeValue) result = (JSTValue) dcCallPointer(callVM, fn);
+	else if (returnType == JSTNativeTypeString) result =  JSTValueFromPointer(dcCallPointer(callVM, fn));
+	else if (returnType == JSTNativeTypeException) result = (JSTValue) dcCallPointer(callVM, fn);
+	else {
+		result = JSTScriptNativeError("%s: %s: procedure return type `%i' is an unknown type", fname, job, returnType);
+		goto bail;
+	}
 
-	dcFree(callVM); return result;
+	goto done;
+
+bail:
+	dcFree(callVM);
+done:
+	return result;
 
 }
 
@@ -280,9 +314,9 @@ static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 	else if (t & JSTNativeTypeInt) return JSTValueFromDouble(sizeof(int));
 	else if (t & JSTNativeTypeLong) return JSTValueFromDouble(sizeof(long));
 	else if (t & JSTNativeTypeLongLong) return JSTValueFromDouble(sizeof(long long));
+	else if (t & JSTNativeTypeSize) return JSTValueFromDouble(sizeof(size_t));
 	else if (t == JSTNativeTypeFloat) return JSTValueFromDouble(sizeof(float));
 	else if (t == JSTNativeTypeDouble) return JSTValueFromDouble(sizeof(double));
-	else if (t & JSTNativeTypeSize) return JSTValueFromDouble(sizeof(size_t));
 	else if (t == JSTNativeTypeUTF8) return JSTValueFromDouble(sizeof(UTF8));
 	else if (t == JSTNativeTypeUTF16) return JSTValueFromDouble(sizeof(UTF16));
 	else if (t == JSTNativeTypeUTF32) return JSTValueFromDouble(sizeof(UTF32));
@@ -361,15 +395,28 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
+	char * jsNativeTypes = JSTConstructUTF8("js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i, exception: %i }",
+		G_MEM_ALIGN, G_BYTE_ORDER,
+		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD, DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS, DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV, DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB, DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32, DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32,
+		0, JSTNativeTypeUnsigned, JSTNativeTypePointer, JSTNativeTypeEllipsis, JSTNativeTypeBoolean,
+		JSTNativeTypeChar, JSTNativeTypeShort, JSTNativeTypeInt, JSTNativeTypeLong, JSTNativeTypeLongLong,
+		JSTNativeTypeFloat, JSTNativeTypeDouble, JSTNativeTypeSize, JSTNativeTypeUTF8, JSTNativeTypeUTF16,
+		JSTNativeTypeUTF32, JSTNativeTypeStruct, JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString,
+		JSTNativeTypeException
+	);
+
+	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
+
+	if (*exception) {
+		return (JSTObject) JSTScriptReportException(); exit(1);
+	}
+
 	JSTObject lib = JSTClassInstance(NULL, NULL);
 
 	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
-
-	JSTObjectSetProperty(native, "alignment", JSTValueFromDouble(G_MEM_ALIGN), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "byteOrder", JSTValueFromDouble(G_BYTE_ORDER), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(native, "toUTF8", JSTFunctionCallback("toUTF8", jsNativeToUTF8), JSTObjectPropertyRequired);
@@ -392,7 +439,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
 
 	if (*exception) {
-		JSTScriptReportException(); exit(1);
+		return (JSTObject) JSTScriptReportException(); exit(1);
 	}
 
 	return native;

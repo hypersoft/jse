@@ -167,17 +167,18 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(env, "chdir", JSTFunctionCallback("chdir", jsToolsEnvChDir), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(env, "user", JSTFunctionCallback("user", jsToolsEnvUser), JSTObjectPropertyRequired);
 
-	JSTObject jsRun = JSTValueToObject(JSTObjectGetProperty(js, "run"));
-
-	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", NULL), JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObject jsRun = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(js, "run", jsRun, JSTObjectPropertyRequired);
+	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), 0);
+	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), 0);
+	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), 0);
+	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), 0);
+	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), 0);
+	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), 0);
+	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), 0);
+	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), 0);
+	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), 0);
+	JSTScriptNativeEval("Object.freeze(js.run)", global);
 
 	JSTNativeInit(js);
 

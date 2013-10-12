@@ -25,7 +25,6 @@ var jsCallStackParse = function parse(c) {
 }
 
 var js = Object.defineProperties(new Object(), {
-	io: {value:{}, enumerable:true},
 	callStack: {get: function() {
 		var trace = [];
 		try { throw Error('n/a') } catch(err) {
@@ -46,9 +45,6 @@ var js = Object.defineProperties(new Object(), {
 		e.toString = jsErrorToString;
 		return e;
 	}, enumerable:true},
-	run: {value:Object.defineProperty(new Object(), "date", {
-		value:new Date(), enumerable:true
-	}), enumerable:true},
 });
 
 js.Tokenizer = function(getToken) {

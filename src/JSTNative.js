@@ -3,16 +3,6 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
-js.cache = new Array();
-
-js.call = {native: 0};
-js.type = {
-	'void': 0, unsigned: 1, pointer: 4, ellipsis: 3, boolean: 8, char: (16 | 1),
-	short: 32, int: 64, long: 128, int64: 256, float: 512, double: 1024, size: 2048,
-	utf8: 4096, utf16: 8192, utf32: 16384, struct: 32768, union: 65536, value: 131072,
-	string: 262144, exception: 524288
-}
-
 js.extend(js.type, {
 	uchar:js.type.unsigned | js.type.char,
 	ushort:js.type.unsigned | js.type.short,

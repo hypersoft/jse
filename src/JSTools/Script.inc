@@ -12,11 +12,11 @@
 
 #define JSTScriptSetError(e) (*exception = e)
 #define JSTScriptHasError (!JSTValueIsVoid(*exception) && JSTValueIsObject(*exception))
-#define JSTScriptReportException() JST(JSTScriptReportException_)
+#define JSTScriptReportException() (JST(JSTScriptReportException_), JSTValueNull)
 
 #define JSTScriptFunction(sName, iParamCount, pArgNames, sBody, sURL, iLine) JST(JSObjectMakeFunction, sName, iParamCount, pArgNames, sBody sURL, iLine)
 
-#define JSTScriptNativeError(f, ...) JSTScriptNativeError_(ctx, exception, __FILE__, __LINE__, f, ##__VA_ARGS__), JSTValueNull
+#define JSTScriptNativeError(f, ...) (JSTScriptNativeError_(ctx, exception, __FILE__, __LINE__, f, ##__VA_ARGS__), JSTValueNull)
 
 #define JSTScriptRestrictArguments(func, job, count, usage) if (argc != count) return JSTScriptNativeError("%s: %s: %s arguments: usage: %s", func, job, (argc > count)?"too many":"insufficient", usage)
 
