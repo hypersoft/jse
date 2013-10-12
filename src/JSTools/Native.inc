@@ -160,6 +160,65 @@ static JSTValue jsNativeCallVMCall JSTDeclareFunction(Pointer callVM, Number typ
 
 }
 
+// This procedure is lacking a plethora of error checking and functional logic
+static JSTValue jsNativeCallVMExec JSTDeclareFunction(Pointer fn, Number mode, Array proto, ...) {
+
+	void * callVM = NULL, * fn = JSTValueToPointer(this); // check that this is a number!
+	// int callVMMode = JSTValueToDouble(argv[0]);
+	JSTValue result = NULL;
+	JSTObject proto = JSTValueToObject(argv[1]);
+
+	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
+	int stackItem = 0, stackSize = 0, stackIndex = 0, returnType = 0;
+	bool ellipsis = false, unsign = false;
+
+	while (stackIndex < protoLen) {
+		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++));
+		if (ellipsis = (stackItem == JSTNativeTypeEllipsis)) { 
+			// need to count & scan argv items here or only support integers
+			// DO NOT USE!
+			break;
+		}
+		if (stackItem > JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
+		stackSize += JSTNativeTypeSize[stackItem];
+	}
+
+	dcMode(callVM = dcNewCallVM(stackSize), JSTValueToDouble(argv[0])), stackIndex = 0,
+	returnType = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++)),
+	(unsign = (returnType >= JSTNativeTypeUnsigned))?returnType -= JSTNativeTypeUnsigned:0;
+
+	while (stackIndex < protoLen) {
+		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex++));
+		if (stackItem >= JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
+		JSTValue value = argv[stackIndex];
+		if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
+		else if (stackItem == JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeShort) dcArgShort(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeInt) dcArgInt(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeLong) dcArgLong(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeLongLong) dcArgLongLong(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
+		else if (stackItem == JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
+		else break; // error!
+	}
+
+	if (returnType == JSTNativeTypeBoolean) result = JSTValueFromBoolean(dcCallBool(callVM, fn));
+	else if (returnType == JSTNativeTypeChar) result = JSTValueFromDouble((double) (unsign)?dcCallChar(callVM, fn):(signed char)dcCallChar(callVM, fn));
+	else if (returnType == JSTNativeTypeShort) result = JSTValueFromDouble((double) (unsign)?(unsigned short)dcCallShort(callVM, fn):dcCallShort(callVM, fn));
+	else if (returnType == JSTNativeTypeInt) result = JSTValueFromDouble((double) (unsign)?(unsigned int)dcCallInt(callVM, fn):dcCallInt(callVM, fn));
+	else if (returnType == JSTNativeTypeLong) result = JSTValueFromDouble(dcCallLong(callVM, fn));
+	else if (returnType == JSTNativeTypeLongLong) result = JSTValueFromDouble((double) (unsign)?(unsigned long long)dcCallLongLong(callVM, fn):dcCallLongLong(callVM, fn));
+	else if (returnType == JSTNativeTypeFloat) result = JSTValueFromDouble(dcCallFloat(callVM, fn));
+	else if (returnType == JSTNativeTypeDouble) result = JSTValueFromDouble(dcCallDouble(callVM, fn));
+	else if (returnType == JSTNativeTypePointer) result = JSTValueFromPointer(dcCallPointer(callVM, fn));
+	else if (returnType == JSTNativeTypeVoid) { result = JSTValueUndefined; dcCallVoid(callVM, fn); }
+	//else ; // error!
+
+	dcFree(callVM); return result;
+
+}
+
 static JSValueRef jsNativeAddressRead JSTDeclareFunction (address, type) {
 	// must have first arg of type Number
 	// must have second arg of type Number
@@ -311,6 +370,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetProperty(callVM, "reset", JSTFunctionCallback("reset", jsNativeCallVMReset), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(callVM, "push", JSTFunctionCallback("push", jsNativeCallVMPush), JSTObjectPropertyRequired);
 	JSTObjectSetProperty(callVM, "call", JSTFunctionCallback("call", jsNativeCallVMCall), JSTObjectPropertyRequired);
+	JSTObjectSetProperty(callVM, "exec", JSTFunctionCallback("exec", jsNativeCallVMExec), JSTObjectPropertyRequired);
 
 	JSTObject address = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "address", address, JSTObjectPropertyRequired);

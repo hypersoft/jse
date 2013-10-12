@@ -31,7 +31,11 @@ int main(int argc, char *argv[], char *envp[]) {
 		JSTScriptEval(script, NULL, argv[1], 1);
 	} else puts("unable to read source file");
 
-	if (e) puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "message")), true));
+	if (e) {
+		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "title")), true));
+		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "message")), true));
+		puts(JSTStringToUTF8(JSTValueToString(JSTObjectGetProperty(e, "line")), true));
+	}
 }
 
 
