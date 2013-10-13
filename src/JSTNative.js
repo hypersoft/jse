@@ -3,7 +3,7 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
-js.type.sign = function(t) { return (t > js.type.bool && t < js.type.float && (t & js.type.unsigned)) ? t-- : t) }
+js.type.sign = function(t) { return (t > js.type.bool && t < js.type.float && (t & js.type.unsigned)) ? t-- : t }
 js.type.address = function(t) { return (t | js.type.pointer) }
 
 js.extend(js.type, {
