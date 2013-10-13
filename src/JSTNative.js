@@ -25,7 +25,7 @@ var Command = function(command) {
 
 function SharedLibrary(s) {
 	var cache = js.native.lib;
-	if (s == undefined || s == null) s = '';
+	if (s == undefined) s = '';
 	this.name = (s == '') ? "jse" : s;
 	if (this.name in cache) {
 		cache[this.name].retainers++;
