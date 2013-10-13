@@ -1,11 +1,13 @@
-const char * JSTReservedAddress = "Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
+const char * JSTReservedAddress =
+
+	"Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
 
 #include "JSTools.inc"
 #include "JSTInit.inc"
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]);
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
-JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
+JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
 JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
 bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
 void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
@@ -147,25 +149,23 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	seed_init_with_context (&argc, &argv, (SeedGlobalContext) ctx);
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
-
-	if (*exception) {
-		JSTScriptReportException(); exit(1);
-	}
-
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+	
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
 
 	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(js, "exec", JSTFunctionCallback("exec", jsExecute), JSTObjectPropertyRequired);
 
-	JSObjectRef env = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(js, "env", env, JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "read", JSTFunctionCallback("read", jsToolsEnvRead), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "write", JSTFunctionCallback("write", jsToolsEnvWrite), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "keys", JSTFunctionCallback("keys", jsToolsEnvKeys), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "delete", JSTFunctionCallback("delete", jsToolsEnvDelete), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "cwd", JSTFunctionCallback("cwd", jsToolsEnvCWD), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "chdir", JSTFunctionCallback("chdir", jsToolsEnvChDir), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(env, "user", JSTFunctionCallback("user", jsToolsEnvUser), JSTObjectPropertyRequired);
+	JSTObjectSetMethod(js, "exec", jsExecute, 0);
+
+	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);
+
+	JSTObjectSetMethod(env, "read", jsToolsEnvRead, 0);
+	JSTObjectSetMethod(env, "write", jsToolsEnvWrite, 0);
+	JSTObjectSetMethod(env, "keys", jsToolsEnvKeys, 0);
+	JSTObjectSetMethod(env, "delete", jsToolsEnvDelete, 0);
+	JSTObjectSetMethod(env, "cwd", jsToolsEnvCWD, 0);
+	JSTObjectSetMethod(env, "chdir", jsToolsEnvChDir, 0);
+	JSTObjectSetMethod(env, "user", jsToolsEnvUser, 0);
 
 	JSTObject jsRun = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "run", jsRun, JSTObjectPropertyRequired);
@@ -180,9 +180,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), 0);
 	JSTScriptNativeEval("Object.freeze(js.run)", global);
 
-	JSTNativeInit(js);
-
-	return js;
+	JSTNativeInit(js); return js;
 
 }
 
@@ -244,7 +242,7 @@ JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f) {
 	return result;
 }
 
-JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...) {
+JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...) {
 	va_list ap; register size_t argc = 0, count = 0; va_start(ap, object); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, object);
 	if (argc > 32) return JSTValueUndefined; JSTValue argv[argc+1];

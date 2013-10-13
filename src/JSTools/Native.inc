@@ -468,7 +468,7 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 	if (JSTObjectHasProperty(definition, "query")) jsClass.hasProperty = &jsNativeContainerQuery;
 	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
 
-	JSClassRef container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
+	JSTClass container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
 
 	return JSTValueFromPointer(container);
 
@@ -496,6 +496,9 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
+	JSTObject lib = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
+
 	char * jsNativeTypes = JSTConstructUTF8("js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; Object.freeze(js.call); js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i};",
 		JSTNativeAlignment, JSTNativeByteOrder,
 		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,
@@ -509,47 +512,42 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 		JSTNativeTypeLongLong, JSTNativeTypeFloat, JSTNativeTypeDouble, JSTNativeTypeSize,
 		JSTNativeTypeUTF8, JSTNativeTypeUTF16,JSTNativeTypeUTF32, JSTNativeTypeStruct,
 		JSTNativeTypeUnion, JSTNativeTypeValue, JSTNativeTypeString
-	);
+	);	// supplemental type aliases are also provided in JSTNative.js
 
 	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
 	if (JSTScriptHasError) {
 		JSTScriptReportException(); exit(1);
 	}
 
-//	sigctx = ctx; // for global signal callback
-//	JSTObjectSetProperty(native, "signalTrap", JSTFunctionCallback("signalTrap", jsNativeSignalTrap), JSTObjectPropertyRequired);
-//	JSTObjectSetProperty(native, "trap", JSTFunctionCallback("trap", jsNativeTrap), JSTObjectPropertyRequired);
-
-	JSTObjectSetProperty(native, "container", JSTFunctionCallback("container", jsNativeContainer), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "instance", JSTFunctionCallback("instance", jsNativeInstance), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "setPrototype", JSTFunctionCallback("setPrototype", jsNativeSetPrototype), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "getPrototype", JSTFunctionCallback("getPrototype", jsNativeGetPrototype), JSTObjectPropertyRequired);
-
-	JSTObject lib = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
-
-	JSTObjectSetProperty(native, "typeSize", JSTFunctionCallback("typeSize", jsNativeTypeSize), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "toUTF8", JSTFunctionCallback("toUTF8", jsNativeToUTF8), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "fromUTF8", JSTFunctionCallback("fromUTF8", jsNativeFromUTF8), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "toUTF32", JSTFunctionCallback("toUTF32", jsNativeToUTF32), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(native, "exec", JSTFunctionCallback("exec", jsNativeExec), JSTObjectPropertyRequired);
+	JSTObjectSetMethod(native, "container", jsNativeContainer, 0);
+	JSTObjectSetMethod(native, "instance", jsNativeInstance, 0);
+	JSTObjectSetMethod(native, "setPrototype", jsNativeSetPrototype, 0);
+	JSTObjectSetMethod(native, "getPrototype", jsNativeGetPrototype, 0);
+	JSTObjectSetMethod(native, "setPrivate", jsNativeSetPrivate, 0);
+	JSTObjectSetMethod(native, "typeSize", jsNativeTypeSize, 0);
+	JSTObjectSetMethod(native, "toUTF8", jsNativeToUTF8, 0);
+	JSTObjectSetMethod(native, "fromUTF8", jsNativeFromUTF8, 0);
+	JSTObjectSetMethod(native, "toUTF32", jsNativeToUTF32, 0);
+	JSTObjectSetMethod(native, "exec", jsNativeExec, 0);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);
-	JSTObjectSetProperty(library, "load", JSTFunctionCallback("load", jsNativeLibraryLoad), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(library, "free", JSTFunctionCallback("free", jsNativeLibraryFree), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(library, "findSymbol", JSTFunctionCallback("findSymbol", jsNativeLibraryFindSymbol), JSTObjectPropertyRequired);
+
+	JSTObjectSetMethod(library, "load", jsNativeLibraryLoad, 0);
+	JSTObjectSetMethod(library, "free", jsNativeLibraryFree, 0);
+	JSTObjectSetMethod(library, "findSymbol", jsNativeLibraryFindSymbol, 0);
 
 	JSTObject address = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "address", address, JSTObjectPropertyRequired);
-	JSTObjectSetProperty(address, "read", JSTFunctionCallback("read", jsNativeAddressRead), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(address, "write", JSTFunctionCallback("write", jsNativeAddressWrite), JSTObjectPropertyRequired);
-	JSTObjectSetProperty(address, "free", JSTFunctionCallback("free", jsNativeAddressFree), JSTObjectPropertyRequired);
+
+	JSTObjectSetMethod(address, "read", jsNativeAddressRead, 0);
+	JSTObjectSetMethod(address, "write", jsNativeAddressWrite, 0);
+	JSTObjectSetMethod(address, "free", jsNativeAddressFree, 0);
 
 	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
 
-	if (*exception) {
-		return (JSTObject) JSTScriptReportException(); exit(1);
+	if (JSTScriptHasError) {
+		JSTScriptReportException(); exit(1);
 	}
 
 	return native;

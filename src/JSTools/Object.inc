@@ -12,6 +12,11 @@
 #define JSTObjectGetPrivate(o) JSObjectGetPrivate(o)
 #define JSTObjectSetPrivate(o, p) JSObjectSetPrivate(o, p)
 
+#define JSTObjectSetMethod(o, n, m, a)	if (JSTValueIsObject(o)) { JSTString name = JSTStringFromUTF8(n); \
+JST(JSObjectSetProperty, o, name, JSTAction(JSObjectMakeFunctionWithCallback, name, m), a); \
+JSTStringRelease(name); \
+}
+
 #define JSTObjectIsFunction(o) JSObjectIsFunction(ctx, o)
 #define JSTObjectIsConstructor(o) JSTAction(JSObjectIsConstructor, o)
 
