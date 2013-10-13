@@ -3,12 +3,15 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
+js.type.sign = function(t) { return (t > js.type.bool && t < js.type.float && (t & js.type.unsigned)) ? t-- : t) }
+js.type.address = function(t) { return (t | js.type.pointer) }
+
 js.extend(js.type, {
-	uchar:js.type.unsigned | js.type.char,
-	ushort:js.type.unsigned | js.type.short,
-	uint:js.type.unsigned | js.type.int,
-	ulong:js.type.unsigned | js.type.long,
-	uint64:js.type.unsigned | js.type.int64,
+	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
+	ushort:js.type.unsigned | js.type.short, 	sshort: js.type.short,
+	uint:js.type.unsigned | js.type.int, 		sint: js.type.int,
+	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
+	uint64:js.type.unsigned | js.type.int64, 	sint64: js.type.int64
 })
 
 var Command = function(command) {
@@ -30,13 +33,15 @@ function SharedLibrary(s) {
 	}
 	this.pointer = js.native.library.load(s);
 	cache[this.name] = this;
+	// hmmm... js.native.compressLibCache... not very useful and doesn't promote sound
+	// coding ethic. load known vectors. its better to hit the cache than disk any day
 }
 
 SharedLibrary.prototype = js.extendPrototype({}, {
 	constructor: SharedLibrary, retainers: 1, pointer: null,
 	retain: function() {this.retainers++},
 	release: function() {
-		if (this.pointer == null) return true;
+		if (this.pointer == undefined) return true;
 		if (this.retainers != 0) this.retainers--;
 		if (this.retainers == 0) {
 			js.native.library.free(this.pointer);
@@ -47,7 +52,7 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 		} else return false;
 	},
 	find: function(s) {
-		if (s == undefined || s == null || s == '') return s;
+		if (s == undefined || s == '') return s;
 		if (s in this) return this[s];
 		else return this[s] = js.native.library.findSymbol(this.pointer, s);
 	},
@@ -70,5 +75,5 @@ function Procedure(lib, name, mode, proto) {
 	return bound;
 }
 
-var exit = new Procedure(js.engine, 'exit', 0, [4, 4]);
+var exit = new Procedure(js.engine, 'exit', js.call.native, [js.type.int, js.type.int]);
 
