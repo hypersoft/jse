@@ -94,14 +94,10 @@ static JSTValue jsNativeSignalTrap JSTDeclareFunction(Object obj, Function, fn) 
 
 static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
 	int number, i = 0, r = 0;
-	if (sigctx) {
-		while (i < argc)
+	if (sigctx) while (i < argc) //
 		if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
-		else {
-			JSTObjectSetPropertyAtIndex(sigob, number, JSTValueUndefined);
-			r++;
-		}
-	}
+		else JSTObjectSetPropertyAtIndex(sigob, number, JSTValueUndefined), r++;
+	//
 	return JSTValueFromDouble(r);
 }
 
@@ -130,10 +126,7 @@ static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, St
 // This procedure is lacking a plethora of error checking and functional logic
 static JSTValue jsNativeExec JSTDeclareFunction(...) {
 
-	const char * fname = "js.native.exec";
-	const char * job = "type error";
-
-	JSTValue result = JSTValueNull;
+	const char * fname = "js.native.exec", * job = "type error"; JSTValue result = JSTValueNull;
 
 	void * fn = JSTValueToPointer(this); // check that this is a number!
 	int returnType = JSTValueToDouble(JSTObjectGetProperty(this, "return"));
@@ -203,8 +196,6 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		goto bail;
 	}
 
-	goto done;
-
 bail:
 	dcFree(callVM);
 done:
@@ -214,8 +205,7 @@ done:
 
 static JSTValue jsNativeAddressRead JSTDeclareFunction (address, type) {
 
-	const char * fname = "js.native.address.read";
-	const char * job = "unable to read pointer contents";
+	const char * fname = "js.native.address.read", * job = "unable to read pointer contents";
 
 	if (argc != 2) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
 
@@ -248,8 +238,7 @@ static JSTValue jsNativeAddressRead JSTDeclareFunction (address, type) {
 
 static JSTValue jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
 
-	const char * fname = "js.native.address.write";
-	const char * job = "unable to write pointer contents";
+	const char * fname = "js.native.address.write", * job = "unable to write pointer contents";
 
 	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
 
@@ -318,8 +307,7 @@ static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
 }
 
 static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
-	void *p; JSTObject o; JSTValue v;
-	size_t i = 0;
+	void *p; JSTObject o; JSTValue v; size_t i = 0;
 	while (i < argc) {
 		v = argv[i++];
 		if (JSTValueIsVoid(v)) continue;
@@ -344,38 +332,26 @@ static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
 
 static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 	// must have one arg of type String
-
 	// this is not reliable, buffer is guessed and unchecked! Proof-of-concept
-
 	JSTString jss = JSTValueToString(argv[0]);
-
 	long utf16bytes = JSTStringUTF16Length(jss);
 	long utf32bytes = ((utf16bytes) * 2);
-
 	const UTF16 * utf16 = JSTStringUTF16(jss);
 	const UTF16 * utf16in = utf16;
-
 	UTF32 * utf32 = malloc(utf32bytes + sizeof(UTF32)); // pad terminate
 	UTF32 * utf32out = utf32;
-	
 	ConvertUTF16toUTF32(
 		&utf16in, utf16in + utf16bytes,
 		&utf32out, utf32out + utf32bytes,
 		0 // strict conversion
 	);
-
-	JSTStringRelease(jss);
-
-	*(utf32out) = L'\0';
-
+	JSTStringRelease(jss), *(utf32out) = L'\0';
 	return JSTValueFromPointer(utf32);
-
 }
 
 static JSTDeclareConvertor(jsNativeContainerConvert) {
-
 	JSTValue conversion;
-	JSTObject convert = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "convert");
+	JSTObject convert = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "convert");
 	if (JSTValueIsVoid(convert)) return false;
 	else if (kJSTypeString == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("String", NULL));
 	else if (kJSTypeNumber == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Number", NULL));
@@ -383,37 +359,30 @@ static JSTDeclareConvertor(jsNativeContainerConvert) {
 	else if (kJSTypeObject == type) conversion = JSTFunctionCall(convert, object, JSTScriptNativeEval("Object", NULL));
 	if (JSTValueIsVoid(conversion)) return false;
 	return conversion;
-
 }
 
 static JSTDeclareDeleteProperty(jsNativeContainerDelete) {
-
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
 	bool result = false;
-	JSTObject delete = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "delete");
+	JSTObject delete = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "delete");
 	if (JSTObjectIsFunction(delete)) result = JSTValueToBoolean(JSTFunctionCall(delete, object, JSTStringToValue(propertyName, false)));
 	requestInProgress = false; return result;
-
 }
 
 static JSTDeclareGetProperty(jsNativeContainerGet) {
-
 	static bool requestInProgress; if (requestInProgress) return NULL; else requestInProgress = true;
 	JSTValue result = NULL;
-	JSTObject get = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
+	JSTObject get = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
 	if (JSTObjectIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
 	requestInProgress = false; return (JSTValueIsNull(result))?NULL:result;
-
 }
 
 static JSTDeclareSetProperty(jsNativeContainerSet) {
-
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
  	bool result = false;
-	JSTObject set = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "set");
+	JSTObject set = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "set");
 	if (JSTObjectIsFunction(set)) result = JSTValueToBoolean(JSTFunctionCall(set, object, JSTStringToValue(propertyName, false), value));
 	requestInProgress = false; return result;
-
 }
 
 // The array of names returned by 'enumerate', must be handled by 'get' in order to show up 
@@ -421,12 +390,12 @@ static JSTDeclareSetProperty(jsNativeContainerSet) {
 static JSTDeclareGetPropertyNames(jsNativeContainerEnumerate) {
 	static bool requestInProgress; if (requestInProgress) return; else requestInProgress = true;
 	void * exception = NULL;
-	JSTObject enumerate = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "enumerate");
+	JSTObject enumerate = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "enumerate");
 	if (JSTObjectIsFunction(enumerate)) {
-		JSTObject names = (JSTObject)JSTFunctionCall(enumerate, object); // must return numeric indexed pseudo array with length
-		register long length = JSTValueToDouble(JSTObjectGetProperty(names, "length"));
-		JSStringRef name = NULL;
-		register long i; for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
+		JSTObject names = (JSTObject) JSTFunctionCall(enumerate, object); // must return numeric indexed pseudo array with length
+		register long length = JSTValueToDouble(JSTObjectGetProperty(names, "length")),
+		i; JSStringRef name; for (i = 0; i < length; i++) {
+		JSPropertyNameAccumulatorAddName(
 			propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(names, i)))
 		);
 			JSTStringRelease(name);
@@ -436,13 +405,11 @@ static JSTDeclareGetPropertyNames(jsNativeContainerEnumerate) {
 }
 
 static JSTDeclareHasProperty(jsNativeContainerQuery) {
-
 	static bool requestInProgress; if (requestInProgress) return false; else requestInProgress = true;
 	void * exception = NULL; bool result = false;
-	JSTObject query = (JSTObject)JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
+	JSTObject query = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "query");
 	if (JSTObjectIsFunction(query)) result = JSTValueToBoolean(JSTFunctionCall(query, object, JSTStringToValue(propertyName, false)));
 	requestInProgress = false; return result;
-
 }
 
 static JSTDeclareFinalizer(jsNativeContainerDeallocate) {
@@ -454,7 +421,6 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 
 	JSTObject definition = JSTValueToObject(argv[0]);
 	char * name = JSTValueToUTF8(JSTObjectGetProperty(definition, "name"));
-	
 	JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 	jsClass.attributes = JSTClassPropertyManualPrototype, jsClass.className = name;
 
@@ -469,7 +435,6 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
 
 	JSTClass container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
-
 	return JSTValueFromPointer(container);
 
 }
@@ -515,10 +480,8 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	);	// supplemental type aliases are also provided in JSTNative.js
 
 	JSTScriptNativeEval(jsNativeTypes, NULL); free(jsNativeTypes);
-	if (JSTScriptHasError) {
-		JSTScriptReportException(); exit(1);
-	}
-
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+	
 	JSTObjectSetMethod(native, "container", jsNativeContainer, 0);
 	JSTObjectSetMethod(native, "instance", jsNativeInstance, 0);
 	JSTObjectSetMethod(native, "setPrototype", jsNativeSetPrototype, 0);
@@ -545,10 +508,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetMethod(address, "free", jsNativeAddressFree, 0);
 
 	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
-
-	if (JSTScriptHasError) {
-		JSTScriptReportException(); exit(1);
-	}
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	return native;
 
