@@ -10,12 +10,9 @@ var printf = new Command('printf', '--');
 var int = js.type.int;
 var native = js.call.native;
 
-var utf8 = js.native.toUTF8("I am hailing you from jse->puts!");
-var puts = new Procedure(js.engine, 'puts', native, [int, int]);
+var puts = new Procedure(js.engine, 'puts', native, [int, js.type.address(js.type.utf8)]);
 
-echo('Hello', js.user.name+'.'); puts(utf8);
-
-js.native.address.free(utf8);
+print("Hello to you "), puts(js.user.name);
 
 exit(0);
 

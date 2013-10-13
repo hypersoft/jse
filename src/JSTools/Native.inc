@@ -126,17 +126,24 @@ static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, St
 // This procedure is lacking a plethora of error checking and functional logic
 static JSTValue jsNativeExec JSTDeclareFunction(...) {
 
-	const char * fname = "js.native.exec", * job = "type error"; JSTValue result = JSTValueNull;
+	const char * fname = "js.native.exec", * job = "type error";
 
-	void * fn = JSTValueToPointer(this); // check that this is a number!
-	int returnType = JSTValueToDouble(JSTObjectGetProperty(this, "return"));
+	JSTValue result = JSTValueNull;
 	JSTObject proto = JSTValueToObject(JSTObjectGetProperty(this, "proto"));
 
-	int stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
-	int callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode"));
+	int
+		callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode")),
+		protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length")),
+		resource = 0, resource16 = 0,
+		returnType = JSTValueToDouble(JSTObjectGetProperty(this, "return")),
+		stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
 
-	void * callVM  = dcNewCallVM(stackSize); dcMode(callVM, callVMMode);
-	if (dcGetError(callVM) == DC_ERROR_UNSUPPORTED_MODE) {
+	void 
+		* callVM  = dcNewCallVM(stackSize),
+		* conversion[argc], * conversion16[argc], 
+		* fn = JSTValueToPointer(this);
+
+	if (dcMode(callVM, callVMMode), dcGetError(callVM) == DC_ERROR_UNSUPPORTED_MODE) {
 		result = JSTScriptNativeError("%s: %s: `%i' is an invalid or unknown virtual call mode", fname, job, callVMMode);
 		goto bail;
 	}
@@ -144,21 +151,27 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	int stackItem = 0, stackIndex = 0;
 	bool ellipsis = false, unsign = (returnType & JSTNativeTypeUnsigned);
 
-	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
-
 	while (stackIndex < protoLen) {
 		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex));
-		if (stackItem > JSTNativeTypeUnsigned) stackItem -= JSTNativeTypeUnsigned;
 		JSTValue value = argv[stackIndex++];
 		if (stackItem & JSTNativeTypeUTF8) {
-			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
-			else dcArgChar(callVM, JSTValueToDouble(value));
+			if (stackItem & JSTNativeTypePointer) {
+				/* conversion required? */
+				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));
+			} else dcArgChar(callVM, JSTValueToDouble(value));
 		} else if (stackItem & JSTNativeTypeUTF16) {
-			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
-			else dcArgShort(callVM, JSTValueToDouble(value));
+			if (stackItem & JSTNativeTypePointer) {
+				/* conversion required? */
+				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				else dcArgPointer(callVM, (void*)JSTStringUTF16(conversion16[resource16++] = JSTValueToString(value)));
+			} else dcArgShort(callVM, JSTValueToDouble(value));
 		} else if (stackItem & JSTNativeTypeUTF32) {
-			if (stackItem & JSTNativeTypePointer) { /* conversion required? */ }
-			else dcArgLong(callVM, JSTValueToDouble(value));
+			if (stackItem & JSTNativeTypePointer) {
+				/* conversion required? */
+				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), false));
+			} else dcArgLong(callVM, JSTValueToDouble(value));
 		} else if (stackItem & JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 		else if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
 		else if (stackItem & JSTNativeTypeChar) dcArgChar(callVM, JSTValueToDouble(value));
@@ -197,7 +210,9 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	}
 
 bail:
-	dcFree(callVM);
+	while (resource) free(conversion[--resource]);
+		dcFree(callVM); 
+	while (resource16) free(conversion16[--resource16]);
 done:
 	return result;
 
@@ -306,6 +321,11 @@ static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
 	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
 }
 
+static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
+	JSTString jss = JSTValueToString(argv[0]);
+	return JSTValueFromPointer(JSTStringToUTF32(jss, true));
+}
+
 static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
 	void *p; JSTObject o; JSTValue v; size_t i = 0;
 	while (i < argc) {
@@ -328,25 +348,6 @@ static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
 		}
 	}
 	return JSTValueUndefined;
-}
-
-static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
-	// must have one arg of type String
-	// this is not reliable, buffer is guessed and unchecked! Proof-of-concept
-	JSTString jss = JSTValueToString(argv[0]);
-	long utf16bytes = JSTStringUTF16Length(jss);
-	long utf32bytes = ((utf16bytes) * 2);
-	const UTF16 * utf16 = JSTStringUTF16(jss);
-	const UTF16 * utf16in = utf16;
-	UTF32 * utf32 = malloc(utf32bytes + sizeof(UTF32)); // pad terminate
-	UTF32 * utf32out = utf32;
-	ConvertUTF16toUTF32(
-		&utf16in, utf16in + utf16bytes,
-		&utf32out, utf32out + utf32bytes,
-		0 // strict conversion
-	);
-	JSTStringRelease(jss), *(utf32out) = L'\0';
-	return JSTValueFromPointer(utf32);
 }
 
 static JSTDeclareConvertor(jsNativeContainerConvert) {

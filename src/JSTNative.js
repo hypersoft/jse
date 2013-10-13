@@ -3,11 +3,11 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
-js.type.sign = function(t) { return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t }
+//js.type.sign = function(t) { return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t }
 js.type.address = function(t) { return (t | js.type.pointer) }
 
 js.extend(js.type, {
-	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
+	uchar:js.type.char,// 						schar:js.type.sign(js.type.char),
 	ushort:js.type.unsigned | js.type.short, 	sshort: js.type.short,
 	uint:js.type.unsigned | js.type.int, 		sint: js.type.int,
 	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
