@@ -8,9 +8,10 @@ var printf = new Command('printf', '--');
 // and catch those exceptions!
 
 var int = js.type.int;
+var utf8p = js.type.utf8 | js.type.pointer;
 var native = js.call.native;
 
-var puts = new Procedure(js.engine, 'puts', native, [int, js.type.address(js.type.utf8)]);
+var puts = new Procedure(js.engine, 'puts', native, [int, utf8p]);
 
 print("Hello to you "), puts(js.user.name);
 
