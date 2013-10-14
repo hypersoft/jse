@@ -416,6 +416,7 @@ static JSTDeclareHasProperty(jsNativeContainerQuery) {
 static JSTDeclareFinalizer(jsNativeContainerDeallocate) {
 	void * unload = JSTObjectGetPrivate(object);
 	if (unload) free(unload), JSTObjectSetPrivate(object, NULL);
+puts("class instance finalized!!!");
 }
 
 static JSTValue jsNativeContainer JSTDeclareFunction () {
@@ -433,15 +434,19 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 	if (JSTObjectHasProperty(definition, "set")) jsClass.setProperty = &jsNativeContainerSet;
 	if (JSTObjectHasProperty(definition, "enumerate")) jsClass.getPropertyNames = &jsNativeContainerEnumerate;
 	if (JSTObjectHasProperty(definition, "query")) jsClass.hasProperty = &jsNativeContainerQuery;
-	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
-
+	if (JSTObjectHasProperty(definition, "deallocate")) {
+puts("deallocation class instance requested");
+		jsClass.finalize = &jsNativeContainerDeallocate;
+	}
 	JSTClass container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
-	return JSTValueFromPointer(container);
+	JSTObjectSetProperty(definition, "_native_class_pointer", JSTValueFromPointer(container), JSTObjectPropertyReadOnly);
+	return (JSTValue) definition;
 
 }
 
 static JSTValue jsNativeInstance JSTDeclareFunction() {
-	return JSTClassInstance(JSTValueToPointer(argv[0]), JSTValueToPointer(argv[1]));
+	JSTClass pointer = JSTValueToPointer(JSTObjectGetProperty((JSTObject)argv[0], "_native_class_pointer"));
+	return JSTClassInstance(pointer, JSTValueToPointer(argv[1]));
 }
 
 static JSTValue jsNativeSetPrototype JSTDeclareFunction() {

@@ -1,19 +1,24 @@
 #!bin/jse
 
-var echo = new Command('echo', '-E');
-var print = new Command('echo', '-En');
-var printf = new Command('printf', '--');
+var Address = function(){} // placeholder for definition
+Address = js.native.container(Object.defineProperties(function Address(p) {
+	var ptr = js.native.instance(Address, p);
+	return ptr;
+}, {
+	deallocate:{value:true}
+}));
 
 // exceptions will hurt you unless you develop an allocation stack to keep track of pointers
 // and catch those exceptions!
 
-var int = js.type.int;
-var utf8p = js.type.utf8 | js.type.pointer;
-var native = js.call.native;
+b = new Address(0);
 
-var puts = new Procedure(js.engine, 'puts', native, [int, utf8p]);
+echo("Container type: "+js.classOf(b));
 
-print("Hello to you "), puts(js.user.name);
+delete b;
 
-exit(0);
+// the program will now loop until forever to show you that garbage collect
+// DOES NOT FINALIZE CLASS INSTANCE EVER!
+// SHOULD GARBAGE COLLECT CALL FINALIZE, YOU WILL BE NOTIFIED VIA STDOUT.
+
 
