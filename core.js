@@ -1,5 +1,7 @@
 #!bin/jse
 
+var echo = new Command('echo', '-E');
+
 var Address = function(){} // placeholder for definition
 Address = js.native.container(Object.defineProperties(function Address(p) {
 	var ptr = js.native.instance(Address, p);
