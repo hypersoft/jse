@@ -31,5 +31,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	if (e) JSTScriptReportException();
 
+	// WHAT THE FUCK!
+	while (1) JSGarbageCollect(ctx);
+
 }
 
