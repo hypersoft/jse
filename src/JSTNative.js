@@ -3,11 +3,11 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
-//js.type.sign = function(t) { return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t }
+js.type.sign = function(t) { return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t }
 js.type.address = function(t) { return (t | js.type.pointer) }
 
 js.extend(js.type, {
-	uchar:js.type.char,// 						schar:js.type.sign(js.type.char),
+	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
 	ushort:js.type.unsigned | js.type.short, 	sshort: js.type.short,
 	uint:js.type.unsigned | js.type.int, 		sint: js.type.int,
 	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
@@ -62,17 +62,27 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 
 Object.defineProperties(js, {engine:{value:new SharedLibrary(), enumerable:true}});
 
-function Procedure(lib, name, mode, proto) {
+function Procedure(lib, name, mode, proto, manual) {
 	var proc = new Object(lib.find(name));
 	proc.proto = new Array();
 	proc.mode = (typeof mode == 'string') ? js.call[mode] : mode;
 	for (item in proto) proc.proto[item] = (typeof proto[item] == 'string') ? js.type[proto[item]] : proto[item];
 	proc.return = proc.proto.shift();
-	proc.length = proc.proto.length, proc.size = 0;
-	for (item in proc.proto) proc.size += js.native.typeSize(proc.proto[item]);
 	var bound = js.native.exec.bind(proc);
-	// bound.proc = proc; need property accessors on proc to validate data
+	if (manual) {
+		Object.defineProperty(proc, "length", {get: Procedure.getLength});
+		Object.defineProperty(proc, "size", {get: Procedure.getSize});
+		bound.proc = proc; 
+	} else {
+		proc.length = Procedure.getLength.call(proc)
+		proc.size = Procedure.getSize.call(proc)
+	}
 	return bound;
+}
+
+Procedure.getLength = function() { return this.proto.length; }
+Procedure.getSize = function(){ var s = 0; var p = this.proto;
+	for (item in p) s += js.native.typeSize(p[item]); return s;
 }
 
 var exit = new Procedure(js.engine, 'exit', js.call.native, [js.type.int, js.type.int]);
