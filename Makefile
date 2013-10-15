@@ -3,7 +3,7 @@ DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0 seed)
 
 JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc bin/UTF.o
-JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h inc/*.inc
+JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h src/JSTNative.inc inc/*.inc
 
 BUILDCOMMON := -fno-strict-aliasing -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 ASM := -S -fverbose-asm -masm=intel
