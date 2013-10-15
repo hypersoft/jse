@@ -62,27 +62,29 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 
 Object.defineProperties(js, {engine:{value:new SharedLibrary(), enumerable:true}});
 
-function Procedure(lib, name, mode, proto, manual) {
+function Procedure(lib, name, mode, proto) {
 	var proc = new Object(lib.find(name));
 	proc.proto = new Array();
 	proc.mode = (typeof mode == 'string') ? js.call[mode] : mode;
 	for (item in proto) proc.proto[item] = (typeof proto[item] == 'string') ? js.type[proto[item]] : proto[item];
 	proc.return = proc.proto.shift();
+	proc.base = proc.proto.slice(0); // for reset base definition
 	var bound = js.native.exec.bind(proc);
-	if (manual) {
-		Object.defineProperty(proc, "length", {get: Procedure.getLength});
-		Object.defineProperty(proc, "size", {get: Procedure.getSize});
-		bound.proc = proc; 
-	} else {
-		proc.length = Procedure.getLength.call(proc)
-		proc.size = Procedure.getSize.call(proc)
-	}
+	if (mode == js.call.ellipsis) bound.proc = proc, bound.parameters = Procedure.setParameters;
+	proc.length = Procedure.getLength.call(proc)
+	proc.size = Procedure.getSize.call(proc)
 	return bound;
 }
-
 Procedure.getLength = function() { return this.proto.length; }
-Procedure.getSize = function(){ var s = 0; var p = this.proto;
-	for (item in p) s += js.native.typeSize(p[item]); return s;
+Procedure.getSize = function(){ var s = 0; var p = this.proto; for (item in p) s += js.native.typeSize(p[item]); return s;}
+Procedure.setParameters = function(type) {
+	if (this.parameters) { // only if defined
+		var cache = this.proc;
+		cache.proto = cache.base.slice(0); // reset to base definition
+		for (t in arguments) cache.proto.push(arguments[t]); // push new types
+		cache.length = Procedure.getLength.call(cache); // calculate
+		cache.size = Procedure.getSize.call(cache); // calculate
+	} // fire when ready
 }
 
 var exit = new Procedure(js.engine, 'exit', js.call.native, [js.type.int, js.type.int]);

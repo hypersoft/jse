@@ -170,7 +170,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 			if (stackItem & JSTNativeTypePointer) {
 				/* conversion required? */
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
-				else dcArgPointer(callVM, JSTStringToUTF32(conversion[resource++] = JSTValueToString(value), false));
+				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), false));
 			} else dcArgLong(callVM, JSTValueToDouble(value));
 		} else if (stackItem & JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 		else if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
