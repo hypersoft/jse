@@ -183,7 +183,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		else if (stackItem == JSTNativeTypeFloat) dcArgFloat(callVM, JSTValueToDouble(value));
 		else if (stackItem == JSTNativeTypeDouble) dcArgDouble(callVM, JSTValueToDouble(value));
 		else if (stackItem == JSTNativeTypeValue) dcArgPointer(callVM, (void*) value);
-		else if (stackItem == JSTNativeTypeString) dcArgPointer(callVM, (void*) value);
+		else if (stackItem == JSTNativeTypeString) dcArgPointer(callVM, (void*)(conversion16[resource16++] = JSTValueToString(value)));
 		else {
 			result = JSTScriptNativeError("%s: %s: argument #%i (%i) is an unknown or invalid argument type", fname, job, stackIndex, stackItem);
 			goto bail;
