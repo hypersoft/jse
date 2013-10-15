@@ -427,13 +427,16 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 
 	// define these properties on your constructor function (passed to this callback)
 	// to enable desired custom container features
+
 	if (JSTObjectHasProperty(definition, "convert")) jsClass.convertToType = &jsNativeContainerConvert;
 	if (JSTObjectHasProperty(definition, "delete")) jsClass.deleteProperty = &jsNativeContainerDelete;
 	if (JSTObjectHasProperty(definition, "get")) jsClass.getProperty = &jsNativeContainerGet;
 	if (JSTObjectHasProperty(definition, "set")) jsClass.setProperty = &jsNativeContainerSet;
 	if (JSTObjectHasProperty(definition, "enumerate")) jsClass.getPropertyNames = &jsNativeContainerEnumerate;
 	if (JSTObjectHasProperty(definition, "query")) jsClass.hasProperty = &jsNativeContainerQuery;
-	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
+
+// The underlying api doesn't work in coregtk-3.0
+//	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
 
 	JSTClass container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
 	return JSTValueFromPointer(container);
@@ -445,7 +448,7 @@ static JSTValue jsNativeInstance JSTDeclareFunction() {
 }
 
 static JSTValue jsNativeSetPrototype JSTDeclareFunction() {
-	JSTObjectSetPrototype((JSTObject)argv[1], argv[2]); return argv[1];
+	JSTObjectSetPrototype((JSTObject)argv[1], argv[2]); return argv[2];
 }
 
 static JSTValue jsNativeGetPrototype JSTDeclareFunction() {
