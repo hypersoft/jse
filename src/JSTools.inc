@@ -14,7 +14,9 @@
 #include <pwd.h>
 #include <signal.h>
 
-#include "UTF.h"
+typedef char32_t UTF32;
+typedef char16_t UTF16;
+typedef char UTF8;
 
 #include "JavaScriptCore.inc"
 #include "glib.inc"
