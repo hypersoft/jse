@@ -14,7 +14,8 @@ var mode = js.call.ellipsis;
 
 var printf = new Procedure(js.engine, 'printf', mode, [int, utf8p]);
 
-// setup ellipsis call: one utf8 pointer (call managed encoding & allocation), one utf32 pointer (call managed encoding & allocation)
+// the following method is only available for js.call.ellipsis
+// setup ellipsis call: one utf8 pointer (call managed encoding & allocation)
 printf.parameters(utf32p); // we have to setup our ... calls because we don't mark types explicitly,
 // as a compiler would at compile time.
 
