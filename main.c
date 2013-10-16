@@ -20,8 +20,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	JSTInit(global, argc, argv, envp);
 
 	if (ioFileExists(argv[1])) {
-		char * script, * src = ioFileReadAllText(argv[1]); script = src;
-		int c = 0;
+		char * script, * src = ioFileReadAllText(argv[1]); script = src; int c = 0;
 		if (*script == '#' && *(script+1) == '!') {
 			script+=2;
 			while ((c = *script) && c != '\n') script++;

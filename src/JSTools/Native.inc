@@ -126,14 +126,18 @@ static JSTValue jsNativeLibraryFindSymbol JSTDeclareFunction(Pointer library, St
 // This procedure is lacking a plethora of error checking and functional logic
 static JSTValue jsNativeExec JSTDeclareFunction(...) {
 
-	const char * fname = "js.native.exec", * job = "type error";
-
 	JSTValue result = JSTValueNull;
 	JSTObject proto = JSTValueToObject(JSTObjectGetProperty(this, "proto"));
+	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
+
+	const char * fname = "js.native.exec", * job = "type error";
+
+	if (argc != protoLen) {
+		return JSTScriptNativeError("%s: %s: argument count does not match function prototype", fname, job);
+	}
 
 	int
 		callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode")),
-		protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length")),
 		resource = 0, resource16 = 0,
 		returnType = JSTValueToDouble(JSTObjectGetProperty(this, "return")),
 		stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
@@ -150,7 +154,6 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 
 	int stackItem = 0, stackIndex = 0;
 	bool ellipsis = false, unsign = (returnType & JSTNativeTypeUnsigned);
-
 	while (stackIndex < protoLen) {
 		stackItem = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, stackIndex));
 		JSTValue value = argv[stackIndex++];
@@ -170,7 +173,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 			if (stackItem & JSTNativeTypePointer) {
 				/* conversion required? */
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
-				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), false));
+				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), JSTValueToDouble(JSTObjectGetProperty(value, "length")), true));
 			} else dcArgLong(callVM, JSTValueToDouble(value));
 		} else if (stackItem & JSTNativeTypePointer) dcArgPointer(callVM, JSTValueToPointer(value));
 		else if (stackItem == JSTNativeTypeBoolean) dcArgBool(callVM, JSTValueToBoolean(value));
@@ -210,9 +213,9 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	}
 
 bail:
-	while (resource) free(conversion[--resource]);
-		dcFree(callVM); 
+	while (resource) g_free(conversion[--resource]);
 	while (resource16) JSTStringRelease(conversion16[--resource16]);
+	dcFree(callVM); 
 done:
 	return result;
 
@@ -323,7 +326,8 @@ static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
 
 static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
 	JSTString jss = JSTValueToString(argv[0]);
-	return JSTValueFromPointer(JSTStringToUTF32(jss, true));
+	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));
+	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));
 }
 
 static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
