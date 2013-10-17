@@ -4,9 +4,6 @@ var echo = new Command('echo', '-E');
 var print = new Command('echo', '-En');
 //var printf = new Command('printf', '--');
 
-// exceptions will hurt you unless you develop an allocation stack to keep track of pointers
-// and catch those exceptions!
-
 var int = js.type.int;
 var utf8p = js.type.utf8 | js.type.pointer;
 var utf32p = js.type.utf32 | js.type.pointer;
@@ -30,6 +27,4 @@ printf("%ls\n", "Hello " + js.user.name);
 
 printf.parameters(utf8p);
 printf("%s\n", "Goodbye.");
-
-exit(0);
 

@@ -26,6 +26,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			while ((c = *script) && c != '\n') script++;
 		}
 		JSTScriptEval(script, NULL, argv[1], 1);
+		JSGarbageCollect(ctx);
 	} else { JSTScriptNativeError("unable to read user script: `%s'", argv[1]); }
 
 	if (e) JSTScriptReportException();

@@ -377,8 +377,8 @@ static JSTDeclareDeleteProperty(jsNativeContainerDelete) {
 static JSTDeclareGetProperty(jsNativeContainerGet) {
 	static bool requestInProgress; if (requestInProgress) return NULL; else requestInProgress = true;
 	JSTValue result = NULL;
-	JSTObject get = (JSTObject) JSTObjectGetProperty(JSTObjectGetConstructor(object), "get");
-	if (JSTObjectIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
+	JSTObject get = (JSTObject) JSTObjectGetProperty(JSTObjectGetProperty(JSTObjectGetPrototype(object), "constructor"), "get");
+	if (JSTValueIsFunction(get)) result = JSTFunctionCall(get, object, JSTStringToValue(propertyName, false));
 	requestInProgress = false; return (JSTValueIsNull(result))?NULL:result;
 }
 
@@ -438,12 +438,9 @@ static JSTValue jsNativeContainer JSTDeclareFunction () {
 	if (JSTObjectHasProperty(definition, "set")) jsClass.setProperty = &jsNativeContainerSet;
 	if (JSTObjectHasProperty(definition, "enumerate")) jsClass.getPropertyNames = &jsNativeContainerEnumerate;
 	if (JSTObjectHasProperty(definition, "query")) jsClass.hasProperty = &jsNativeContainerQuery;
-
-// The underlying api doesn't work in coregtk-3.0
-//	if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
-
-	JSTClass container = JSClassRetain(JSClassCreate(&jsClass)); free(name);
-	return JSTValueFromPointer(container);
+	//if (JSTObjectHasProperty(definition, "deallocate")) jsClass.finalize = &jsNativeContainerDeallocate;
+	JSTValue r = JSTValueFromPointer(JSClassRetain(JSClassCreate(&jsClass))); free(name);
+	return r;
 
 }
 
@@ -452,11 +449,11 @@ static JSTValue jsNativeInstance JSTDeclareFunction() {
 }
 
 static JSTValue jsNativeSetPrototype JSTDeclareFunction() {
-	JSTObjectSetPrototype((JSTObject)argv[1], argv[2]); return argv[2];
+	JSTObjectSetPrototype((JSTObject)argv[0], argv[1]); return argv[1];
 }
 
 static JSTValue jsNativeGetPrototype JSTDeclareFunction() {
-	return (JSTValue) JSTObjectGetPrototype((JSTObject)argv[1]);
+	return (JSTValue) JSTObjectGetPrototype((JSTObject)argv[0]);
 }
 
 static JSTValue jsNativeSetPrivate JSTDeclareFunction() {
@@ -472,7 +469,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject lib = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
 
-	char * jsNativeTypes = JSTConstructUTF8("js.signal = {fpe: %i, ill: %i, segv: %i, bus: %i, abrt: %i, iot: %i, trap: %i, sys: %i, term: %i, int: %i, quit: %i, kill: %i, hup: %i, alrm: %i, vtalrm: %i, prof: %i, io: %i, urg: %i, poll: %i, chld: %i, cld: %i, cont: %i, stop: %i, ttin: %i, ttou: %i, pipe: %i, xcpu: %i, xfsz: %i, usr1: %i, usr2: %i, winch: %i}js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; Object.freeze(js.call); js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i};",
+	char * jsNativeTypes = JSTConstructUTF8("js.signal = {fpe: %i, ill: %i, segv: %i, bus: %i, abrt: %i, iot: %i, trap: %i, sys: %i, term: %i, int: %i, quit: %i, kill: %i, hup: %i, alrm: %i, vtalrm: %i, prof: %i, io: %i, urg: %i, poll: %i, chld: %i, cld: %i, cont: %i, stop: %i, ttin: %i, ttou: %i, pipe: %i, xcpu: %i, xfsz: %i, usr1: %i, usr2: %i, winch: %i}; js.native.alignment = %i; js.native.byteOrder = %i; js.call = {native: %i, ellipsis: %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}}; Object.freeze(js.call); js.type = { 'void': %i, unsigned: %i, pointer: %i, ellipsis: %i, boolean: %i, char: %i, short: %i, int: %i, long: %i, int64: %i, float: %i, double: %i, size: %i, utf8: %i, utf16: %i, utf32: %i, struct: %i, union: %i, value: %i, string: %i};",
 		SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGABRT, SIGIOT, SIGTRAP, SIGSYS, SIGTERM, SIGINT, SIGQUIT, SIGKILL, SIGHUP, SIGALRM, SIGVTALRM, SIGPROF, SIGIO, SIGURG, SIGPOLL, SIGCHLD, SIGCLD, SIGCONT, SIGSTOP, SIGTTIN, SIGTTOU, SIGPIPE, SIGXCPU, SIGXFSZ, SIGUSR1, SIGUSR2, SIGWINCH, 
 		JSTNativeAlignment, JSTNativeByteOrder,
 		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,
