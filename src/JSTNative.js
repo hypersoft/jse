@@ -80,7 +80,7 @@ Procedure.setParameters = function(type) {
 	if (this.parameters) { // only if defined
 		var cache = this.proc;
 		cache.proto = cache.base.slice(0); // reset to base definition
-		for (t in arguments) cache.proto.push(arguments[t]); // push new types
+		for (t in arguments) cache.proto.push((typeof arguments[t] == 'string')?js.type[arguments[t]]:arguments[t]); // push new types
 		cache.length = Procedure.getLength.call(cache); // calculate
 		cache.size = Procedure.getSize.call(cache); // calculate
 	} // fire when ready
