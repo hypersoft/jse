@@ -170,7 +170,7 @@ Declaration.parse = function(source) {
 			identifier.call(this);
 		} else if (tokenizer.accept(syntax.lparen)) {
 			var d = new declarator();
-			if (this.name === undefined && (d.pointer === undefined )) extend(this, d);
+			if (this.name === undefined && (d.pointer === undefined )) js.extend(this, d);
 			else this.declarator = d;
 			tokenizer.expect(syntax.rparen);
 		} else if (tokenizer.accept(syntax.termination)) {

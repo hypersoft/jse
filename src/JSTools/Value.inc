@@ -56,6 +56,6 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 #define JSTValueIsConstructor(v) (v && JSTValueIsObject(v) && JSTObjectIsConstructor(v))
 
 #define JSTValueToPointer(v) ((void*)((unsigned long)JSTValueToDouble(v)))
-#define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((long) p)))
+#define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((unsigned long) p)))
 
 
