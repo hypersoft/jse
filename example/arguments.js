@@ -2,7 +2,7 @@
 var echo = new Command("echo", "-E");
 echo("Argument count:", js.run.argc);
 
-var printf = new Procedure(js.engine, "printf", '...', ["int"]);
+var printf = new Procedure('jse', "printf", '...', ["int"]);
 
 printf.parameters("utf8 *", "int", "utf8 *");
 

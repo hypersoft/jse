@@ -71,6 +71,7 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 Object.defineProperties(js, {engine:{value:new SharedLibrary(), enumerable:true}});
 
 function Procedure(lib, name, mode, proto) {
+	if (lib == undefined || lib == 'jse') lib = js.engine;
 	var proc = new Object(lib.find(name)); proc.proto = new Array();
 	proc.mode = (typeof mode == 'string') ? js.call[mode] : mode;
 	for (item in proto) proc.proto[item] = (typeof proto[item] == 'string') ? js.type[proto[item]] : proto[item];
