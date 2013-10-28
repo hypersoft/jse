@@ -2,9 +2,7 @@
 var echo = new Command("echo", "-E");
 echo("Argument count:", js.run.argc);
 
-js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
-
-var printf = new Procedure(js.engine, "printf", js.call.ellipsis, ["int"]);
+var printf = new Procedure(js.engine, "printf", '...', ["int"]);
 
 printf.parameters("utf8 *", "int", "utf8 *");
 

@@ -3,8 +3,12 @@ js.exec.prototype = {
 	valueOf:function(){return this.status}
 }
 
-js.type.sign = function(t) { return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t }
-js.type.address = function(t) { return (t | js.type.pointer) }
+js.type.sign = function(t) {
+	if (typeof t == 'string') t = js.type[t];
+	return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t
+}
+
+js.type.address = function(t) { return (((typeof t == 'string')?js.type[t]:t) | js.type.pointer) }
 
 js.extend(js.type, {
 	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
@@ -13,6 +17,10 @@ js.extend(js.type, {
 	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
 	uint64:js.type.unsigned | js.type.int64, 	sint64: js.type.int64
 })
+
+js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
+js.type['utf16 *'] = js.type.utf8 | js.type.pointer;
+js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
 
 var Command = function(command) {
 	this.argv = Array.apply(null, arguments);
@@ -69,7 +77,7 @@ function Procedure(lib, name, mode, proto) {
 	proc.return = proc.proto.shift();
 	proc.base = proc.proto.slice(0); // for reset base definition
 	var bound = js.native.exec.bind(proc);
-	if (mode == js.call.ellipsis) bound.proc = proc, bound.parameters = Procedure.setParameters;
+	if (proc.mode == js.call.ellipsis) bound.proc = proc, bound.parameters = Procedure.setParameters;
 	proc.length = Procedure.getLength.call(proc)
 	proc.size = Procedure.getSize.call(proc)
 	return bound;
@@ -86,5 +94,5 @@ Procedure.setParameters = function(type) {
 	} // fire when ready
 }
 
-var exit = new Procedure(js.engine, 'exit', js.call.native, [js.type.int, js.type.int]);
+var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
 
