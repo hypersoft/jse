@@ -8,7 +8,7 @@ JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h src/JSTNative.inc inc/
 BUILDCOMMON := -fno-strict-aliasing -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_CODENAME='"Brigadier"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 ASM := -S -fverbose-asm -masm=intel
 
-all: bin/jse
+all: glib-html-kb bin/jse
 
 ${DYNCALL}:
 	@bin/dynhacker
@@ -45,6 +45,14 @@ main.s: ${JSEDEPENDS}
 	gcc ${ASM} ${BUILDCOMMON} main.c -o $@
 
 asm: main.s src/JSTools.s
+
+kb:
+	mkdir kb
+
+kb/glib-html-2.39.0: kb
+	wget -O - https://developer.gnome.org/glib/glib-html-2.39.0.tar.gz | tar zxf - -C kb
+
+glib-html-kb: kb/glib-html-2.39.0
 
 clean:
 	@rm -rf bin/jse bin/*.a bin/*.o inc/dyncall *.s src/*.s src/JSTInit.inc

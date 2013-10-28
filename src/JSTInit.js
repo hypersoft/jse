@@ -61,7 +61,7 @@ js.Tokenizer.Expression = function(operationClass, elementName, selector) {
 		// strings are a single case indexOf search
 		else if (typeof selector == 'string') this.seekAhead = selector
 		// regexps are a single char by expression match.
-		else if (classOf(selector) == 'RegExp') this.scanAhead = selector;
+		else if (js.classOf(selector) == 'RegExp') this.scanAhead = selector;
 	}
 }
 
@@ -125,7 +125,7 @@ js.Tokenizer.prototype = {
 				}
 			}
 			delete this.subExpression;
-			if (classOf(expression) == 'RegExp') { // when regexp we match data
+			if (js.classOf(expression) == 'RegExp') { // when regexp we match data
 				if (!data) data = source;
 				match = expression.exec(data)
 				if (match != null) {
@@ -134,14 +134,14 @@ js.Tokenizer.prototype = {
 					this.element = (name)?name:this.scanned;
 					return 1;
 				}
-			} else if (classOf(expression) == 'Object') { // when object we match keys
+			} else if (js.classOf(expression) == 'Object') { // when object we match keys
 				if (!data) data = source; var key
 				for (key in expression) if (key == data) {
 					this.scanned = key; this.advance(this.scanned.length);
 					this.element = (name)?name:this.scanned;
 					return 1;				
 				}
-			} else if (classOf(expression) == 'Array') { // when array we match index data
+			} else if (js.classOf(expression) == 'Array') { // when array we match index data
 				if (!data) data = source; var index
 				for (index in expression) if (expression[index] == data) {
 					this.scanned = expression[index]; this.advance(this.scanned.length);
