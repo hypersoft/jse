@@ -104,7 +104,7 @@ var Address = js.extendPrototype(function Address(v, t){
 	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
 	return o;
 }, {
-	container: null, name: "Address", prototype: { length: 1, type: js.type.void, address: 0,
+	container: null, name: "Address", prototype: { type: js.type.void, address: 0,
 		toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
 		valueOf: function(){ return this.value; },
 	},
@@ -127,8 +127,7 @@ var Address = js.extendPrototype(function Address(v, t){
 			return js.native.address.read((this['&'] + (i * this.size)), this.type);
 		}
 		var index = name.match(/^\&([0-9]+)$/);
-		if (index != null) {
-			index = index[1];
+		if (index != null) { index = index[1];
 			return (this['&'] + (index * this.size));
 		}
 		return null;
