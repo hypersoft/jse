@@ -100,13 +100,13 @@ var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
 var Address = js.extendPrototype(function Address(v, t){
 	var o = js.native.instance(Address.container, 0);
 	js.native.setPrototype(o, Address.prototype);
-	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
 	if (v != undefined) o['*'] = parseInt(v);
+	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
 	return o;
 }, {
-	container: null, name: "Address", prototype: { type: js.type.void, address: 0,
+	container: null, name: "Address", prototype: { length: 1, type: js.type.void, address: 0,
 		toString: function(){ return '[object Address 0x'+this['*'].toString(16)+']'},
-		valueOf: function(){ return this['*']; },
+		valueOf: function(){ return this[0]; },
 	},
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
@@ -122,6 +122,7 @@ var Address = js.extendPrototype(function Address(v, t){
 		return null;
 	},
 	get: function(name) {
+		if (name == 'value') return js.native.address.read(this['*'], this.type);
 		if (!isNaN(i = parseInt(name))) {
 			return js.native.address.read((this['*'] + (i * this.size)), this.type);
 		}
