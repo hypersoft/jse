@@ -109,22 +109,24 @@ var Address = js.extendPrototype(function Address(v, t, l){
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
 			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
-			return js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
+			js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
+			return true;
 		}
 		if (name == 'value' || name == '*') {
-			return js.native.address.write(this['&'], this.type, this.value);			
+			js.native.address.write(this['&'], this.type, this.value);
+			return true;		
 		}
 		if (name == 'type') {
 			Object.defineProperties(this, {type:{'value': (typeof value == 'string')?js.type[value]:value, writeable:true}});
 			Object.defineProperties(this, {size:{'value':js.native.typeSize(this.type), writeable:true}});
-			return null;
+			return true;
 		}
 		if (name == 'length') {
 			Object.defineProperties(this, {length:{'value':value, writeable:true,configurable:true}})
-			return null;
+			return true;
 		}
 		if (name == '&') { this['&'] = value;
-			return null;
+			return true;
 		}
 		return null;
 	},
@@ -142,15 +144,12 @@ var Address = js.extendPrototype(function Address(v, t, l){
 		return null;
 	},
 	enumerate: function() {
-		var o = {length:this.length};
-		for (i = 0; i < o.length; i++) o[i] = i;
-		return o;
+		var o = {length:this.length}; for (i = 0; i < o.length; i++) o[i] = i; return o;
 	},
 })
 
 Address.prototype = js.extendPrototype(Object.defineProperties({}, {
-	constructor: {value:Address},
-	length:{value:1},
+	constructor: {value:Address}, length:{value:1},
 }),{
 	toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
 	valueOf: function(){ return this.value; },
