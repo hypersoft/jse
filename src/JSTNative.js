@@ -100,20 +100,20 @@ var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
 var Address = js.extendPrototype(function Address(v, t){
 	var o = js.native.instance(Address.container, 0);
 	js.native.setPrototype(o, Address.prototype);
-	if (v != undefined) o['*'] = parseInt(v);
+	if (v != undefined) o['&'] = parseInt(v);
 	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
 	return o;
 }, {
 	container: null, name: "Address", prototype: { length: 1, type: js.type.void, address: 0,
-		toString: function(){ return '[object Address 0x'+this['*'].toString(16)+']'},
-		valueOf: function(){ return this[0]; },
+		toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
+		valueOf: function(){ return this.value; },
 	},
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
-			return js.native.address.write(this['*'] + (i * this.size), this.type, this.value);
+			return js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
 		}
-		if (name == 'value') {
-			return js.native.address.write(this['*'], this.type, this.value);			
+		if (name == 'value' || name == '*') {
+			return js.native.address.write(this['&'], this.type, this.value);			
 		}
 		if (name == 'type') {
 			this.type = (typeof value == 'string')?js.type[value]:value;
@@ -122,14 +122,14 @@ var Address = js.extendPrototype(function Address(v, t){
 		return null;
 	},
 	get: function(name) {
-		if (name == 'value') return js.native.address.read(this['*'], this.type);
+		if (name == 'value' || name == '*') return js.native.address.read(this['&'], this.type);
 		if (!isNaN(i = parseInt(name))) {
-			return js.native.address.read((this['*'] + (i * this.size)), this.type);
+			return js.native.address.read((this['&'] + (i * this.size)), this.type);
 		}
 		var index = name.match(/^\&([0-9]+)$/);
 		if (index != null) {
 			index = index[1];
-			return (this['*'] + (index * this.size));
+			return (this['&'] + (index * this.size));
 		}
 		return null;
 	}
