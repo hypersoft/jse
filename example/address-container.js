@@ -11,6 +11,9 @@ var i, puts = new Procedure("jse", "puts", "native", ["void", "utf8 *"]);
 // Print out &argv as object->string
 puts(argv)
 
+// print out &argv in hex
+puts(argv['&'].toHex())
+
 // Print out &argv[0] in hex
 puts(argv['&0'].toHex())
 
