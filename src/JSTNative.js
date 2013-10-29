@@ -108,6 +108,7 @@ var Address = js.extendPrototype(function Address(v, t, l){
 	container: null, name: "Address", prototype: {},
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
+			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
 			return js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
 		}
 		if (name == 'value' || name == '*') {
@@ -116,9 +117,13 @@ var Address = js.extendPrototype(function Address(v, t, l){
 		if (name == 'type') {
 			Object.defineProperties(this, {type:{'value': (typeof value == 'string')?js.type[value]:value, writeable:true}});
 			Object.defineProperties(this, {size:{'value':js.native.typeSize(this.type), writeable:true}});
+			return null;
 		}
 		if (name == 'length') {
 			Object.defineProperties(this, {length:{'value':value, writeable:true,configurable:true}})
+			return null;
+		}
+		if (name == '&') { this['&'] = value;
 			return null;
 		}
 		return null;
@@ -126,10 +131,12 @@ var Address = js.extendPrototype(function Address(v, t, l){
 	get: function(name) {
 		if (name == 'value' || name == '*') return js.native.address.read(this['&'], this.type);
 		if (!isNaN(i = parseInt(name))) {
+			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
 			return js.native.address.read((this['&'] + (i * this.size)), this.type);
 		}
 		var index = name.match(/^\&([0-9]+)$/);
 		if (index != null) { index = index[1];
+			if (index >= this.length || index < 0) throw new RangeError("address index out of bounds");
 			return (this['&'] + (index * this.size));
 		}
 		return null;
