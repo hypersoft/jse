@@ -97,17 +97,15 @@ Procedure.setParameters = function(type) {
 
 var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
 
-var Address = js.extendPrototype(function Address(v, t){
+var Address = js.extendPrototype(function Address(v, t, l){
 	var o = js.native.instance(Address.container, 0);
 	js.native.setPrototype(o, Address.prototype);
-	if (v != undefined) o['&'] = parseInt(v);
+	if (v != undefined) Object.defineProperties(o, {'&':{value: parseInt(v), writeable:true}});
 	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
+	if (l != undefined) o.length = l;
 	return o;
 }, {
-	container: null, name: "Address", prototype: { type: js.type.void, address: 0,
-		toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
-		valueOf: function(){ return this.value; },
-	},
+	container: null, name: "Address", prototype: {},
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
 			return js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
@@ -116,8 +114,12 @@ var Address = js.extendPrototype(function Address(v, t){
 			return js.native.address.write(this['&'], this.type, this.value);			
 		}
 		if (name == 'type') {
-			this.type = (typeof value == 'string')?js.type[value]:value;
-			this.size = js.native.typeSize(this.type);
+			Object.defineProperties(this, {type:{'value': (typeof value == 'string')?js.type[value]:value, writeable:true}});
+			Object.defineProperties(this, {size:{'value':js.native.typeSize(this.type), writeable:true}});
+		}
+		if (name == 'length') {
+			Object.defineProperties(this, {length:{'value':value, writeable:true,configurable:true}})
+			return null;
 		}
 		return null;
 	},
@@ -131,10 +133,28 @@ var Address = js.extendPrototype(function Address(v, t){
 			return (this['&'] + (index * this.size));
 		}
 		return null;
-	}
+	},
+	enumerate: function() {
+		var o = {length:this.length};
+		for (i = 0; i < o.length; i++) o[i] = i;
+		return o;
+	},
 })
 
-Address.prototype.constructor = Address;
+Address.prototype = js.extendPrototype(Object.defineProperties({}, {
+	constructor: {value:Address},
+	length:{value:1},
+}),{
+	toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
+	valueOf: function(){ return this.value; },
+});
+
 Address.container = js.native.container(Address);
+
+js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
+	var a = parseInt(this);
+	if (isNaN(a)) throw new RangeError("unable to parse integer address");
+	return Address(a, t, l);
+}});
 
 

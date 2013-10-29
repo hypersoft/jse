@@ -1,7 +1,6 @@
 
 (function JSTInit() {
 
-
 var jsErrorToString = function() {
 	return this.sourceURL+': '+this.function+': line '+this.line+': '+this.name+': '+this.message;
 };
@@ -192,6 +191,10 @@ else o[prop] = property;
 }
 return o;
 }
+
+js.extendPrototype(Number.prototype, {
+	toHex: function toHex() { return '0x' + this.toString(16); }
+})
 
 return js;
 })();

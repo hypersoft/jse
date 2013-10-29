@@ -1,21 +1,22 @@
 
-// print out arguments
-var argv = new Address(js.run.argv, "utf8 *");
-var i, puts = new Procedure("jse", "puts", "native", ["int", "utf8 *"]);
+// All Number objects have the 'toAddress' convertor...
+var argv = js.run.argv.toAddress("utf8 *", js.run.argc);
 
-function hex(i) { return '0x' + i.toString(16); }
+var i, puts = new Procedure("jse", "puts", "native", ["int", "utf8 *"]);
 
 // In C `&' means to get address instead of value ...
 // the address returned is a primitve value
 
+// All Number objects have the 'toHex' convertor...
+
 // Print out &argv in hex
-puts(hex(argv['&']))
+puts(argv['&'].toHex())
 
 // Print out &argv[0] in hex
-puts(hex(argv['&0']))
+puts(argv['&0'].toHex())
 
 // Print out &argv[1] in hex
-puts(hex(argv['&1']))
+puts(argv['&' + 1].toHex())
 
-for (i = 0; i < js.run.argc; i++) puts(argv[i]);
+for (i in argv) puts(argv[i]);
 
