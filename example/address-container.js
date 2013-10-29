@@ -6,12 +6,16 @@ var Address = js.extendPrototype(function Address(v, t){
 	if (v != undefined) o['*'] = parseInt(v);
 	return o;
 }, {
-	container: null, name: "Address", prototype: {
-		'&': null, 'value': null, type: js.type.void, address: 0
+	container: null, name: "Address", prototype: { type: js.type.void, address: 0,
+		toString: function(){ return '[object Address 0x'+this['*'].toString(16)+']'},
+		valueOf: function(){ return this['*']; },
 	},
 	set: function(name, value) {
 		if (!isNaN(i = parseInt(name))) {
 			return js.native.address.write(this['*'] + (i * this.size), this.type, this.value);
+		}
+		if (name == 'value') {
+			return js.native.address.write(this['*'], this.type, this.value);			
 		}
 		if (name == 'type') {
 			this.type = (typeof value == 'string')?js.type[value]:value;
@@ -40,5 +44,6 @@ Address.container = js.native.container(Address);
 // print out arguments
 var argv = Address(js.run.argv, "utf8 *");
 var i, puts = new Procedure("jse", "puts", "native", ["int", "utf8 *"]);
+puts(argv)
 for (i = 0; i < js.run.argc; i++) puts(argv[i]);
 
