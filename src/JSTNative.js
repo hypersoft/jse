@@ -1,3 +1,4 @@
+
 js.exec.prototype = {
 	toString:function(){return this.stdout || this.stderr || this.status},
 	valueOf:function(){return this.status}

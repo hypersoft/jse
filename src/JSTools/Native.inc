@@ -29,7 +29,7 @@
 
 extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 extern int JSTNativeTypeGetSize(int t);
-extern const char * JSTNativeTypeNameUTF8(int t);
+extern const char * JSTNativeTypeGetName(int t);
 
 #else
 
@@ -55,7 +55,7 @@ int JSTNativeTypeGetSize(int t) {
 	else return 0;
 }
 
-const char * JSTNativeTypeNameUTF8(int t) {
+const char * JSTNativeTypeGetName(int t) {
 	if (t == 0) return "void"; else if (t & JSTNativeTypePointer
 		|| t == JSTNativeTypeValue
 		|| t == JSTNativeTypeString
@@ -76,29 +76,115 @@ const char * JSTNativeTypeNameUTF8(int t) {
 	else return NULL;
 }
 
-static JSTContext sigctx = NULL;
-static JSTObject sigfn = NULL;
-static JSTObject sigob = NULL;
-
-static void signal_handler (int signum) {
-	JSTContext ctx = sigctx; void * exception = NULL;
-	if (sigfn) JSTFunctionCall(sigfn, sigob, JSTValueFromDouble(signum));
-	else signal(signum, SIG_IGN);
+char JSTNativeTypeGetChar(int t) {
+	if (t & JSTNativeTypePointer
+		|| t == JSTNativeTypeValue
+		|| t == JSTNativeTypeString
+	) return 'p';
+	else if (t == JSTNativeTypeBoolean) return 'B';
+	else if (t & JSTNativeTypeChar) return (t & JSTNativeTypeUnsigned)?'C':'c';
+	else if (t & JSTNativeTypeShort) return (t & JSTNativeTypeUnsigned)?'S':'s';
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) return (t & JSTNativeTypeUnsigned)?'I':'i';
+	else if (t & JSTNativeTypeLong) return (t & JSTNativeTypeUnsigned)?'J':'j';
+	else if (t & JSTNativeTypeLongLong) return (t & JSTNativeTypeUnsigned)?'L':'l';
+	else if (t & JSTNativeTypeSize) return (t & JSTNativeTypeUnsigned)?'J':'j';
+	else if (t == JSTNativeTypeFloat) return 'f';
+	else if (t == JSTNativeTypeDouble) return 'd';
+	else if (t == JSTNativeTypeUTF8) return 'C';
+	else if (t == JSTNativeTypeUTF16) return 'S';
+	else if (t == JSTNativeTypeUTF32) return 'J';
+	else return 'v';
 }
 
-static JSTValue jsNativeSignalTrap JSTDeclareFunction(Object obj, Function, fn) {
-	if (!sigfn) sigfn = JSTValueToObject(argv[0]), sigob = JSTValueToObject(argv[1]);
-	else return JSTValueFromBoolean(false);
-	return JSTValueFromBoolean(true);
+typedef struct jsNativeCallbackStruct {
+	void * cb; void * group; void * object; void * function; void * proto;
+	int type; int length;
+} jsNativeCallbackStruct;
+
+char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNativeCallbackStruct * cbs) {
+
+	JSTContext ctx = JSTContextCreateInGroup(cbs->group, NULL);
+	JSTObject e = NULL; JSTValue *exception = (void*)&e;
+	JSTValue argv[cbs->length]; int i, t;
+
+	for (i = 0; i < cbs->length; i++) {
+		t = JSTValueToDouble(JSTObjectGetPropertyAtIndex(cbs->proto, i));
+		if (t & JSTNativeTypePointer
+			|| t == JSTNativeTypeValue
+			|| t == JSTNativeTypeString
+		) argv[i] = JSTValueFromPointer(dcbArgPointer(args));
+		else if (t == JSTNativeTypeBoolean) argv[i] = JSTValueFromBoolean(dcbArgBool(args));
+		else if (t & JSTNativeTypeChar) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUChar(args):dcbArgChar(args));
+		else if (t & JSTNativeTypeShort) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUShort(args):dcbArgShort(args));
+		else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUInt(args):dcbArgInt(args));
+		else if (t & JSTNativeTypeLong) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
+		else if (t & JSTNativeTypeLongLong) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULongLong(args):dcbArgLongLong(args));
+		else if (t & JSTNativeTypeSize) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
+		else if (t == JSTNativeTypeFloat) argv[i] = JSTValueFromDouble(dcbArgFloat(args));
+		else if (t == JSTNativeTypeDouble) argv[i] = JSTValueFromDouble(dcbArgDouble(args));
+		else if (t == JSTNativeTypeUTF8) argv[i] = JSTValueFromDouble(dcbArgUChar(args));
+		else if (t == JSTNativeTypeUTF16) argv[i] = JSTValueFromDouble(dcbArgUShort(args));
+		else if (t == JSTNativeTypeUTF32) argv[i] = JSTValueFromDouble(dcbArgULong(args));
+	}
+
+	JSTValue value = JST(JSObjectCallAsFunction, cbs->function, cbs->object, cbs->length, argv);
+
+	t = cbs->type;
+	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString) {
+		result->p = JSTValueToPointer(value); return 'p';
+	} else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
+	else if (t & JSTNativeTypeChar) {result->c =JSTValueToBoolean(value); return 'c';}
+	else if (t & JSTNativeTypeShort) {result->s =JSTValueToBoolean(value); return 's';}
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i =JSTValueToBoolean(value); return 'i';}
+	else if (t & JSTNativeTypeLong) {result->j =JSTValueToBoolean(value); return 'j';}
+	else if (t & JSTNativeTypeLongLong) {result->l =JSTValueToBoolean(value); return 'l';}
+	else if (t & JSTNativeTypeSize) {result->j =JSTValueToBoolean(value); return 'j';}
+	else if (t == JSTNativeTypeFloat) {result->f =JSTValueToBoolean(value); return 'f';}
+	else if (t == JSTNativeTypeDouble) {result->d =JSTValueToBoolean(value); return 'd';}
+	else if (t == JSTNativeTypeUTF8) {result->C =JSTValueToBoolean(value); return 'C';}
+	else if (t == JSTNativeTypeUTF16) {result->S =JSTValueToBoolean(value); return 'S';}
+	else if (t == JSTNativeTypeUTF32) {result->J =JSTValueToBoolean(value); return 'J';}
+	else {return 'v';}
+
 }
 
-static JSTValue jsNativeTrap JSTDeclareFunction(Number, ...) {
-	int number, i = 0, r = 0;
-	if (sigctx) while (i < argc) //
-		if (signal (number = JSTValueToDouble(argv[i++]), signal_handler) == SIG_IGN) signal (number, SIG_IGN);
-		else JSTObjectSetPropertyAtIndex(sigob, number, JSTValueUndefined), r++;
-	//
-	return JSTValueFromDouble(r);
+static JSTValue jsNativeCallback JSTDeclareFunction() {
+
+	jsNativeCallbackStruct * cbs = calloc(1, sizeof(jsNativeCallbackStruct));
+
+	cbs->group = (void*)JSContextGetGroup(ctx);
+	cbs->object = (void*)argv[0];
+	cbs->function = (void*) argv[1];
+	cbs->type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(argv[2], 0));
+	cbs->proto = (void*)JSTScriptNativeEval("this.slice(1)", (JSTObject) argv[2]);
+	cbs->length = JSTValueToDouble(JSTObjectGetProperty(cbs->proto, "length"));
+
+	int i, type; char signature[cbs->length+3];
+
+	for (i = 0; i < cbs->length; i++) {
+		type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(cbs->proto, i));
+		signature[i] = JSTNativeTypeGetChar(type);
+	};
+
+	signature[i++] = ')'; signature[i++] = JSTNativeTypeGetChar(cbs->type); signature[i] = 0;
+
+	cbs->cb = dcbNewCallback((char*) &signature, (void*) &jsNativeCallbackHandler, cbs);
+
+	JSTObject out = JSTValueToObject(JSTValueFromPointer(cbs->cb));
+	JSTObjectSetProperty(out, "userdata", JSTValueFromPointer(cbs), 0);
+	JSTScriptNativeEval("this.free = function(){js.native.callbackFree(this)}", out);
+
+	return (JSTValue) out;
+
+}
+
+static JSTValue jsNativeCallbackFree JSTDeclareFunction() {
+	jsNativeCallbackStruct * cbs = JSTValueToPointer(JSTObjectGetProperty((JSTObject)argv[0], "userdata"));
+	dcbFreeCallback(cbs->cb); free(cbs); return JSTValueNull;
+}
+
+int jsNativeCallbackTest(void * cbs, int i) {
+	return ((int(*)(int))cbs)(i);
 }
 
 static JSTValue jsNativeLibraryLoad JSTDeclareFunction(String name) {
@@ -490,6 +576,8 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	
 	JSTObjectSetMethod(native, "container", jsNativeContainer, 0);
 	JSTObjectSetMethod(native, "instance", jsNativeInstance, 0);
+	JSTObjectSetMethod(native, "callback", jsNativeCallback, 0);
+	JSTObjectSetMethod(native, "callbackFree", jsNativeCallbackFree, 0);
 	JSTObjectSetMethod(native, "setPrototype", jsNativeSetPrototype, 0);
 	JSTObjectSetMethod(native, "getPrototype", jsNativeGetPrototype, 0);
 	JSTObjectSetMethod(native, "setPrivate", jsNativeSetPrivate, 0);
