@@ -172,7 +172,6 @@ static JSTValue jsNativeCallback JSTDeclareFunction() {
 
 	JSTObject out = JSTValueToObject(JSTValueFromPointer(cbs->cb));
 	JSTObjectSetProperty(out, "userdata", JSTValueFromPointer(cbs), 0);
-	JSTScriptNativeEval("this.free = function(){js.native.callbackFree(this)}", out);
 
 	return (JSTValue) out;
 

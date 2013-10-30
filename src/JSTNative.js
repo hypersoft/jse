@@ -1,4 +1,11 @@
 
+Callback = function Callback(o, f, p) {
+	var object = js.native.callback(o, f, p);
+	object.free = js.native.callbackFree.bind(this);
+	return object;
+}
+
+
 js.exec.prototype = {
 	toString:function(){return this.stdout || this.stderr || this.status},
 	valueOf:function(){return this.status}
