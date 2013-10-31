@@ -124,14 +124,14 @@ var Address = js.extendPrototype(function Address(v, t, l){
 	return o;
 }, {
 	container: null, name: "Address", prototype: {},
-	set: function(name, value) {
-		if (!isNaN(i = parseInt(name))) {
+	set: function(name, value) { var i = parseInt(name);
+		if (! isNaN(i) ) {
 			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
-			js.native.address.write(this['&'] + (i * this.size), this.type, this.value);
+			js.native.address.write((i * this.size) + this['&'], this.type, value);
 			return true;
 		}
 		if (name == 'value' || name == '*') {
-			js.native.address.write(this['&'], this.type, this.value);
+			js.native.address.write(this['&'], this.type, value);
 			return true;		
 		}
 		if (name == 'type') {
@@ -148,12 +148,12 @@ var Address = js.extendPrototype(function Address(v, t, l){
 		}
 		return null;
 	},
-	get: function(name) {
-		if (name == 'value' || name == '*') return js.native.address.read(this['&'], this.type);
-		if (!isNaN(i = parseInt(name))) {
+	get: function(name) { var i = parseInt(name);
+		if (! isNaN(i) ) {
 			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
 			return js.native.address.read((this['&'] + (i * this.size)), this.type);
 		}
+		if (name == 'value' || name == '*') return js.native.address.read(this['&'], this.type);
 		var index = name.match(/^\&([0-9]+)$/);
 		if (index != null) { index = index[1];
 			if (index >= this.length || index < 0) throw new RangeError("address index out of bounds");
@@ -177,7 +177,7 @@ Address.container = js.native.container(Address);
 
 function Allocate(type) {
 	if (typeof arguments[1] == 'number') {
-		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type)), arguments[1]).toAddress(type, arguments[1]);
+		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type)) * arguments[1]).toAddress(type, arguments[1]);
 		return o;
 	} else if (js.classOf(arguments[1]) == Array.name) {
 		var a = arguments[1]; var length = a.length;

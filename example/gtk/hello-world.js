@@ -35,10 +35,7 @@ function print_hello() {
 	return 0;
 }
 
-
-var init = Allocate("void *", [js.run.argc, js.run.argv]); // allocate + init storage
-
-gtk_init(init['&0'], init['&1']); js.native.address.free(init); // free storage
+gtk_init(0, 0);
 
 window = gtk_window_new(0);
 gtk_window_set_title(window, "JSE GTK+ 3.0 Example");
