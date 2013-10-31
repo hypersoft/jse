@@ -30,7 +30,7 @@ var g_signal_connect_swapped = function(instance, detailed_signal, c_handler, da
 }
 
 function print_hello() {
-	echo('Its your turn to say you earned your way...');
+	echo("Its your turn to say you've earned your way...");
 	return 0;
 }
 
@@ -53,5 +53,5 @@ gtk_widget_show_all(window);
 
 gtk_main ();
 
-echo("If you didn't know before your're going to learn today...");
+echo("If you didn't know before you're going to learn today...");
 
