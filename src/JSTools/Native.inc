@@ -133,17 +133,17 @@ char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNa
 	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString) {
 		result->p = JSTValueToPointer(value); return 'p';
 	} else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
-	else if (t & JSTNativeTypeChar) {result->c =JSTValueToBoolean(value); return 'c';}
-	else if (t & JSTNativeTypeShort) {result->s =JSTValueToBoolean(value); return 's';}
-	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i =JSTValueToBoolean(value); return 'i';}
-	else if (t & JSTNativeTypeLong) {result->j =JSTValueToBoolean(value); return 'j';}
-	else if (t & JSTNativeTypeLongLong) {result->l =JSTValueToBoolean(value); return 'l';}
-	else if (t & JSTNativeTypeSize) {result->j =JSTValueToBoolean(value); return 'j';}
-	else if (t == JSTNativeTypeFloat) {result->f =JSTValueToBoolean(value); return 'f';}
-	else if (t == JSTNativeTypeDouble) {result->d =JSTValueToBoolean(value); return 'd';}
-	else if (t == JSTNativeTypeUTF8) {result->C =JSTValueToBoolean(value); return 'C';}
-	else if (t == JSTNativeTypeUTF16) {result->S =JSTValueToBoolean(value); return 'S';}
-	else if (t == JSTNativeTypeUTF32) {result->J =JSTValueToBoolean(value); return 'J';}
+	else if (t & JSTNativeTypeChar) {result->c = JSTValueToDouble(value); return 'c';}
+	else if (t & JSTNativeTypeShort) {result->s = JSTValueToDouble(value); return 's';}
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i = JSTValueToDouble(value); return 'i';}
+	else if (t & JSTNativeTypeLong) {result->j =JSTValueToDouble(value); return 'j';}
+	else if (t & JSTNativeTypeLongLong) {result->l = JSTValueToDouble(value); return 'l';}
+	else if (t & JSTNativeTypeSize) {result->j = JSTValueToDouble(value); return 'j';}
+	else if (t == JSTNativeTypeFloat) {result->f = JSTValueToDouble(value); return 'f';}
+	else if (t == JSTNativeTypeDouble) {result->d = JSTValueToDouble(value); return 'd';}
+	else if (t == JSTNativeTypeUTF8) {result->C = JSTValueToDouble(value); return 'C';}
+	else if (t == JSTNativeTypeUTF16) {result->S = JSTValueToDouble(value); return 'S';}
+	else if (t == JSTNativeTypeUTF32) {result->J = JSTValueToDouble(value); return 'J';}
 	else {return 'v';}
 
 }
