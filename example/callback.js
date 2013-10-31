@@ -11,10 +11,10 @@ function target(i) {
 
 
 // setup the callback & prototype...
-var cb = Callback(this, target, [js.type.int, js.type.int]);
+var cb = Callback(this, target, ["int", "int"]);
 
 // create a native procedure to test the callback...
-var test = Procedure("jse", "jsNativeCallbackTest", "native", [js.type.int, js.type.pointer, js.type.int]);
+var test = Procedure("jse", "jsNativeCallbackTest", "native", ["int", "void *", "int"]);
 
 test(cb, 12);
 

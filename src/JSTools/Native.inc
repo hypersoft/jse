@@ -171,14 +171,14 @@ static JSTValue jsNativeCallback JSTDeclareFunction() {
 	cbs->cb = dcbNewCallback((char*) &signature, (void*) &jsNativeCallbackHandler, cbs);
 
 	JSTObject out = JSTValueToObject(JSTValueFromPointer(cbs->cb));
-	JSTObjectSetProperty(out, "userdata", JSTValueFromPointer(cbs), 0);
+	JSTObjectSetProperty(out, "struct", JSTValueFromPointer(cbs), 0);
 
 	return (JSTValue) out;
 
 }
 
 static JSTValue jsNativeCallbackFree JSTDeclareFunction() {
-	jsNativeCallbackStruct * cbs = JSTValueToPointer(JSTObjectGetProperty((JSTObject)argv[0], "userdata"));
+	jsNativeCallbackStruct * cbs = JSTValueToPointer(JSTObjectGetProperty((JSTObject)argv[0], "struct"));
 	dcbFreeCallback(cbs->cb); free(cbs); return JSTValueNull;
 }
 

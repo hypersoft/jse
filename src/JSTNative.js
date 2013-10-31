@@ -1,7 +1,9 @@
 
 Callback = function Callback(o, f, p) {
-	var object = js.native.callback(o, f, p);
-	object.free = js.native.callbackFree.bind(this);
+	var proto = new Array();
+	for (item in p) proto[item] = (typeof p[item] == 'string') ? js.type[p[item]] : p[item];
+	var object = js.native.callback(o, f, proto);
+	object.free = js.native.callbackFree.bind(null, object);
 	return object;
 }
 
@@ -26,6 +28,7 @@ js.extend(js.type, {
 	uint64:js.type.unsigned | js.type.int64, 	sint64: js.type.int64
 })
 
+js.type['void *'] = js.type.void | js.type.pointer;
 js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
 js.type['utf16 *'] = js.type.utf8 | js.type.pointer;
 js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
