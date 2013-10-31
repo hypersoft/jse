@@ -164,6 +164,9 @@ static JSTValue jsNativeCallback JSTDeclareFunction() {
 	cbs->proto = (void*)JSTScriptNativeEval("this.slice(1)", (JSTObject) argv[2]);
 	cbs->length = JSTValueToDouble(JSTObjectGetProperty(cbs->proto, "length"));
 
+	// These value/objects must not be garbage collected and shouldn't be carelessly modified.
+	JSTValueProtect(cbs->object); JSTValueProtect(cbs->function); JSTValueProtect(cbs->proto);
+
 	int i, type; char signature[cbs->length+3];
 
 	for (i = 0; i < cbs->length; i++) {
@@ -184,7 +187,9 @@ static JSTValue jsNativeCallback JSTDeclareFunction() {
 
 static JSTValue jsNativeCallbackFree JSTDeclareFunction() {
 	jsNativeCallbackStruct * cbs = JSTValueToPointer(JSTObjectGetProperty((JSTObject)argv[0], "struct"));
-	dcbFreeCallback(cbs->cb); free(cbs); return JSTValueNull;
+	JSTValueUnprotect(cbs->object); JSTValueUnprotect(cbs->function);
+	JSTValueUnprotect(cbs->proto); dcbFreeCallback(cbs->cb);
+	free(cbs); return JSTValueNull;
 }
 
 int jsNativeCallbackTest(void * cbs, int i) {
