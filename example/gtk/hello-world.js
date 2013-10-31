@@ -35,13 +35,10 @@ function print_hello() {
 	return 0;
 }
 
-var init = Allocate("void *", 2); // allocate storage
-init[0] = js.run.argc, init[1] = js.run.argv; // write these data to memory..
-var pargc = init['&0'], pargv = init['&1']; // get address of values
 
-gtk_init(pargc, pargv);
+var init = Allocate("void *", [js.run.argc, js.run.argv]); // allocate + init storage
 
-js.native.address.free(init); // free storage
+gtk_init(init['&0'], init['&1']); js.native.address.free(init); // free storage
 
 window = gtk_window_new(0);
 gtk_window_set_title(window, "JSE GTK+ 3.0 Example");

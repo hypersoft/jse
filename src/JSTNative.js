@@ -175,18 +175,27 @@ Address.prototype = js.extendPrototype(Object.defineProperties({}, {
 
 Address.container = js.native.container(Address);
 
+function Allocate(type) {
+	if (typeof arguments[1] == 'number') {
+		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type)), arguments[1]).toAddress(type, arguments[1]);
+		return o;
+	} else if (js.classOf(arguments[1]) == Array.name) {
+		var a = arguments[1]; var length = a.length;
+		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type))*length).toAddress(type, length);
+		for(i = 0; i < length; i++) o[i] = a[i];
+		return o;
+	} else throw new ReferenceError();
+}
+
 js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
 	var a = parseInt(this);
 	if (isNaN(a)) throw new RangeError("unable to parse integer address");
 	return Address(a, t, l);
 }});
 
-js.native.malloc = Procedure('jse', 'malloc', 'native', ['void *', 'long']);
-js.native.free = Procedure('jse', 'free', 'native', ['void', 'void *']);
-js.native.memset = Procedure('jse', 'memset', 'native', ['void *', 'void *', 'int', 'size']);
-
-function Allocate(type, length) {
-	var o = js.native.malloc(js.native.typeSize(js.type.resolve(type))*length).toAddress(type, length);
-	return o;
-}
+js.native.address.calloc = Procedure('jse', 'calloc', 'native', ['void *', 'size', 'size']);
+js.native.address.malloc = Procedure('jse', 'malloc', 'native', ['void *', 'long']);
+js.native.address.realloc = Procedure('jse', 'realloc', 'native', ['void *', 'void *', 'size']);
+js.native.address.memset = Procedure('jse', 'memset', 'native', ['void *', 'void *', 'int', 'size']);
+js.native.address.memmove = Procedure('jse', 'memmove', 'native', ['void *', 'void *', 'void *', 'size']);
 
