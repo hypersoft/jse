@@ -1,16 +1,17 @@
 
-Callback = function Callback(o, f, p) {
-	var proto = new Array();
-	for (item in p) proto[item] = (typeof p[item] == 'string') ? js.type[p[item]] : p[item];
-	var object = js.native.callback(o, f, proto);
-	object.free = js.native.callbackFree.bind(null, object);
-	return object;
-}
-
-
 js.exec.prototype = {
 	toString:function(){return this.stdout || this.stderr || this.status},
 	valueOf:function(){return this.status}
+}
+
+js.type.resolve = function (t) {
+	if (typeof t == 'string') return js.type[t];
+	if (js.classOf(t) == Array.name) {
+		var proto = new Array();
+		for (item in t) proto[item] = (typeof t[item] == 'string') ? js.type[t[item]] : t[item];
+		return proto;
+	}
+	return t;
 }
 
 js.type.sign = function(t) {
@@ -32,6 +33,12 @@ js.type['void *'] = js.type.void | js.type.pointer;
 js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
 js.type['utf16 *'] = js.type.utf8 | js.type.pointer;
 js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
+
+Callback = function Callback(o, f, p) {
+	var object = js.native.callback(o, f, js.type.resolve(p));
+	object.free = js.native.callbackFree.bind(null, object);
+	return object;
+}
 
 var Command = function(command) {
 	this.argv = Array.apply(null, arguments);
@@ -83,9 +90,8 @@ Object.defineProperties(js, {engine:{value:new SharedLibrary(), enumerable:true}
 
 function Procedure(lib, name, mode, proto) {
 	if (lib == undefined || lib == 'jse') lib = js.engine;
-	var proc = new Object(lib.find(name)); proc.proto = new Array();
+	var proc = new Object(lib.find(name)); proc.proto = js.type.resolve(proto);
 	proc.mode = (typeof mode == 'string') ? js.call[mode] : mode;
-	for (item in proto) proc.proto[item] = (typeof proto[item] == 'string') ? js.type[proto[item]] : proto[item];
 	proc.return = proc.proto.shift();
 	proc.base = proc.proto.slice(0); // for reset base definition
 	var bound = js.native.exec.bind(proc);
@@ -105,6 +111,8 @@ Procedure.setParameters = function(type) {
 		cache.size = Procedure.getSize.call(cache); // calculate
 	} // fire when ready
 }
+
+js.native.typeName = new Procedure("jse", 'JSTNativeTypeGetName', 'native', ['utf8 *', 'int']);
 
 var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
 
