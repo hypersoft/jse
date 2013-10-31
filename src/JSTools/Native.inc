@@ -131,10 +131,10 @@ char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNa
 	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString) {
 		result->p = JSTValueToPointer(value); return 'p';
 	} else if (t & JSTNativeTypeSize) {result->j = JSTValueToDouble(value); return 'j';}
-	else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
 	else if (t & JSTNativeTypeLong) {result->j =JSTValueToDouble(value); return 'j';}
 	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i = JSTValueToDouble(value); return 'i';}
 	else if (t == JSTNativeTypeDouble) {result->d = JSTValueToDouble(value); return 'd';}
+	else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
 	else if (t & JSTNativeTypeChar) {result->c = JSTValueToDouble(value); return 'c';}
 	else if (t & JSTNativeTypeShort) {result->s = JSTValueToDouble(value); return 's';}
 	else if (t & JSTNativeTypeLongLong) {result->l = JSTValueToDouble(value); return 'l';}
