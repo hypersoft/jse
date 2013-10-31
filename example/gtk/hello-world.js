@@ -1,3 +1,4 @@
+
 var echo = Command('echo');
 echo('Be quiet for a second, you might learn something..');
 
@@ -34,7 +35,13 @@ function print_hello() {
 	return 0;
 }
 
-gtk_init(0, 0);
+var init = Allocate("void *", 2); // allocate storage
+init[0] = js.run.argc, init[1] = js.run.argv; // write these data to memory..
+var pargc = init['&0'], pargv = init['&1']; // get address of values
+
+gtk_init(pargc, pargv);
+
+js.native.address.free(init); // free storage
 
 window = gtk_window_new(0);
 gtk_window_set_title(window, "JSE GTK+ 3.0 Example");

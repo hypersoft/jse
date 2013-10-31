@@ -433,6 +433,9 @@ static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
 			} else if (JSTObjectHasProperty(o, "free")) { // assume its a freeable object
 				JSTScriptNativeEval("this.free()", o);
 				continue;
+			} else if (JSTObjectHasProperty(o, "&")) { // assume its a freeable object
+				free(JSTValueToPointer(JSTScriptNativeEval("this['&']", o)));
+				continue;
 			} else { // assume its an object with toValue
 				p = JSTValueToPointer(v); if (p) free(p);
 				continue;

@@ -181,4 +181,12 @@ js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
 	return Address(a, t, l);
 }});
 
+js.native.malloc = Procedure('jse', 'malloc', 'native', ['void *', 'long']);
+js.native.free = Procedure('jse', 'free', 'native', ['void', 'void *']);
+js.native.memset = Procedure('jse', 'memset', 'native', ['void *', 'void *', 'int', 'size']);
+
+function Allocate(type, length) {
+	var o = js.native.malloc(js.native.typeSize(js.type.resolve(type))*length).toAddress(type, length);
+	return o;
+}
 
