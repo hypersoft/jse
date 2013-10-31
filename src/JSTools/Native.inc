@@ -109,19 +109,17 @@ char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNa
 
 	for (i = 0; i < cbs->length; i++) {
 		t = JSTValueToDouble(JSTObjectGetPropertyAtIndex(cbs->proto, i));
-		if (t & JSTNativeTypePointer
-			|| t == JSTNativeTypeValue
-			|| t == JSTNativeTypeString
-		) argv[i] = JSTValueFromPointer(dcbArgPointer(args));
+		if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString)
+			argv[i] = JSTValueFromPointer(dcbArgPointer(args));
+		else if (t & JSTNativeTypeSize) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
+		else if (t & JSTNativeTypeLong) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
+		else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUInt(args):dcbArgInt(args));
+		else if (t == JSTNativeTypeDouble) argv[i] = JSTValueFromDouble(dcbArgDouble(args));
 		else if (t == JSTNativeTypeBoolean) argv[i] = JSTValueFromBoolean(dcbArgBool(args));
 		else if (t & JSTNativeTypeChar) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUChar(args):dcbArgChar(args));
 		else if (t & JSTNativeTypeShort) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUShort(args):dcbArgShort(args));
-		else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgUInt(args):dcbArgInt(args));
-		else if (t & JSTNativeTypeLong) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
 		else if (t & JSTNativeTypeLongLong) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULongLong(args):dcbArgLongLong(args));
-		else if (t & JSTNativeTypeSize) argv[i] = JSTValueFromDouble((t & JSTNativeTypeUnsigned)?dcbArgULong(args):dcbArgLong(args));
 		else if (t == JSTNativeTypeFloat) argv[i] = JSTValueFromDouble(dcbArgFloat(args));
-		else if (t == JSTNativeTypeDouble) argv[i] = JSTValueFromDouble(dcbArgDouble(args));
 		else if (t == JSTNativeTypeUTF8) argv[i] = JSTValueFromDouble(dcbArgUChar(args));
 		else if (t == JSTNativeTypeUTF16) argv[i] = JSTValueFromDouble(dcbArgUShort(args));
 		else if (t == JSTNativeTypeUTF32) argv[i] = JSTValueFromDouble(dcbArgULong(args));
@@ -132,15 +130,15 @@ char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNa
 	t = cbs->type;
 	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString) {
 		result->p = JSTValueToPointer(value); return 'p';
-	} else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
+	} else if (t & JSTNativeTypeSize) {result->j = JSTValueToDouble(value); return 'j';}
+	else if (t == JSTNativeTypeBoolean) { result->B = JSTValueToBoolean(value); return 'B'; }
+	else if (t & JSTNativeTypeLong) {result->j =JSTValueToDouble(value); return 'j';}
+	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i = JSTValueToDouble(value); return 'i';}
+	else if (t == JSTNativeTypeDouble) {result->d = JSTValueToDouble(value); return 'd';}
 	else if (t & JSTNativeTypeChar) {result->c = JSTValueToDouble(value); return 'c';}
 	else if (t & JSTNativeTypeShort) {result->s = JSTValueToDouble(value); return 's';}
-	else if (t & JSTNativeTypeInt || t == JSTNativeTypeUnsigned) {result->i = JSTValueToDouble(value); return 'i';}
-	else if (t & JSTNativeTypeLong) {result->j =JSTValueToDouble(value); return 'j';}
 	else if (t & JSTNativeTypeLongLong) {result->l = JSTValueToDouble(value); return 'l';}
-	else if (t & JSTNativeTypeSize) {result->j = JSTValueToDouble(value); return 'j';}
 	else if (t == JSTNativeTypeFloat) {result->f = JSTValueToDouble(value); return 'f';}
-	else if (t == JSTNativeTypeDouble) {result->d = JSTValueToDouble(value); return 'd';}
 	else if (t == JSTNativeTypeUTF8) {result->C = JSTValueToDouble(value); return 'C';}
 	else if (t == JSTNativeTypeUTF16) {result->S = JSTValueToDouble(value); return 'S';}
 	else if (t == JSTNativeTypeUTF32) {result->J = JSTValueToDouble(value); return 'J';}
