@@ -36,10 +36,8 @@ extern const char * JSTNativeTypeGetName(int t);
 #include "JSTNative.inc"
 
 int JSTNativeTypeGetSize(int t) {
-	if (t == 0) return t; else if (t & JSTNativeTypePointer
-		|| t == JSTNativeTypeValue
-		|| t == JSTNativeTypeString
-	) return sizeof(void*);
+	if (t == 0) return t;
+	else if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString ) return sizeof(void*);
 	else if (t == JSTNativeTypeBoolean) return sizeof(bool);
 	else if (t & JSTNativeTypeChar) return sizeof(char);
 	else if (t & JSTNativeTypeShort) return sizeof(short);
@@ -56,10 +54,8 @@ int JSTNativeTypeGetSize(int t) {
 }
 
 const char * JSTNativeTypeGetName(int t) {
-	if (t == 0) return "void"; else if (t & JSTNativeTypePointer
-		|| t == JSTNativeTypeValue
-		|| t == JSTNativeTypeString
-	) return "pointer";
+	if (t == 0) return "void";
+	else if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString ) return "pointer";
 	else if (t == JSTNativeTypeEllipsis) return "ellipsis";
 	else if (t == JSTNativeTypeBoolean) return "bool";
 	else if (t & JSTNativeTypeChar) return (t & JSTNativeTypeUnsigned)?"char":"schar";
@@ -77,10 +73,7 @@ const char * JSTNativeTypeGetName(int t) {
 }
 
 char JSTNativeTypeGetChar(int t) {
-	if (t & JSTNativeTypePointer
-		|| t == JSTNativeTypeValue
-		|| t == JSTNativeTypeString
-	) return 'p';
+	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString ) return 'p';
 	else if (t == JSTNativeTypeBoolean) return 'B';
 	else if (t & JSTNativeTypeChar) return (t & JSTNativeTypeUnsigned)?'C':'c';
 	else if (t & JSTNativeTypeShort) return (t & JSTNativeTypeUnsigned)?'S':'s';
