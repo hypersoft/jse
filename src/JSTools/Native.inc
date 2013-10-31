@@ -123,9 +123,16 @@ char jsNativeCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, jsNa
 		else if (t == JSTNativeTypeUTF8) argv[i] = JSTValueFromDouble(dcbArgUChar(args));
 		else if (t == JSTNativeTypeUTF16) argv[i] = JSTValueFromDouble(dcbArgUShort(args));
 		else if (t == JSTNativeTypeUTF32) argv[i] = JSTValueFromDouble(dcbArgULong(args));
+		else {
+			JSTScriptNativeError("jsNativeCallbackHandler: argument %i: is an unknown type", i);
+			JSTScriptReportException(), exit(1);
+		}
+		if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 	}
 
 	JSTValue value = JST(JSObjectCallAsFunction, cbs->function, cbs->object, cbs->length, argv);
+
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	t = cbs->type;
 	if (t & JSTNativeTypePointer || t == JSTNativeTypeValue || t == JSTNativeTypeString) {
