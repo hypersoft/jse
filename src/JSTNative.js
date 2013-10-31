@@ -57,10 +57,8 @@ function SharedLibrary(s) {
 		cache[this.name].retainers++;
 		return cache[this.name];
 	}
-	this.pointer = js.native.library.load(s);
 	cache[this.name] = this;
-	// hmmm... js.native.compressLibCache... not very useful and doesn't promote sound
-	// coding ethic. load known vectors. its better to hit the cache than disk any day
+	if ((this.pointer = js.native.library.load(s)) == 0) throw new ReferenceError("unable to locate library `"+s+"'");
 }
 
 SharedLibrary.prototype = js.extendPrototype({}, {
@@ -80,7 +78,8 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 	find: function(s) {
 		if (s == undefined || s == '') return s;
 		if (s in this) return this[s];
-		else return this[s] = js.native.library.findSymbol(this.pointer, s);
+		if ((this[s] = js.native.library.findSymbol(this.pointer, s)) == 0) throw new ReferenceError("unable to locate library symbol `"+s+"'");
+		return this[s];
 	},
 	valueOf: function() { return this.pointer },
 	toString: function() { return this.name },
