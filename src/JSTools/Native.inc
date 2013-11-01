@@ -14,7 +14,7 @@
 #define JSTNativeTypeInt (1 << 5)
 #define JSTNativeTypeLong (1 << 6)
 #define JSTNativeTypeLongLong (1 << 7)
-#define JSTNativeTypeSize (1 << 8)
+#define JSTNativeTypeSize ((1 << 8) | JSTNativeTypeUnsigned)
 #define JSTNativeTypeFloat (1 << 9)
 #define JSTNativeTypeDouble (1 << 10)
 #define JSTNativeTypeUTF8 (1 << 11)
@@ -154,9 +154,9 @@ static JSTValue jsNativeCallback JSTDeclareFunction() {
 
 	cbs->group = (void*)JSContextGetGroup(ctx);
 	cbs->object = (void*)argv[0];
-	cbs->function = (void*) argv[1];
-	cbs->type = JSTValueToDouble(JSTObjectGetPropertyAtIndex(argv[2], 0));
-	cbs->proto = (void*)JSTScriptNativeEval("this.slice(1)", (JSTObject) argv[2]);
+	cbs->type = JSTValueToDouble(argv[1]);
+	cbs->function = (void*) argv[2];
+	cbs->proto = (void*) argv[3];
 	cbs->length = JSTValueToDouble(JSTObjectGetProperty(cbs->proto, "length"));
 
 	// These value/objects must not be garbage collected and shouldn't be carelessly modified.

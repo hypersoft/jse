@@ -1,41 +1,29 @@
-
 js.exec.prototype = {
 	toString:function(){return this.stdout || this.stderr || this.status},
 	valueOf:function(){return this.status}
 }
 
-js.type.resolve = function (t) {
-	if (typeof t == 'string') return js.type[t];
-	if (js.classOf(t) == Array.name) {
-		var proto = new Array();
-		for (item in t) proto[item] = (typeof t[item] == 'string') ? js.type[t[item]] : t[item];
-		return proto;
-	}
-	return t;
+function Procedure(lib, type, name, proto, optionalMode) {
+	if (lib == undefined || lib == 'jse') lib = js.engine;
+	var proc = (typeof name == 'number')?name:new Object(lib.find(name));
+	proc.proto = js.type.resolve(proto);
+	if (optionalMode != undefined) proc.mode = (typeof optionalMode == 'string')?js.call[optionalMode]:optionalMode;
+	else proc.mode = js.call['native'];
+	proc.return = js.type.resolve(type);
+	proc.base = proc.proto.slice(0); // for reset base definition
+	var bound = js.native.exec.bind(proc);
+	bound.address = Number(proc);
+	proc.length = Procedure.getLength.call(proc)
+	proc.size = Procedure.getSize.call(proc)
+	return bound;
 }
 
-js.type.sign = function(t) {
-	if (typeof t == 'string') t = js.type[t];
-	return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t
-}
+Procedure.getLength = function() { return this.proto.length; }
+Procedure.getSize = function(){ var s = 0; var p = this.proto; for (item in p) s += js.native.typeSize(p[item]); return s;}
 
-js.type.address = function(t) { return (((typeof t == 'string')?js.type[t]:t) | js.type.pointer) }
-
-js.extend(js.type, {
-	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
-	ushort:js.type.unsigned | js.type.short, 	sshort: js.type.short,
-	uint:js.type.unsigned | js.type.int, 		sint: js.type.int,
-	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
-	uint64:js.type.unsigned | js.type.int64, 	sint64: js.type.int64
-})
-
-js.type['void *'] = js.type.void | js.type.pointer;
-js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
-js.type['utf16 *'] = js.type.utf8 | js.type.pointer;
-js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
-
-Callback = function Callback(o, f, p) {
-	var object = js.native.callback(o, f, js.type.resolve(p));
+Callback = function Callback(o, t, f, p) {
+	var proto = p.slice(0);
+	var object = js.native.callback(o, js.type.resolve(t), f, js.type.resolve(proto));
 	object.free = js.native.callbackFree.bind(null, object);
 	return object;
 }
@@ -87,33 +75,35 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 
 Object.defineProperties(js, {engine:{value:new SharedLibrary(), enumerable:true}});
 
-function Procedure(lib, name, mode, proto) {
-	if (lib == undefined || lib == 'jse') lib = js.engine;
-	var proc = new Object(lib.find(name)); proc.proto = js.type.resolve(proto);
-	proc.mode = (typeof mode == 'string') ? js.call[mode] : mode;
-	proc.return = proc.proto.shift();
-	proc.base = proc.proto.slice(0); // for reset base definition
-	var bound = js.native.exec.bind(proc);
-	if (proc.mode == js.call.ellipsis) bound.proc = proc, bound.parameters = Procedure.setParameters;
-	proc.length = Procedure.getLength.call(proc)
-	proc.size = Procedure.getSize.call(proc)
-	return bound;
-}
-Procedure.getLength = function() { return this.proto.length; }
-Procedure.getSize = function(){ var s = 0; var p = this.proto; for (item in p) s += js.native.typeSize(p[item]); return s;}
-Procedure.setParameters = function(type) {
-	if (this.parameters) { // only if defined
-		var cache = this.proc;
-		cache.proto = cache.base.slice(0); // reset to base definition
-		for (t in arguments) cache.proto.push((typeof arguments[t] == 'string')?js.type[arguments[t]]:arguments[t]); // push new types
-		cache.length = Procedure.getLength.call(cache); // calculate
-		cache.size = Procedure.getSize.call(cache); // calculate
-	} // fire when ready
+js.type.resolve = function (t) {
+	if (typeof t == 'string') return js.type[t];
+	if (js.classOf(t) == Array.name) {
+		var proto = new Array();
+		for (item in t) proto[item] = (typeof t[item] == 'string') ? js.type[t[item]] : t[item];
+		return proto;
+	}
+	return t;
 }
 
-js.native.typeName = new Procedure("jse", 'JSTNativeTypeGetName', 'native', ['utf8 *', 'int']);
+js.type.lookup = new Procedure("jse", 'utf8 *', 'JSTNativeTypeGetName', ['int']);
 
-var exit = new Procedure(js.engine, 'exit', 'native', ['int', 'int']);
+js.type.sign = function(t) {
+	if (typeof t == 'string') t = js.type[t];
+	return ((t & js.type.unsigned) && t > js.type.bool && t < js.type.float) ? t-- : t
+}
+
+js.extend(js.type, {
+	uchar:js.type.char, 						schar:js.type.sign(js.type.char),
+	ushort:js.type.unsigned | js.type.short, 	sshort: js.type.short,
+	uint:js.type.unsigned | js.type.int, 		sint: js.type.int,
+	ulong:js.type.unsigned | js.type.long, 		slong: js.type.long,
+	uint64:js.type.unsigned | js.type.int64, 	sint64: js.type.int64
+})
+
+js.type['void *'] = js.type.void | js.type.pointer;
+js.type['utf8 *'] = js.type.utf8 | js.type.pointer;
+js.type['utf16 *'] = js.type.utf8 | js.type.pointer;
+js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
 
 var Address = js.extendPrototype(function Address(v, t, l){
 	var o = js.native.instance(Address.container, 0);
@@ -175,6 +165,12 @@ Address.prototype = js.extendPrototype(Object.defineProperties({}, {
 
 Address.container = js.native.container(Address);
 
+js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
+	var a = parseInt(this);
+	if (isNaN(a)) throw new RangeError("unable to parse integer address");
+	return Address(a, t, l);
+}});
+
 function Allocate(type) {
 	if (typeof arguments[1] == 'number') {
 		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type)) * arguments[1]).toAddress(type, arguments[1]);
@@ -187,15 +183,5 @@ function Allocate(type) {
 	} else throw new ReferenceError();
 }
 
-js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
-	var a = parseInt(this);
-	if (isNaN(a)) throw new RangeError("unable to parse integer address");
-	return Address(a, t, l);
-}});
-
-js.native.address.calloc = Procedure('jse', 'calloc', 'native', ['void *', 'size', 'size']);
-js.native.address.malloc = Procedure('jse', 'malloc', 'native', ['void *', 'long']);
-js.native.address.realloc = Procedure('jse', 'realloc', 'native', ['void *', 'void *', 'size']);
-js.native.address.memset = Procedure('jse', 'memset', 'native', ['void *', 'void *', 'int', 'size']);
-js.native.address.memmove = Procedure('jse', 'memmove', 'native', ['void *', 'void *', 'void *', 'size']);
+var exit = new Procedure(js.engine, 'int', 'exit', ['int']);
 

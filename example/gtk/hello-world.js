@@ -3,24 +3,23 @@ var echo = Command('echo');
 echo('Be quiet for a second, you might learn something..');
 
 var gtk3 = new SharedLibrary('libgtk-3.so');
-var gtk_init = Procedure(gtk3, "gtk_init", "native", ['int', 'void *', 'void *']);
-var gtk_main = Procedure(gtk3, 'gtk_main', 'native', ['int']);
-var gtk_widget_show_all = Procedure(gtk3, 'gtk_widget_show_all', 'native', ['void', 'void *']);
-var gtk_window_new = Procedure(gtk3, "gtk_window_new", 'native', ['void *', 'int']);
-var gtk_window_set_title = Procedure(gtk3, "gtk_window_set_title", 'native', ['void', 'void *', 'utf8 *']);
-var gtk_container_set_border_width = Procedure(gtk3, 'gtk_container_set_border_width', 'native', ['void', 'void *', 'int']);
-var gtk_button_new_with_label = Procedure(gtk3, 'gtk_button_new_with_label', 'native', ['void *', 'utf8 *']);
-var gtk_container_add = Procedure(gtk3, 'gtk_container_add', 'native', ['void', 'pointer', 'pointer']);
-var gtk_window_set_default_size = Procedure(gtk3, 'gtk_window_set_default_size', 'native', ['void', 'void *', 'int', 'int']);
-var gtk_window_set_position = Procedure(gtk3, 'gtk_window_set_position', 'native', ['void', 'void *', 'int']);
+var gtk_init = Procedure(gtk3, 'int', "gtk_init", ['void *', 'void *']);
+var gtk_main = Procedure(gtk3, 'int', 'gtk_main', []);
+var gtk_widget_show_all = Procedure(gtk3, 'void', 'gtk_widget_show_all', ['void *']);
+var gtk_window_new = Procedure(gtk3, 'void *', "gtk_window_new", ['int']);
+var gtk_window_set_title = Procedure(gtk3, 'void', "gtk_window_set_title", ['void *', 'utf8 *']);
+var gtk_container_set_border_width = Procedure(gtk3, 'void', 'gtk_container_set_border_width', ['void *', 'int']);
+var gtk_button_new_with_label = Procedure(gtk3, 'void *', 'gtk_button_new_with_label', ['utf8 *']);
+var gtk_container_add = Procedure(gtk3, 'void', 'gtk_container_add', ['pointer', 'pointer']);
+var gtk_window_set_default_size = Procedure(gtk3, 'void', 'gtk_window_set_default_size', ['void *', 'int', 'int']);
+var gtk_window_set_position = Procedure(gtk3, 'void', 'gtk_window_set_position', ['void *', 'int']);
 
 var gobj = new SharedLibrary('libgobject-2.0.so');
 var G_CONNECT_SWAPPED = 1 << 1;
 var GTK_WIN_POS_CENTER = 1;
 
-var g_signal_connect_data = Procedure(gobj,
-	'g_signal_connect_data', 'native', [
-	'ulong', 'pointer', 'utf8 *', 'pointer', 'pointer', 'pointer', 'int'
+var g_signal_connect_data = Procedure(gobj, 'ulong', 'g_signal_connect_data', [
+	'pointer', 'utf8 *', 'pointer', 'pointer', 'pointer', 'int'
 ]);
 var g_signal_connect = function(instance, detailed_signal, c_handler, data) {
 	return g_signal_connect_data(instance, detailed_signal, c_handler, data, 0, 0);
@@ -45,7 +44,7 @@ gtk_window_set_default_size(window, 230, 150);
 gtk_window_set_position(window, GTK_WIN_POS_CENTER);
 
 button = gtk_button_new_with_label ("Hello World");
-g_signal_connect (button, "clicked", Callback(this, print_hello, ['void', 'void *', 'void *']), 0);
+g_signal_connect (button, "clicked", Callback(this, 'void', print_hello, ['void *', 'void *']), 0);
 g_signal_connect_swapped(button, "clicked", gtk3.find('gtk_widget_destroy'), window);
 
 gtk_container_add(window, button)
