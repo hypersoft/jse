@@ -16,9 +16,9 @@ GTK_BUILDER_ERROR_TEMPLATE_MISMATCH = 10;
 js.extend(js.type, {
 	'GtkBuilder *': js.type.pointer,
 	'GObject *': js.type.pointer,
-	'gchar *': js.type.utf8 | js.type.pointer;
-	'const gchar *': js.type.utf8 | js.type.pointer;
-	'gchar **': js.type.utf8 | js.type.pointer;
+	'gchar *': js.type.utf8 | js.type.pointer,
+	'const gchar *': js.type.utf8 | js.type.pointer,
+	'gchar **': js.type.utf8 | js.type.pointer,
 	'gssize': (js.type.size - 1),
 	'GCallback': js.type.pointer,
 	'GError **': js.type.pointer,
@@ -27,7 +27,7 @@ js.extend(js.type, {
 	'GtkBuilderConnectFunc': js.type.pointer,
 	'GParamSpec *': js.type.pointer,
 	'GType': js.type.int,
-	'GValue *': js.type.pointer
+	'GValue *': js.type.pointer,
 	'guint': js.type.int | js.type.unsigned,
 	'gboolean': js.type.boolean,
 	'GSList *': js.type.pointer,
