@@ -281,6 +281,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 			result = JSTScriptNativeError("%s: %s: argument #%i (%i) is an unknown or invalid argument type", fname, job, stackIndex, stackItem);
 			goto bail;
 		}
+		continue;
 	}
 
 	if (unsign) returnType -= JSTNativeTypeUnsigned;
