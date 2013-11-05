@@ -2,6 +2,10 @@ const char * JSTReservedAddress =
 
 	"Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
 
+const char * CODENAME = JSE_CODENAME;
+const char * VERSION = JSE_BUILDNO;
+const char * VENDOR = JSE_VENDOR;
+
 #include "JSTools.inc"
 #include "JSTInit.inc"
 
@@ -154,7 +158,6 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 	return result;
 
 }
-		
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
@@ -167,11 +170,14 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 	
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
-	JSTObjectSetMethod(js, "source", jsToolsSource, 0);
 
-	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyRequired);
-
-	JSTObjectSetMethod(js, "exec", jsExecute, 0);
+	JSTObjectSetProperty(js, "copyright", JSTValueFromPointer(JSTReservedAddress), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(js, "vendor", JSTValueFromPointer(VENDOR), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(js, "version", JSTValueFromPointer(VERSION), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(js, "codename", JSTValueFromPointer(CODENAME), JSTObjectPropertyReadOnly);
+	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);
+	JSTObjectSetMethod(js, "exec", jsExecute, JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyReadOnly);
 
 	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);
 
