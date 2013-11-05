@@ -137,6 +137,25 @@ static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
+static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
+	JSTValue result;
+	char *script = NULL, *src = NULL, *file = (argc)?JSTValueToUTF8(argv[0]):NULL;
+	if (g_file_get_contents(file, &src, NULL, NULL)) {
+		script = src; int c = 0;
+		if (*script == '#' && *(script+1) == '!') {
+			script+=2;
+			while ((c = *script) && c != '\n') script++;
+		}
+		result = JSTScriptEval(script, (argc == 2)?(JSTObject)argv[1]:NULL, file, 1); g_free(src);
+	} else {
+		JSTScriptNativeError("unable to get file `%s' contents", file);
+	}
+	JSTStringFreeUTF8(file);
+	return result;
+
+}
+		
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	static bool initialized;
@@ -148,6 +167,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 	
 	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetMethod(js, "source", jsToolsSource, 0);
 
 	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyRequired);
 
