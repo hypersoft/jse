@@ -30,6 +30,7 @@ js.extend(js.type, {
 	'GValue *': js.type.pointer
 	'guint': js.type.int | js.type.unsigned,
 	'gboolean': js.type.boolean,
+	'GSList *': js.type.pointer,
 })
 
 gtk_builder_new = new Procedure(Gtk3, 'GtkBuilder *', 'gtk_builder_new', ['void']);

@@ -18,7 +18,6 @@ static JSValueRef jsExecute JSTDeclareFunction ();
 char * JSTConstructUTF8(char * format, ...);
 
 #include "JSTools/Native.inc"
-#include <seed.h>
 
 char * JSTConstructUTF8(char * format, ...) {
 	va_list ap; va_start(ap, format); char * message = NULL;
@@ -144,9 +143,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	char buffer[PATH_MAX];
 
 	if (! initialized )	initialized++;
-
-	// The argument that gtk could be used easily from scripting was far too compelling.
-	seed_init_with_context (&argc, &argv, (SeedGlobalContext) ctx);
 
 	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
