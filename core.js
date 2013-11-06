@@ -1,6 +1,6 @@
 #!bin/jse
 
-//var echo = new Command('echo', '-E');
+var echo = new Command('echo', '-E');
 //var print = new Command('echo', '-En');
 //var printf = new Command('printf', '--');
 
@@ -13,9 +13,9 @@ printVersion();
 
 // More than one way to skin a 'cat'
 var printf = new Command('printf', '--');
-var vendor = js.native.fromUTF8(js.vendor); // these are JS managed string copies ;)
-var codename = js.native.fromUTF8(js.codename);
-var version = js.native.fromUTF8(js.version);
+var vendor = String.fromUTF8(js.vendor); // these are JS managed string copies ;)
+var codename = String.fromUTF8(js.codename);
+var version = String.fromUTF8(js.version);
 
 printf("%s JSE %s v%s\n", vendor, codename, version);
 

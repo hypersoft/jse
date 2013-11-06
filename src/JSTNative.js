@@ -108,7 +108,7 @@ js.type['utf32 *'] = js.type.utf32 | js.type.pointer;
 var Address = js.extendPrototype(function Address(v, t, l){
 	var o = js.native.instance(Address.container, 0);
 	js.native.setPrototype(o, Address.prototype);
-	if (v != undefined) Object.defineProperties(o, {'&':{value: parseInt(v), writeable:true}});
+	if (v != undefined) o['&'] = v;
 	if (t != undefined) o.type = (typeof t == 'string')?js.type[t]:t;
 	if (l != undefined) o.length = l;
 	return o;
@@ -125,16 +125,19 @@ var Address = js.extendPrototype(function Address(v, t, l){
 			return true;		
 		}
 		if (name == 'type') {
-			Object.defineProperties(this, {type:{'value': (typeof value == 'string')?js.type[value]:value, writeable:true}});
-			Object.defineProperties(this, {size:{'value':js.native.typeSize(this.type), writeable:true}});
+			Object.defineProperties(this, {type:{'value': (typeof value == 'string')?js.type[value]:value, writeable:true,writeable:true}});
+			Object.defineProperties(this, {size:{'value':js.native.typeSize(this.type), writeable:true,writeable:true}});
 			return true;
 		}
 		if (name == 'length') {
 			Object.defineProperties(this, {length:{'value':value, writeable:true,configurable:true}})
 			return true;
 		}
-		if (name == '&') { this['&'] = value;
-			return true;
+		if (name == '&') {
+			Object.defineProperties(this, {'&':{value: parseInt(value), configurable:true,writeable:true}});
+		}
+		if (name == 'free') {
+			Object.defineProperties(this, {free:{value: value, configurable:true,writeable:true}});
 		}
 		return null;
 	},
@@ -170,18 +173,6 @@ js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
 	if (isNaN(a)) throw new RangeError("unable to parse integer address");
 	return Address(a, t, l);
 }});
-
-function Allocate(type) {
-	if (typeof arguments[1] == 'number') {
-		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type)) * arguments[1]).toAddress(type, arguments[1]);
-		return o;
-	} else if (js.classOf(arguments[1]) == Array.name) {
-		var a = arguments[1]; var length = a.length;
-		var o = js.native.address.malloc(js.native.typeSize(js.type.resolve(type))*length).toAddress(type, length);
-		for(i = 0; i < length; i++) o[i] = a[i];
-		return o;
-	} else throw new ReferenceError();
-}
 
 var exit = new Procedure(js.engine, 'int', 'exit', ['int']);
 

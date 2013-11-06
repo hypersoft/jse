@@ -405,17 +405,17 @@ static JSTValue jsNativeTypeSize JSTDeclareFunction(Number type) {
 	else return JSTValueFromDouble(0);
 }
 
-static JSTValue jsNativeToUTF8 JSTDeclareFunction(Value target) {
+static JSTValue jsStringToUTF8 JSTDeclareFunction(Value target) {
 	// must have one arg of type String
 	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));
 }
 
-static JSTValue jsNativeFromUTF8 JSTDeclareFunction(Pointer target) {
+static JSTValue jsStringFromUTF8 JSTDeclareFunction(Pointer target) {
 	// must have one arg of type char *
 	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
 }
 
-static JSTValue jsNativeToUTF32 JSTDeclareFunction(Value target) {
+static JSTValue jsStringToUTF32 JSTDeclareFunction(Value target) {
 	JSTString jss = JSTValueToString(argv[0]);
 	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));
 	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));
@@ -560,6 +560,11 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject native = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(js, "native", native, JSTObjectPropertyRequired);
 
+	JSTObject string = JSTValueToObject(JSTScriptNativeEval("String", NULL));
+	JSTObjectSetMethod(string, "toUTF8", jsStringToUTF8, 0);
+	JSTObjectSetMethod(string, "fromUTF8", jsStringFromUTF8, 0);
+	JSTObjectSetMethod(string, "toUTF32", jsStringToUTF32, 0);
+
 	JSTObject lib = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
 
@@ -590,9 +595,6 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObjectSetMethod(native, "getPrototype", jsNativeGetPrototype, 0);
 	JSTObjectSetMethod(native, "setPrivate", jsNativeSetPrivate, 0);
 	JSTObjectSetMethod(native, "typeSize", jsNativeTypeSize, 0);
-	JSTObjectSetMethod(native, "toUTF8", jsNativeToUTF8, 0);
-	JSTObjectSetMethod(native, "fromUTF8", jsNativeFromUTF8, 0);
-	JSTObjectSetMethod(native, "toUTF32", jsNativeToUTF32, 0);
 	JSTObjectSetMethod(native, "exec", jsNativeExec, 0);
 
 	JSTObject library = JSTClassInstance(NULL, NULL);
