@@ -274,7 +274,7 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObjec
 
 static JSValueRef jsExecute JSTDeclareFunction () {
 
-	int child_status = 0, i = 0;
+	int child_status = 0, allocated = 0, deallocated = 0;
 	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
 
 	JSObjectRef exec = JSTObjectUndefined;
@@ -288,49 +288,54 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 	JSObjectRef oargv = (JSTObject) JSTObjectGetProperty(this, "argv");
 	int oargc = JSTValueToDouble(JSTObjectGetProperty(oargv, "length"));
 
-	char * nargv[oargc + argc + 1];
-	char ** dest = nargv;
+	if (JSTScriptHasError) { return JSTValueUndefined; }
 
-	while (i < oargc) {
-		nargv[i] = JSTStringToUTF8(JSTValueToString(JSTObjectGetPropertyAtIndex(oargv, i)), true);
-		i++;
+	char * argument[oargc + argc + 1];
+	char ** dest = argument;
+
+	while (allocated < oargc) {
+		JSTString tmp = JSTValueToString(JSTObjectGetPropertyAtIndex(oargv, allocated));
+		argument[allocated] = JSTStringToUTF8(tmp, true);
+		allocated++;
 	}
 
-	dest = nargv + oargc; i=0;
+	dest = argument + oargc; int secondary=0;
 
-	while (i < argc) {
-		dest[i] = JSTStringToUTF8(JSTValueToString(argv[i]), true);
-		i++;
+	while (secondary < argc) {
+		if (JSTValueIsNull(argv[secondary])) return JSTScriptReportException();
+		JSTString tmp = JSTValueToString(argv[secondary]);
+		dest[secondary] = JSTStringToUTF8(tmp, true);
+		secondary++;
 	}
 
-	dest[i] = NULL;
+	dest[secondary] = NULL; allocated += secondary;
+	if (JSTScriptHasError) { goto leaving; }
 
-	if (true) {
-		exec = JSTClassInstance(NULL, NULL);
-		if (captureTime) JSTScriptNativeEval("this.startTime = Object.freeze(new Date())", exec);
-		if (g_spawn_sync(NULL, nargv, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
-			exec_child_status = WEXITSTATUS(exec_child_status);
-			bool success = (exec_child_status == 0);
+	exec = JSTClassInstance(NULL, NULL);
+	if (captureTime) JSTScriptNativeEval("this.startTime = Object.freeze(new Date())", exec);
+	if (g_spawn_sync(NULL, argument, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
+		exec_child_status = WEXITSTATUS(exec_child_status);
+		bool success = (exec_child_status == 0);
 
-			if (success) {
-				JSTObjectSetProperty(exec, "status", JSTValueFromBoolean(success), 0);
-			} else {
-				JSTObjectSetProperty(exec, "status", JSTValueFromDouble(exec_child_status), 0);
-			}
-
-			if (captureOut && exec_child_out) {
-				JSTObjectSetProperty(exec, "stdout", JSTValueFromString(JSTStringFromUTF8(exec_child_out), 0), true);
-				JSTStringFreeUTF8(exec_child_out);
-			}
-			if (captureError && exec_child_err) {
-				JSTObjectSetProperty(exec, "stderr", JSTValueFromString(JSTStringFromUTF8(exec_child_err), 0), true);
-				JSTStringFreeUTF8(exec_child_err);
-			} 
+		if (success) {
+			JSTObjectSetProperty(exec, "status", JSTValueFromBoolean(success), 0);
+		} else {
+			JSTObjectSetProperty(exec, "status", JSTValueFromDouble(exec_child_status), 0);
 		}
-		if (captureTime) JSTScriptNativeEval("this.endTime = Object.freeze(new Date())", exec);
-		argc += oargc + 1;
-		i = 0; while (i < argc) JSTStringFreeUTF8(nargv[i++]);
+
+		if (captureOut && exec_child_out) {
+			JSTObjectSetProperty(exec, "stdout", JSTValueFromString(JSTStringFromUTF8(exec_child_out), 0), true);
+			JSTStringFreeUTF8(exec_child_out);
+		}
+		if (captureError && exec_child_err) {
+			JSTObjectSetProperty(exec, "stderr", JSTValueFromString(JSTStringFromUTF8(exec_child_err), 0), true);
+			JSTStringFreeUTF8(exec_child_err);
+		} 
 	}
+	if (captureTime) JSTScriptNativeEval("this.endTime = Object.freeze(new Date())", exec);
+
+leaving:
+	while (deallocated < allocated) JSTStringFreeUTF8(argument[deallocated++]);
 
 	JSTObjectSetPrototype(exec, JSTScriptNativeEval("js.exec.prototype", NULL));
 

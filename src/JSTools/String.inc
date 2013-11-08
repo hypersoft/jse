@@ -22,6 +22,7 @@ extern UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release
 #else
 
 char * JSTStringToUTF8 (JSTString s, bool release) {
+	if (!s) return NULL;
 	register size_t bufferLength = 0; register void * buffer = NULL;
 	if (s && (bufferLength = JSStringGetMaximumUTF8CStringSize(s)))
 		JSStringGetUTF8CString(s, (buffer = malloc(bufferLength)), bufferLength);
