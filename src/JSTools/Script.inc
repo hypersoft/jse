@@ -50,8 +50,12 @@ void JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception
 }
 
 void JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
-	register char *b = JSTStringToUTF8(JSTValueToString(JSTScriptNativeEval("this + '\\nstack trace: { ' + this.stack.split('\\n').reverse().join(' } --> { ').split('@').join(': ') + ' }\\n'", (JSTObject)*exception)), true);
-	fprintf(stderr, "JSE Fatal Error Dump: %s", b); free(b); *exception = NULL;
+	register char *b = JSTValueToUTF8(*exception);
+	JSTObject e = (JSTObject) *exception; *exception = NULL;
+	fprintf(stderr, "JSE Fatal Error Dump: %s\n", b); free(b);
+	b = JSTValueToUTF8(JSTScriptNativeEval("js.trace(this)", e));
+	fprintf(stderr, "%s\n", b);
+	free(b);
 }
 
 #endif
