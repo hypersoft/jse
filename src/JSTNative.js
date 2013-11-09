@@ -45,7 +45,7 @@ var NativeType = function(name, size, unsigned, code, pointers) {
 	this.name = name, this.size = size,
 	this.isConstant = false,
 	this.isUnsigned = (unsigned == true)?true:false,
-	this.code = code || NativeTypeNext();
+	this.code = code || NativeTypeNext(),
 	this.derefCount = pointers || 0;
 	native.type[name] = this;
 }
@@ -90,7 +90,6 @@ NativeType.prototype = {
 		var copy = Object.create(this);
 		if (this.name == 'void') {
 			var name = '';
-//			for (name in NativeType.dummy) if (copy[name] == undefined)	delete copy[name];
 			copy.unsigned = undefined;
 		}
 		copy.derefCount++;

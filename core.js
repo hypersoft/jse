@@ -5,10 +5,10 @@
 var printVersion = (function mainLoad() {
 
 var int = native.type.int;
-var utf8ptr = native.type.utf8.pointer;
+var utf8p = native.type.utf8.constant.pointer;
 
 return Procedure(
-	native.engine, int, "printf", [utf8ptr, utf8ptr, utf8ptr, utf8ptr]).bind(
+	native.engine, int, "printf", [utf8p, utf8p, utf8p, utf8p]).bind(
 	this, "%s JSE %s v%s\n", js.vendor, js.codename, js.version
 );
 
