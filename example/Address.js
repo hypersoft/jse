@@ -3,12 +3,12 @@
 // All Number objects have the 'toHex' convertor...
 
 var utf8p = native.type.utf8.pointer;
-var cUtf8p = utf8p.constant;
+var int = native.type.int;
 
 // toAddress is an applied shortcut for... Address(number, type, count)
-var argv = js.run.argv.toAddress(cUtf8p, js.run.argc);
+var argv = js.run.argv.toAddress(utf8p.constant, js.run.argc);
 argv[0] = "blue";
-var i, puts = new Procedure(native.engine, native.type.int, "puts", [utf8p]);
+var i, puts = new Procedure(native.engine, int, "puts", [utf8p]);
 
 // In C `&' means to get address instead of value ...
 // the address returned is a primitve value
