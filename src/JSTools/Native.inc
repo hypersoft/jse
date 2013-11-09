@@ -245,7 +245,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	JSTObject proto = JSTValueToObject(JSTObjectGetProperty(this, "proto"));
 	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
 
-	const char * fname = "js.native.exec", * job = "type error";
+	const char * fname = "native.exec", * job = "type error";
 
 	if (argc != protoLen) {
 		return JSTScriptNativeError("%s: %s: argument count does not match function prototype", fname, job);
@@ -334,7 +334,7 @@ done:
 
 static JSTValue jsNativeAddressRead JSTDeclareFunction (address, type) {
 
-	const char * fname = "js.native.address.read", * job = "unable to read pointer contents";
+	const char * fname = "native.address.read", * job = "unable to read pointer contents";
 
 	if (argc != 2) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
 
@@ -367,7 +367,7 @@ static JSTValue jsNativeAddressRead JSTDeclareFunction (address, type) {
 
 static JSTValue jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
 
-	const char * fname = "js.native.address.write", * job = "unable to write pointer contents";
+	const char * fname = "native.address.write", * job = "unable to write pointer contents";
 
 	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
 
@@ -569,20 +569,18 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
 	JSTObject lib = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
 
-	char * jsNativeDefines = NULL;
+	char * jsNativeDefines = JSTConstructUTF8("native.alignment = %i; native.byteOrder = %i; native.call = {native: %i, ellipsis: %i, '...': %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}};",
+		JSTNativeAlignment, JSTNativeByteOrder,
+		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,
+		DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS,
+		DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV,
+		DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB,
+		DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32,
+		DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32
+	);
 
-/*JSTConstructUTF8("native.alignment = %i; native.byteOrder = %i; native.call = {native: %i, ellipsis: %i, '...': %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}};",*/
-/*		JSTNativeAlignment, JSTNativeByteOrder,*/
-/*		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,*/
-/*		DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS,*/
-/*		DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV,*/
-/*		DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB,*/
-/*		DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32,*/
-/*		DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32,*/
-/*	);*/
-
-/*	JSTScriptNativeEval(jsNativeDefines, NULL);*/
-/*	free(jsNativeDefines);*/
+	JSTScriptNativeEval(jsNativeDefines, NULL);
+	free(jsNativeDefines);
 
 	jsNativeDefines = JSTConstructUTF8("native.size = js.extend({}, {'void': %i, 'const': %i, unsigned: %i, bool: %i, char: %i, short: %i, int: %i, 'enum': %i, long: %i, size: %i, pointer: %i, int64: %i, float: %i, double: %i, struct: %i, union: %i, ellipsis: %i, utf8: %i, utf16: %i, utf32: %i, string: %i, value: %i})",
 		JSN_C_TYPE_VOID_SIZE, JSN_C_TYPE_CONST_SIZE, JSN_C_TYPE_UNSIGNED_SIZE,
