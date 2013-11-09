@@ -2,8 +2,6 @@
 // This is not a very good example!
 // but it demonstrates a working theory...
 
-var echo = new Command('echo', '-E');
-
 // create the function to call..
 function target(i) {
 	return echo("callback target was called with:", i);
