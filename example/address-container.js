@@ -4,11 +4,9 @@
 
 var utf8p = native.type.utf8.pointer;
 
-var argv = js.run.argv.toAddress(utf8p, js.run.argc);
+var argv = js.run.argv.toAddress(native.type.utf8.constant.pointer, js.run.argc);
 
-//Command('echo')()
-
-var i, puts = new Procedure(native.engine, 'int', "puts", [utf8p]);
+var i, puts = new Procedure(native.engine, native.type.int, "puts", [utf8p]);
 
 // In C `&' means to get address instead of value ...
 // the address returned is a primitve value

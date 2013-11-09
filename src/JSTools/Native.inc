@@ -275,21 +275,26 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		if (argCode & JSN_C_TYPE_POINTER) {
 			if (argCode & JSN_C_TYPE_UTF8) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
-				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));				
+				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));
+				continue;
 			} else if (argCode & JSN_C_TYPE_UTF16) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, (void*)JSTStringUTF16(conversion16[resource16++] = JSTValueToString(value)));
+				continue;
 			} else if (argCode & JSN_C_TYPE_UTF32) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), JSTValueToDouble(JSTObjectGetProperty(value, "length")), true));
+				continue;
 			} else if (argCode & JSN_C_TYPE_VALUE) {
 				dcArgPointer(callVM, (void*)value);
+				continue;
 			} else if (argCode & JSN_C_TYPE_STRING) {
 				dcArgPointer(callVM, JSTValueToString(value));
+				continue;
 			} else {
 				dcArgPointer(callVM, JSTValueToPointer(value));
+				continue;
 			}
-			continue;
 		} else if (argCode == JSN_C_TYPE_BOOL) dcArgBool(callVM, JSTValueToBoolean(value));
 		else if (argCode & JSN_C_TYPE_CHAR) dcArgChar(callVM, JSTValueToDouble(value));
 		else if (argCode & JSN_C_TYPE_SHORT) dcArgShort(callVM, JSTValueToDouble(value));
@@ -382,6 +387,11 @@ static JSTValue jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
 	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
 
 	int type = JSTValueToDouble(argv[1]);
+
+	if (type & JSN_C_TYPE_CONST) {
+		return JSTScriptNativeError("%s: %s: pointer value is constant", fname, job);
+	}
+
 	double value = JSTValueToDouble(argv[2]);
 
 	if (type & JSN_C_TYPE_POINTER) *(intptr_t*)(address) = (intptr_t)value;
