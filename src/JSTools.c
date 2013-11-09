@@ -13,10 +13,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
 JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
-bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
-void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
-JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
-bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 static JSValueRef jsExecute JSTDeclareFunction ();
 char * JSTConstructUTF8(char * format, ...);
@@ -211,44 +207,6 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
 		result = JSTAction(JSValueMakeFromJSONString, s);
-		JSTStringRelease(s);
-	}
-	return result;
-}
-
-bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
-	bool result = NULL;
-	if (p) {
-		JSTString s = JSTStringFromUTF8(p);
-		result = JST(JSObjectDeleteProperty, o, s);
-		JSTStringRelease(s);
-	}
-	return result;
-}
-
-JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
-	JSTValue result = NULL;
-	if (p) {
-		JSTString s = JSTStringFromUTF8(p);
-		result = JST(JSObjectGetProperty, o, s);
-		JSTStringRelease(s);
-	}
-	return result;
-}
-
-void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a) {
-	if (p) {
-		JSTString s = JSTStringFromUTF8(p);
-		JST(JSObjectSetProperty, o, s, v, a);
-		JSTStringRelease(s);
-	}
-}
-
-bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
-	bool result = NULL;
-	if (p) {
-		JSTString s = JSTStringFromUTF8(p);
-		result = JSTAction(JSObjectHasProperty, o, s);
 		JSTStringRelease(s);
 	}
 	return result;

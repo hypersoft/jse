@@ -28,4 +28,53 @@ JSTStringRelease(name); \
 #define JSTObjectPropertyReadOnly kJSPropertyAttributeReadOnly
 #define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete
 
+#ifdef JSTools_h
+
+extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
+extern void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
+extern JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
+extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
+
+#else
+
+bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
+	bool result = NULL;
+	if (p) {
+		JSTString s = JSTStringFromUTF8(p);
+		result = JST(JSObjectDeleteProperty, o, s);
+		JSTStringRelease(s);
+	}
+	return result;
+}
+
+JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
+	JSTValue result = NULL;
+	if (p) {
+		JSTString s = JSTStringFromUTF8(p);
+		result = JST(JSObjectGetProperty, o, s);
+		JSTStringRelease(s);
+	}
+	return result;
+}
+
+void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a) {
+	if (p) {
+		JSTString s = JSTStringFromUTF8(p);
+		JST(JSObjectSetProperty, o, s, v, a);
+		JSTStringRelease(s);
+	}
+}
+
+bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
+	bool result = NULL;
+	if (p) {
+		JSTString s = JSTStringFromUTF8(p);
+		result = JSTAction(JSObjectHasProperty, o, s);
+		JSTStringRelease(s);
+	}
+	return result;
+}
+
+
+#endif
 

@@ -28,9 +28,9 @@ typedef char UTF8;
 #include "JSTools/Context.inc"
 #include "JSTools/Declare.inc"
 #include "JSTools/Function.inc"
-#include "JSTools/Object.inc"
 #include "JSTools/Stack.inc"
 #include "JSTools/String.inc"
+#include "JSTools/Object.inc"
 #include "JSTools/Value.inc"
 #include "JSTools/Script.inc"
 
@@ -45,10 +45,6 @@ extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 extern JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
 extern JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
 extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
-extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
-extern void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
-extern JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
-extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 extern JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 extern char * JSTConstructUTF8(char * format, ...);
 
