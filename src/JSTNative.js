@@ -172,11 +172,14 @@ native.type.value.name = "JSValueRef";
 
 function Procedure(lib, type, name, proto, optionalMode) {
 	if (lib == undefined || lib == 'jse') lib = native.engine;
-	var proc = new Object(lib.find(name));
-	proc.mode = 0;
+	var proc = new Object(lib.find(name)); proc.mode = 0;
+	if (optionalMode != undefined) {
+		if (typeof optionalMode == 'string') {
+			proc.mode = native.call[optionalMode];
+		} else proc.mode = optionalMode;
+	} 
 	proc.return = native.type(type);
 	proc.proto = native.type(proto);
-//	proc.base = proc.proto.slice(0); // for reset base definition
 	var bound = native.exec.bind(proc);
 	bound.address = Number(proc);
 	proc.length = Procedure.getLength.call(proc)
