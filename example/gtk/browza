@@ -8,8 +8,11 @@ var WebKit = new SharedLibrary('libwebkitgtk-3.0.so');
 var Gtk = new SharedLibrary('libgtk-3.so');
 var Gobj = new SharedLibrary('libgobject-2.0.so');
 
-js.extend(js.type, {
-	'GtkWidget *': js.type.pointer,
+js.extend(native.type, {
+	'GtkWidget *': native.type.pointer,
+	'void *': native.type.void.pointer,
+	'utf8 *': native.type.utf8.pointer,
+	'ulong': native.type.long.unsigned,
 })
 
 var gtk_init = Procedure(Gtk, 'int', "gtk_init", ['void *', 'void *']);

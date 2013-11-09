@@ -2,8 +2,13 @@
 // All Number objects have the 'toAddress' convertor...
 // All Number objects have the 'toHex' convertor...
 
-var argv = js.run.argv.toAddress("utf8 *", js.run.argc);
-var i, puts = new Procedure(js.engine, 'void', "puts", ["utf8 *"]);
+var utf8p = native.type.utf8.pointer;
+
+var argv = js.run.argv.toAddress(utf8p, js.run.argc);
+
+//Command('echo')()
+
+var i, puts = new Procedure(native.engine, 'int', "puts", [utf8p]);
 
 // In C `&' means to get address instead of value ...
 // the address returned is a primitve value

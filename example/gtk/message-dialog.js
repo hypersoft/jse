@@ -1,4 +1,11 @@
 
+js.extend(native.type, {
+	'GtkWidget *': native.type.pointer,
+	'void *': native.type.void.pointer,
+	'utf8 *': native.type.utf8.pointer,
+	'ulong': native.type.long.unsigned,
+})
+
 var gobj = new SharedLibrary('libgobject-2.0.so');
 
 var g_signal_connect_data = Procedure(gobj, 'ulong', 'g_signal_connect_data', ['pointer', 'utf8 *', 'pointer', 'pointer', 'pointer', 'int']);

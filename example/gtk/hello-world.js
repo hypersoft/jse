@@ -2,6 +2,13 @@
 var echo = Command('echo');
 echo('Be quiet for a second, you might learn something..');
 
+js.extend(native.type, {
+	'GtkWidget *': native.type.pointer,
+	'void *': native.type.void.pointer,
+	'utf8 *': native.type.utf8.pointer,
+	'ulong': native.type.long.unsigned,
+})
+
 var gtk3 = new SharedLibrary('libgtk-3.so');
 var gtk_init = Procedure(gtk3, 'int', "gtk_init", ['void *', 'void *']);
 var gtk_main = Procedure(gtk3, 'int', 'gtk_main', []);

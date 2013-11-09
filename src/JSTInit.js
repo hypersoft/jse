@@ -10,16 +10,13 @@ js.trace = function(e) {
 }
 
 js.classOf = function classOf(o) {
-if (o === null) return "Null"; if (o === undefined) return "Undefined";
-return Object.prototype.toString.call(o).slice(8,-1);
+	if (o === null) return "Null"; if (o === undefined) return "Undefined";
+	return Object.prototype.toString.call(o).slice(8,-1);
 }
 
 js.extend = function extend(o, p) {
-if (o == undefined) {
-	echo(js.trace());
-}
-for (prop in p) o[prop] = p[prop];
-return o;
+	for (prop in p) o[prop] = p[prop];
+	return o;
 }
 
 js.extendPrototype = function extendPrototype(o, p) {
