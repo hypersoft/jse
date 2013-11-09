@@ -19,6 +19,15 @@ native.type = function typeDeref(v) {
 }
 
 js.extendPrototype(native.type, {
+	toSource:function(type){
+		if (typeof type != 'string' && type != undefined) throw new TypeError("Expected source type string");
+		if (type == undefined || type.match(/^c$/i) != null) {
+		var string = [];
+		for (name in native.type) string.push('#define JSN_C_TYPE_'+name.toUpperCase()+' '+Number(native.type[name].code))
+		return string.join('\n');
+		}
+		throw new TypeError("Unrecognized source type: "+type);
+	},
 	defineAlias: function(name, model) {
 		model = native.type(model);
 		var alias = Object.create(model);
