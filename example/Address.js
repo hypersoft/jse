@@ -7,7 +7,7 @@ var int = native.type.int;
 
 // toAddress is an applied shortcut for... Address(number, type, count)
 var argv = js.run.argv.toAddress(utf8p.constant, js.run.argc);
-argv[0] = "blue";
+
 var i, puts = new Procedure(native.engine, int, "puts", [utf8p]);
 
 // In C `&' means to get address instead of value ...
