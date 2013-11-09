@@ -50,7 +50,7 @@ void JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception
 }
 
 void JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
-	register char *b = JSTStringToUTF8(JSTValueToString(JSTScriptNativeEval("JSON.stringify(this, ['message', 'line', 'sourceURL', 'stack'], 2)", (JSTObject)*exception)), true);
+	register char *b = JSTStringToUTF8(JSTValueToString(JSTScriptNativeEval("this + '\\nstack trace: { ' + this.stack.split('\\n').reverse().join(' } --> { ').split('@').join(': ') + ' }\\n'", (JSTObject)*exception)), true);
 	fprintf(stderr, "JSE Fatal Error Dump: %s", b); free(b); *exception = NULL;
 }
 
