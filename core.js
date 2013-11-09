@@ -1,23 +1,29 @@
 #!bin/jse
 
-var echo = new Command('echo', '-E');
-//var print = new Command('echo', '-En');
-//var printf = new Command('printf', '--');
+// The way you are 'supposed' to do it:
 
-printVersion = Procedure(
-	"jse", "int", "printf", ['utf8 *', 'utf8 *', 'utf8 *', 'utf8 *']).bind(
+var printVersion = (function mainLoad() {
+
+var int = native.type.int;
+var utf8ptr = native.type.utf8.pointer;
+
+return Procedure(
+	native.engine, int, "printf", [utf8ptr, utf8ptr, utf8ptr, utf8ptr]).bind(
 	this, "%s JSE %s v%s\n", js.vendor, js.codename, js.version
 );
+
+})()
 
 printVersion();
 
 // More than one way to skin a 'cat'
-var printf = new Command('printf', '--');
-var vendor = String.fromUTF8(js.vendor); // these are JS managed string copies ;)
-var codename = String.fromUTF8(js.codename);
-var version = String.fromUTF8(js.version);
 
-printf("%s JSE %s v%s\n", vendor, codename, version);
+//var printf = new Command('printf', '--');
+//var vendor = String.fromUTF8(js.vendor); // these are JS managed string copies ;)
+//var codename = String.fromUTF8(js.codename);
+//var version = String.fromUTF8(js.version);
+
+//printf("%s JSE %s v%s\n", vendor, codename, version);
 
 // Since 'Commands' expect string parameters, the ellipsis interpretation is strictly
 // implied.
