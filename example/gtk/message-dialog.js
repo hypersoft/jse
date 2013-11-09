@@ -18,7 +18,7 @@ var g_signal_connect_swapped = function(instance, detailed_signal, c_handler, da
 }
 
 var gtk3 = new SharedLibrary('libgtk-3.so');
-var gtk_init = Procedure(gtk3, 'int', "gtk_init", ['void *', 'void *']);
+var gtk_init = Procedure(gtk3, 'int', "gtk_init", [native.type.int.pointer.pointer, native.type.char.pointer.pointer]);
 var gtk_message_dialog_new = Procedure(gtk3, 'pointer', 'gtk_message_dialog_new', ['pointer', 'int', 'int', 'int', 'utf8 *']);
 var gtk_dialog_run = Procedure(gtk3, 'int', 'gtk_dialog_run', ['pointer']);
 

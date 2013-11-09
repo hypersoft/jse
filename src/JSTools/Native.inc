@@ -8,12 +8,12 @@
 #define JSN_C_TYPE_CONST 2
 #define JSN_C_TYPE_UNSIGNED 4
 #define JSN_C_TYPE_BOOL 8
-#define JSN_C_TYPE_CHAR 20
+#define JSN_C_TYPE_CHAR 16
 #define JSN_C_TYPE_SHORT 32
 #define JSN_C_TYPE_INT 64
-#define JSN_C_TYPE_ENUM 70
+#define JSN_C_TYPE_ENUM 64
 #define JSN_C_TYPE_LONG 128
-#define JSN_C_TYPE_SIZE 260
+#define JSN_C_TYPE_SIZE 256
 #define JSN_C_TYPE_POINTER 512
 #define JSN_C_TYPE_INT64 1024
 #define JSN_C_TYPE_FLOAT 2048
@@ -21,11 +21,11 @@
 #define JSN_C_TYPE_STRUCT 8192
 #define JSN_C_TYPE_UNION 16384
 #define JSN_C_TYPE_ELLIPSIS 32768
-#define JSN_C_TYPE_UTF8 65540
-#define JSN_C_TYPE_UTF16 131076
-#define JSN_C_TYPE_UTF32 262148
-#define JSN_C_TYPE_STRING 524800
-#define JSN_C_TYPE_VALUE 1049088
+#define JSN_C_TYPE_UTF8 65536
+#define JSN_C_TYPE_UTF16 131072
+#define JSN_C_TYPE_UTF32 262144
+#define JSN_C_TYPE_STRING 524288
+#define JSN_C_TYPE_VALUE 1048576
 
 #define JSN_C_TYPE_VOID_SIZE 0
 #define JSN_C_TYPE_CONST_SIZE 0
@@ -273,7 +273,6 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		argCode = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, argIndex));
 		JSTValue value = argv[argIndex++];
 		if (argCode & JSN_C_TYPE_POINTER) {
-			argCode = argCode &~ JSN_C_TYPE_POINTER; // turn it off
 			if (argCode & JSN_C_TYPE_UTF8) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));				

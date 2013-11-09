@@ -136,7 +136,7 @@ new NativeType('long', size.long);
 new NativeType('size', size.size, true);
 native.type.size.name = 'size_t'
 
-new NativeType('pointer', size.pointer, false, undefined, 1);
+new NativeType('pointer', size.pointer, true, undefined, 1);
 native.type.pointer.name = 'void *'
 native.type.pointer.unsigned = undefined;
 native.type.defineAlias('void *', 'pointer');
@@ -163,9 +163,9 @@ new NativeType('utf16', size.utf16, true);
 native.type.utf16.name = "UTF16";
 new NativeType('utf32', size.utf32, true);
 native.type.utf32.name = "UTF32";
-new NativeType('string', size.string, false, undefined, 1);
+new NativeType('string', size.string, true, undefined, 1);
 native.type.string.name = "JSStringRef";
-new NativeType('value', size.value, false, undefined, 1);
+new NativeType('value', size.value, true, undefined, 1);
 native.type.value.name = "JSValueRef";
 
 })();
