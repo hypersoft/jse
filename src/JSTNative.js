@@ -163,9 +163,9 @@ new NativeType('utf16', size.utf16, true);
 native.type.utf16.name = "UTF16";
 new NativeType('utf32', size.utf32, true);
 native.type.utf32.name = "UTF32";
-new NativeType('string', size.string, true, undefined, 1);
+new NativeType('string', size.string, false, undefined, 1);
 native.type.string.name = "JSStringRef";
-new NativeType('value', size.value, true, undefined, 1);
+new NativeType('value', size.value, false, undefined, 1);
 native.type.value.name = "JSValueRef";
 
 })();

@@ -24,8 +24,8 @@
 #define JSN_C_TYPE_UTF8 65540
 #define JSN_C_TYPE_UTF16 131076
 #define JSN_C_TYPE_UTF32 262148
-#define JSN_C_TYPE_STRING 524804
-#define JSN_C_TYPE_VALUE 1049092
+#define JSN_C_TYPE_STRING 524800
+#define JSN_C_TYPE_VALUE 1049088
 
 #define JSN_C_TYPE_VOID_SIZE 0
 #define JSN_C_TYPE_CONST_SIZE 0
@@ -273,6 +273,7 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		argCode = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, argIndex));
 		JSTValue value = argv[argIndex++];
 		if (argCode & JSN_C_TYPE_POINTER) {
+			argCode = argCode &~ JSN_C_TYPE_POINTER; // turn it off
 			if (argCode & JSN_C_TYPE_UTF8) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));				
@@ -282,6 +283,10 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 			} else if (argCode & JSN_C_TYPE_UTF32) {
 				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), JSTValueToDouble(JSTObjectGetProperty(value, "length")), true));
+			} else if (argCode & JSN_C_TYPE_VALUE) {
+				dcArgPointer(callVM, (void*)value);
+			} else if (argCode & JSN_C_TYPE_STRING) {
+				dcArgPointer(callVM, JSTValueToString(value));
 			} else {
 				dcArgPointer(callVM, JSTValueToPointer(value));
 			}
