@@ -1,6 +1,16 @@
 [JSE](https://github.com/hypersoft/jse/wiki/About-JSE) is a [GNU/Linux project](https://www.gnu.org/gnu/linux-and-gnu.html) conceptualized and maintained by [Hypersoft](https://github.com/hypersoft/) [(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com)
 
-You can get started right away by going to the [Download](https://github.com/hypersoft/jse/wiki/Download) page where you can learn how to acquire and build the source.
+JSE is a great engine for general application scripting. You can touch on everything,
+from advanced to beginner, all depending on how comfortable you are with learning,
+trying, and building great things.
+
+If you require a more thorough approach (matured operations libraries), for your enterprise,
+capabilities, make no mistakes, JSE is probably the best tool for the task, but it is
+a tool of tools, and it doesn't come with many. Here is a JavaScript great toolkit 
+known as [Node.js](http://nodejs.org/). Node comes with specific enterprise designs in
+mind. Node.js scripts are not compatible with JSE scripts either.
+
+You can get started with JSE right away by going to the [Download](https://github.com/hypersoft/jse/wiki/Download) page where you can learn how to acquire and build the source.
 
 ### Recommended Reading for Application Developers
 * [Wikipedia: JavaScript](http://en.wikipedia.org/wiki/JavaScript)
