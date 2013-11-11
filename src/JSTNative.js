@@ -114,6 +114,10 @@ NativeType.prototype = {
 		var o = Object.create(this); o.isConstant = false;
 		return o;
 	},
+	value: function(value) {
+		var o = new Object(value); o.constructor = this;
+		return o;
+	}
 }
 
 new NativeType('void', size.void);
