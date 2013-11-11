@@ -12,6 +12,18 @@ mind. Node.js scripts are not compatible with JSE scripts either.
 
 You can get started with JSE right away by going to the [Download](https://github.com/hypersoft/jse/wiki/Download) page where you can learn how to acquire and build the source.
 
+JSE is a free and open source project, that could greatly use your support. Help JSE
+reach its Goal for 2014 to raise $10,000.00!
+
+Funds Raised to date: $0.00 (Impeccably Impoverished)
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="DG3H6F8DSG4BC">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+
 ### Recommended Reading for Application Developers
 * [Wikipedia: JavaScript](http://en.wikipedia.org/wiki/JavaScript)
 * [MDN: JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
