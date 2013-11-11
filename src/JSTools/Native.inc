@@ -245,16 +245,19 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 	JSTObject proto = JSTValueToObject(JSTObjectGetProperty(this, "proto"));
 	int protoLen = JSTValueToDouble(JSTObjectGetProperty(proto, "length"));
 
-	const char * fname = "native.exec", * job = "type error";
-
-	if (argc != protoLen) {
-		return JSTScriptNativeError("%s: %s: argument count does not match function prototype", fname, job);
-	}
-
+	const char * fname = "Procedure", * job = "type error";
 	int
 		callVMMode = JSTValueToDouble(JSTObjectGetProperty(this, "mode")),
 		resource = 0, resource16 = 0,
 		stackSize = JSTValueToDouble(JSTObjectGetProperty(this, "size"));
+
+	if (argc != protoLen && callVMMode != DC_CALL_C_ELLIPSIS) {
+		return JSTScriptNativeError("%s: %s: argument count does not match function prototype", fname, job);
+	}
+
+	if (callVMMode == DC_CALL_C_ELLIPSIS) {
+		stackSize += ((argc - protoLen) * JSN_C_TYPE_DOUBLE_SIZE); // plenty
+	}
 
 	void 
 		* callVM  = dcNewCallVM(stackSize),
@@ -266,23 +269,41 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 		goto bail;
 	}
 
-	JSTObject argType = NULL, argItem = NULL, returnType = JSTObjectGetObject(this, "return");
+	JSTObject argType = NULL, returnType = JSTObjectGetObject(this, "return");
 	int argIndex = 0, argCode, retCode = JSTValueToDouble(returnType);
 
-	while (argIndex < protoLen) {
-		argCode = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, argIndex));
-		JSTValue value = argv[argIndex++];
+	while (argIndex < argc) {
+		JSTValue value = argv[argIndex];
+		int jsType = JSTValueGetType(value);
+		if (argIndex < protoLen) {
+			argCode = JSTValueToDouble(JSTObjectGetPropertyAtIndex(proto, argIndex));
+		} else if (callVMMode == DC_CALL_C_ELLIPSIS) {
+			JSTObject constructor = NULL;
+			if (jsType == JSTValueTypeObject) {
+				constructor = JSTObjectGetObject(value, "type");
+				argCode = JSTValueToDouble(constructor);
+			} else if (jsType == JSTValueTypeString) {
+				argCode = JSN_C_TYPE_UTF8 | JSN_C_TYPE_POINTER;
+			} else if (jsType == JSTValueTypeNumber) {
+				argCode = JSN_C_TYPE_INT;
+			} else printf("Oh shit: %i, %i\n", jsType, JSTValueTypeObject);
+
+		} else {
+			result = JSTScriptNativeError("%s: %s: `%i' unable to determine conversion procedure for argument", fname, job, argIndex);
+			goto bail;
+		}
+		argIndex++;
 		if (argCode & JSN_C_TYPE_POINTER) {
 			if (argCode & JSN_C_TYPE_UTF8) {
-				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				if (jsType == JSTValueTypeObject || jsType == JSTValueTypeNumber) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTValueToUTF8(value));
 				continue;
 			} else if (argCode & JSN_C_TYPE_UTF16) {
-				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				if (jsType == JSTValueTypeObject || jsType == JSTValueTypeNumber) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, (void*)JSTStringUTF16(conversion16[resource16++] = JSTValueToString(value)));
 				continue;
 			} else if (argCode & JSN_C_TYPE_UTF32) {
-				if (JSTValueIsNumber(value)) dcArgPointer(callVM, JSTValueToPointer(value));
+				if (jsType == JSTValueTypeObject || jsType == JSTValueTypeNumber) dcArgPointer(callVM, JSTValueToPointer(value));
 				else dcArgPointer(callVM, conversion[resource++] = JSTStringToUTF32(JSTValueToString(value), JSTValueToDouble(JSTObjectGetProperty(value, "length")), true));
 				continue;
 			} else if (argCode & JSN_C_TYPE_VALUE) {

@@ -115,7 +115,8 @@ NativeType.prototype = {
 		return o;
 	},
 	value: function(value) {
-		var o = new Object(value); o.constructor = this;
+		var o = new Object(value);
+		o.type = this;
 		return o;
 	}
 }
@@ -192,6 +193,9 @@ function Procedure(lib, type, name, proto, optionalMode) {
 	} 
 	proc.return = native.type(type);
 	proc.proto = native.type(proto);
+	if (proc.proto[proc.proto.length - 1].code == native.type.ellipsis.code) {
+		proc.proto.pop(); proc.mode = native.call.ellipsis;
+	}
 	var bound = native.exec.bind(proc);
 	bound.address = Number(proc);
 	proc.length = Procedure.getLength.call(proc)

@@ -4,5 +4,5 @@
 var int = native.type.int;
 var val = int.value(14);
 
-echo(val.constructor, "val =", val);
+echo(val.type, "val =", val);
 

@@ -13,7 +13,7 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 
 #endif
 
-#define JSTValueGetType(v) JSValueGetType, v)
+#define JSTValueGetType(v) JSTAction(JSValueGetType, v)
 
 #define JSTValueTypeUndefined kJSTypeUndefined
 #define JSTValueTypeNull kJSTypeNull
