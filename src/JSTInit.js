@@ -29,6 +29,14 @@ else o[prop] = property;
 return o;
 }
 
+js.extendHidden = function extendHidden(o, p) {
+if (o == undefined) throw new ReferenceError("cannot extend undefined")
+for(prop in p) {
+	Object.defineProperty(o, prop, {value:p[prop],enumerable:false,configurable:true,writeable:true});
+}
+return o;
+}
+
 js.extendPrototype(Number.prototype, {
 	toHex: function toHex() { return '0x' + this.toString(16); }
 })

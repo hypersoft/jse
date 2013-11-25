@@ -35,6 +35,12 @@ js.extendPrototype(native.type, {
 		Object.defineProperties(native.type, definition);
 		return alias;
 	},
+	align: function typeAlign(base, type) {
+		var misalignment = (base % type.size)
+		if (misalignment != 0) {
+			return (type.size - misalignment);
+		} else return 0;
+	},
 })
 
 var sigIndex = 0;
