@@ -48,9 +48,9 @@ if (buildLibWaveForm() == false) {
 	var wave_form_buffer = new Procedure(libwaveform, WaveForm, 'wave_form_buffer', [WaveForm, double, size_t]);
 	var wave_buffer_free = new Procedure(libwaveform, 'void', 'wave_buffer_free', [WaveForm]);
 
-	var left = new_wave_form(420, 15000); // 420 hz; 15,000 amplitude (48%)
-	var right = new_wave_form(416.8, 15000); // 416 hz; 15,000 amplitude (48%)
-	var center = new_wave_form(4.2, 25000); // 4.2 hz; 15,000 amplitude (48%)
+	var left = new_wave_form(420, 450); // 420 hz; 15,000 amplitude (48%)
+	var right = new_wave_form(416.8, 450); // 416.8 hz; 15,000 amplitude (48%)
+	var center = new_wave_form(4.2, 100); // 4.2 hz; 15,000 amplitude (48%)
 
 	// this is a buffer'd loop of .2 seconds that is used as an overlay to
 	// make the target binaural beat frequency more prominent.
@@ -60,7 +60,8 @@ if (buildLibWaveForm() == false) {
 	// w - WaveForm a sine wave descriptor
 	// b - Buffer'd WaveForm that cuts off when the data runs out
 	// l - Buffer'd WaveForm that loops when the data runs out
-	wave_form_stream_mix(60, 44100, stdout, "wwl", left, right, buffer); // 60 seconds @ 44100 samples per second
+	wave_form_stream_mix(120, 44100, stdout, "wwl", left, right, buffer); // 60 seconds @ 44100 samples per second
+	wave_form_stream_mix(120, 44100, stdout, "wwl", right, left, buffer); // 60 seconds @ 44100 samples per second
 
 	wave_form_free(left);
 	wave_form_free(right);
