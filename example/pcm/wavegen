@@ -48,25 +48,32 @@ if (buildLibWaveForm() == false) {
 	var wave_form_buffer = new Procedure(libwaveform, WaveForm, 'wave_form_buffer', [WaveForm, double, size_t]);
 	var wave_buffer_free = new Procedure(libwaveform, 'void', 'wave_buffer_free', [WaveForm]);
 
-	var left = new_wave_form(420, 450); // 420 hz; 15,000 amplitude (48%)
-	var right = new_wave_form(416.8, 450); // 416.8 hz; 15,000 amplitude (48%)
-	var center = new_wave_form(4.2, 100); // 4.2 hz; 15,000 amplitude (48%)
+	function BinauralBeat(carrier, freq, amp) {
+		js.extend(this, {
+			left: new_wave_form(carrier, amp), right: new_wave_form(carrier - freq, amp),
+			center: new_wave_form(freq, amp * .25)
+		});
+	}
 
-	// this is a buffer'd loop of .2 seconds that is used as an overlay to
-	// make the target binaural beat frequency more prominent.
-	var buffer = wave_form_buffer(center, 0.2, 44100);
+	var theta = new BinauralBeat(150, 6, 350);
+	var thought = new BinauralBeat(360, 40, 50);
+	var understanding = new BinauralBeat(440, 40, 50);
 
-	// this procedure can accept 3 format parameters:
+	// the following procedure can accept 4 format parameters:
+
 	// w - WaveForm a sine wave descriptor
+	// m - Mix WaveForm descriptor sample with next output sample before streaming (cumulative, cutoff)
 	// b - Buffer'd WaveForm that cuts off when the data runs out
 	// l - Buffer'd WaveForm that loops when the data runs out
-	wave_form_stream_mix(120, 44100, stdout, "wwl", left, right, buffer); // 60 seconds @ 44100 samples per second
-	wave_form_stream_mix(120, 44100, stdout, "wwl", right, left, buffer); // 60 seconds @ 44100 samples per second
 
-	wave_form_free(left);
-	wave_form_free(right);
-	wave_form_free(center);
-	wave_buffer_free(buffer);
+	wave_form_stream_mix(240, 44100, stdout, "mmwmmwmmw",
+		theta.left, thought.left, understanding.left,
+		theta.right, thought.right, understanding.right,
+		theta.center, thought.center, understanding.center
+	); // 240 seconds @ 44100 samples per second
+
+	wave_form_free(theta.left);
+	wave_form_free(theta.right);
 
 }
 

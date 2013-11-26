@@ -95,7 +95,7 @@ WaveBuffer * wave_form_buffer(WaveForm * wave, double duration, size_t rate) {
 
 void wave_form_stream_mix(double duration, size_t rate, FILE * file, char * fmt, ...) {
 
-	double phase, sample; va_list ap; WaveForm * wave; WaveBuffer * buffer;
+	double phase, sample, mix = 0; va_list ap; WaveForm * wave; WaveBuffer * buffer;
 	size_t index, sampleIndex = 0; char type; short s16;
 	for (phase = 0; phase < duration; phase += interval/rate, sampleIndex++) {
 		va_start(ap, fmt); index = 0;
@@ -103,19 +103,36 @@ void wave_form_stream_mix(double duration, size_t rate, FILE * file, char * fmt,
 			if (type == 'w') {
 				wave = va_arg(ap, WaveForm *);
 				sample = wave->amplitude * sin(radians * wave->frequency * phase);
-				s16 = (short)sample;
+				if (mix != 0) {
+					s16 = wave_form_mix_samples((short) sample, (short) mix);
+					mix = 0;
+				} else s16 = (short)sample;
 				fwrite(&s16, sizeof(short), 1, file);
 			} else if (type == 'b') {
 				buffer = va_arg(ap, WaveBuffer *);
 				if (sampleIndex < buffer->length) {
-					s16 = buffer->data[sampleIndex];
-				} else s16 = 0;
+					if (mix != 0) {
+						s16 = wave_form_mix_samples(buffer->data[sampleIndex], (short) mix);
+						mix = 0;
+					} else s16 = buffer->data[sampleIndex];
+				} else s16 = (mix != 0)?(short) mix : 0;
 				fwrite(&s16, sizeof(short), 1, file);
 			} else if (type == 'l') {
 				buffer = va_arg(ap, WaveBuffer *);
 				if (buffer->loop >= buffer->length) buffer->loop = 0;
-				if (buffer->data) s16 = buffer->data[buffer->loop++];
-				else s16 = 0; fwrite(&s16, sizeof(short), 1, file);
+				if (buffer->data) {
+					if (mix != 0) {
+						s16 = wave_form_mix_samples(buffer->data[buffer->loop++], (short) mix);
+						mix = 0;
+					} else s16 = buffer->data[buffer->loop++];
+				} else s16 = (mix != 0)?(short) mix : 0;
+				fwrite(&s16, sizeof(short), 1, file);
+			} else if (type == 'm') {
+				wave = va_arg(ap, WaveForm *);
+				if (mix != 0) {
+					sample = wave->amplitude * sin(radians * wave->frequency * phase);
+					mix = wave_form_mix_samples((short) sample, (short) mix);
+				} else mix = wave->amplitude * sin(radians * wave->frequency * phase);				
 			} else {
 				fprintf(stderr, "TypeError: '%c' is not a valid WaveForm argument\n", type);
 				return; 
