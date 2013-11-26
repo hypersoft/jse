@@ -54,9 +54,9 @@ if (buildLibWaveForm() == false) {
 	var wave_form_stream_mix = new Procedure(libwaveform, 'void', 'wave_form_stream_mix', [double, size_t, FILE, string, '...']);
 	var wave_form_buffer = new Procedure(libwaveform, WaveForm, 'wave_form_buffer', [WaveForm, double, size_t]);
 
-	var left = new_wave_form(420, 15000); // 105 hz; 15,000 amplitude (48%)
-	var right = new_wave_form(416.8, 15000); // 105 hz; 15,000 amplitude (48%)
-	var center = new_wave_form(4.2, 25000); // 105 hz; 15,000 amplitude (48%)
+	var left = new_wave_form(420, 15000); // 420 hz; 15,000 amplitude (48%)
+	var right = new_wave_form(416.8, 15000); // 416 hz; 15,000 amplitude (48%)
+	var center = new_wave_form(4.2, 25000); // 4.2 hz; 15,000 amplitude (48%)
 
 	// this is a buffer'd loop of .2 seconds that is used as an overlay to
 	// make the target binaural beat frequency more prominent.
