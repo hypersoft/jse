@@ -66,7 +66,7 @@ if (buildLibWaveForm() == false) {
 	// w - WaveForm a sine wave descriptor
 	// b - Buffer'd WaveForm that cuts off when the data runs out
 	// l - Buffer'd WaveForm that loops when the data runs out
-	wave_form_stream_mix(60, 44100, stdout, "wwl", left, right, buffer); // 2.5 seconds @ 44100 samples per second
+	wave_form_stream_mix(60, 44100, stdout, "wwl", left, right, buffer); // 60 seconds @ 44100 samples per second
 
 	wave_form_free(left);
 	wave_form_free(right);
