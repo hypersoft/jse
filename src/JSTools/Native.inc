@@ -60,6 +60,40 @@ extern const char * JSTNativeTypeGetName(int t);
 
 #include "JSTNative.inc"
 
+int JSTNative16FromBE(int v) {
+	return GINT16_FROM_BE(v);
+}
+
+int JSTNative16ToBE(int v) {
+	return GINT16_TO_BE(v);
+}
+
+int JSTNative16FromLE(int v) {
+	return GINT16_FROM_LE(v);
+}
+
+int JSTNative16ToLE(int v) {
+	return GINT16_TO_LE(v);
+}
+
+//
+int JSTNative32FromLE(int v) {
+	return GINT32_FROM_LE(v);
+}
+
+int JSTNative32ToLE(int v) {
+	return GINT32_TO_LE(v);
+}
+
+//
+int JSTNative32FromBE(int v) {
+	return GINT32_FROM_BE(v);
+}
+
+int JSTNative32ToBE(int v) {
+	return GINT32_TO_BE(v);
+}
+
 int JSTNativeTypeGetSize(int t) {
 	if (t == 0) return t;
 	else if (t & JSN_C_TYPE_POINTER) return sizeof(void*);
@@ -286,8 +320,10 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 				argCode = JSN_C_TYPE_UTF8 | JSN_C_TYPE_POINTER;
 			} else if (jsType == JSTValueTypeNumber) {
 				argCode = JSN_C_TYPE_INT;
-			} else printf("Oh shit: %i, %i\n", jsType, JSTValueTypeObject);
-
+			} else {
+				result = JSTScriptNativeError("%s: %s: `%i' unable to determine ellipsis conversion procedure for argument", fname, job, argIndex);
+				goto bail;
+			}
 		} else {
 			result = JSTScriptNativeError("%s: %s: `%i' unable to determine conversion procedure for argument", fname, job, argIndex);
 			goto bail;
