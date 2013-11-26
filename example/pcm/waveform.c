@@ -53,6 +53,16 @@ short wave_form_mix_samples(short a, short b) {
 	else return (short) target;
 }
 
+WaveBuffer * wave_buffer_mix(WaveBuffer * a, WaveBuffer * b, double amplitude) {
+	size_t length = (a->length > b->length) ? a->length : b->length;
+	WaveBuffer * result = new_wave_buffer(length, amplitude);
+	size_t i; double sample;
+	for (i = 0; i < length; i++) {
+		sample = amplitude * wave_form_mix_samples(a->data[i], b->data[i]);
+		result->data[i] = (short) sample;
+	}
+	return result;
+}
 
 void wave_form_sample_write(WaveForm * wave, double phase, FILE * file) {
     double sample = wave->amplitude * sin(radians * wave->frequency * phase);
