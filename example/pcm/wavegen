@@ -17,13 +17,6 @@
 // Excercise: extend the demo to allow supply of your own parameters to the
 // stream generator via command line.
 
-// Note: There are a few ways included in the library to get things done. You can
-// use what has been provided in the library to create stereo streams as well,
-// but you will have to supply your sampling loop, calling wave_form_sample_write
-// for each channel. If you use aplay as a stream processor you will also need
-// to tell it that you are using more than one channel. PCM is RAW audio, and doesn't
-// notify the data interpreter of its properties.
-
 var double = native.type.double;
 var short = native.type.short;
 var size_t = native.type.size;
