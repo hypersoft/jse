@@ -53,6 +53,7 @@ if (buildLibWaveForm() == false) {
 	var wave_form_stream_sample = new Procedure(libwaveform, 'void', 'wave_form_stream_sample', [WaveForm, double, size_t, FILE]);
 	var wave_form_stream_mix = new Procedure(libwaveform, 'void', 'wave_form_stream_mix', [double, size_t, FILE, string, '...']);
 	var wave_form_buffer = new Procedure(libwaveform, WaveForm, 'wave_form_buffer', [WaveForm, double, size_t]);
+	var wave_buffer_free = new Procedure(libwaveform, 'void', 'wave_buffer_free', [WaveForm]);
 
 	var left = new_wave_form(420, 15000); // 420 hz; 15,000 amplitude (48%)
 	var right = new_wave_form(416.8, 15000); // 416 hz; 15,000 amplitude (48%)
