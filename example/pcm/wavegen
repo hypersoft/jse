@@ -1,0 +1,58 @@
+#!bin/jse
+
+// YOU SHOULD BE RUNNING THIS FILE FROM THE JSE PROJECT'S ROOT DIRECTORY.
+
+// 16bit PCM host encoded WaveForm generator
+
+// This DEMO will build the included libwaveform.c into a library, load it, and output
+// a Monaural 16bit host encoded PCM stream sampled at 44100 hz.
+
+// The demo will then delete the compiled library and exit.
+
+// You may import the PCM stream into an application such as audacity,
+// or pipe it into a raw PCM stream filter such as:
+
+// example/pcm/wavegen | aplay -f s16_le -r 44100
+
+// Excercise: extend the demo to allow supply of your own parameters to the
+// stream generator via command line.
+
+// Note: There are a few ways included in the library to get things done. You can
+// use what has been provided in the library to create stereo streams as well,
+// but you will have to supply your sampling loop, calling wave_form_sample_write
+// for each channel. If you use aplay as a stream processor you will also need
+// to tell it that you are using more than one channel. PCM is RAW audio, and doesn't
+// notify the data interpreter of its properties.
+
+var double = native.type.double;
+var short = native.type.short;
+var size_t = native.type.size;
+
+var WaveForm = native.type.pointer;
+var FILE = native.type.pointer;
+
+var stdout = native.engine.find('stdout').toAddress(FILE);
+
+var buildLibWaveForm = new Command('gcc', '-shared', '-Wl,-soname,libwaveform.so', '-o', 'bin/libwaveform.so', 'example/pcm/waveform.c', '-lc');
+
+if (buildLibWaveForm() == false) {
+	exit(1);
+} else {
+
+	var libwaveform = new SharedLibrary('bin/libwaveform.so');
+
+	var new_wave_form = new Procedure(libwaveform, WaveForm, 'new_wave_form', [double, double]);
+	var wave_form_free = new Procedure(libwaveform, 'void', 'wave_form_free', [WaveForm]);
+	var wave_form_sample = new Procedure(libwaveform, short, 'wave_form_sample', [WaveForm, double]);
+	var wave_form_sample_write = new Procedure(libwaveform, 'void', 'wave_form_sample_write', [WaveForm, double, FILE]);
+	var wave_form_stream_sample = new Procedure(libwaveform, 'void', 'wave_form_stream_sample', [WaveForm, double, size_t, FILE]);
+
+	var wave = new_wave_form(105, 15000); // 105 hz; 15,000 amplitude (48%)
+
+	wave_form_stream_sample(wave, 2.5, 44100, stdout); // 2.5 seconds @ 44100 samples per second
+
+	wave_form_free(wave);
+
+}
+
+new Command('rm', 'bin/libwaveform.so')();
