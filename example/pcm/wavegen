@@ -71,6 +71,7 @@ if (buildLibWaveForm() == false) {
 	wave_form_free(left);
 	wave_form_free(right);
 	wave_form_free(center);
+	wave_buffer_free(buffer);
 
 }
 
