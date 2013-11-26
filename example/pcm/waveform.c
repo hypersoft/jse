@@ -54,7 +54,7 @@ short wave_form_mix_samples(short a, short b) {
 }
 
 WaveBuffer * wave_buffer_mix(WaveBuffer * a, WaveBuffer * b, double amplitude) {
-	size_t length = (a->length > b->length) ? a->length : b->length;
+	size_t length = (a->length < b->length) ? a->length : b->length;
 	WaveBuffer * result = new_wave_buffer(length, amplitude);
 	size_t i; double sample;
 	for (i = 0; i < length; i++) {
