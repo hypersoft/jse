@@ -102,7 +102,7 @@ void wave_form_stream_mix(double duration, size_t rate, FILE * file, char * fmt,
 				fwrite(&s16, sizeof(short), 1, file);
 			} else if (type == 'l') {
 				buffer = va_arg(ap, WaveBuffer *);
-				if (buffer->loop > buffer->length) buffer->loop = 0;
+				if (buffer->loop >= buffer->length) buffer->loop = 0;
 				if (buffer->data) s16 = buffer->data[buffer->loop++];
 				else s16 = 0; fwrite(&s16, sizeof(short), 1, file);
 			} else {
