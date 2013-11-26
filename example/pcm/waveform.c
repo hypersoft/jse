@@ -9,6 +9,7 @@
 #include <stdarg.h>
 
 double radians = (M_PI * 2);
+double interval = 1.0;
 
 typedef struct WaveForm {
 	double frequency;
@@ -34,7 +35,7 @@ void wave_form_free(WaveForm * wave) { free(wave); }
 WaveBuffer * new_wave_buffer(size_t length, double amplitude) {
 	WaveBuffer * result = malloc(sizeof(WaveBuffer));
 	result->amplitude = amplitude; result->loop = 0;
-	result->data = malloc(length << 2); result->length = length;
+	result->data = malloc(length << sizeof(short)); result->length = length;
 	return result;
 }
 
@@ -62,7 +63,7 @@ void wave_form_sample_write(WaveForm * wave, double phase, FILE * file) {
 void wave_form_stream_sample(WaveForm * wave, double duration, size_t rate, FILE * file) {
 
 	double phase;
-	for (phase = 0; phase < duration; phase += 1.0/rate) {
+	for (phase = 0; phase < duration; phase += interval/rate) {
 		double sample = wave->amplitude * sin(radians * wave->frequency * phase);
 		short s16 = (short)sample;
 		fwrite(&s16, sizeof(short), 1, file);
@@ -74,7 +75,7 @@ WaveBuffer * wave_form_buffer(WaveForm * wave, double duration, size_t rate) {
 	size_t length = (size_t)(duration * rate);
 	WaveBuffer * buffer = new_wave_buffer(length, wave->amplitude);
 	double phase;
-	for (phase = 0; phase < duration; phase += 1.0/rate) {
+	for (phase = 0; phase < duration; phase += interval/rate) {
 		double sample = wave->amplitude * sin(radians * wave->frequency * phase);
 		buffer->data[buffer->loop++] = (short)sample;
 	}
@@ -86,7 +87,7 @@ void wave_form_stream_mix(double duration, size_t rate, FILE * file, char * fmt,
 
 	double phase, sample; va_list ap; WaveForm * wave; WaveBuffer * buffer;
 	size_t index, sampleIndex = 0; char type; short s16;
-	for (phase = 0; phase < duration; phase += 1.0/rate, sampleIndex++) {
+	for (phase = 0; phase < duration; phase += interval/rate, sampleIndex++) {
 		va_start(ap, fmt); index = 0;
 		while ((type = fmt[index++]) != 0) {
 			if (type == 'w') {
