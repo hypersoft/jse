@@ -75,7 +75,7 @@ if (buildLibWaveForm() == false) {
 	// The above WaveForms were created by matching the target beat frequency range
 	// with the wave height of standard music notes.
 
-	// http://www.phy.mtu.edu/~suits/notefreqs.html
+	// example/pcm/musicnotefreqs-suits-phy.mtu.edu.pdf
 
 	// My theory on amplitude is simple. Match the amplitude with the desried
 	// intensity (relative to to other environmental samples). This audio should be mixed in
