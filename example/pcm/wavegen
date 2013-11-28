@@ -2,7 +2,7 @@
 
 // YOU SHOULD BE RUNNING THIS FILE FROM THE JSE PROJECT'S ROOT DIRECTORY.
 
-// 16bit PCM host encoded WaveForm generator
+// 16bit PCM Trinaural host encoded WaveForm generator
 
 // This DEMO will build the included libwaveform.c into a library, load it, and output
 // a 3 channel 16bit host encoded PCM binaural beat sampled at 44100 hz.
@@ -49,31 +49,54 @@ if (buildLibWaveForm() == false) {
 	var wave_buffer_free = new Procedure(libwaveform, 'void', 'wave_buffer_free', [WaveForm]);
 
 	function BinauralBeat(carrier, freq, amp) {
+		if (arguments.length == 1) { // try to parse sbagen style
+			var rx = /^([0-9\.]+)[+-]([0-9\.]+)\/([0-9\.]+)/;
+			var xpm;
+			if ((xpm = rx.exec(carrier)) != null) {
+				carrier = xpm[1], freq = xpm[2], amp = xpm[3];
+			} else throw new TypeError("Unable to parse sbagen style binaural beat");
+		}
 		js.extend(this, {
 			left: new_wave_form(carrier, amp), right: new_wave_form(carrier - freq, amp),
-			center: new_wave_form(freq, amp * .25)
+			center: new_wave_form(freq, amp * 1.25)
 		});
 	}
+	BinauralBeat.prototype = {
+		free:function(){
+			wave_form_free(this.left); wave_form_free(this.right); wave_form_free(this.center);
+		}
+	}
 
-	var theta = new BinauralBeat(150, 6, 350);
-	var thought = new BinauralBeat(360, 40, 50);
-	var understanding = new BinauralBeat(440, 40, 50);
+	// These are allocated native structures
+	var theta = new BinauralBeat("51.91+6.65/20");  		// G#1 carrier
+	var gammaLo = new BinauralBeat(830.61, 41.5, 120); 	// G#5 carrier
+	var gammaHi = new BinauralBeat(415.30, 83.1, 140); 		// G5 carrier
+
+	// The above WaveForms were created by matching the target beat frequency range
+	// with the wave height of standard music notes.
+
+	// http://www.phy.mtu.edu/~suits/notefreqs.html
+
+	// My theory on amplitude is simple. Match the amplitude with the desried
+	// intensity (relative to to other environmental samples). This audio should be mixed in
+	// as barely audible ambient noise with music that you enjoy which promotes,
+	// critical thinking and analysis. Typically classical music/easy listening/jazz.
+	// but even death metal at a proper co-amplitude can promote the type of stimulus required.
 
 	// the following procedure can accept 4 format parameters:
 
 	// w - WaveForm a sine wave descriptor
-	// m - Mix WaveForm descriptor sample with next output sample before streaming (cumulative, cutoff)
+	// m - Mix WaveForm descriptor sample with next output sample before streaming (cumulative, clipped)
 	// b - Buffer'd WaveForm that cuts off when the data runs out
 	// l - Buffer'd WaveForm that loops when the data runs out
 
-	wave_form_stream_mix(240, 44100, stdout, "mmwmmwmmw",
-		theta.left, thought.left, understanding.left,
-		theta.right, thought.right, understanding.right,
-		theta.center, thought.center, understanding.center
-	); // 240 seconds @ 44100 samples per second
+	wave_form_stream_mix(2240, 44100, stdout, "mmwmmwmmw",
+		theta.left, gammaLo.left, gammaHi.left,
+		theta.right, gammaLo.right, gammaHi.right,
+		theta.center, gammaLo.center, gammaHi.center
+	); // 2240 seconds @ 44100 samples per second
 
-	wave_form_free(theta.left);
-	wave_form_free(theta.right);
+	native.address.free(theta, gammaLo, gammaHi);
 
 }
 
