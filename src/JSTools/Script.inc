@@ -53,7 +53,7 @@ void JSTScriptReportException_(register JSTContext ctx, register JSTValue *excep
 	register char *b = JSTValueToUTF8(*exception);
 	JSTObject e = (JSTObject) *exception; *exception = NULL;
 	fprintf(stderr, "JSE Fatal Error Dump: %s\n", b); free(b);
-	b = JSTValueToUTF8(JSTScriptNativeEval("js.trace(this)", e));
+	b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
 	fprintf(stderr, "%s\n", b);
 	free(b);
 }

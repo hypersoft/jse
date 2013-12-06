@@ -1,9 +1,10 @@
 #!bin/jse
 
-var utf8p = native.type.utf8.constant.pointer;
-var int = native.type.int;
+var map = new sys.object.bitmap(16, 
+	['void','const','integer','unsigned','bool','char','short','int','long','int64','float','double','pointer','size','string','value']
+)(0);
 
-var printf = Procedure(native.engine, int, "printf", [utf8p, '...'])
+map([1,undefined,1]);
 
-printf("%s JSE %s %s\n", js.vendor, js.codename, js.version);
-
+//var map = new sys.object.bitmap(2, ['a','b'])(7)
+print(map);

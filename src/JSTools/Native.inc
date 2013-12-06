@@ -60,6 +60,40 @@ extern const char * JSTNativeTypeGetName(int t);
 
 #include "JSTNative.inc"
 
+int JSTNative16FromBE(int v) {
+	return GINT16_FROM_BE(v);
+}
+
+int JSTNative16ToBE(int v) {
+	return GINT16_TO_BE(v);
+}
+
+int JSTNative16FromLE(int v) {
+	return GINT16_FROM_LE(v);
+}
+
+int JSTNative16ToLE(int v) {
+	return GINT16_TO_LE(v);
+}
+
+//
+int JSTNative32FromLE(int v) {
+	return GINT32_FROM_LE(v);
+}
+
+int JSTNative32ToLE(int v) {
+	return GINT32_TO_LE(v);
+}
+
+//
+int JSTNative32FromBE(int v) {
+	return GINT32_FROM_BE(v);
+}
+
+int JSTNative32ToBE(int v) {
+	return GINT32_TO_BE(v);
+}
+
 int JSTNativeTypeGetSize(int t) {
 	if (t == 0) return t;
 	else if (t & JSN_C_TYPE_POINTER) return sizeof(void*);
@@ -286,8 +320,10 @@ static JSTValue jsNativeExec JSTDeclareFunction(...) {
 				argCode = JSN_C_TYPE_UTF8 | JSN_C_TYPE_POINTER;
 			} else if (jsType == JSTValueTypeNumber) {
 				argCode = JSN_C_TYPE_INT;
-			} else printf("Oh shit: %i, %i\n", jsType, JSTValueTypeObject);
-
+			} else {
+				result = JSTScriptNativeError("%s: %s: `%i' unable to determine ellipsis conversion procedure for argument", fname, job, argIndex);
+				goto bail;
+			}
 		} else {
 			result = JSTScriptNativeError("%s: %s: `%i' unable to determine conversion procedure for argument", fname, job, argIndex);
 			goto bail;
@@ -591,76 +627,76 @@ static JSTValue jsNativeGetPrivate JSTDeclareFunction() {
 	return JSTValueFromPointer(JSTObjectGetPrivate((JSTObject)argv[0]));
 }
 
-JSTObject JSTNativeInit_ JSTUtility(JSTObject js) {
+JSTObject JSTNativeInit_ JSTUtility(JSTObject global) {
 
-	JSTObject string = JSTValueToObject(JSTScriptNativeEval("String", NULL));
-	JSTObjectSetMethod(string, "toUTF8", jsStringToUTF8, 0);
-	JSTObjectSetMethod(string, "fromUTF8", jsStringFromUTF8, 0);
-	JSTObjectSetMethod(string, "toUTF32", jsStringToUTF32, 0);
+/*	JSTObject string = JSTValueToObject(JSTScriptNativeEval("String", NULL));*/
+/*	JSTObjectSetMethod(string, "toUTF8", jsStringToUTF8, 0);*/
+/*	JSTObjectSetMethod(string, "fromUTF8", jsStringFromUTF8, 0);*/
+/*	JSTObjectSetMethod(string, "toUTF32", jsStringToUTF32, 0);*/
 
-	JSTObject native = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(JSTContextGetGlobalObject(ctx), "native", native, 0);
+/*	JSTObject native = JSTClassInstance(NULL, NULL);*/
+/*	JSTObjectSetProperty(JSTContextGetGlobalObject(ctx), "native", native, 0);*/
 
-	JSTObject lib = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);
+/*	JSTObject lib = JSTClassInstance(NULL, NULL);*/
+/*	JSTObjectSetProperty(native, "lib", lib, JSTObjectPropertyRequired);*/
 
-	char * jsNativeDefines = JSTConstructUTF8("native.alignment = %i; native.byteOrder = %i; native.call = {native: %i, ellipsis: %i, '...': %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}};",
-		JSTNativeAlignment, JSTNativeByteOrder,
-		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,
-		DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS,
-		DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV,
-		DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB,
-		DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32,
-		DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32
-	);
+/*	char * jsNativeDefines = JSTConstructUTF8("native.alignment = %i; native.byteOrder = %i; native.call = {native: %i, ellipsis: %i, '...': %i, x86:{cdecl: %i, win32:{std:%i, fast:{ms: %i, gnu: %i}, 'this':{ms: %i, gnu: %i}}, plan9: %i}, x64:{win64: %i, sysv: %i}, ppc32:{darwin: %i, sysv: %i}, arm:{default: %i, thumb: %i, eabi:{default: %i, thumb: %i}}, mips32:{eabi: %i, o32: %i}, mips64:{n64: %i, n32: %i}};",*/
+/*		JSTNativeAlignment, JSTNativeByteOrder,*/
+/*		0, DC_CALL_C_ELLIPSIS, DC_CALL_C_ELLIPSIS, DC_CALL_C_X86_CDECL, DC_CALL_C_X86_WIN32_STD,*/
+/*		DC_CALL_C_X86_WIN32_FAST_MS, DC_CALL_C_X86_WIN32_FAST_GNU, DC_CALL_C_X86_WIN32_THIS_MS,*/
+/*		DC_CALL_C_X86_WIN32_THIS_GNU, DC_CALL_C_X86_PLAN9, DC_CALL_C_X64_WIN64, DC_CALL_C_X64_SYSV,*/
+/*		DC_CALL_C_PPC32_DARWIN, DC_CALL_C_PPC32_SYSV, DC_CALL_C_ARM_ARM, DC_CALL_C_ARM_THUMB,*/
+/*		DC_CALL_C_ARM_ARM_EABI, DC_CALL_C_ARM_THUMB_EABI ,DC_CALL_C_MIPS32_EABI, DC_CALL_C_MIPS32_O32,*/
+/*		DC_CALL_C_MIPS64_N64, DC_CALL_C_MIPS64_N32*/
+/*	);*/
 
-	JSTScriptNativeEval(jsNativeDefines, NULL);
-	free(jsNativeDefines);
+/*	JSTScriptNativeEval(jsNativeDefines, NULL);*/
+/*	free(jsNativeDefines);*/
 
-	jsNativeDefines = JSTConstructUTF8("native.size = js.extend({}, {'void': %i, 'const': %i, unsigned: %i, bool: %i, char: %i, short: %i, int: %i, 'enum': %i, long: %i, size: %i, pointer: %i, int64: %i, float: %i, double: %i, struct: %i, union: %i, ellipsis: %i, utf8: %i, utf16: %i, utf32: %i, string: %i, value: %i})",
-		JSN_C_TYPE_VOID_SIZE, JSN_C_TYPE_CONST_SIZE, JSN_C_TYPE_UNSIGNED_SIZE,
-		JSN_C_TYPE_BOOL_SIZE, JSN_C_TYPE_CHAR_SIZE, JSN_C_TYPE_SHORT_SIZE,
-		JSN_C_TYPE_INT_SIZE, JSN_C_TYPE_ENUM_SIZE, JSN_C_TYPE_LONG_SIZE,
-		JSN_C_TYPE_SIZE_SIZE, JSN_C_TYPE_POINTER_SIZE, JSN_C_TYPE_INT64_SIZE,
-		JSN_C_TYPE_FLOAT_SIZE, JSN_C_TYPE_DOUBLE_SIZE, JSN_C_TYPE_STRUCT_SIZE,
-		JSN_C_TYPE_UNION_SIZE, JSN_C_TYPE_ELLIPSIS_SIZE, JSN_C_TYPE_UTF8_SIZE,
-		JSN_C_TYPE_UTF16_SIZE, JSN_C_TYPE_UTF32_SIZE, JSN_C_TYPE_STRING_SIZE,
-		JSN_C_TYPE_VALUE_SIZE
-	);
+/*	jsNativeDefines = JSTConstructUTF8("native.size = js.extend({}, {'void': %i, 'const': %i, unsigned: %i, bool: %i, char: %i, short: %i, int: %i, 'enum': %i, long: %i, size: %i, pointer: %i, int64: %i, float: %i, double: %i, struct: %i, union: %i, ellipsis: %i, utf8: %i, utf16: %i, utf32: %i, string: %i, value: %i})",*/
+/*		JSN_C_TYPE_VOID_SIZE, JSN_C_TYPE_CONST_SIZE, JSN_C_TYPE_UNSIGNED_SIZE,*/
+/*		JSN_C_TYPE_BOOL_SIZE, JSN_C_TYPE_CHAR_SIZE, JSN_C_TYPE_SHORT_SIZE,*/
+/*		JSN_C_TYPE_INT_SIZE, JSN_C_TYPE_ENUM_SIZE, JSN_C_TYPE_LONG_SIZE,*/
+/*		JSN_C_TYPE_SIZE_SIZE, JSN_C_TYPE_POINTER_SIZE, JSN_C_TYPE_INT64_SIZE,*/
+/*		JSN_C_TYPE_FLOAT_SIZE, JSN_C_TYPE_DOUBLE_SIZE, JSN_C_TYPE_STRUCT_SIZE,*/
+/*		JSN_C_TYPE_UNION_SIZE, JSN_C_TYPE_ELLIPSIS_SIZE, JSN_C_TYPE_UTF8_SIZE,*/
+/*		JSN_C_TYPE_UTF16_SIZE, JSN_C_TYPE_UTF32_SIZE, JSN_C_TYPE_STRING_SIZE,*/
+/*		JSN_C_TYPE_VALUE_SIZE*/
+/*	);*/
 
-	JSTScriptNativeEval(jsNativeDefines, NULL);
-	free(jsNativeDefines);
+/*	JSTScriptNativeEval(jsNativeDefines, NULL);*/
+/*	free(jsNativeDefines);*/
 
-	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
-	
-	JSTObjectSetMethod(native, "container", jsNativeContainer, 0);
-	JSTObjectSetMethod(native, "instance", jsNativeInstance, 0);
-	JSTObjectSetMethod(native, "callback", jsNativeCallback, 0);
-	JSTObjectSetMethod(native, "callbackFree", jsNativeCallbackFree, 0);
-	JSTObjectSetMethod(native, "setPrototype", jsNativeSetPrototype, 0);
-	JSTObjectSetMethod(native, "getPrototype", jsNativeGetPrototype, 0);
-	JSTObjectSetMethod(native, "setPrivate", jsNativeSetPrivate, 0);
-	JSTObjectSetMethod(native, "getPrivate", jsNativeGetPrivate, 0);
-	JSTObjectSetMethod(native, "exec", jsNativeExec, 0);
+/*	if (JSTScriptHasError) JSTScriptReportException(), exit(1);*/
+/*	*/
+/*	JSTObjectSetMethod(native, "container", jsNativeContainer, 0);*/
+/*	JSTObjectSetMethod(native, "instance", jsNativeInstance, 0);*/
+/*	JSTObjectSetMethod(native, "callback", jsNativeCallback, 0);*/
+/*	JSTObjectSetMethod(native, "callbackFree", jsNativeCallbackFree, 0);*/
+/*	JSTObjectSetMethod(native, "setPrototype", jsNativeSetPrototype, 0);*/
+/*	JSTObjectSetMethod(native, "getPrototype", jsNativeGetPrototype, 0);*/
+/*	JSTObjectSetMethod(native, "setPrivate", jsNativeSetPrivate, 0);*/
+/*	JSTObjectSetMethod(native, "getPrivate", jsNativeGetPrivate, 0);*/
+/*	JSTObjectSetMethod(native, "exec", jsNativeExec, 0);*/
 
-	JSTObject library = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);
+/*	JSTObject library = JSTClassInstance(NULL, NULL);*/
+/*	JSTObjectSetProperty(native, "library", library, JSTObjectPropertyRequired);*/
 
-	JSTObjectSetMethod(library, "load", jsNativeLibraryLoad, 0);
-	JSTObjectSetMethod(library, "free", jsNativeLibraryFree, 0);
-	JSTObjectSetMethod(library, "findSymbol", jsNativeLibraryFindSymbol, 0);
+/*	JSTObjectSetMethod(library, "load", jsNativeLibraryLoad, 0);*/
+/*	JSTObjectSetMethod(library, "free", jsNativeLibraryFree, 0);*/
+/*	JSTObjectSetMethod(library, "findSymbol", jsNativeLibraryFindSymbol, 0);*/
 
-	JSTObject address = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(native, "address", address, JSTObjectPropertyRequired);
+/*	JSTObject address = JSTClassInstance(NULL, NULL);*/
+/*	JSTObjectSetProperty(native, "address", address, JSTObjectPropertyRequired);*/
 
-	JSTObjectSetMethod(address, "read", jsNativeAddressRead, 0);
-	JSTObjectSetMethod(address, "write", jsNativeAddressWrite, 0);
-	JSTObjectSetMethod(address, "free", jsNativeAddressFree, 0);
+/*	JSTObjectSetMethod(address, "read", jsNativeAddressRead, 0);*/
+/*	JSTObjectSetMethod(address, "write", jsNativeAddressWrite, 0);*/
+/*	JSTObjectSetMethod(address, "free", jsNativeAddressFree, 0);*/
 
-	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);
-	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+/*	JSTScriptEval(JSTNativeScript, NULL, "JSTNative.js", 1);*/
+/*	if (JSTScriptHasError) JSTScriptReportException(), exit(1);*/
 
-	return native;
+	return global;
 
 }
 

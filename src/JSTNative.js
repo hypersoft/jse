@@ -35,6 +35,12 @@ js.extendPrototype(native.type, {
 		Object.defineProperties(native.type, definition);
 		return alias;
 	},
+	align: function typeAlign(base, type) {
+		var misalignment = (base % type.size)
+		if (misalignment != 0) {
+			return (type.size - misalignment);
+		} else return 0;
+	},
 })
 
 var sigIndex = 0;
@@ -53,7 +59,7 @@ var NativeType = function(name, size, unsigned, code, pointers) {
 NativeType.dummy = {
 	variable: undefined, constant: undefined, deref: undefined,
 	isPointer: false, pointer: undefined, signed: undefined, unsigned: undefined, 
-	isConstant: false
+	isConstant: false,
 };
 
 NativeType.prototype = {
@@ -75,6 +81,9 @@ NativeType.prototype = {
 		if (this.isUnsigned == true) code = (code | native.type.unsigned.code);
 		if (this.derefCount > 0) code = (code | native.type.pointer.code);
 		return code;
+	},
+	equals: function(v) {
+		return Boolean(this.valueOf() == v.valueOf() && this.derefCount== v.derefCount)
 	},
 	get unsigned() {
 		if (this.isUnsigned) return this;
@@ -99,6 +108,9 @@ NativeType.prototype = {
 	get isPointer() {
 		return (this.derefCount > 0);
 	},
+	get isVoid(){
+		return Number(this) == native.type.void.code;
+	},
 	get deref() {
 		if (this.derefCount < 1) return this;
 		var o = Object.create(this); o.derefCount--;
@@ -114,16 +126,20 @@ NativeType.prototype = {
 		var o = Object.create(this); o.isConstant = false;
 		return o;
 	},
-	value: function(value) {
+	value: function(value, address, length) {
 		var o = new Object(value);
 		o.type = this;
+		o.address = (address)?address:undefined;
+		o.length = (length)?length:1
 		return o;
 	}
 }
 
 new NativeType('void', size.void);
 js.extend(native.type.void, NativeType.dummy); // blocks prototype accessors
+delete native.type.void.deref;
 delete native.type.void.pointer; // allows prototype accessor
+delete native.type.void.isPointer; // allows prototype accessor
 
 new NativeType('const', size.const);
 js.extend(native.type.const, NativeType.dummy);
@@ -267,75 +283,185 @@ SharedLibrary.prototype = js.extendPrototype({}, {
 
 Object.defineProperties(native, {engine:{value:new SharedLibrary(), enumerable:true}});
 
-var Address = js.extendPrototype(function Address(v, t, l){
-	var o = native.instance(Address.container, 0);
-	native.setPrototype(o, Address.prototype);
-	if (v != undefined) o['&'] = v;
-	if (t != undefined) o.type = (typeof t == 'string')?native.type[t]:t;
-	if (l != undefined) o.length = l;
-	return o;
-}, {
-	container: null, name: "Address", prototype: {},
-	set: function(name, value) { var i = parseInt(name);
+var Native = (function init(global, native) {
+
+	global.double = native.type.double, global.float = native.type.float,
+	global.int64 = native.type.int64,
+	global.int = native.type.int, global.long = native.type.long,
+	global.vptr = native.type.void.pointer, global.void_t = native.type.void;
+	global.short = native.type.short, global.char = native.type.char,
+	global.size_t = native.type.size, global.boolean = native.type.boolean,
+	global.utf8 = native.type.utf8, global.utf16 = native.type.utf16,
+	global.utf32 = native.type.utf32,
+	global.value_t = native.type.value, global.string_t = native.type.string;
+	global.file_t = native.type.void; file_t.name = 'FILE'
+
+	global.io = {print:Procedure(native.engine, int, 'fprintf', [file_t, utf8.pointer, '...'])};
+	global.print = Procedure(native.engine, int, 'printf', [utf8.pointer, '...']);
+	global.exit = new Procedure(native.engine, 'int', 'exit', ['int']);
+	global.echo = new Command('echo', '-E');
+
+	var malloc = Procedure(native.engine, vptr, 'malloc', [size_t]);
+
+	var Native = {Number:Number,Boolean:Boolean};
+
+	Native.Object = function(){	return Object.apply(this, arguments); }
+	native.setPrototype(Native.Object, Object);
+
+	Native.Object.Extend = function Extend(object, properties, permissions) {
+		var o = {};
+		for (name in properties) {
+			o[name] = {
+				value: properties[name], enumerable: permissions[0],
+				writeable: permissions[1], configurable: permissions[2]
+			};
+		}
+		return Object.defineProperties(object, o);
+	}
+
+	Native.Object.Accessor = function(object, name, get, set, permissions) {
+		var o = {};
+		o[name] = { get:get, set:set, enumerable: permissions[0],
+			writeable: permissions[1], configurable: permissions[2]
+		};
+		return Object.defineProperties(object, o);
+	}
+
+	Native.Object.Prototype = function(object, prototype) {
+		if (prototype === undefined) return native.getPrototype(object);
+		native.setPrototype(object, prototype);
+		return object;
+	}
+
+	Native.Object.Private = function(object, prototype) {
+		if (prototype === undefined) return native.getPrivate(object);
+		if (isNaN(parseInt(prototype))) throw new ReferenceError("unable to set object private");
+		native.setPrivate(object, prototype);
+		return object;
+	}
+
+	Native.Address = function(t, v) {
+		var _this = Native.Object.Extend({},{_address:v,type:t},[false,true,false]);
+		return Native.Object.Prototype(Native.Object.Extend(_this, {
+			write:Native.Address.Write.bind(_this), read:Native.Address.Read.bind(_this)
+		},[false,false,false]), Native.Address.prototype);
+	}
+
+	Native.Address.prototype = {
+		constructor: Native.Address, write:null, read:null, free:null,
+		get address(){return this._address},
+		set address(v){this._address = v},
+		set value(v){this.write(v); return v},
+		get value(){return this.read()},
+		valueOf: function(){return this.address},
+		toString:function(){return this.value.toString()},
+		get deref(){
+			if (this.type.derefCount < 2) throw new TypeError("cannot dereference type " + String(this.value.type));
+			return Native.Address(this.value.type, this.value)
+		},
+		defineAs:function property(object, name){
+			return Native.Address.Accessor(object, name, this)
+		},
+	}
+
+	Native.Address.Accessor = function(object, name, address, type) {
+		if (type != undefined) {
+			address = Native.Address(address, type);
+		}
+		var o = {};
+		o[name] = { get:address.read, set:address.write, enumerable: true,
+			writeable: false, configurable: true
+		};
+		return Object.defineProperties(object, o);
+	}
+
+	Native.Address.Write = function (value) {
+		var type = this.type.deref;
+		if (type.equals(utf8)) this.address = String.toUTF8(value);
+		else native.address.write(this.address, type, value);
+		return value;
+	}
+
+	Native.Address.Read = function() { return new Native.Address.Reference(this); }
+
+	Native.Address.Reference = function(a) { this.header = a; }
+
+	Native.Address.Reference.prototype = {
+		constructor: Native.Address,
+		get clone(){return this.header.deref},
+		get defineAs(){return this.header.defineAs},
+		get type(){return this.header.type.deref},
+		set type(v){return this.header.type = v},
+		get address(){return this.header.address},
+		set address(v){ return this.header.address = v},
+		get read(){return this.header.read},
+		get write(){return this.header.write},
+		get free(){return this.header.free},
+		set read(v){return this.header.read = v},
+		set write(v){return this.header.write = v},
+		set free(v){return this.header.free = v},
+		valueOf:function(){
+			if (this.type.equals(utf8)) return this.address;
+			return native.address.read(this.address, this.type)
+		},
+		toString:function(){
+			if (this.type.equals(utf8.pointer))
+				return String.fromUTF8(native.address.read(this.address, this.type));
+			else if (this.type.equals(utf8))
+				return String.fromUTF8(this.address);
+			return String(native.address.read(this.address, this.type))
+		},
+	}
+
+	Native.Array = function Array(t, a, l) {
+		var o = Native.Object.Extend(native.instance(Native.Array.container, 0), {
+			type:(t)?t:void_t, address:(a)?a:0, length:(l)?l:1
+		}, [false,true,true]);
+		Native.Object.Prototype(o, Native.Array.prototype);
+		return o;
+	}
+
+	Native.Array.prototype = {
+		constructor: Native.Array, length: 0,
+		valueOf: function() {return this.address},
+		toString: function() {return String(this.address)},
+	}
+
+	Native.Array.set = function index(name, value) { var i = parseInt(name);
 		if (! isNaN(i) ) {
 			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
-			native.address.write((i * this.size) + this['&'], this.type, value);
-			return true;
-		}
-		if (name == 'value' || name == '*') {
-			native.address.write(this['&'], this.type, value);
-			return true;		
-		}
-		if (name == 'type') {
-			Object.defineProperties(this, {type:{'value': native.type(value), writeable:true,configurable:true}});
-			Object.defineProperties(this, {size:{'value': native.type(value).size, writeable:true,configurable:true}});
-			return true;
-		}
-		if (name == 'length') {
-			Object.defineProperties(this, {length:{'value':value, writeable:true,configurable:true}})
-			return true;
-		}
-		if (name == '&') {
-			Object.defineProperties(this, {'&':{value: parseInt(value), configurable:true,writeable:true}});
-		}
-		if (name == 'free') {
-			Object.defineProperties(this, {free:{value: value, configurable:true,writeable:true}});
+			return Native.Address(this.type, this.address + (i * this.type.size)).value = value;
 		}
 		return null;
-	},
-	get: function(name) { var i = parseInt(name);
+	}
+
+	Native.Array.get = function index(name) { var i = parseInt(name);
 		if (! isNaN(i) ) {
 			if (i >= this.length || i < 0) throw new RangeError("address index out of bounds");
-			return native.address.read((this['&'] + (i * this.size)), this.type);
-		}
-		if (name == 'value' || name == '*') return native.address.read(this['&'], this.type);
-		var index = name.match(/^\&([0-9]+)$/);
-		if (index != null) { index = index[1];
-			if (index >= this.length || index < 0) throw new RangeError("address index out of bounds");
-			return (this['&'] + (index * this.size));
+			Native.Address(this.type, this.address + (i * this.type.size)).defineAs(this, i);
+			return this[i];
 		}
 		return null;
-	},
-	enumerate: function() {
+	}
+
+	Native.Array.enumerate = function list() {
 		var o = {length:this.length}; for (i = 0; i < o.length; i++) o[i] = i; return o;
-	},
-})
+	}
 
-Address.prototype = js.extendPrototype(Object.defineProperties({}, {
-	constructor: {value:Address}, length:{value:1},
-}),{
-	toString: function(){ return '[object Address 0x'+this['&'].toString(16)+']'},
-	valueOf: function(){ return this.value; },
-});
+	Native.Array.container = native.container(Native.Array);
 
-Address.container = native.container(Address);
+	global.argv = Native.Array(utf8.pointer.pointer, js.run.argv, js.run.argc);
 
-js.extendPrototype(Number.prototype, {toAddress: function toAddress(t, l) {
-	var a = parseInt(this);
-	if (isNaN(a)) throw new RangeError("unable to parse integer address");
-	return Address(a, t, l);
-}});
+	var locate = native.engine.find;
+	Native.Address(file_t.pointer.pointer, locate('stdin')).defineAs(io, 'stdin');
+	Native.Address(file_t.pointer.pointer, locate('stdout')).defineAs(io, 'stdout');
+	Native.Address(file_t.pointer.pointer, locate('stderr')).defineAs(io, 'stderr');
 
-var exit = new Procedure(native.engine, 'int', 'exit', ['int']);
-var echo = new Command('echo', '-E');
+	io.print.error = Procedure(
+		native.engine, int, 'fprintf', [vptr, utf8.pointer, '...']
+	).bind(null, io.stderr);
+
+	return Native;
+
+})(this, native);
 

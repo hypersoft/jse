@@ -25,6 +25,8 @@ JSTStringRelease(name); \
 #define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
 #define JSTObjectNull ((JSTObject) JSTValueNull)
 
+#define JSTObjectArray(argc, argv) JST(JSObjectMakeArray, argc, argv)
+
 #define JSTObjectPropertyHidden kJSPropertyAttributeDontEnum
 #define JSTObjectPropertyReadOnly kJSPropertyAttributeReadOnly
 #define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete

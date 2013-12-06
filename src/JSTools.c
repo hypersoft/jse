@@ -120,17 +120,6 @@ static JSValueRef jsToolsEnvKeys JSTDeclareFunction (string) {
 	return result;
 }
 
-static JSValueRef jsToolsEnvCWD JSTDeclareFunction () {
-	char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
-	return JSTValueFromUTF8(buffer);
-}
-
-static JSValueRef jsToolsEnvChDir JSTDeclareFunction () {
-	char * val; JSValueRef
-	result = JSTValueFromDouble(chdir(JSTStringToUTF8(JSTStringFromValue(argv[0]), true)));
-	JSTStringFreeUTF8(val);
-	return result;
-}
 
 static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	if (JSTValueIsNumber(argv[0])) return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
@@ -155,50 +144,157 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 
 }
 
+static JSValueRef jst_io_path JSTDeclareFunction () {
+
+	if (argc == 0) {
+		char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
+		return JSTValueFromUTF8(buffer);
+	}
+
+	char * val; JSValueRef
+	result = JSTValueFromDouble(chdir(val = JSTStringToUTF8(JSTStringFromValue(argv[0]), true)));
+	JSTStringFreeUTF8(val);
+	return result;
+
+}
+
+static JSValueRef jst_io_stream_print JSTDeclareFunction () {
+
+	size_t i; char * output; double count = 0;
+
+	FILE * stream = JSTValueToPointer(argv[0]);
+
+	for (i = 1; i < argc; i++) {
+		output = JSTStringToUTF8(JSTValueToString(argv[i]), true);
+		if (output) count += fprintf(stream, "%s", output);
+		JSTStringFreeUTF8(output);
+	}
+
+	return JSTValueFromDouble(count);
+
+}
+
+static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
+
+	if (argc > 0) {
+		int stream = JSTValueToDouble(argv[0]);
+		if (stream == 0) return JSTValueFromPointer(stdin);
+		if (stream == 1) return JSTValueFromPointer(stdout);
+		if (stream == 2) return JSTValueFromPointer(stderr);
+	}
+	return JSTValueUndefined;
+
+}
+
+static JSValueRef jst_error_number JSTDeclareFunction () {
+
+	if (argc == 0) {
+		return JSTValueFromDouble(errno);
+	} else errno = JSTValueToDouble(argv[0]);
+
+	return argv[0];
+
+}
+
+static JSValueRef jst_error_message JSTDeclareFunction () {
+
+	if (argc == 1) {
+		return JSTValueFromUTF8(strerror(JSTValueToDouble(argv[0])));
+	}
+	return JSTValueUndefined;
+
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	static bool initialized;
-	char buffer[PATH_MAX];
+	JSTObject sys, object, engine, io, error;
 
-	if (! initialized )	initialized++;
+	sys = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(global, "sys", sys, 0);
 
-	JSTObject js = JSTValueToObject(JSTScriptEval(JSTInitScript, global, "JSTInit.js", 1));
-	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+	object = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "object", object, 0);
+
+	JSTObjectSetProperty(sys, "main", JSTValueFromUTF8(argv[1]), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(sys, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), JSTObjectPropertyReadOnly);
+
+	JSTObjectSetProperty(sys, "global", global, 0);
+	JSTObjectSetProperty(sys, "context", JSTValueFromPointer(ctx), 0);
+	JSTObjectSetProperty(sys, "exception", JSTValueFromPointer(exception), 0);
+
+	{	char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
+		JSTObjectSetProperty(sys, "path", JSTValueFromUTF8(buffer), JSTObjectPropertyReadOnly);
+	}
+
+	JSTObjectSetProperty(sys, "argc", JSTValueFromDouble(argc), 0);
+	JSTObjectSetProperty(sys, "argv", JSTValueFromPointer(argv), 0);
+	JSTObjectSetProperty(sys, "envp", JSTValueFromPointer(envp), 0);
 	
-	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);
+	JSTObjectSetMethod(sys, "_io_path", jst_io_path, 0);
+	JSTObjectSetMethod(sys, "_io_stream_print", jst_io_stream_print, 0);
+	JSTObjectSetMethod(sys, "_io_stream_pointer", jst_io_stream_pointer, 0);
 
-	JSTObjectSetProperty(js, "copyright", JSTValueFromPointer(JSTReservedAddress), JSTObjectPropertyReadOnly);
-	JSTObjectSetProperty(js, "vendor", JSTValueFromPointer(VENDOR), JSTObjectPropertyReadOnly);
-	JSTObjectSetProperty(js, "version", JSTValueFromPointer(VERSION), JSTObjectPropertyReadOnly);
-	JSTObjectSetProperty(js, "codename", JSTValueFromPointer(CODENAME), JSTObjectPropertyReadOnly);
-	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);
-	JSTObjectSetMethod(js, "exec", jsExecute, JSTObjectPropertyReadOnly);
-	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyReadOnly);
+	JSTObjectSetMethod(sys, "_error_number", jst_error_number, 0);
+	JSTObjectSetMethod(sys, "_error_message", jst_error_message, 0);
 
-	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);
+	engine = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "engine", engine, 0);
 
-	JSTObjectSetMethod(env, "read", jsToolsEnvRead, 0);
-	JSTObjectSetMethod(env, "write", jsToolsEnvWrite, 0);
-	JSTObjectSetMethod(env, "keys", jsToolsEnvKeys, 0);
-	JSTObjectSetMethod(env, "delete", jsToolsEnvDelete, 0);
-	JSTObjectSetMethod(env, "cwd", jsToolsEnvCWD, 0);
-	JSTObjectSetMethod(env, "chdir", jsToolsEnvChDir, 0);
-	JSTObjectSetMethod(env, "user", jsToolsEnvUser, 0);
+	JSTObjectSetProperty(engine, "copyright", JSTValueFromUTF8(JSTReservedAddress), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(engine, "vendor", JSTValueFromUTF8(VENDOR), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(engine, "version", JSTValueFromUTF8(VERSION), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(engine, "codename", JSTValueFromUTF8(CODENAME), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(engine, "path", JSTValueFromUTF8(argv[0]), JSTObjectPropertyReadOnly);
 
-	JSTObject jsRun = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(js, "run", jsRun, JSTObjectPropertyRequired);
-	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), 0);
-	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), 0);
-	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), 0);
-	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), 0);
-	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), 0);
-	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), 0);
-	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), 0);
-	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), 0);
-	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), 0);
-	JSTScriptNativeEval("Object.freeze(js.run)", global);
+	io = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "io", io, 0);
 
-	JSTNativeInit(js); return js;
+	error = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "error", error, 0);
+
+	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+
+	JSTNativeInit(global);
+
+/*	static bool initialized;*/
+/*	char buffer[PATH_MAX];*/
+
+/*	if (! initialized )	initialized++;*/
+
+/*	JSTObject js = JSTValueToObject();*/
+/*	if (JSTScriptHasError) JSTScriptReportException(), exit(1);*/
+/*	*/
+/*	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);*/
+
+/*	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);*/
+/*	JSTObjectSetMethod(js, "exec", jsExecute, JSTObjectPropertyReadOnly);*/
+/*	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyReadOnly);*/
+
+/*	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);*/
+
+/*	JSTObjectSetMethod(env, "read", jsToolsEnvRead, 0);*/
+/*	JSTObjectSetMethod(env, "write", jsToolsEnvWrite, 0);*/
+/*	JSTObjectSetMethod(env, "keys", jsToolsEnvKeys, 0);*/
+/*	JSTObjectSetMethod(env, "delete", jsToolsEnvDelete, 0);*/
+/*	JSTObjectSetMethod(env, "cwd", jsToolsEnvCWD, 0);*/
+/*	JSTObjectSetMethod(env, "chdir", jsToolsEnvChDir, 0);*/
+/*	JSTObjectSetMethod(env, "user", jsToolsEnvUser, 0);*/
+
+/*	JSTObject jsRun = JSTClassInstance(NULL, NULL);*/
+/*	JSTObjectSetProperty(js, "run", jsRun, JSTObjectPropertyRequired);*/
+/*	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), 0);*/
+/*	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), 0);*/
+/*	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), 0);*/
+/*	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), 0);*/
+/*	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), 0);*/
+/*	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), 0);*/
+/*	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), 0);*/
+/*	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), 0);*/
+/*	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), 0);*/
+/*	JSTScriptNativeEval("Object.freeze(js.run)", global);*/
+
+	return global;
 
 }
 
