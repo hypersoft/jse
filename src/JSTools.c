@@ -302,8 +302,28 @@ static JSTDeclareConstructor(jst_object_new) {
 static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
 
 	JSTObject class, interface = (JSTObject) argv[0], prototype, value;
+
 	void * _object_class = jst_object_class;
-	char *v = "value", *ii = "init"; bool exec, construct;
+
+	char *v = "value", *ii = "init", *nn = "name";
+
+	bool exec = JSTObjectHasProperty(interface, "exec"),
+	construct = JSTObjectHasProperty(interface, "prototype"),
+	hasName = JSTObjectHasProperty(interface, nn);
+
+	char *cc = "class", *ccc = "constructor", *fc = "function",
+
+	*classType = JSTCND(
+		exec || construct, JSTCND(construct, ccc, fc), cc
+	), *nameOf;
+
+	if (hasName) {
+		char *className = JSTValueToUTF8(JSTObjectGetProperty(interface, nn));
+		nameOf = JSTConstructUTF8("%s %s", classType, className);
+		free(className);
+	} else {
+		nameOf = JSTConstructUTF8("%s", classType);
+	}
 
 	if (JSTObjectHasProperty(interface, "prototype"))
 	prototype = (JSTObject) JSTScriptNativeEval("Object(this.prototype)", interface);
@@ -311,29 +331,32 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 	if (JSTObjectHasProperty(interface, v))
 	value = (JSTObject) JSTObjectGetProperty(interface, v);
 	else value = JSTClassInstance(NULL, NULL);
-
-	if ((exec = JSTObjectHasProperty(interface, "exec")) || (construct = JSTObjectHasProperty(interface, "prototype"))){
-		char * name = "function";
+		
+	if (hasName || exec || construct){
 		JSTClassDefinition jsClass = JSTClassEmptyDefinition;
-		jsClass.attributes = JSTClassPropertyManualPrototype, jsClass.className = name;
-		jsClass.setProperty = &jst_object_class_set;
-		jsClass.getProperty = &jst_object_class_get;
-		jsClass.deleteProperty = &jst_object_class_delete;
+		jsClass.attributes = JSTClassPropertyManualPrototype,
+		jsClass.className = nameOf,
+		jsClass.setProperty = &jst_object_class_set,
+		jsClass.getProperty = &jst_object_class_get,
+		jsClass.deleteProperty = &jst_object_class_delete,
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
 		if (construct) jsClass.callAsConstructor = &jst_object_new;
-		_object_class = JSClassRetain(JSClassCreate(&jsClass));
+		_object_class = JSClassCreate(&jsClass);
 	}
 
-	class = JSTClassInstance(_object_class, NULL);
+	class = JSTClassInstance(_object_class, NULL); free(nameOf);
 
 	// the prototype isn't linked up so its safe to do stuff...
 	if (JSTObjectHasProperty(interface, ii)) {
 		JSTObject _init = (JSTObject) JSTObjectGetProperty(interface, ii);
-		JSTFunctionCall(_init, value, prototype, class);
+		JSTFunctionCall(_init, value, class, prototype);
 	}
+
 	// circular property dereference warning!
-	JSTObjectSetProperty(value, jst_object_class_extern, class, 0); // pretty good way to lock 'er up
+	// pretty good way to lock 'er up
+	JSTObjectSetProperty(value, jst_object_class_extern, class, 0);
+
 	// return null for any properties you haven't explicitly designated, blacklisted 
 	// or parsed. this is only for a reference, such as when defining an external
 	// property or prototype from inside the interface code.

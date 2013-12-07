@@ -151,8 +151,8 @@ delete sys._io_path;
 	sys.error.clear = function clear(){return ! (sys.error.number = 0)};
 
 	var dual_error_message = function message(i){return (sys_error_message(i))};
-	dual_error_message.toString = function toString(){return sys_error_message(sys.error.number)};
-	dual_error_message.valueOf = function valueOf(){return sys.error.number};
+	dual_error_message.toString = function toString(){return sys_error_message(sys_error_number())};
+	dual_error_message.valueOf = function valueOf(){return sys_error_number()};
 
 	sys.object.property(sys.error, 'message', function message(value) {
 		if (value != undefined) throw new ReferenceError("attempt to set read only property");
