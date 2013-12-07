@@ -1,10 +1,20 @@
 #!bin/jse
 
-var map = new sys.object.bitmap(16, 
-	['void','const','integer','unsigned','bool','char','short','int','long','int64','float','double','pointer','size','string','value']
-)(0);
+p = sys.object.create({
+	value:{keep:{}},
+	get: function(item){
+		return this.keep[item] || null;
+	},
+	set: function(item, value){
+		print.line("setting ", item);
+		this.keep[item] = value; return true
+	},
+	enumerate: function(data) {return Object.keys(this.keep)},
+});
 
-map([1,undefined,1]);
+Object.defineProperties(p, {a:{value:1,enumerable:true}});
 
-//var map = new sys.object.bitmap(2, ['a','b'])(7)
-print(map);
+//p.food = "sammich"
+
+print.line(p.a)
+for (name in p) print.line(name);
