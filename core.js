@@ -7,11 +7,11 @@ p = sys.object.create(/* system object interface */{
 	// on the created prototype as a hidden system property.
 
 	// all procedures herein are defined as a function of an external object. 
-	// these external property methods are bound to a private interface value.
+	// these external property methods are bound to a private interface 'value'.
 
-	value: {}, // modifications to 'this' reference definition are propogated.
+	value: {},
 
-	// the public interface object 'extern' may optionally have inheritable properties.
+	// the public interface instance 'extern' may optionally have inheritable properties.
 	// this prototype will be constructed as a prototype of itself, so that modifications
 	// to the prototype via script do not propogate.
 	prototype: {},
@@ -26,7 +26,7 @@ p = sys.object.create(/* system object interface */{
 		*/
 	},
 
-	/* optionally, construct static principles of the resulting system object class */
+	/* optionally, construct static principles of the resulting system object instance */
 
 	init:function(extern, prototype){
 
@@ -38,24 +38,20 @@ p = sys.object.create(/* system object interface */{
 
 	},
 
-	// read property, before extern->prototype
 	get: function(item){
 		return this.keep[item] || null
 	},
 
-	// write property, before extern->prototype
 	set: function(item, value){
 		this.keep[item] = value; return true
 	},
 
-	// delete property before extern->prototype
 	delete: function(item){
 		if (Object.hasOwnProperty(keep, item)){
 			delete this.keep[item]; return true
 		} else return false;
 	},
 
-	// get property keys before extern->prototype
 	enumerate:function(){
 		return Object.keys(this.keep)
 	},
