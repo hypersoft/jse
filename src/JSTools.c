@@ -286,7 +286,7 @@ static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
 
 }
 
-static JSTDeclareHasProperty(jst_object_provides) {
+static JSTDeclareHasProperty(jst_object_inspect_keys) {
 
 	void * exception = NULL;
 	JSTValue name = JSTStringToValue(propertyName, false);
@@ -371,7 +371,7 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		jsClass.getProperty = &jst_object_class_get,
 		jsClass.deleteProperty = &jst_object_class_delete,
 		jsClass.getPropertyNames = &jst_object_class_enumerate,
-		jsClass.hasProperty = &jst_object_provides;
+		jsClass.hasProperty = &jst_object_inspect_keys;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
 		if (construct) jsClass.callAsConstructor = &jst_object_new;
 		_object_class = JSClassCreate(&jsClass);
@@ -418,8 +418,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		jsClass.getProperty = &jst_object_class_get;
 		jsClass.deleteProperty = &jst_object_class_delete;
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
-		jsClass.callAsFunction = &jst_object_exec;
-		jsClass.callAsConstructor = &jst_object_new;
+		jsClass.hasProperty = &jst_object_inspect_keys;
 		jst_object_class = JSClassRetain(JSClassCreate(&jsClass));
 
 	}
