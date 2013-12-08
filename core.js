@@ -56,7 +56,9 @@ p = sys.object.create(/* system object interface */{
 	},
 
 	// get property keys before extern->prototype
-	enumerate:function(){return Object.keys(this.keep)},
+	enumerate:function(){
+		return Object.keys(this.keep)
+	},
 
 	/* it is a special case when the system or script defines a property on extern */
 	/* the property set handler is external to the class interface, therefore */
@@ -66,7 +68,7 @@ p = sys.object.create(/* system object interface */{
 
 });
 
-print.line(p);
+//print.line(p);
 
 p.food = ['pear','apple','pie']
 
@@ -74,5 +76,5 @@ for (name in p) print.line(name);
 
 print.line(Object.hasOwnProperty(p, 'food'));
 
-print.line(p.food[2]);
+//print.line(p.food[2]);
 

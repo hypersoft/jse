@@ -260,25 +260,56 @@ static JSTDeclareSetProperty(jst_object_class_set) {
 }
 
 static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
+
 	void * exception = NULL;
 	JSTObject prototype = (JSTObject) JSTObjectGetPrototype(object);
 	JSTObject interface = (JSTObject) JSTObjectGetProperty(prototype, jst_object_class_call);
+	JSTObject private = (JSTObject) JSTObjectGetProperty(prototype, jst_object_class_value);
+	JSTObject keys = NULL;
 	char *ss = "enumerate";
-	if (JSTObjectHasProperty(interface, ss)) {
+
+	if (JSTObjectHasProperty(private, "keys"))
+		keys = (JSTObject) JSTObjectGetProperty(private, "keys");
+	else if (JSTObjectHasProperty(interface, ss)) {
 		JSTObject _enum = (JSTObject) JSTObjectGetProperty(interface, ss);
-		JSTScriptNativeEval("delete this.enumerate", interface);
-		JSTObject private = (JSTObject) JSTObjectGetProperty(prototype, jst_object_class_value);
-		JSTValue result = JSTFunctionCall(_enum, private);
-		JSTObjectSetProperty(interface, ss, _enum, 0);
-		long length = JSTValueToDouble(JSTObjectGetProperty(result, "length"));
-		JSStringRef name; size_t i;
-		for (i = 0; i < length; i++) {
-			JSPropertyNameAccumulatorAddName(
-				propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(result, i)))
-			);
-				JSTStringRelease(name);
-		}
+		keys = (JSTObject) JSTFunctionCall(_enum, private);
+	} else keys = (JSTObject) JSTScriptNativeEval("[]", NULL);
+
+	long length = JSTValueToDouble(JSTObjectGetProperty(keys, "length"));
+	JSStringRef name; size_t i;
+	for (i = 0; i < length; i++) {
+		JSPropertyNameAccumulatorAddName(
+			propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(keys, i)))
+		);
+			JSTStringRelease(name);
 	}
+
+}
+
+static JSTDeclareHasProperty(jst_object_provides) {
+
+	void * exception = NULL;
+	JSTValue name = JSTStringToValue(propertyName, false);
+	JSTObject prototype = (JSTObject) JSTObjectGetPrototype(object);
+	JSTObject interface = (JSTObject) JSTObjectGetProperty(prototype, jst_object_class_call);
+	JSTObject private = (JSTObject) JSTObjectGetProperty(prototype, jst_object_class_value);
+
+	char *kk = "keys", *ss = "enumerate";
+
+	JSTObject keys = NULL;
+	if (JSTObjectHasProperty(private, kk))
+		keys = (JSTObject) JSTObjectGetProperty(private, kk);
+	else if (JSTObjectHasProperty(interface, ss)) {
+		JSTObject _enum = (JSTObject) JSTObjectGetProperty(interface, ss);
+		keys = (JSTObject) JSTFunctionCall(_enum, private);
+	} else return false;
+
+	JSTObject indexOf = (JSTObject)JSTObjectGetProperty(keys, "indexOf");
+
+	return JSTValueToBoolean(JSTScriptNativeEval(
+		"this != -1", (JSTObject) JSTFunctionCall(indexOf, keys, name)
+	));
+
 }
 
 static JSTValue jst_object_exec JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
@@ -339,7 +370,8 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		jsClass.setProperty = &jst_object_class_set,
 		jsClass.getProperty = &jst_object_class_get,
 		jsClass.deleteProperty = &jst_object_class_delete,
-		jsClass.getPropertyNames = &jst_object_class_enumerate;
+		jsClass.getPropertyNames = &jst_object_class_enumerate,
+		jsClass.hasProperty = &jst_object_provides;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
 		if (construct) jsClass.callAsConstructor = &jst_object_new;
 		_object_class = JSClassCreate(&jsClass);
