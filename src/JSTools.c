@@ -480,7 +480,13 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
+	read = JSTClassInstance(NULL, NULL);
+	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
+	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
+
 	JSTObject stream = (JSTObject) JSTObjectGetProperty(io, "stream");
+	JSTObjectSetProperty(stream, "read", read, 0);
+
 	JSTObjectSetMethod(stream, "open", jst_io_stream_open, 0);
 	JSTObjectSetMethod(stream, "close", jst_io_stream_close, 0);
 	JSTObjectSetMethod(stream, "flush", jst_io_stream_flush, 0);
@@ -496,11 +502,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTObjectSetMethod(error, "wide", jst_io_stream_wide, 0);
 
-	read = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(io, "read", read, 0);
-
-	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
-	JSTObjectSetMethod(read, "field", jst_io_stream_read_input, 0);
+	JSTObjectSetProperty(global, "read", read, 0);
 
 	JSTNativeInit(global);
 

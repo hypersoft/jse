@@ -87,6 +87,8 @@ sys.object.map(sys.engine, {
 			get stderr(){return sys_io_stream_pointer(2)}
 		};
 
+		sys.object.map(sys.global, sys.io.stream);
+
 		sys.io.stream.print = sys_io_stream_print; 
 		sys.io.stream.print.line = function line() {
 			if (arguments.length == 1)
