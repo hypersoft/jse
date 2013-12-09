@@ -237,13 +237,10 @@ static JSTValue jst_object_exec JSTDeclareFunction(JSTObject prototype, JSTObjec
 }
 
 static JSTDeclareConstructor(jst_object_new) {
-	char *ii = "instance", *pp = "prototype"; JSTObject this,
+	char *pp = "prototype"; JSTObject this,
 	interface = JSTObjectGetPrivate(constructor),
 	new = (JSTObject) JSTObjectGetProperty(interface, "new");
-	if (JSTObjectHasProperty(constructor, ii))
-		this = JSTClassInstance(NULL, NULL),
-		JSTObjectSetPrototype(this, JSTObjectGetProperty(interface, ii));
-	else if (JSTObjectHasProperty(constructor, pp))
+	if (JSTObjectHasProperty(constructor, pp))
 		this = JSTClassInstance(NULL, NULL),
 		JSTObjectSetPrototype(this, JSTObjectGetProperty(constructor, pp));
 	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
@@ -275,11 +272,11 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 
 	void * _object_class = jst_object_class;
 
-	char *v = "value", *ii = "init", *nn = "name",
+	char *v = "value", *ii = "init", *nn = "name", *in = "new", *pp = "prototype",
 	*cc = "class", *ccc = "constructor", *fc = "function";
 
 	bool exec = JSTObjectHasProperty(interface, "exec"),
-	construct = JSTObjectHasProperty(interface, "new"),
+	construct = JSTObjectHasProperty(interface, in),
 	hasName = JSTObjectHasProperty(interface, nn);
 
 	char *classType = JSTCND(
@@ -294,7 +291,7 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		nameOf = JSTConstructUTF8("%s", classType);
 	}
 
-	if (JSTObjectHasProperty(interface, "prototype"))
+	if (JSTObjectHasProperty(interface, pp))
 	prototype = (JSTObject) JSTScriptNativeEval("Object(this.prototype)", interface);
 	else prototype = JSTClassInstance(NULL, NULL);
 	if (JSTObjectHasProperty(interface, v))
@@ -314,7 +311,14 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		jsClass.hasInstance = &jst_object_is_product,
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
-		if (construct) jsClass.callAsConstructor = &jst_object_new;
+		if (construct) {
+			char *ii = "instance";
+			if (JSTObjectHasProperty(interface, ii)) {
+				JSTObject new = (JSTObject) JSTObjectGetProperty(interface, in);
+				JSTObjectSetProperty(new, pp, JSTObjectGetProperty(interface, ii), 0);
+			}
+			jsClass.callAsConstructor = &jst_object_new;
+		}
 		_object_class = JSClassCreate(&jsClass);
 	}
 

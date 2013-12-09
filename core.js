@@ -2,16 +2,15 @@
 
 p = sys.object.create(/* system object interface */{
 
-	name: 'p', value: {}, prototype: {crazy:"going ham"},
-	exec:function(){},
-	new:function(){},
-	product: function(value){ // check some stuff, return some truth.
+	name: 'p', value: {},
+	prototype: {crazy:"going ham"}, // self prototype
+	instance: {}, // new prototype of 'this' for new object constructor
+	new:function(){}, // may have prototype if instance not defined
+	product: function(value){ /* 'instanceof' new ;) */
 		return false;
 	},
-	init:function(data, prototype){
-		// prototype has not yet been set as the prototype of this.
-		// print.line(prototype.isPrototypeOf(this)); // false
-	},
+	exec:function(){},
+	init:function(data, prototype){},
 	get: function(data, item){
 		if (data[item] != undefined) {
 			print.line("requesting ", item);
