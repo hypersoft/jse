@@ -1,5 +1,6 @@
 #!bin/jse
 
-print.line(sys.engine)
+
+print.line("hi"+io.ofs+"there")
 
 

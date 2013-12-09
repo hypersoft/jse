@@ -20,15 +20,16 @@ sys.object.property = function method(host, value, accessor, permissions) {
 	); else if (! permissions[1] instanceof Boolean) throw new TypeError (
 		"expected boolean configurable flag, found "+typeof permissions[1]
 	);
-	var property; for (property in value) accessor = accessor.bind(host, value, property),
-	Object.defineProperty(host,		property, {
-		get:accessor,				set:accessor,
+
+	var call, d = {}, property; for (property in value)
+	call = accessor.bind(host, value, property), d[property] = {
+		get:call,					set:call,
 		enumerable:permissions[0],	configurable:permissions[1]
-	}); return host;
+	};  return Object.defineProperties(host, d);
 
 };  sys.object.map = function data(host, value, permissions){
-	return sys.object.property(host, value, sys.object.map.auto, permissions, arguments[3]);
-};  sys.object.map.auto = function property(data, name, value) {
+	return sys.object.property(host, value, sys.object.map.data, permissions, arguments[3]);
+};  sys.object.map.data = function(data, name, value) {
 	if (arguments.length == 3) return data[name] = value;
 	return data[name];
 };
@@ -57,31 +58,42 @@ sys.object.property = function method(host, value, accessor, permissions) {
 // initalize sys.io
 (function(sys_io_path) {
 
+	// i/o character separators
+
+	sys.object.map(sys.io, {
+		get path(){return sys_io_path()}, set path(v){return sys_io_path(v)},
+	}, [true, false]); delete sys._io_path;
+
+	sys.object.property(sys.io, {lfs: '\n', ifs: ' \t\n', ofs: ' '},
+	function separator(data, name, value){
+		if (arguments.length == 3) {
+			if (! value instanceof String) throw new TypeError(
+				"expected string argument, found"+typeof v
+			); return data[name] = value;
+		}
+		return data[name];
+	},[true, false]);
+
 	// sys.io.stream
 	(function(prop, sys_io_stream_print, sys_io_stream_pointer){
-
+		
 		// declare
 		sys.io.stream = {
-			print:sys_io_stream_print,
 			get stdin(){return sys_io_stream_pointer(0)},
 			get stdout(){return sys_io_stream_pointer(1)},
 			get stderr(){return sys_io_stream_pointer(2)}
 		};
 
+		sys.io.stream.print = sys_io_stream_print; 
 		sys.io.stream.print.line = function line() {
 			if (arguments.length == 1)
-			return sys.io.stream.print(arguments[0], "\n");
-			var argv = Array.apply(null, arguments); argv.push('\n');
+			return sys.io.stream.print(arguments[0], sys.io.lfs);
+			var argv = Array.apply(null, arguments); argv.push(sys.io.lfs);
 			return sys.io.stream.print.apply(sys.io.stream, argv);
 		};
 		
 	})(sys.object.property, sys._io_stream_print, sys._io_stream_pointer);
 	delete sys._io_stream_print, delete sys._io_stream_pointer;
-
-	sys.object.map(sys.io, {
-		get path(){return sys_io_path()},
-		set path(v){return sys_io_path(v)},
-	}, [true, false]); delete sys._io_path;
 
 	sys.io.print = function print() {
 		if (arguments.length == 1)
@@ -92,10 +104,10 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 	sys.io.print.line = function line() {
 		if (arguments.length == 1)
-		return sys.io.stream.print(sys.io.stream.stdout, arguments[0], "\n");
+		return sys.io.stream.print(sys.io.stream.stdout, arguments[0], sys.io.lfs);
 		var argv = Array.apply(null, arguments);
-		argv.unshift(sys.io.stream.stdout), argv.push('\n');
-		return sys.io.stream.print.apply(sys.io, argv);
+		argv.unshift(sys.io.stream.stdout), argv.push(sys.io.lfs);
+		return sys.io.stream.print.apply(sys.io.stream, argv);
 	};
 
 	sys.io.print.error = function error() {
@@ -107,10 +119,10 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 	sys.io.print.error.line = function line() {
 		if (arguments.length == 1)
-		return sys.io.stream.print(sys.io.stream.stderr, arguments[0], "\n");
+		return sys.io.stream.print(sys.io.stream.stderr, arguments[0], sys.io.lfs );
 		var argv = Array.apply(null, arguments);
-		argv.unshift(sys.io.stream.stderr), argv.push('\n');
-		return sys.io.stream.print.apply(sys.io, argv);
+		argv.unshift(sys.io.stream.stderr), argv.push(sys.io.lfs);
+		return sys.io.stream.print.apply(sys.io.stream, argv);
 	};
 
 	sys.error.print = sys.io.print.error,
