@@ -240,11 +240,11 @@ static JSTDeclareConstructor(jst_object_new) {
 	char *pp = "prototype"; JSTObject this,
 	interface = JSTObjectGetPrivate(constructor),
 	new = (JSTObject) JSTObjectGetProperty(interface, "new");
-	if (JSTObjectHasProperty(constructor, pp))
-		this = JSTClassInstance(NULL, NULL),
-		JSTObjectSetPrototype(this, JSTObjectGetProperty(constructor, pp));
+	if (JSTObjectHasProperty(new, pp)) this = JSTClassInstance(NULL, NULL),
+		JSTObjectSetPrototype(this, JSTObjectGetProperty(new, pp));
 	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	return (JSTObject) JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
+	JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
+	return this;
 }
 
 static JSTDeclareHasInstance(jst_object_is_product) {

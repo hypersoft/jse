@@ -4,7 +4,7 @@ p = sys.object.create(/* system object interface */{
 
 	name: 'p', value: {},
 	prototype: {crazy:"going ham"}, // self prototype
-	instance: {}, // new prototype of 'this' for new object constructor
+	instance: {color:'blue'}, // new prototype of 'this' for new object constructor
 	new:function(){}, // may have prototype if instance not defined
 	product: function(value){ /* 'instanceof' new ;) */
 		return false;
@@ -30,13 +30,17 @@ p = sys.object.create(/* system object interface */{
 	},
 });
 
-p.food = ['pear','apple','pineapple','pie']
+r = new p();
 
-Object.defineProperty(p, "syrup", 
-	{value:['maple','sugar free','caramel','cherry','strawberry'],enumerable:true}
-);
+print.line(r.color);
 
-for (name in p) value = p[name], print.line(name, ": ",
-	(Array.prototype.isPrototypeOf(value)) ? value.join(', ') : value
-);
+//p.food = ['pear','apple','pineapple','pie']
+
+//Object.defineProperty(p, "syrup", 
+//	{value:['maple','sugar free','caramel','cherry','strawberry'],enumerable:true}
+//);
+
+//for (name in p) value = p[name], print.line(name, ": ",
+//	(Array.prototype.isPrototypeOf(value)) ? value.join(', ') : value
+//);
 
