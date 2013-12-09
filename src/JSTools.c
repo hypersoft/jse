@@ -211,55 +211,43 @@ char * jst_object_class_interface = "jse://sys/object/interface";
 
 static JSTDeclareDeleteProperty(jst_object_class_delete) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(object);
+	char *ss = "delete"; if (JSTObjectHasProperty(interface, ss)) return false;
 	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	char *ss = "delete";
-	if (JSTObjectHasProperty(interface, ss)) {
-		JSTObject delete = (JSTObject) JSTObjectGetProperty(interface, ss);
-		JSTObjectDeleteProperty(interface, ss);
-		JSTValue result = JSTFunctionCall(delete, object, data,
-			JSTStringToValue(propertyName, false)
-		);
-		JSTObjectSetProperty(interface, ss, delete, 0);
-		return JSTValueToBoolean(result);
-	}
-	return false;
+	JSTObject delete = (JSTObject) JSTObjectGetProperty(interface, ss);
+	JSTObjectDeleteProperty(interface, ss);
+	JSTValue result = JSTFunctionCall(delete, object, data, JSTStringToValue(propertyName, false));
+	JSTObjectSetProperty(interface, ss, delete, 0);
+	return JSTValueToBoolean(result);
 }
 
 static JSTDeclareGetProperty(jst_object_class_get) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(object);
+	char *gg = "get"; if (! JSTObjectHasProperty(interface, gg)) return NULL;
 	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	JSTValue result = NULL;
-	char *gg = "get";
-	if (JSTObjectHasProperty(interface, gg)) {
-		JSTObject getter = (JSTObject) JSTObjectGetProperty(interface, gg);
-		JSTObjectDeleteProperty(interface, gg);
-		result = JSTFunctionCall(getter, object, data, JSTStringToValue(propertyName, false));
-		JSTObjectSetProperty(interface, gg, getter, 0);
-	}
+	JSTObject getter = (JSTObject) JSTObjectGetProperty(interface, gg);
+	JSTObjectDeleteProperty(interface, gg);
+	JSTValue result = JSTFunctionCall(getter, object, data, JSTStringToValue(propertyName, false));
+	JSTObjectSetProperty(interface, gg, getter, 0);
 	return JSTValueIsNull(result) ? NULL : result;
 }
 
 static JSTDeclareSetProperty(jst_object_class_set) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(object);
+	char *ss = "set"; if (! JSTObjectHasProperty(interface, ss)) return false;
 	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	char *ss = "set";
-	if (JSTObjectHasProperty(interface, ss)) {
-		JSTObject setter = (JSTObject) JSTObjectGetProperty(interface, ss);
-		JSTObjectDeleteProperty(interface, ss);
-		JSTValue result = JSTFunctionCall(setter, object, data, JSTStringToValue(propertyName, false), value);
-		JSTObjectSetProperty(interface, ss, setter, 0);
-		return JSTValueToBoolean(result);
-	}
-	return JSTValueToBoolean(false);
+	JSTObject setter = (JSTObject) JSTObjectGetProperty(interface, ss);
+	JSTObjectDeleteProperty(interface, ss);
+	JSTValue result = JSTFunctionCall(setter, object, data, JSTStringToValue(propertyName, false), value);
+	JSTObjectSetProperty(interface, ss, setter, 0);
+	return JSTValueToBoolean(result);
 }
 
 static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
-	void * exception = NULL;
-	JSTObject interface = (JSTObject) JSTObjectGetPrivate(object);
-	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	JSTObject keys = (JSTObject) JSTScriptNativeEval("Object.keys(this)", data);
-	long length = JSTValueToDouble(JSTObjectGetProperty(keys, "length"));
-	JSStringRef name; size_t i;
+	JSStringRef name; size_t i, length; void * exception = NULL;
+	JSTObject keys = (JSTObject) JSTScriptNativeEval("Object.keys(this)", (JSTObject)
+		JSTObjectGetProperty((JSTObject) JSTObjectGetPrivate(object), jst_object_class_value)
+	);
+	length = JSTValueToDouble(JSTObjectGetProperty(keys, "length"));
 	for (i = 0; i < length; i++) {
 		JSPropertyNameAccumulatorAddName(
 			propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(keys, i)))
@@ -270,30 +258,44 @@ static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
 
 static JSTValue jst_object_exec JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(function);
-	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	JSTObject exec = (JSTObject) JSTObjectGetProperty(interface, "exec");
-	JSTValue result = JST(JSObjectCallAsFunction, exec, data, argc, argv);
-	return result;
+	return JSObjectCallAsFunction(ctx,
+		(JSTObject) JSTObjectGetProperty(interface, "exec"),
+		(JSTObject) JSTObjectGetProperty(interface, jst_object_class_value),
+		argc, argv, exception
+	);
 }
 
 static JSTDeclareConstructor(jst_object_new) {
+	JSTObject interface = JSTObjectGetPrivate(constructor);
+	return (JSTObject) JSObjectCallAsFunction(ctx,
+		(JSTObject) JSTObjectGetProperty(interface, "new"),
+		(JSTObject) JSTObjectGetProperty(interface, jst_object_class_value),
+		argumentCount, arguments, exception
+	);
+}
+
+static JSTDeclareHasInstance(jst_object_is_product) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(constructor);
-	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	JSTObject new = (JSTObject) JSTObjectGetProperty(interface, "new");
-	JSTValue result = JST(JSObjectCallAsFunction, new, data, argumentCount, arguments);
-	return (JSTObject) result;
+	if (! JSTObjectHasProperty(interface, "product")) return false;
+	return JSTValueToBoolean(JSTFunctionCall(
+		(JSTObject) JSTObjectGetProperty(interface, "product"), constructor,
+		possibleInstance
+	));
 }
 
 static JSTDeclareHasProperty(jst_object_query) {
 	void *exception = NULL;
-	JSTObject interface = (JSTObject) JSTObjectGetPrivate(object);
-	JSTObject data = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	return JSObjectHasProperty(ctx, data, propertyName);
+	return JSObjectHasProperty(ctx, (JSTObject)
+		(JSTObject) JSTObjectGetProperty(JSTObjectGetPrivate(object), jst_object_class_value),
+		propertyName
+	);
 }
 
 static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
 
-	JSTObject class, interface = (JSTObject) argv[0], prototype, value;
+	JSTObject class, interface = (JSTObject) JSTScriptNativeEval(
+		"Object(this)", (JSTObject) argv[0]
+	), prototype, value;
 
 	void * _object_class = jst_object_class;
 
@@ -323,6 +325,8 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 	if (JSTObjectHasProperty(interface, v))
 	value = (JSTObject) JSTScriptNativeEval("Object(this)", (JSTObject) JSTObjectGetProperty(interface, v));
 	else value = JSTClassInstance(NULL, NULL);
+
+	JSTObjectSetProperty(interface, jst_object_class_value, value, 0);
 		
 	if (hasName || exec || construct){
 		JSTClassDefinition jsClass = JSTClassEmptyDefinition;
@@ -330,8 +334,9 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		jsClass.className = nameOf,
 		jsClass.setProperty = &jst_object_class_set,
 		jsClass.getProperty = &jst_object_class_get,
-		jsClass.deleteProperty = &jst_object_class_delete;
-		jsClass.hasProperty = &jst_object_query;
+		jsClass.deleteProperty = &jst_object_class_delete,
+		jsClass.hasProperty = &jst_object_query,
+		jsClass.hasInstance = &jst_object_is_product,
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
 		if (construct) jsClass.callAsConstructor = &jst_object_new;
@@ -339,16 +344,14 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 	}
 
 	class = JSTClassInstance(_object_class, interface); free(nameOf);
+	JSTObjectSetProperty(prototype, jst_object_class_interface, interface, JSTObjectPropertyHidden);
+	JSTObjectSetPrototype(class, prototype);
 
-	// the prototype isn't linked up so its safe to do stuff...
 	if (JSTObjectHasProperty(interface, ii)) {
 		JSTObject _init = (JSTObject) JSTObjectGetProperty(interface, ii);
 		JSTFunctionCall(_init, class, value, prototype);
 	}
 
-	JSTObjectSetProperty(prototype, jst_object_class_interface, interface, JSTObjectPropertyHidden);
-	JSTObjectSetPrototype(class, prototype);
-	JSTObjectSetProperty(interface, jst_object_class_value, value, 0);
 	return (JSTValue) class;
 
 }
@@ -367,9 +370,11 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		char * name = "class";
 		JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 		jsClass.attributes = JSTClassPropertyManualPrototype, jsClass.className = name;
-		jsClass.setProperty = &jst_object_class_set;
-		jsClass.getProperty = &jst_object_class_get;
-		jsClass.deleteProperty = &jst_object_class_delete;
+		jsClass.setProperty = &jst_object_class_set,
+		jsClass.getProperty = &jst_object_class_get,
+		jsClass.deleteProperty = &jst_object_class_delete,
+		jsClass.hasProperty = &jst_object_query,
+		jsClass.hasInstance = &jst_object_is_product,
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
 		jst_object_class = JSClassRetain(JSClassCreate(&jsClass));
 
