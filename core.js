@@ -14,7 +14,7 @@ p = sys.object.create(/* system object interface */{
 	// the public interface instance 'extern' may optionally have inheritable properties.
 	// this prototype will be constructed as a prototype of itself, so that modifications
 	// to the prototype via script do not propogate.
-	prototype: {},
+	prototype: {crazy:"going ham"},
 
 	// some extern objects need an internalized function handler.
 	exec:function(){},
@@ -28,49 +28,46 @@ p = sys.object.create(/* system object interface */{
 
 	/* optionally, construct static principles of the resulting system object instance */
 
-	init:function(extern, prototype){
-
+	init:function(data, prototype){
 		// prototype has not yet been set as the prototype of extern.
-		// in the native code, this means the property functions of extern are not,
-		// reached. return value of this function is void.
+		// print.line(prototype.isPrototypeOf(extern)); // false
 
-		this.keep = {}
-
+		//Object.defineProperty(this, "keys", {get:function(){return Object.keys(this.data)}});
 	},
 
-	get: function(item){
-		return this.keep[item] || null
+	get: function(data, item){
+		if (data[item] != undefined) {
+			print.line("requesting ", item);
+			return data[item]
+		}
+		return null
 	},
 
-	set: function(item, value){
-		this.keep[item] = value; return true
+	set:function(data, item, value){
+		print.line("setting ", item);
+		data[item] = value; return true
 	},
 
-	delete: function(item){
-		if (Object.hasOwnProperty(keep, item)){
-			delete this.keep[item]; return true
+	delete:function(data, item, v){
+		print.line("deleting ", item, " "+v);
+		if (Object.hasOwnProperty(data, item)){
+			delete data[item]; return true
 		} else return false;
 	},
 
-	enumerate:function(){
-		return Object.keys(this.keep)
+	enumerate:function(data){
+		print.line("enumerating");
+		return Object.keys(data);
 	},
-
-	/* it is a special case when the system or script defines a property on extern */
-	/* the property set handler is external to the class interface, therefore */
-	/* the resulting data is defined on extern as is permissible, instead of */
-	/* the operation prescribed by set. equally, this interface will be queried */
-	/* for all property operations, before they are handled by extern or prototype */
-
 });
 
-//print.line(p);
+p.food = ['pear','apple','pineapple','pie']
 
-p.food = ['pear','apple','pie']
+Object.defineProperty(p, "syrup", 
+	{value:['maple','sugar free','caramel','cherry','strawberry'],enumerable:true}
+);
 
-for (name in p) print.line(name);
-
-print.line(Object.hasOwnProperty(p, 'food'));
-
-//print.line(p.food[2]);
+for (name in p) value = p[name], print.line(name, ": ",
+	(Array.prototype.isPrototypeOf(value)) ? value.join(', ') : value
+);
 
