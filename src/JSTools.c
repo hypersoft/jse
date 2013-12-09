@@ -237,14 +237,14 @@ static JSTValue jst_object_exec JSTDeclareFunction(JSTObject prototype, JSTObjec
 }
 
 static JSTDeclareConstructor(jst_object_new) {
-	char *pp = "prototype"; JSTObject this,
+	char *pp = "prototype"; JSTObject this, product,
 	interface = JSTObjectGetPrivate(constructor),
 	new = (JSTObject) JSTObjectGetProperty(interface, "new");
 	if (JSTObjectHasProperty(new, pp)) this = JSTClassInstance(NULL, NULL),
 		JSTObjectSetPrototype(this, JSTObjectGetProperty(new, pp));
 	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
-	return this;
+	product = JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
+	return (this != product) ? product : this;
 }
 
 static JSTDeclareHasInstance(jst_object_is_product) {

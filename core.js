@@ -5,7 +5,7 @@ p = sys.object.create(/* system object interface */{
 	name: 'p', value: {},
 	prototype: {crazy:"going ham"}, // self prototype
 	instance: {color:'blue'}, // new prototype of 'this' for new object constructor
-	new:function(){}, // may have prototype if instance not defined
+	new:function(){return {color:'green'}}, // may have prototype if instance not defined
 	product: function(value){ /* 'instanceof' new ;) */
 		return false;
 	},
