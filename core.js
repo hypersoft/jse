@@ -48,7 +48,7 @@ p = sys.object.create(/* system object interface */{
 		data[item] = value; return true
 	},
 
-	delete:function(data, item, v){
+	delete:function(data, item){
 		print.line("deleting ", item, " "+v);
 		if (Object.hasOwnProperty(data, item)){
 			delete data[item]; return true
