@@ -136,6 +136,8 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 	return result;
 }
 
+static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return NULL;}
+
 static JSValueRef jst_io_path JSTDeclareFunction () {
 	if (argc == 0) {
 		char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
@@ -145,6 +147,61 @@ static JSValueRef jst_io_path JSTDeclareFunction () {
 	result = JSTValueFromDouble(chdir(val = JSTStringToUTF8(JSTStringFromValue(argv[0]), true)));
 	JSTStringFreeUTF8(val);
 	return result;
+}
+
+static JSValueRef jst_io_stream_open JSTDeclareFunction(void) {
+	char * file = JSTValueToUTF8(argv[0]), * mode = JSTValueToUTF8(argv[1]);
+	JSTValue result = JSTValueFromPointer(fopen(file, mode));
+	free(file); free(mode); return result;
+}
+
+static JSValueRef jst_io_stream_close JSTDeclareFunction () {
+	if (argc > 0) return JSTValueFromDouble(fclose(JSTValueToPointer(argv[0])));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_stream_flush JSTDeclareFunction () {
+	if (argc > 0) return JSTValueFromDouble(fflush(JSTValueToPointer(argv[0])));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_stream_eof JSTDeclareFunction () {
+	long result = feof(JSTValueToPointer(argv[0]));
+	return JSTValueFromDouble(result);
+}
+
+static JSValueRef jst_io_stream_seek JSTDeclareFunction () {
+	return JSTValueFromDouble(fseek(JSTValueToPointer(argv[0]), JSTValueToDouble(argv[1]), SEEK_SET));
+}
+
+static JSValueRef jst_io_stream_rewind JSTDeclareFunction () {
+	if (argc > 0) rewind(JSTValueToPointer(argv[0]));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_stream_descriptor JSTDeclareFunction () {
+	long result = fileno(JSTValueToPointer(argv[0]));
+	return JSTValueFromDouble(result);
+}
+
+static JSValueRef jst_io_stream_position JSTDeclareFunction () {
+	long result = ftell(JSTValueToPointer(argv[0]));
+	return JSTValueFromDouble(result);
+}
+
+static JSValueRef jst_io_stream_error JSTDeclareFunction () {
+	long result = ferror(JSTValueToPointer(argv[0]));
+	return JSTValueFromDouble(result);
+}
+
+static JSValueRef jst_io_stream_error_clear JSTDeclareFunction () {
+	if (argc > 0) clearerr(JSTValueToPointer(argv[0]));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_stream_wide JSTDeclareFunction () {
+	long result = fwide(JSTValueToPointer(argv[0]), 0);
+	return JSTValueFromDouble(result);
 }
 
 static JSValueRef jst_io_stream_print JSTDeclareFunction () {
@@ -402,9 +459,26 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	io = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "io", io, 0);
+	JSTObjectSetMethod(io, "flush", jst_io_flush, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+
+	JSTObject stream = (JSTObject) JSTObjectGetProperty(io, "stream");
+	JSTObjectSetMethod(stream, "open", jst_io_stream_open, 0);
+	JSTObjectSetMethod(stream, "close", jst_io_stream_close, 0);
+	JSTObjectSetMethod(stream, "flush", jst_io_stream_flush, 0);
+	JSTObjectSetMethod(stream, "rewind", jst_io_stream_rewind, 0);
+	JSTObjectSetMethod(stream, "seek", jst_io_stream_seek, 0);
+	JSTObjectSetMethod(stream, "position", jst_io_stream_position, 0);
+	JSTObjectSetMethod(stream, "eof", jst_io_stream_eof, 0);
+	JSTObjectSetMethod(stream, "descriptor", jst_io_stream_descriptor, 0);
+
+	JSTObjectSetMethod(stream, "error", jst_io_stream_error, 0);
+	JSTObject error = (JSTObject) JSTObjectGetProperty(stream, "error");
+	JSTObjectSetMethod(error, "clear", jst_io_stream_error_clear, 0);
+
+	JSTObjectSetMethod(error, "wide", jst_io_stream_wide, 0);
 
 	JSTNativeInit(global);
 

@@ -78,7 +78,7 @@ sys.object.map(sys.engine, {
 	},[true, false]);
 
 	// sys.io.stream
-	(function(prop, sys_io_stream_print, sys_io_stream_pointer){
+	(function(sys_io_stream_print, sys_io_stream_pointer){
 		
 		// declare
 		sys.io.stream = {
@@ -95,7 +95,7 @@ sys.object.map(sys.engine, {
 			return sys.io.stream.print.apply(sys.io.stream, argv);
 		};
 		
-	})(sys.object.property, sys._io_stream_print, sys._io_stream_pointer);
+	})(sys._io_stream_print, sys._io_stream_pointer);
 	delete sys._io_stream_print, delete sys._io_stream_pointer;
 
 	sys.io.print = function print() {
