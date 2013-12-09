@@ -34,6 +34,10 @@ sys.object.property = function method(host, value, accessor, permissions) {
 	return data[name];
 };
 
+// initialize sys.engine.time
+sys.object.map(sys.engine, {
+	get time(){return Date.now() - sys.date},
+}, [true, false]);
 
 // initialize sys.error
 (function error(sys_error_number, sys_error_message){
@@ -57,7 +61,6 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 // initalize sys.io
 (function(sys_io_path) {
-
 
 	sys.object.map(sys.io, {
 		get path(){return sys_io_path()}, set path(v){return sys_io_path(v)},

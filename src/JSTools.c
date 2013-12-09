@@ -363,7 +363,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(object, "create", jst_object_create, 0);
 
 	JSTObjectSetProperty(sys, "main", JSTValueFromUTF8(argv[1]), JSTObjectPropertyReadOnly);
-	JSTObjectSetProperty(sys, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), JSTObjectPropertyReadOnly);
+	JSTObjectSetProperty(sys, "date", JSTScriptNativeEval("Date.now()", global), JSTObjectPropertyReadOnly);
 
 	JSTObjectSetProperty(sys, "global", global, 0);
 	JSTObjectSetProperty(sys, "context", JSTValueFromPointer(ctx), 0);
