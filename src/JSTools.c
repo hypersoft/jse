@@ -243,15 +243,16 @@ static JSTDeclareConstructor(jst_object_new) {
 	if (JSTObjectHasProperty(new, pp)) this = JSTClassInstance(NULL, NULL),
 		JSTObjectSetPrototype(this, JSTObjectGetProperty(new, pp));
 	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	product = JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
-	return (this != product) ? product : this;
+	product = (JSTObject) JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
+	return (JSTValueIsVoid(product)) ? this : product;
 }
 
 static JSTDeclareHasInstance(jst_object_is_product) {
 	JSTObject interface = (JSTObject) JSTObjectGetPrivate(constructor);
 	if (! JSTObjectHasProperty(interface, "product")) return false;
 	return JSTValueToBoolean(JSTFunctionCall(
-		(JSTObject) JSTObjectGetProperty(interface, "product"), constructor,
+		(JSTObject) JSTObjectGetProperty(interface, "product"),
+		(JSTObject) JSTObjectGetProperty(interface, "new"),
 		possibleInstance
 	));
 }
@@ -311,13 +312,13 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 		jsClass.hasInstance = &jst_object_is_product,
 		jsClass.getPropertyNames = &jst_object_class_enumerate;
 		if (exec) jsClass.callAsFunction = &jst_object_exec;
-		if (construct) {
-			char *ii = "instance";
-			if (JSTObjectHasProperty(interface, ii)) {
-				JSTObject new = (JSTObject) JSTObjectGetProperty(interface, in);
-				JSTObjectSetProperty(new, pp, JSTObjectGetProperty(interface, ii), 0);
-			}
-			jsClass.callAsConstructor = &jst_object_new;
+		if (construct) { char *ii = "instance";
+			if (JSTObjectHasProperty(interface, ii)){ // link new prototype
+				JSTObject new = (JSTObject) JSTObjectGetProperty(interface, in),
+				prototype = (JSTObject) JSTObjectGetProperty(interface, ii);
+				JSTObjectSetProperty(new, pp, prototype, 0),
+				JSTObjectSetProperty(prototype, "constructor", new, 0);
+			};  jsClass.callAsConstructor = &jst_object_new;
 		}
 		_object_class = JSClassCreate(&jsClass);
 	}

@@ -4,10 +4,16 @@ p = sys.object.create(/* system object interface */{
 
 	name: 'p', value: {},
 	prototype: {crazy:"going ham"}, // self prototype
-	instance: {color:'blue'}, // new prototype of 'this' for new object constructor
-	new:function(){return {color:'green'}}, // may have prototype if instance not defined
-	product: function(value){ /* 'instanceof' new ;) */
-		return false;
+	new:function(){ 
+		/*
+			if you haven't defined an instance prototype, the value of this will be
+			the instance of value, instead of the instance of prototype
+		*/
+	},
+	instance: {color:'blue'}, // new.prototype
+	product: function(value){ /* 'instanceof' new */
+		/* the value of 'this' is the new constructor */
+		return this.prototype.isPrototypeOf(value)
 	},
 	exec:function(){},
 	init:function(data, prototype){},
@@ -30,17 +36,17 @@ p = sys.object.create(/* system object interface */{
 	},
 });
 
-r = new p();
+// instanceof test
+//r = new p();
+//(r instanceof p) && print.line(true)
 
-print.line(r.color);
+p.food = ['pear','apple','pineapple','pie']
 
-//p.food = ['pear','apple','pineapple','pie']
+Object.defineProperty(p, "syrup", 
+	{value:['maple','sugar free','caramel','cherry','strawberry'],enumerable:true}
+);
 
-//Object.defineProperty(p, "syrup", 
-//	{value:['maple','sugar free','caramel','cherry','strawberry'],enumerable:true}
-//);
-
-//for (name in p) value = p[name], print.line(name, ": ",
-//	(Array.prototype.isPrototypeOf(value)) ? value.join(', ') : value
-//);
+for (name in p) value = p[name], print.line(name, ": ",
+	(Array.prototype.isPrototypeOf(value)) ? value.join(', ') : value
+);
 
