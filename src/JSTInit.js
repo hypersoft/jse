@@ -58,12 +58,12 @@ sys.object.property = function method(host, value, accessor, permissions) {
 // initalize sys.io
 (function(sys_io_path) {
 
-	// i/o character separators
 
 	sys.object.map(sys.io, {
 		get path(){return sys_io_path()}, set path(v){return sys_io_path(v)},
 	}, [true, false]); delete sys._io_path;
 
+	// i/o character separators
 	sys.object.property(sys.io, {lfs: '\n', ifs: ' \t\n', ofs: ' '},
 	function separator(data, name, value){
 		if (arguments.length == 3) {
