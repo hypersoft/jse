@@ -5,7 +5,7 @@ PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h src/JSTNative.inc inc/*.inc
 
-BUILDCOMMON := -fno-strict-aliasing -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
+BUILDCOMMON := -fno-strict-aliasing -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
 ASM := -S -fverbose-asm -masm=intel
 
 all: bin/jse

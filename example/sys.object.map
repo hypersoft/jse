@@ -1,0 +1,7 @@
+#!bin/jse
+
+sys.object.map(this, {"shebang":"#!"});
+
+print.line(shebang)
+
+

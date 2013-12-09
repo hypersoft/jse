@@ -338,7 +338,7 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io, error;
+	JSTObject sys, object, engine, io;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
@@ -395,9 +395,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	io = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "io", io, 0);
-
-	error = JSTClassInstance(NULL, NULL);
-	JSTObjectSetProperty(sys, "error", error, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
