@@ -55,10 +55,6 @@ p = sys.object.create(/* system object interface */{
 		} else return false;
 	},
 
-	enumerate:function(data){
-		print.line("enumerating");
-		return Object.keys(data);
-	},
 });
 
 p.food = ['pear','apple','pineapple','pie']
