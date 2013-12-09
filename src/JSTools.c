@@ -2,9 +2,9 @@ const char * JSTReservedAddress =
 
 	"Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
 
-const char * CODENAME = JSE_CODENAME;
-const char * VERSION = JSE_BUILDNO;
-const char * VENDOR = JSE_VENDOR;
+	const char * CODENAME = JSE_CODENAME;
+	const char * VERSION = JSE_BUILDNO;
+	const char * VENDOR = JSE_VENDOR;
 
 #include "JSTools.inc"
 #include "JSTInit.inc"
@@ -88,14 +88,11 @@ static JSValueRef jsToolsEnvWrite JSTDeclareFunction (String) {
 }
 
 static JSValueRef jsToolsEnvDelete JSTDeclareFunction (string) {
-
 	if (argc < 1) {
 		JSTScriptSyntaxError("js.env.delete: expected argument: string");
 		return JSTValueUndefined;
 	}
-
 	JSValueRef result = JSTValueUndefined;
-
 	if (!JSTValueIsString(argv[0])) {
 		JSTScriptTypeError("js.env.delete: expected string");
 	} else {
@@ -103,9 +100,7 @@ static JSValueRef jsToolsEnvDelete JSTDeclareFunction (string) {
 		result = JSTValueFromDouble(unsetenv(key));
 		JSTStringFreeUTF8(key);
 	}
-
 	return result;
-
 }
 
 static JSValueRef jsToolsEnvKeys JSTDeclareFunction (string) {
@@ -120,7 +115,6 @@ static JSValueRef jsToolsEnvKeys JSTDeclareFunction (string) {
 	return result;
 }
 
-
 static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	if (JSTValueIsNumber(argv[0])) return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
 	return JSTValueUndefined;
@@ -132,8 +126,7 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 	if (g_file_get_contents(file, &src, NULL, NULL)) {
 		script = src; int c = 0;
 		if (*script == '#' && *(script+1) == '!') {
-			script+=2;
-			while ((c = *script) && c != '\n') script++;
+			script+=2; while ((c = *script) && c != '\n') script++;
 		}
 		result = JSTScriptEval(script, (argc == 2)?(JSTObject)argv[1]:NULL, file, 1); g_free(src);
 	} else {
@@ -141,41 +134,31 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 	}
 	JSTStringFreeUTF8(file);
 	return result;
-
 }
 
 static JSValueRef jst_io_path JSTDeclareFunction () {
-
 	if (argc == 0) {
 		char buffer[PATH_MAX]; getcwd(buffer, PATH_MAX);
 		return JSTValueFromUTF8(buffer);
 	}
-
 	char * val; JSValueRef
 	result = JSTValueFromDouble(chdir(val = JSTStringToUTF8(JSTStringFromValue(argv[0]), true)));
 	JSTStringFreeUTF8(val);
 	return result;
-
 }
 
 static JSValueRef jst_io_stream_print JSTDeclareFunction () {
-
 	size_t i; char * output; double count = 0;
-
 	FILE * stream = JSTValueToPointer(argv[0]);
-
 	for (i = 1; i < argc; i++) {
 		output = JSTStringToUTF8(JSTValueToString(argv[i]), true);
 		if (output) count += fprintf(stream, "%s", output);
 		JSTStringFreeUTF8(output);
 	}
-
 	return JSTValueFromDouble(count);
-
 }
 
 static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
-
 	if (argc > 0) {
 		int stream = JSTValueToDouble(argv[0]);
 		if (stream == 0) return JSTValueFromPointer(stdin);
@@ -183,26 +166,16 @@ static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
 		if (stream == 2) return JSTValueFromPointer(stderr);
 	}
 	return JSTValueUndefined;
-
 }
 
 static JSValueRef jst_error_number JSTDeclareFunction () {
-
-	if (argc == 0) {
-		return JSTValueFromDouble(errno);
-	} else errno = JSTValueToDouble(argv[0]);
-
-	return argv[0];
-
+	if (argc == 0) return JSTValueFromDouble(errno);
+	else errno = JSTValueToDouble(argv[0]); return argv[0];
 }
 
 static JSValueRef jst_error_message JSTDeclareFunction () {
-
-	if (argc == 1) {
-		return JSTValueFromUTF8(strerror(JSTValueToDouble(argv[0])));
-	}
+	if (argc == 1) return JSTValueFromUTF8(strerror(JSTValueToDouble(argv[0])));
 	return JSTValueUndefined;
-
 }
 
 void * jst_object_class = NULL;
@@ -248,11 +221,9 @@ static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
 		JSTObjectGetProperty((JSTObject) JSTObjectGetPrivate(object), jst_object_class_value)
 	);
 	length = JSTValueToDouble(JSTObjectGetProperty(keys, "length"));
-	for (i = 0; i < length; i++) {
-		JSPropertyNameAccumulatorAddName(
-			propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(keys, i)))
-		);
-			JSTStringRelease(name);
+	for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
+		propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(keys, i)))
+		);  JSTStringRelease(name);
 	}
 }
 
@@ -266,12 +237,17 @@ static JSTValue jst_object_exec JSTDeclareFunction(JSTObject prototype, JSTObjec
 }
 
 static JSTDeclareConstructor(jst_object_new) {
-	JSTObject interface = JSTObjectGetPrivate(constructor);
-	return (JSTObject) JSObjectCallAsFunction(ctx,
-		(JSTObject) JSTObjectGetProperty(interface, "new"),
-		(JSTObject) JSTObjectGetProperty(interface, jst_object_class_value),
-		argumentCount, arguments, exception
-	);
+	char *ii = "instance", *pp = "prototype"; JSTObject this,
+	interface = JSTObjectGetPrivate(constructor),
+	new = (JSTObject) JSTObjectGetProperty(interface, "new");
+	if (JSTObjectHasProperty(constructor, ii))
+		this = JSTClassInstance(NULL, NULL),
+		JSTObjectSetPrototype(this, JSTObjectGetProperty(interface, ii));
+	else if (JSTObjectHasProperty(constructor, pp))
+		this = JSTClassInstance(NULL, NULL),
+		JSTObjectSetPrototype(this, JSTObjectGetProperty(constructor, pp));
+	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
+	return (JSTObject) JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
 }
 
 static JSTDeclareHasInstance(jst_object_is_product) {
@@ -299,15 +275,14 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 
 	void * _object_class = jst_object_class;
 
-	char *v = "value", *ii = "init", *nn = "name";
+	char *v = "value", *ii = "init", *nn = "name",
+	*cc = "class", *ccc = "constructor", *fc = "function";
 
 	bool exec = JSTObjectHasProperty(interface, "exec"),
-	construct = JSTObjectHasProperty(interface, "prototype"),
+	construct = JSTObjectHasProperty(interface, "new"),
 	hasName = JSTObjectHasProperty(interface, nn);
 
-	char *cc = "class", *ccc = "constructor", *fc = "function",
-
-	*classType = JSTCND(
+	char *classType = JSTCND(
 		exec || construct, JSTCND(construct, ccc, fc), cc
 	), *nameOf;
 

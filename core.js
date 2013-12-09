@@ -3,7 +3,11 @@
 p = sys.object.create(/* system object interface */{
 
 	name: 'p', value: {}, prototype: {crazy:"going ham"},
-	exec:function(){}, new:function(){},
+	exec:function(){},
+	new:function(){},
+	product: function(value){ // check some stuff, return some truth.
+		return false;
+	},
 	init:function(data, prototype){
 		// prototype has not yet been set as the prototype of this.
 		// print.line(prototype.isPrototypeOf(this)); // false
@@ -24,9 +28,6 @@ p = sys.object.create(/* system object interface */{
 		if (Object.hasOwnProperty(data, item)){
 			delete data[item]; return true
 		} else return false;
-	},
-	product: function(value){ // check some stuff, return some truth.
-		return false;
 	},
 });
 
