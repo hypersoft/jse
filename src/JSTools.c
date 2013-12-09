@@ -336,6 +336,12 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 
 }
 
+static JSValueRef jst_exit JSTDeclareFunction () {
+	if (argc == 1) exit(JSTValueToDouble(argv[0]));
+	else exit(0);
+	return JSTValueNull;
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	JSTObject sys, object, engine, io;
@@ -364,6 +370,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTObjectSetProperty(sys, "main", JSTValueFromUTF8(argv[1]), JSTObjectPropertyReadOnly);
 	JSTObjectSetProperty(sys, "date", JSTScriptNativeEval("Date.now()", global), JSTObjectPropertyReadOnly);
+	JSTObjectSetMethod(sys, "exit", jst_exit, 0);
 
 	JSTObjectSetProperty(sys, "global", global, 0);
 	JSTObjectSetProperty(sys, "context", JSTValueFromPointer(ctx), 0);

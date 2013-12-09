@@ -133,3 +133,6 @@ sys.object.map(sys.engine, {
 
 })(sys._io_path);
 
+sys.global.exit = sys.exit;
+
+
