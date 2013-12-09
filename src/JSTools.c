@@ -215,6 +215,22 @@ static JSValueRef jst_io_stream_print JSTDeclareFunction () {
 	return JSTValueFromDouble(count);
 }
 
+static JSValueRef jst_io_stream_read_line JSTDeclareFunction () {
+	char *buffer = NULL; ssize_t length = 0;
+	ssize_t result = getline(&buffer, &length, JSTValueToPointer(argv[0]));
+	if (result == -1) return JSTValueNull;
+	JSTValue string = JSTValueFromUTF8(buffer); free(buffer);
+	return string;
+}
+
+static JSValueRef jst_io_stream_read_field JSTDeclareFunction (FILE *, int char) {
+	char *buffer = NULL; ssize_t length = 0;
+	ssize_t result = getdelim(&buffer, &length, JSTValueToDouble(argv[1]), JSTValueToPointer(argv[0]));
+	if (result == -1) return JSTValueNull;
+	JSTValue string = JSTValueFromUTF8(buffer); free(buffer);
+	return string;
+}
+
 static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
 	if (argc > 0) {
 		int stream = JSTValueToDouble(argv[0]);
@@ -401,7 +417,7 @@ static JSValueRef jst_exit JSTDeclareFunction () {
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io;
+	JSTObject sys, object, engine, io, read;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
@@ -479,6 +495,12 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(error, "clear", jst_io_stream_error_clear, 0);
 
 	JSTObjectSetMethod(error, "wide", jst_io_stream_wide, 0);
+
+	read = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(io, "read", read, 0);
+
+	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
+	JSTObjectSetMethod(read, "field", jst_io_stream_read_input, 0);
 
 	JSTNativeInit(global);
 
