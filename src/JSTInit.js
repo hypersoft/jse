@@ -1,9 +1,5 @@
 // initialize global utilities
 
-sys.engine.toString = function toString(){
-	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
-}
-
 sys.object.property = function method(host, value, accessor, permissions) {
 
 	if (! Object.isExtensible(host)) throw new TypeError (
@@ -34,10 +30,9 @@ sys.object.property = function method(host, value, accessor, permissions) {
 	return data[name];
 };
 
-// initialize sys.engine.time
-sys.object.map(sys.engine, {
-	get time(){return Date.now() - sys.date},
-}, [true, false]);
+sys.engine.toString = function toString(){
+	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
+};  sys.object.map(sys.engine, {get time(){return Date.now() - sys.date}}, [true, false]);
 
 // initialize sys.error
 (function error(sys_error_number, sys_error_message){

@@ -155,6 +155,12 @@ static JSValueRef jst_io_stream_open JSTDeclareFunction(void) {
 	free(file); free(mode); return result;
 }
 
+static JSValueRef jst_io_stream_reopen JSTDeclareFunction(void) {
+	char * file = JSTValueToUTF8(argv[0]), * mode = JSTValueToUTF8(argv[1]);
+	JSTValue result = JSTValueFromPointer(freopen(file, mode, JSTValueToPointer(argv[2])));
+	free(file); free(mode); return result;
+}
+
 static JSValueRef jst_io_stream_close JSTDeclareFunction () {
 	if (argc > 0) return JSTValueFromDouble(fclose(JSTValueToPointer(argv[0])));
 	return JSTValueUndefined;
@@ -417,13 +423,16 @@ static JSValueRef jst_exit JSTDeclareFunction () {
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io, read;
+	JSTObject sys, object, engine, io, stream, read, memory;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
 
 	object = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "object", object, 0);
+
+	memory = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "memory", memory, 0);
 
 	{
 		char * name = "class";
@@ -484,10 +493,11 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
 	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
 
-	JSTObject stream = (JSTObject) JSTObjectGetProperty(io, "stream");
+	stream = (JSTObject) JSTObjectGetProperty(io, "stream");
 	JSTObjectSetProperty(stream, "read", read, 0);
 
 	JSTObjectSetMethod(stream, "open", jst_io_stream_open, 0);
+	JSTObjectSetMethod(stream, "reopen", jst_io_stream_reopen, 0);
 	JSTObjectSetMethod(stream, "close", jst_io_stream_close, 0);
 	JSTObjectSetMethod(stream, "flush", jst_io_stream_flush, 0);
 	JSTObjectSetMethod(stream, "rewind", jst_io_stream_rewind, 0);
