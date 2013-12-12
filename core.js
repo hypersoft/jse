@@ -1,3 +1,4 @@
 #!bin/jse
 
-print.line(sys.type.parse('const char unsigned *'));
+for (item in sys.type) print.line('#define jse_type_'+item+' '+sys.type[item].flag);
+

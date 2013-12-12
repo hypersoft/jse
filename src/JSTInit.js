@@ -97,7 +97,7 @@ sys.type.parse = function(data) {
 		};  _this.flag = result;
 		return sys.object.prototype(_this, sys.type.prototype);
 	}
-}
+}; sys.object.unlist(sys.type, 'parse'); // hide it
 
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
