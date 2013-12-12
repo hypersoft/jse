@@ -1,20 +1,5 @@
 // initialize global utilities
 
-sys.type = function(data) {
-	var i, item, result = 0,
-	list = data.split('*').join(' pointer ').replace(/\s+/g, ' ').split(' ');
-	for (i in list) { if ((item = list[i]) in sys.type.code)
-		result |= sys.type.code[item]; 
-		else throw new TypeError(item+" is not a type");
-	};  return result;
-};  sys.type.code = Object.freeze({
-	const: 1, signed: 2, int: 4, struct: 8,
-	union: 16, utf: 32, void: 64, bool: 128,
-	char: 256, short: 512, long: 1024, size: 2048,
-	pointer: 4096, int64: 8192, float: 16384, double: 32768,
-	value: 65536, string: 131072
-}); sys.type.size = {};
-
 sys.object.property = function method(host, value, accessor, permissions) {
 
 	if (! Object.isExtensible(host)) throw new TypeError (
@@ -40,19 +25,26 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 };
 
-sys.object.unlist = function(host) {
+sys.object.config = function(perm, host) {
 	if (! Object.isExtensible(host)) throw new TypeError (
 		"expected extensible object, found non-extensible "+typeof host
-	);	var i; for (i = 1; i < arguments.length; i++) {
+	);	var i; for (i = 2; i < arguments.length; i++) {
 		value = arguments[i], pd = Object.getOwnPropertyDescriptor(host, value);
 		if (pd && pd.configurable === true) {
-			pd.enumerable = false; Object.defineProperty(host, value, pd)
+			pd.configurable = perm[1]; pd.enumerable = perm[0];
+			Object.defineProperty(host, value, pd)
 		}
 	}
 };
 
+sys.object.unlist = function(host) {
+	var va = Array.apply(null, arguments);
+	va.unshift([false, true]);
+	sys.object.config.apply(null, va);
+};
+
 sys.object.cloak = function names(host) {
-	var arg = Object.getOwnPropertyNames(host); arg.unshift(host);
+	var arg = Object.getOwnPropertyNames(host);
 	sys.object.unlist.apply(null, arg);
 };
 
@@ -64,6 +56,23 @@ sys.object.map.data = function(data, name, value) {
 	if (arguments.length == 3) return data[name] = value;
 	return data[name];
 };
+
+sys.type = function(data) {
+	var i, item, result = 0,
+	list = data.split('*').join(' pointer ').replace(/\s+/g, ' ').split(' ');
+	for (i in list) { if ((item = list[i]) in sys.type.code)
+		result |= sys.type.code[item]; 
+		else throw new TypeError(item+" is not a type");
+	};  return result;
+};  sys.type.code = Object.freeze({
+	const: 1, signed: 2, int: 4, struct: 8,
+	union: 16, utf: 32, void: 64, bool: 128,
+	char: 256, short: 512, long: 1024, size: 2048,
+	pointer: 4096, int64: 8192, float: 16384, double: 32768,
+	value: 65536, string: 131072
+}); sys.type.width = {};
+
+sys.object.config([false, false], sys.type, 'width', 'code');
 
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version

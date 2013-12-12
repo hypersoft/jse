@@ -523,18 +523,22 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	char * script = JSTConstructUTF8(
-		"sys.type.size.bool = %i, " "sys.type.size.char = %i, "
-		"sys.type.size.short = %i, " "sys.type.size.long = %i, "
-		"sys.type.size.size = %i, " "sys.type.size.pointer = %i, "
-		"sys.type.size.int64 = %i, " "sys.type.size.float = %i, "
-		"sys.type.size.double = %i, " "sys.type.size.value = %i, "
-		"sys.type.size.string = %i; Object.freeze(sys.type.size)",
+		"sys.type.width.bool = %i, sys.type.width.char = %i, "
+		"sys.type.width.short = %i, sys.type.width.long = %i, "
+		"sys.type.width.size = %i, sys.type.width.pointer = %i, "
+		"sys.type.width.int64 = %i, sys.type.width.float = %i, "
+		"sys.type.width.double = %i, sys.type.width.value = %i, "
+		"sys.type.width.string = %i; Object.freeze(sys.type.width);"
+		/* other convenient data */
+		"sys.byteOrder = %i",
 		sizeof(bool), sizeof(char),
 		sizeof(short), sizeof(long),
 		sizeof(size_t), sizeof(intptr_t),
 		sizeof(long long), sizeof(float),
 		sizeof(double), sizeof(intptr_t),
-		sizeof(intptr_t)
+		sizeof(intptr_t),
+		/* other convenient data */
+		G_BYTE_ORDER
 	);
 
 	JSTScriptNativeEval(script, global); free(script);

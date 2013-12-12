@@ -1,3 +1,3 @@
 #!bin/jse
 
-print.line(sys.type.size.double)
+for (key in sys.type) print.line(key)
