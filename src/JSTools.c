@@ -537,7 +537,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		sizeof(intptr_t)
 	);
 
-	JSTScriptNativeEval(script, global);
+	JSTScriptNativeEval(script, global); free(script);
 
 	read = JSTClassInstance(NULL, NULL);
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
