@@ -1,5 +1,19 @@
 // initialize global utilities
 
+sys.object.bitmap = function(keys) {
+	var index, name; for (index in keys) name = keys[index],
+	this[name] = {name:name, index:index, flag:(1<<index)},
+	sys.object.prototype(this[name], sys.object.bitmap.field);
+};
+
+sys.object.bitmap.field = {
+	constructor:sys.object.bitmap,
+	name:null, index:null, flag:null,
+	members:null, length:null,
+	toString:function(){return this.name},
+	valueOf:function(){return this.flag}
+}
+
 sys.object.property = function method(host, value, accessor, permissions) {
 
 	if (! Object.isExtensible(host)) throw new TypeError (
@@ -23,12 +37,67 @@ sys.object.property = function method(host, value, accessor, permissions) {
 		enumerable:permissions[0],	configurable:permissions[1]
 	};  return Object.defineProperties(host, d);
 
-};  sys.object.map = function data(host, value, permissions){
+};
+
+sys.object.unlist = function(host) {
+	if (! Object.isExtensible(host)) throw new TypeError (
+		"expected extensible object, found non-extensible "+typeof host
+	);	var i; for (i = 1; i < arguments.length; i++) {
+		value = arguments[i], pd = Object.getOwnPropertyDescriptor(host, value);
+		if (pd && pd.configurable === true) {
+			pd.enumerable = false; Object.defineProperty(host, value, pd)
+		}
+	}
+};
+
+sys.object.cloak = function names(host) {
+	var arg = Object.getOwnPropertyNames(host); arg.unshift(host);
+	sys.object.unlist.apply(null, arg);
+};
+
+sys.object.map = function data(host, value, permissions){
 	return sys.object.property(host, value, sys.object.map.data, permissions, arguments[3]);
-};  sys.object.map.data = function(data, name, value) {
+};
+
+sys.object.map.data = function(data, name, value) {
 	if (arguments.length == 3) return data[name] = value;
 	return data[name];
 };
+
+sys.type = sys.object.map(function(data){
+
+},  new sys.object.bitmap([
+	'const',	'signed',	'int',
+	'struct',	'union', 	'utf',
+	'void',		'bool',		'char',
+	'short',	'long',		'size',
+	'pointer',	'int64',	'float',
+	'double',	'value',	'string'
+]));
+
+var t = {
+	constructor:sys.type, name:null, index:null, flag:null,
+	members:null, length:null,
+	toString:function(){return this.name},
+	valueOf:function(){return this.flag}
+}
+
+for (name in sys.type) sys.object.prototype(sys.type[name], t);
+sys.type.prototype = t; delete t;
+
+sys.type.parse = function(data) {
+	if (typeof data == 'string') {
+		var _this = {name:data}, name, result = 0,
+		list = data.replace(/\*/, " pointer ").replace(/\s+/, ' ').split(' ');
+		for (name in list) { var item = list[name];
+			if (item == 'unsigned') { result &= ~sys.type.signed; continue}
+			else if (item in sys.type) result |= sys.type[item]
+			else if (item == '') continue
+			else throw new TypeError(item+" is not a system type");
+		};  _this.flag = result;
+		return sys.object.prototype(_this, sys.type.prototype);
+	}
+}
 
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version

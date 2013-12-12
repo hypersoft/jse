@@ -136,6 +136,12 @@ static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
 	return result;
 }
 
+static JSValueRef jst_sys_eval JSTDeclareFunction(source, file, line) {
+	char * source = JSTValueToUTF8(argv[0]), * file = JSTValueToUTF8(argv[1]);
+	JSTValue result = JSTScriptEval(source, this, file, JSTValueToDouble(argv[2]));
+	free(file); free(source); return result;
+}
+
 static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return NULL;}
 
 static JSValueRef jst_io_path JSTDeclareFunction () {
@@ -347,7 +353,7 @@ static JSTDeclareHasProperty(jst_object_query) {
 static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
 
 	JSTObject class, interface = (JSTObject) JSTScriptNativeEval(
-		"Object(this)", (JSTObject) argv[0]
+		"Object.create(this)", (JSTObject) argv[0]
 	), prototype, value;
 
 	void * _object_class = jst_object_class;
@@ -372,10 +378,10 @@ static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObj
 	}
 
 	if (JSTObjectHasProperty(interface, pp))
-	prototype = (JSTObject) JSTScriptNativeEval("Object(this.prototype)", interface);
+	prototype = (JSTObject) JSTScriptNativeEval("Object.create(this.prototype)", interface);
 	else prototype = JSTClassInstance(NULL, NULL);
 	if (JSTObjectHasProperty(interface, v))
-	value = (JSTObject) JSTScriptNativeEval("Object(this)", (JSTObject) JSTObjectGetProperty(interface, v));
+	value = (JSTObject) JSTScriptNativeEval("Object.create(Object(this))", (JSTObject) JSTObjectGetProperty(interface, v));
 	else value = JSTClassInstance(NULL, NULL);
 
 	JSTObjectSetProperty(interface, jst_object_class_value, value, 0);
@@ -421,15 +427,23 @@ static JSValueRef jst_exit JSTDeclareFunction () {
 	return JSTValueNull;
 }
 
+static JSValueRef jst_object_prototype JSTDeclareFunction () {
+	if (argc == 1) return JSTObjectGetPrototype(argv[0]);
+	else JSTObjectSetPrototype(argv[0], argv[1]);
+	return argv[0];
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	JSTObject sys, object, engine, io, stream, read, memory;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
+	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
 
 	object = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "object", object, 0);
+	JSTObjectSetMethod(object, "prototype", jst_object_prototype, 0);
 
 	memory = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "memory", memory, 0);

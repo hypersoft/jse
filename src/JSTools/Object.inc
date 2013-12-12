@@ -1,8 +1,8 @@
 #define JSTObject JSObjectRef
 
-#define JSTObjectGetPrototype(o) (JSTObject)JSTAction(JSObjectGetPrototype, o)
+#define JSTObjectGetPrototype(o) (JSTObject)JSTAction(JSObjectGetPrototype, (JSTObject) o)
 #define JSTObjectGetConstructor(o) (JSTObject)JSTObjectGetProperty(JSTObjectGetPrototype(o), "constructor")
-#define JSTObjectSetPrototype(o, p) JSTAction(JSObjectSetPrototype, o, p)
+#define JSTObjectSetPrototype(o, p) JSTAction(JSObjectSetPrototype, (JSTObject) o, (JSTObject) p)
 #define JSTObjectHasProperty(o, p) JST(JSTObjectHasProperty_, o, p)
 #define JSTObjectGetProperty(o, p) JST(JSTObjectGetProperty_, (JSTObject) o, p)
 #define JSTObjectGetObject(o, p) ((JSTObject) JSTObjectGetProperty((JSTObject)o, p))
