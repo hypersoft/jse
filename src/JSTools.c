@@ -523,12 +523,12 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	char * script = JSTConstructUTF8(
-		"sys.type.bool.width = %i, " "sys.type.char.width = %i, "
-		"sys.type.short.width = %i, " "sys.type.long.width = %i, "
-		"sys.type.size.width = %i, " "sys.type.pointer.width = %i, "
-		"sys.type.int64.width = %i, " "sys.type.float.width = %i, "
-		"sys.type.double.width = %i, " "sys.type.value.width = %i, "
-		"sys.type.string.width = %i;",
+		"sys.type.size.bool = %i, " "sys.type.size.char = %i, "
+		"sys.type.size.short = %i, " "sys.type.size.long = %i, "
+		"sys.type.size.size = %i, " "sys.type.size.pointer = %i, "
+		"sys.type.size.int64 = %i, " "sys.type.size.float = %i, "
+		"sys.type.size.double = %i, " "sys.type.size.value = %i, "
+		"sys.type.size.string = %i; Object.freeze(sys.type.size)",
 		sizeof(bool), sizeof(char),
 		sizeof(short), sizeof(long),
 		sizeof(size_t), sizeof(intptr_t),
@@ -538,6 +538,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	);
 
 	JSTScriptNativeEval(script, global); free(script);
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	read = JSTClassInstance(NULL, NULL);
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);

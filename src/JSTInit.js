@@ -1,18 +1,19 @@
 // initialize global utilities
 
-sys.object.bitmap = function(keys) {
-	var index, name; for (index in keys) name = keys[index],
-	this[name] = {name:name, index:index, flag:(1<<index)},
-	sys.object.prototype(this[name], sys.object.bitmap.field);
-};
-
-sys.object.bitmap.field = {
-	constructor:sys.object.bitmap,
-	name:null, index:null, flag:null,
-	members:null, length:null,
-	toString:function(){return this.name},
-	valueOf:function(){return this.flag}
-}
+sys.type = function(data) {
+	var i, item, result = 0,
+	list = data.split('*').join(' pointer ').replace(/\s+/g, ' ').split(' ');
+	for (i in list) { if ((item = list[i]) in sys.type.code)
+		result |= sys.type.code[item]; 
+		else throw new TypeError(item+" is not a type");
+	};  return result;
+};  sys.type.code = Object.freeze({
+	const: 1, signed: 2, int: 4, struct: 8,
+	union: 16, utf: 32, void: 64, bool: 128,
+	char: 256, short: 512, long: 1024, size: 2048,
+	pointer: 4096, int64: 8192, float: 16384, double: 32768,
+	value: 65536, string: 131072
+}); sys.type.size = {};
 
 sys.object.property = function method(host, value, accessor, permissions) {
 
@@ -63,41 +64,6 @@ sys.object.map.data = function(data, name, value) {
 	if (arguments.length == 3) return data[name] = value;
 	return data[name];
 };
-
-sys.type = sys.object.map(function(data){
-
-},  new sys.object.bitmap([
-	'const',	'signed',	'int',
-	'struct',	'union', 	'utf',
-	'void',		'bool',		'char',
-	'short',	'long',		'size',
-	'pointer',	'int64',	'float',
-	'double',	'value',	'string'
-]));
-
-var t = {
-	constructor:sys.type, name:null, index:null, flag:null,
-	members:null, length:null,
-	toString:function(){return this.name},
-	valueOf:function(){return this.flag}
-}
-
-for (name in sys.type) sys.object.prototype(sys.type[name], t);
-sys.type.prototype = t; delete t;
-
-sys.type.parse = function(data) {
-	if (typeof data == 'string') {
-		var _this = {name:data}, name, result = 0,
-		list = data.replace(/\*/, " pointer ").replace(/\s+/, ' ').split(' ');
-		for (name in list) { var item = list[name];
-			if (item == 'unsigned') { result &= ~sys.type.signed; continue}
-			else if (item in sys.type) result |= sys.type[item]
-			else if (item == '') continue
-			else throw new TypeError(item+" is not a system type");
-		};  _this.flag = result;
-		return sys.object.prototype(_this, sys.type.prototype);
-	}
-}; sys.object.unlist(sys.type, 'parse'); // hide it
 
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
