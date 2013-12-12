@@ -6,6 +6,25 @@ const char * JSTReservedAddress =
 	const char * VERSION = JSE_BUILDNO;
 	const char * VENDOR = JSE_VENDOR;
 
+#define jse_type_const 1
+#define jse_type_signed 2
+#define jse_type_int 4
+#define jse_type_struct 8
+#define jse_type_union 16
+#define jse_type_utf 32
+#define jse_type_void 64
+#define jse_type_bool 128
+#define jse_type_char 256
+#define jse_type_short 512
+#define jse_type_long 1024
+#define jse_type_size 2048
+#define jse_type_pointer 4096
+#define jse_type_int64 8192
+#define jse_type_float 16384
+#define jse_type_double 32768
+#define jse_type_value 65536
+#define jse_type_string 131072
+
 #include "JSTools.inc"
 #include "JSTInit.inc"
 
@@ -502,6 +521,23 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
+
+	char * script = JSTConstructUTF8(
+		"sys.type.bool.width = %i, " "sys.type.char.width = %i, "
+		"sys.type.short.width = %i, " "sys.type.long.width = %i, "
+		"sys.type.size.width = %i, " "sys.type.pointer.width = %i, "
+		"sys.type.int64.width = %i, " "sys.type.float.width = %i, "
+		"sys.type.double.width = %i, " "sys.type.value.width = %i, "
+		"sys.type.string.width = %i;",
+		sizeof(bool), sizeof(char),
+		sizeof(short), sizeof(long),
+		sizeof(size_t), sizeof(intptr_t),
+		sizeof(long long), sizeof(float),
+		sizeof(double), sizeof(intptr_t),
+		sizeof(intptr_t)
+	);
+
+	JSTScriptNativeEval(script, global);
 
 	read = JSTClassInstance(NULL, NULL);
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
