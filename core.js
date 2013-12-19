@@ -1,3 +1,4 @@
 #!bin/jse
 
-sys.exec('ls');
+for (name in sys.env) print.line(sys.env[name])
+

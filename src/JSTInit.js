@@ -1,5 +1,34 @@
 // initialize global utilities
 
+// sys.env
+(function(keys, read, write, erase){
+
+sys.env = sys.object.create({name: 'env',
+	init:function(data, prototype){for (name in keys()) data[name] = null},
+	get: function(data, item){ return read(item) },
+	set:function(data, item, value){
+		var status = write(item, value);
+		if (status == 0) {
+			data[item] = null; // tracks enum...
+			return true;
+		}
+		return false;
+	},
+	delete:function(data, item){
+		var status = erase(item);
+		if (status == 0) {
+			delete data[item]; // tracks enum...
+			return true;
+		}
+		return false;
+	},
+});
+
+delete sys._env_keys; delete sys._env_delete;
+delete sys._env_read; delete sys._env_write;
+
+})(sys._env_keys, sys._env_read, sys._env_write, sys._env_delete);
+
 sys.command = function(command) {
 	this.argv = Array.apply(null, arguments);
 	var bound = sys.exec.bind(this);

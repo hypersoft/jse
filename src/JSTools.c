@@ -63,77 +63,6 @@ JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exce
 	return result;
 }
 
-extern char *secure_getenv(const char *name);
-
-static JSValueRef jsToolsEnvRead JSTDeclareFunction (String) {
-
-	if (argc < 1) {
-		JSTScriptSyntaxError("js.env.read: expected argument: string");
-		return JSTValueUndefined;
-	}
-
-	if (!JSTValueIsString(argv[0])) {
-		JSTScriptTypeError("js.env.read: expected string");
-	} else {
-		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
-		char * value = secure_getenv(key); JSTStringFreeUTF8(key);
-		return value?JSTValueFromUTF8(value):JSTValueUndefined;
-	}
-
-	return JSTValueUndefined;
-
-}
-
-static JSValueRef jsToolsEnvWrite JSTDeclareFunction (String) {
-
-	if (argc < 2) {
-		JSTScriptSyntaxError("js.env.write: expected string arguments: key, value");
-		return JSTValueUndefined;
-	}
-
-	JSValueRef result = JSTValueUndefined;
-
-	if (!JSTValueIsString(argv[0]) || !JSTValueIsString(argv[1])) {
-		JSTScriptTypeError("js.env.write: expected string arguments");
-	} else {
-		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
-		char * value = JSTStringToUTF8(JSTValueToString(argv[1]), true);
-		result = JSTValueFromDouble(setenv(key, value, true));
-		JSTStringFreeUTF8(key); JSTStringFreeUTF8(value);
-	}
-
-	return result;
-
-}
-
-static JSValueRef jsToolsEnvDelete JSTDeclareFunction (string) {
-	if (argc < 1) {
-		JSTScriptSyntaxError("js.env.delete: expected argument: string");
-		return JSTValueUndefined;
-	}
-	JSValueRef result = JSTValueUndefined;
-	if (!JSTValueIsString(argv[0])) {
-		JSTScriptTypeError("js.env.delete: expected string");
-	} else {
-		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
-		result = JSTValueFromDouble(unsetenv(key));
-		JSTStringFreeUTF8(key);
-	}
-	return result;
-}
-
-static JSValueRef jsToolsEnvKeys JSTDeclareFunction (string) {
-	char **env = JSTValueToPointer(JSTScriptNativeEval("js.run.envp", NULL));
-	size_t count = 0; while(env[count++]);
-	size_t i = 0; char key[PATH_MAX];
-	JSObjectRef result = JSTClassInstance(NULL, NULL);
-	while(env[i]) {
-		sscanf(env[i++], "%[^=]", key);
-		JSTObjectSetProperty(result, key, JSTValueUndefined, 0);
-	}
-	return result;
-}
-
 static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	if (JSTValueIsNumber(argv[0])) return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
 	return JSTValueUndefined;
@@ -452,6 +381,78 @@ static JSValueRef jst_object_prototype JSTDeclareFunction () {
 	return argv[0];
 }
 
+extern char *secure_getenv(const char *name);
+
+static JSValueRef jst_env_read JSTDeclareFunction (String) {
+
+	if (argc < 1) {
+		JSTScriptSyntaxError("sys.env read: expected argument: string");
+		return JSTValueUndefined;
+	}
+
+	if (!JSTValueIsString(argv[0])) {
+		JSTScriptTypeError("sys.env read: expected string");
+	} else {
+		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
+		char * value = secure_getenv(key); JSTStringFreeUTF8(key);
+		return value?JSTValueFromUTF8(value):JSTValueUndefined;
+	}
+
+	return JSTValueUndefined;
+
+}
+
+static JSValueRef jst_env_write JSTDeclareFunction (String) {
+
+	if (argc < 2) {
+		JSTScriptSyntaxError("sys.env write: expected string arguments: key, value");
+		return JSTValueUndefined;
+	}
+
+	JSValueRef result = JSTValueUndefined;
+
+	if (!JSTValueIsString(argv[0]) || !JSTValueIsString(argv[1])) {
+		JSTScriptTypeError("sys.env write: expected string arguments");
+	} else {
+		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
+		char * value = JSTStringToUTF8(JSTValueToString(argv[1]), true);
+		result = JSTValueFromDouble(setenv(key, value, true));
+		JSTStringFreeUTF8(key); JSTStringFreeUTF8(value);
+	}
+
+	return result;
+
+}
+
+static JSValueRef jst_env_delete JSTDeclareFunction (string) {
+	if (argc < 1) {
+		JSTScriptSyntaxError("sys.env delete: expected argument: string");
+		return JSTValueUndefined;
+	}
+	JSValueRef result = JSTValueUndefined;
+	if (!JSTValueIsString(argv[0])) {
+		JSTScriptTypeError("sys.env delete: expected string");
+	} else {
+		char * key = JSTStringToUTF8(JSTValueToString(argv[0]), true);
+		result = JSTValueFromDouble(unsetenv(key));
+		JSTStringFreeUTF8(key);
+	}
+	return result;
+}
+
+static JSValueRef jst_env_keys JSTDeclareFunction (string) {
+	char **env = JSTValueToPointer(JSTScriptNativeEval("sys.envp", NULL));
+	size_t count = 0; while(env[count++]);
+	size_t i = 0; char key[PATH_MAX];
+	JSObjectRef result = JSTClassInstance(NULL, NULL);
+	while(env[i]) {
+		sscanf(env[i++], "%[^=]", key);
+		JSTObjectSetProperty(result, key, JSTValueUndefined, 0);
+	}
+	return result;
+}
+
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	JSTObject sys, object, engine, io, stream, read, memory;
@@ -460,6 +461,11 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(global, "sys", sys, 0);
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
 	JSTObjectSetMethod(sys, "exec", jsExecute, 0);
+
+	JSTObjectSetMethod(sys, "_env_read", jst_env_read, 0);
+	JSTObjectSetMethod(sys, "_env_write", jst_env_write, 0);
+	JSTObjectSetMethod(sys, "_env_delete", jst_env_delete, 0);
+	JSTObjectSetMethod(sys, "_env_keys", jst_env_keys, 0);
 
 	object = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "object", object, 0);
