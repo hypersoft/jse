@@ -459,6 +459,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
+	JSTObjectSetMethod(sys, "exec", jsExecute, 0);
 
 	object = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "object", object, 0);
@@ -683,14 +684,7 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 	if (captureTime) JSTScriptNativeEval("this.startTime = Object.freeze(new Date())", exec);
 	if (g_spawn_sync(NULL, argument, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, (captureOut) ? &exec_child_out : NULL, (captureError) ? &exec_child_err : NULL, &exec_child_status, NULL)) {
 		exec_child_status = WEXITSTATUS(exec_child_status);
-		bool success = (exec_child_status == 0);
-
-		if (success) {
-			JSTObjectSetProperty(exec, "status", JSTValueFromBoolean(success), 0);
-		} else {
-			JSTObjectSetProperty(exec, "status", JSTValueFromDouble(exec_child_status), 0);
-		}
-
+		JSTObjectSetProperty(exec, "status", JSTValueFromDouble(exec_child_status), 0);
 		if (captureOut && exec_child_out) {
 			JSTObjectSetProperty(exec, "stdout", JSTValueFromString(JSTStringFromUTF8(exec_child_out), 0), true);
 			JSTStringFreeUTF8(exec_child_out);
@@ -701,12 +695,8 @@ static JSValueRef jsExecute JSTDeclareFunction () {
 		} 
 	}
 	if (captureTime) JSTScriptNativeEval("this.endTime = Object.freeze(new Date())", exec);
-
 leaving:
 	while (deallocated < allocated) JSTStringFreeUTF8(argument[deallocated++]);
-
-	JSTObjectSetPrototype(exec, JSTScriptNativeEval("js.exec.prototype", NULL));
-
 	return (JSValueRef) exec;
 }
 

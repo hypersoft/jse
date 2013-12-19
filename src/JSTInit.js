@@ -1,5 +1,14 @@
 // initialize global utilities
 
+sys.command = function(command) {
+	this.argv = Array.apply(null, arguments);
+	var bound = sys.exec.bind(this);
+	bound.capture = this;
+	bound.argv = this.argv;
+	bound.toString = function(){return this.argv[0]};
+	return bound;
+}
+
 sys.object.property = function method(host, value, accessor, permissions) {
 
 	if (! Object.isExtensible(host)) throw new TypeError (
@@ -25,7 +34,7 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 };
 
-sys.object.config = function(perm, host) {
+sys.object.config = function(host, perm) {
 	if (! Object.isExtensible(host)) throw new TypeError (
 		"expected extensible object, found non-extensible "+typeof host
 	);	var i; for (i = 2; i < arguments.length; i++) {
