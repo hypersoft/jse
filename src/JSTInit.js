@@ -1,5 +1,7 @@
 // initialize global utilities
 
+sys.user = sys.userOf();
+
 // sys.env
 (function(keys, read, write, erase){
 

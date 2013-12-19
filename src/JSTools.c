@@ -63,7 +63,7 @@ JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exce
 	return result;
 }
 
-static JSTValue jst_sys_user JSTDeclareFunction () {
+static JSTValue jst_sys_user_of JSTDeclareFunction () {
 	if (JSTValueIsNumber(argv[0]))
 	return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
 	else return (JSTValue) jsToolsPasswdToObject(ctx, geteuid(), exception);
@@ -491,7 +491,12 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
 	JSTObjectSetMethod(sys, "run", jst_sys_run, 0);
 	JSTObjectSetMethod(sys, "exec", jst_sys_execute, 0);
-	JSTObjectSetMethod(sys, "user", jst_sys_user, 0);
+	JSTObjectSetMethod(sys, "userOf", jst_sys_user_of, 0);
+
+	JSTObjectSetProperty(sys, "uid", JSTValueFromDouble(getuid()), 0);
+	JSTObjectSetProperty(sys, "euid", JSTValueFromDouble(geteuid()), 0);
+	JSTObjectSetProperty(sys, "gid", JSTValueFromDouble(getgid()), 0);
+	JSTObjectSetProperty(sys, "pid", JSTValueFromDouble(getpid()), 0);
 
 	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
 	JSTObjectSetMethod(sys, "fromUTF8", jst_from_utf8, 0);
