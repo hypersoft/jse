@@ -489,8 +489,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
 	JSTObjectSetMethod(sys, "exec", jsExecute, 0);
 
-	JSTObjectSetMethod(sys, "free", jst_free, 0);
-
 	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
 	JSTObjectSetMethod(sys, "fromUTF8", jst_from_utf8, 0);
 	JSTObjectSetMethod(sys, "toUTF32", jst_to_utf32, 0);
@@ -507,6 +505,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	memory = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "memory", memory, 0);
+	JSTObjectSetMethod(memory, "free", jst_free, 0);
 
 	{
 		char * name = "class";
