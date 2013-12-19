@@ -68,7 +68,7 @@ static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
-static JSValueRef jst_sys_load JSTDeclareFunction (file, [global object]) {
+static JSValueRef jst_sys_run JSTDeclareFunction (file, [global object]) {
 	JSTValue result;
 	char *script = NULL, *src = NULL, *file = (argc)?JSTValueToUTF8(argv[0]):NULL;
 	if (g_file_get_contents(file, &src, NULL, NULL)) {
@@ -488,7 +488,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(global, "sys", sys, 0);
 
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
-	JSTObjectSetMethod(sys, "load", jst_sys_load, 0);
+	JSTObjectSetMethod(sys, "run", jst_sys_run, 0);
 	JSTObjectSetMethod(sys, "exec", jst_sys_execute, 0);
 
 	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
