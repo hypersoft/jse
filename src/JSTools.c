@@ -452,6 +452,33 @@ static JSValueRef jst_env_keys JSTDeclareFunction (string) {
 	return result;
 }
 
+static JSTValue jst_to_utf8 JSTDeclareFunction(Value target) {
+	// must have one arg of type String
+	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));
+}
+
+static JSTValue jst_from_utf8 JSTDeclareFunction(Pointer target) {
+	// must have one arg of type char *
+	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
+}
+
+static JSTValue jst_to_utf32 JSTDeclareFunction(Value target) {
+	JSTString jss = JSTValueToString(argv[0]);
+	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));
+	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));
+}
+
+static JSTValue jst_from_utf32 JSTDeclareFunction(Value target) {
+	char * utf32 = JSTValueToPointer(argv[0]);
+	JSTString source = JSTStringFromUTF32(utf32, -1, false);
+	JSTValue result = JSTValueFromString(source, true);
+	return result;
+}
+
+static JSTValue jst_free JSTDeclareFunction(Pointer target) {
+	free(JSTValueToPointer(argv[0]));
+	return JSTValueUndefined;
+}
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
@@ -461,6 +488,13 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(global, "sys", sys, 0);
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
 	JSTObjectSetMethod(sys, "exec", jsExecute, 0);
+
+	JSTObjectSetMethod(sys, "free", jst_free, 0);
+
+	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
+	JSTObjectSetMethod(sys, "fromUTF8", jst_from_utf8, 0);
+	JSTObjectSetMethod(sys, "toUTF32", jst_to_utf32, 0);
+	JSTObjectSetMethod(sys, "fromUTF32", jst_from_utf32, 0);
 
 	JSTObjectSetMethod(sys, "_env_read", jst_env_read, 0);
 	JSTObjectSetMethod(sys, "_env_write", jst_env_write, 0);

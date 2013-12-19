@@ -1,3 +1,4 @@
 #!bin/jse
 
-print.line(sys.type('void *'))
+for (name in sys.env) print.line(sys.env[name])
+

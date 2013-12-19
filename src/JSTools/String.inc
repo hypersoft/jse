@@ -18,6 +18,7 @@
 
 extern char * JSTStringToUTF8 (JSTString s, bool release);
 extern UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release);
+extern JSTString JSTStringFromUTF32(register char *ucs4, size_t len, bool release);
 
 #else
 
@@ -34,6 +35,13 @@ UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release) {
 	const gunichar2 * utf16 = JSTStringUTF16(jss);
 	void * result = g_utf16_to_ucs4(utf16, len, NULL, NULL, NULL);
 	if (release) JSTStringRelease(jss);
+	return result;
+}
+
+JSTString JSTStringFromUTF32(register const gunichar *ucs4, size_t len, bool release) {
+	long bytes = 0; const gunichar2 * utf16 = g_ucs4_to_utf16(ucs4, len, &bytes, NULL, NULL);
+	if (release) g_free((void*)ucs4);
+	JSTString result = JSTStringFromUTF16(utf16, bytes); g_free((void*)utf16);
 	return result;
 }
 
