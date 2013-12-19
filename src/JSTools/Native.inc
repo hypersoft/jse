@@ -473,21 +473,21 @@ static JSTValue jsNativeAddressWrite JSTDeclareFunction (address, type, value) {
 
 }
 
-static JSTValue jsStringToUTF8 JSTDeclareFunction(Value target) {
-	// must have one arg of type String
-	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));
-}
+/*static JSTValue jsStringToUTF8 JSTDeclareFunction(Value target) {*/
+/*	// must have one arg of type String*/
+/*	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));*/
+/*}*/
 
-static JSTValue jsStringFromUTF8 JSTDeclareFunction(Pointer target) {
-	// must have one arg of type char *
-	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
-}
+/*static JSTValue jsStringFromUTF8 JSTDeclareFunction(Pointer target) {*/
+/*	// must have one arg of type char **/
+/*	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));*/
+/*}*/
 
-static JSTValue jsStringToUTF32 JSTDeclareFunction(Value target) {
-	JSTString jss = JSTValueToString(argv[0]);
-	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));
-	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));
-}
+/*static JSTValue jsStringToUTF32 JSTDeclareFunction(Value target) {*/
+/*	JSTString jss = JSTValueToString(argv[0]);*/
+/*	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));*/
+/*	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));*/
+/*}*/
 
 static JSTValue jsNativeAddressFree JSTDeclareFunction(Pointer target, ...) {
 	void *p; JSTObject o; JSTValue v; size_t i = 0;

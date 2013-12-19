@@ -33,7 +33,7 @@ JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
 JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
 JSTValue JSTValueFromJSON_ JSTUtility(char * p);
-static JSValueRef jsExecute JSTDeclareFunction ();
+static JSValueRef jst_sys_execute JSTDeclareFunction ();
 char * JSTConstructUTF8(char * format, ...);
 
 #include "JSTools/Native.inc"
@@ -68,7 +68,7 @@ static JSTValue jsToolsEnvUser JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
-static JSValueRef jsToolsSource JSTDeclareFunction (file, [global object]) {
+static JSValueRef jst_sys_load JSTDeclareFunction (file, [global object]) {
 	JSTValue result;
 	char *script = NULL, *src = NULL, *file = (argc)?JSTValueToUTF8(argv[0]):NULL;
 	if (g_file_get_contents(file, &src, NULL, NULL)) {
@@ -486,8 +486,10 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
+
 	JSTObjectSetMethod(sys, "eval", jst_sys_eval, 0);
-	JSTObjectSetMethod(sys, "exec", jsExecute, 0);
+	JSTObjectSetMethod(sys, "load", jst_sys_load, 0);
+	JSTObjectSetMethod(sys, "exec", jst_sys_execute, 0);
 
 	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
 	JSTObjectSetMethod(sys, "fromUTF8", jst_from_utf8, 0);
@@ -622,7 +624,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 /*	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);*/
 
 /*	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);*/
-/*	JSTObjectSetMethod(js, "exec", jsExecute, JSTObjectPropertyReadOnly);*/
+/*	JSTObjectSetMethod(js, "exec", jst_sys_execute, JSTObjectPropertyReadOnly);*/
 /*	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyReadOnly);*/
 
 /*	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);*/
@@ -680,7 +682,7 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObjec
 	argv[count] = NULL; return JST(JSObjectCallAsFunction, method, object, argc, argv);
 }
 
-static JSValueRef jsExecute JSTDeclareFunction () {
+static JSValueRef jst_sys_execute JSTDeclareFunction () {
 
 	int child_status = 0, allocated = 0, deallocated = 0;
 	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
