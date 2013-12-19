@@ -98,8 +98,8 @@ sys.object.map.data = function(data, name, value) {
 sys.type = function(data) {
 	var i, item, result = 0,
 	list = data.split('*').join(' pointer ').replace(/\s+/g, ' ').split(' ');
-	for (i in list) { if ((item = list[i]) in sys.type.code)
-		result |= sys.type.code[item]; 
+	for (i in list) { if ((item = list[i]) == '') continue;
+		else if (item in sys.type.code) result |= sys.type.code[item]; 
 		else throw new TypeError(item+" is not a type");
 	};  return result;
 };  sys.type.code = Object.freeze({
