@@ -1,3 +1,5 @@
 #!bin/jse
 
-sys.run('example/sys.env');
+me = sys.user();
+
+print.line(me.shell);
