@@ -1,0 +1,5 @@
+#!bin/jse
+
+my = sys.user();
+
+print.line(my.shell);
