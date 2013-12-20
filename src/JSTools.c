@@ -144,11 +144,14 @@ static JSValueRef jst_io_file_stream JSTDeclareFunction(fd, access) {
 }
 
 static JSValueRef jst_io_file_pipe JSTDeclareFunction(array) {
-	JSTObject array = (JSTObject) argv[0]; int fd[2];
-	JSTValue result = JSTValueFromDouble(pipe(fd));
-	JSTObjectSetPropertyAtIndex(array, 0, JSTValueFromDouble(fd[0]));
-	JSTObjectSetPropertyAtIndex(array, 1, JSTValueFromDouble(fd[1]));
-	return result;
+	JSTObject array = (JSTObject) JSTScriptNativeEval("[]", NULL); int fd[2];
+	if (pipe(fd) == 0) {
+		JSTObjectSetPropertyAtIndex(array, 0, JSTValueFromDouble(fd[0]));
+		JSTObjectSetPropertyAtIndex(array, 1, JSTValueFromDouble(fd[1]));
+		return (JSTValue) array;
+	}
+	JSTScriptNativeError("sys.io.file.pipe: unable to create pipe: %s", strerror(errno));
+	return JSTValueUndefined;
 }
 
 static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return JSTValueUndefined;}
