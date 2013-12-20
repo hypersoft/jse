@@ -91,7 +91,33 @@ static JSValueRef jst_sys_eval JSTDeclareFunction(source, file, line) {
 	free(file); free(source); return result;
 }
 
-static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return NULL;}
+static JSValueRef jst_file_open JSTDeclareFunction(path, flags) {
+	// this version simplifies, create is separate from open!
+	JSTValue result = JSTValueUndefined; int flags = 0;
+	char * path = JSTValueToUTF8(argv[0]), * access = JSTValueToUTF8(argv[1]);
+
+	if (strcmp(access, "r") == 0) flags = O_RDONLY;
+	else if (strcmp(access, "w") == 0) flags = O_WRONLY;
+	else if (strcmp(access, "rw") == 0) flags = O_RDWR;
+	else {
+		JSTScriptNativeError("sys.file.open: invalid access mode: %s", access);
+		goto quit;
+	}
+
+	result = JSTValueFromDouble(open(path, flags));
+
+quit:
+	free(path); free(access);
+	return result;
+
+}
+
+static JSValueRef jst_file_close JSTDeclareFunction () {
+	if (argc > 0) return JSTValueFromDouble(close(JSTValueToDouble(argv[0])));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return JSTValueUndefined;}
 
 static JSValueRef jst_io_path JSTDeclareFunction () {
 	if (argc == 0) {
@@ -483,7 +509,7 @@ static JSTValue jst_free JSTDeclareFunction(Pointer target) {
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io, stream, read, memory;
+	JSTObject sys, object, engine, io, stream, file, read, memory;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
@@ -566,7 +592,13 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	io = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "io", io, 0);
+	
 	JSTObjectSetMethod(io, "flush", jst_io_flush, 0);
+
+	file = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(io, "file", file, 0);
+	JSTObjectSetMethod(file, "open", jst_file_open, 0);
+	JSTObjectSetMethod(file, "close", jst_file_close, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
@@ -619,43 +651,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(global, "read", read, 0);
 
 	JSTNativeInit(global);
-
-/*	static bool initialized;*/
-/*	char buffer[PATH_MAX];*/
-
-/*	if (! initialized )	initialized++;*/
-
-/*	JSTObject js = JSTValueToObject();*/
-/*	if (JSTScriptHasError) JSTScriptReportException(), exit(1);*/
-/*	*/
-/*	JSTObjectSetProperty(global, "js", js, JSTObjectPropertyReadOnly | JSTObjectPropertyRequired);*/
-
-/*	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);*/
-/*	JSTObjectSetMethod(js, "exec", jst_sys_execute, JSTObjectPropertyReadOnly);*/
-/*	JSTObjectSetProperty(js, "user", jst_passwd_struct_to_object(ctx, getuid(), exception), JSTObjectPropertyReadOnly);*/
-
-/*	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);*/
-
-/*	JSTObjectSetMethod(env, "read", jsToolsEnvRead, 0);*/
-/*	JSTObjectSetMethod(env, "write", jsToolsEnvWrite, 0);*/
-/*	JSTObjectSetMethod(env, "keys", jsToolsEnvKeys, 0);*/
-/*	JSTObjectSetMethod(env, "delete", jsToolsEnvDelete, 0);*/
-/*	JSTObjectSetMethod(env, "cwd", jsToolsEnvCWD, 0);*/
-/*	JSTObjectSetMethod(env, "chdir", jsToolsEnvChDir, 0);*/
-/*	JSTObjectSetMethod(env, "user", jsToolsEnvUser, 0);*/
-
-/*	JSTObject jsRun = JSTClassInstance(NULL, NULL);*/
-/*	JSTObjectSetProperty(js, "run", jsRun, JSTObjectPropertyRequired);*/
-/*	JSTObjectSetProperty(jsRun, "argc", JSTValueFromDouble(argc), 0);*/
-/*	JSTObjectSetProperty(jsRun, "argv", JSTValueFromPointer(argv), 0);*/
-/*	JSTObjectSetProperty(jsRun, "envp", JSTValueFromPointer(envp), 0);*/
-/*	JSTObjectSetProperty(jsRun, "uid", JSTValueFromDouble(getuid()), 0);*/
-/*	JSTObjectSetProperty(jsRun, "euid", JSTValueFromDouble(geteuid()), 0);*/
-/*	JSTObjectSetProperty(jsRun, "gid", JSTValueFromDouble(getgid()), 0);*/
-/*	JSTObjectSetProperty(jsRun, "pid", JSTValueFromDouble(getpid()), 0);*/
-/*	JSTObjectSetProperty(jsRun, "path", JSTValueFromString(JSTStringFromUTF8(getcwd(buffer, PATH_MAX)),true), 0);*/
-/*	JSTObjectSetProperty(jsRun, "date", JSTScriptNativeEval("Object.freeze(new Date())", global), 0);*/
-/*	JSTScriptNativeEval("Object.freeze(js.run)", global);*/
 
 	return global;
 

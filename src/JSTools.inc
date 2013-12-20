@@ -13,6 +13,9 @@
 #include <uchar.h>
 #include <pwd.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 typedef char32_t UTF32;
 typedef char16_t UTF16;
