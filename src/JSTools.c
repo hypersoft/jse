@@ -91,7 +91,7 @@ static JSValueRef jst_sys_eval JSTDeclareFunction(source, file, line) {
 	free(file); free(source); return result;
 }
 
-static JSValueRef jst_file_open JSTDeclareFunction(path, flags) {
+static JSValueRef jst_io_file_open JSTDeclareFunction(path, flags) {
 	// this version simplifies, create is separate from open!
 	JSTValue result = JSTValueUndefined; int flags = 0;
 	char * path = JSTValueToUTF8(argv[0]), * access = JSTValueToUTF8(argv[1]);
@@ -112,9 +112,43 @@ quit:
 
 }
 
-static JSValueRef jst_file_close JSTDeclareFunction () {
+static JSValueRef jst_io_file_close JSTDeclareFunction () {
 	if (argc > 0) return JSTValueFromDouble(close(JSTValueToDouble(argv[0])));
 	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_file_read JSTDeclareFunction () {
+	int file = JSTValueToDouble(argv[0]);
+	void *buf = JSTValueToPointer(argv[1]);
+	int count = JSTValueToDouble(argv[2]);
+	JSTValue result = JSTValueFromDouble(read(file, buf, count));
+	return result;
+}
+
+static JSValueRef jst_io_file_write JSTDeclareFunction () {
+	int file = JSTValueToDouble(argv[0]);
+	void *buf = JSTValueToPointer(argv[1]);
+	int count = JSTValueToDouble(argv[2]);
+	JSTValue result = JSTValueFromDouble(write(file, buf, count));
+	return result;
+}
+
+// converts fd to stream *
+static JSValueRef jst_io_file_stream JSTDeclareFunction(fd, access) {
+	JSTValue result = JSTValueUndefined;
+	int fd = JSTValueToDouble(argv[0]);
+	char * access = JSTValueToUTF8(argv[1]);
+	result = JSTValueFromPointer(fdopen(fd, access));
+	free(access);
+	return result;
+}
+
+static JSValueRef jst_io_file_pipe JSTDeclareFunction(array) {
+	JSTObject array = (JSTObject) argv[0]; int fd[2];
+	JSTValue result = JSTValueFromDouble(pipe(fd));
+	JSTObjectSetPropertyAtIndex(array, 0, JSTValueFromDouble(fd[0]));
+	JSTObjectSetPropertyAtIndex(array, 1, JSTValueFromDouble(fd[1]));
+	return result;
 }
 
 static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return JSTValueUndefined;}
@@ -502,8 +536,31 @@ static JSTValue jst_from_utf32 JSTDeclareFunction(Value target) {
 	return result;
 }
 
-static JSTValue jst_free JSTDeclareFunction(Pointer target) {
+static JSTValue jst_memory_release JSTDeclareFunction(Pointer target) {
 	free(JSTValueToPointer(argv[0]));
+	return JSTValueUndefined;
+}
+
+static JSValueRef jst_memory_allocate JSTDeclareFunction () {
+	int width = JSTValueToDouble(argv[0]);
+	int count = JSTValueToDouble(argv[1]);
+	JSTValue result = JSTValueFromPointer(malloc(width * count));
+	return result;
+}
+
+static JSValueRef jst_memory_resize JSTDeclareFunction () {
+	void *buf = JSTValueToPointer(argv[0]);
+	int width = JSTValueToDouble(argv[1]);
+	int count = JSTValueToDouble(argv[2]);
+	JSTValue result = JSTValueFromPointer(realloc(buf, width * count));
+	return result;
+}
+
+static JSValueRef jst_memory_clear JSTDeclareFunction () {
+	void *buf = JSTValueToPointer(argv[0]);
+	int width = JSTValueToDouble(argv[1]);
+	int count = JSTValueToDouble(argv[2]);
+	memset(buf, 0, width * count);
 	return JSTValueUndefined;
 }
 
@@ -540,7 +597,10 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	memory = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "memory", memory, 0);
-	JSTObjectSetMethod(memory, "free", jst_free, 0);
+	JSTObjectSetMethod(memory, "release", jst_memory_release, 0);
+	JSTObjectSetMethod(memory, "allocate", jst_memory_allocate, 0);
+	JSTObjectSetMethod(memory, "resize", jst_memory_resize, 0);
+	JSTObjectSetMethod(memory, "clear", jst_memory_clear, 0);
 
 	{
 		char * name = "class";
@@ -597,8 +657,12 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	file = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(io, "file", file, 0);
-	JSTObjectSetMethod(file, "open", jst_file_open, 0);
-	JSTObjectSetMethod(file, "close", jst_file_close, 0);
+	JSTObjectSetMethod(file, "open", jst_io_file_open, 0);
+	JSTObjectSetMethod(file, "close", jst_io_file_close, 0);
+	JSTObjectSetMethod(file, "read", jst_io_file_read, 0);
+	JSTObjectSetMethod(file, "write", jst_io_file_write, 0);
+	JSTObjectSetMethod(file, "stream", jst_io_file_stream, 0);
+	JSTObjectSetMethod(file, "pipe", jst_io_file_pipe, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);

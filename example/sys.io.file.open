@@ -2,7 +2,7 @@
 
 // opens a read-only file descriptor to self, then prints content to stdout using bash+cat.
 
-x = sys.io.file.open(sys.main, "r"); // r, w, or rw
+var x = sys.io.file.open(sys.main, "r"); // r, w, or rw
 
 sys.exec('bash', '-c', 'cat <&'+x);
 
