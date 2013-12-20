@@ -1,3 +1,3 @@
 #!bin/jse
 
-print.line(sys.uid)
+print.line(sys.main)

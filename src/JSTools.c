@@ -43,7 +43,7 @@ char * JSTConstructUTF8(char * format, ...) {
 	vasprintf(&message, format, ap); return message;
 }
 
-JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exception) {
+JSObjectRef jst_passwd_struct_to_object(JSContextRef ctx, uid_t uid, JSValueRef * exception) {
 	JSObjectRef result = JSTClassInstance(NULL, NULL);
 	struct passwd * pws = getpwuid(uid);
 	if (pws) {
@@ -65,8 +65,8 @@ JSObjectRef jsToolsPasswdToObject(JSContextRef ctx, uid_t uid, JSValueRef * exce
 
 static JSTValue jst_sys_user_of JSTDeclareFunction () {
 	if (JSTValueIsNumber(argv[0]))
-	return (JSTValue) jsToolsPasswdToObject(ctx, JSTValueToDouble(argv[0]), exception);
-	else return (JSTValue) jsToolsPasswdToObject(ctx, geteuid(), exception);
+	return (JSTValue) jst_passwd_struct_to_object(ctx, JSTValueToDouble(argv[0]), exception);
+	else return (JSTValue) jst_passwd_struct_to_object(ctx, geteuid(), exception);
 }
 
 static JSValueRef jst_sys_run JSTDeclareFunction (file, [global object]) {
@@ -632,7 +632,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 /*	JSTObjectSetMethod(js, "source", jsToolsSource, JSTObjectPropertyReadOnly);*/
 /*	JSTObjectSetMethod(js, "exec", jst_sys_execute, JSTObjectPropertyReadOnly);*/
-/*	JSTObjectSetProperty(js, "user", jsToolsPasswdToObject(ctx, getuid(), exception), JSTObjectPropertyReadOnly);*/
+/*	JSTObjectSetProperty(js, "user", jst_passwd_struct_to_object(ctx, getuid(), exception), JSTObjectPropertyReadOnly);*/
 
 /*	JSObjectRef env = JSTClassInstance(NULL, NULL); JSTObjectSetProperty(js, "env", env, 0);*/
 
