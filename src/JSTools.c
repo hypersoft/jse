@@ -143,7 +143,7 @@ static JSValueRef jst_io_file_stream JSTDeclareFunction(fd, access) {
 	return result;
 }
 
-static JSValueRef jst_io_file_pipe JSTDeclareFunction(array) {
+static JSValueRef jst_io_file_pipe JSTDeclareFunction(void) {
 	JSTObject array = (JSTObject) JSTScriptNativeEval("[]", NULL); int fd[2];
 	if (pipe(fd) == 0) {
 		JSTObjectSetPropertyAtIndex(array, 0, JSTValueFromDouble(fd[0]));

@@ -2,4 +2,5 @@
 
 var x = sys.io.file.pipe();
 
-print.line(x)
+print.line(x);
+
