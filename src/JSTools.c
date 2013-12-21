@@ -660,7 +660,7 @@ static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 	if (argc != 2) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
 
 	void * address = JSTValueToPointer(argv[0]);
-	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
+	if (! address ) return JSTScriptNativeError("%s: %s: address argument is null", fname, job);
 
 	int type = JSTValueToDouble(argv[1]);
 	bool unsign = ((type & jse_type_signed) == 0);
@@ -697,7 +697,7 @@ static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) 
 	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 3)?"too many":"insufficient");
 
 	void * address = JSTValueToPointer(argv[0]);
-	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
+	if (! address ) return JSTScriptNativeError("%s: %s: address argument is null", fname, job);
 
 	int i, type = JSTValueToDouble(argv[1]), count = JSTValueToDouble(argv[2]);
 	JSTValue array[count];
@@ -740,6 +740,75 @@ static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) 
 
 }
 
+static JSTValue jst_memory_write JSTDeclareFunction (address, type, value) {
+
+	const char * fname = "sys.memory.write", * job = "unable to write pointer contents";
+
+	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
+
+	void * address = JSTValueToPointer(argv[0]);
+	if (! address ) return JSTScriptNativeError("%s: %s: address argument is null", fname, job);
+
+	int type = JSTValueToDouble(argv[1]);
+
+	if (type & jse_type_const) {
+		return JSTScriptNativeError("%s: %s: pointer value is constant", fname, job);
+	}
+
+	double value = JSTValueToDouble(argv[2]);
+
+	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value)
+		*(intptr_t*)(address) = (intptr_t)value;
+	else if (type & jse_type_bool) *(bool*)(address) = (bool) value; 
+	else if (type & jse_type_char) *(char*)(address) = (char) value;
+	else if (type & jse_type_short) *(short*)(address) = (short) value;
+	else if (type & jse_type_int) *(int*)(address) = (int) value;
+	else if (type & jse_type_long) *(long*)(address) = (long) value;
+	else if (type & jse_type_int64) *(long long*)(address) = (long long) value;
+	else if (type & jse_type_size) *(size_t*)(address) = (size_t) value;
+	else if (type & jse_type_float) *(float*)(address) = (float) value;
+	else if (type & jse_type_double) *(double*)(address) = value;
+	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
+
+	return argv[2];
+
+}
+
+static JSTValue jst_memory_write_block JSTDeclareFunction (address, type, value) {
+
+	const char * fname = "sys.memory.write", * job = "unable to write pointer contents";
+
+	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
+
+	void * address = JSTValueToPointer(argv[0]);
+	if (! address ) return JSTScriptNativeError("%s: %s: address argument is null", fname, job);
+
+	int type = JSTValueToDouble(argv[1]);
+
+	if (type & jse_type_const) {
+		return JSTScriptNativeError("%s: %s: pointer value is constant", fname, job);
+	}
+
+	JSTObject value = (JSTObject) argv[2];
+	size_t i, length = JSTValueToDouble(JSTObjectGetProperty(value, "length"));
+	//for (i = 0; i < count; i++) JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value)
+		for (i = 0; i < length; i++) ((intptr_t*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_bool) for (i = 0; i < length; i++) ((bool*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i)); 
+	else if (type & jse_type_char) for (i = 0; i < length; i++) ((char*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_short) for (i = 0; i < length; i++) ((short*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_int) for (i = 0; i < length; i++) ((int*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_long) for (i = 0; i < length; i++) ((long*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_int64) for (i = 0; i < length; i++) ((long long*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_size) for (i = 0; i < length; i++) ((size_t*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_float) for (i = 0; i < length; i++) ((float*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else if (type & jse_type_double) for (i = 0; i < length; i++) ((double*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
+	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
+
+	return argv[2];
+
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	JSTObject sys, object, engine, io, stream, file, read, write, memory;
@@ -778,9 +847,13 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(memory, "resize", jst_memory_resize, 0);
 	JSTObjectSetMethod(memory, "clear", jst_memory_clear, 0);
 	JSTObjectSetMethod(memory, "read", jst_memory_read, 0);
+	JSTObjectSetMethod(memory, "write", jst_memory_write, 0);
 
 	read = (JSTObject) JSTObjectGetProperty(memory, "read");
 	JSTObjectSetMethod(read, "block", jst_memory_read_block, 0);
+
+	write = (JSTObject) JSTObjectGetProperty(memory, "write");
+	JSTObjectSetMethod(write, "block", jst_memory_write_block, 0);
 
 	{
 		char * name = "class";
