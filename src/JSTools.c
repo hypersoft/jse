@@ -653,6 +653,29 @@ static JSValueRef jst_memory_clear JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
+static JSValueRef jst_memory_open JSTDeclareFunction () {
+	if (argc != 4) return JSTScriptNativeError("sys.memory.open: unable to initialize memory stream: %s arguments", (argc > 4)?"too many":"insufficient");
+	void * buf = JSTValueToPointer(argv[0]);
+	int width = JSTValueToDouble(argv[1]), length = JSTValueToDouble(argv[2]);
+	char * mode = JSTValueToUTF8(argv[3]);
+	FILE * stream = fmemopen(buf, width*length, mode);
+	if (stream == NULL) {
+		return JSTScriptNativeError("sys.memory.open: unable to open memory block: %s", strerror(errno));
+	}
+	return JSTValueFromPointer(stream);
+}
+
+static JSValueRef jst_memory_stream JSTDeclareFunction (**input, *length) {
+	if (argc != 2) return JSTScriptNativeError("sys.memory.stream: unable to initialize memory stream: %s arguments", (argc > 2)?"too many":"insufficient");
+	char ** input = JSTValueToPointer(argv[0]);
+	size_t * length = JSTValueToPointer(argv[1]);
+	FILE * stream = open_memstream(input, length);
+	if (stream == NULL) {
+		return JSTScriptNativeError("sys.memory.stream: unable to instantiate memory stream: %s", strerror(errno));
+	}
+	return JSTValueFromPointer(stream);
+}
+
 static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
 	const char * fname = "sys.memory.read", * job = "unable to read pointer contents";
@@ -791,7 +814,6 @@ static JSTValue jst_memory_write_block JSTDeclareFunction (address, type, value)
 
 	JSTObject value = (JSTObject) argv[2];
 	size_t i, length = JSTValueToDouble(JSTObjectGetProperty(value, "length"));
-	//for (i = 0; i < count; i++) JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
 	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value)
 		for (i = 0; i < length; i++) ((intptr_t*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i));
 	else if (type & jse_type_bool) for (i = 0; i < length; i++) ((bool*)(address))[i] = JSTValueToDouble(JSTObjectGetPropertyAtIndex(value, i)); 
@@ -848,6 +870,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(memory, "clear", jst_memory_clear, 0);
 	JSTObjectSetMethod(memory, "read", jst_memory_read, 0);
 	JSTObjectSetMethod(memory, "write", jst_memory_write, 0);
+	JSTObjectSetMethod(memory, "open", jst_memory_open, 0);
+	JSTObjectSetMethod(memory, "stream", jst_memory_stream, 0);
 
 	read = (JSTObject) JSTObjectGetProperty(memory, "read");
 	JSTObjectSetMethod(read, "block", jst_memory_read_block, 0);
