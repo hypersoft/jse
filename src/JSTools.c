@@ -653,9 +653,96 @@ static JSValueRef jst_memory_clear JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
+static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
+
+	const char * fname = "sys.memory.read", * job = "unable to read pointer contents";
+
+	if (argc != 2) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 2)?"too many":"insufficient");
+
+	void * address = JSTValueToPointer(argv[0]);
+	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
+
+	int type = JSTValueToDouble(argv[1]);
+	bool unsign = ((type & jse_type_signed) == 0);
+
+	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value)
+		return JSTValueFromPointer(*(intptr_t*)(address));
+	else if (type & jse_type_bool)
+		return JSTValueFromDouble((double) *(bool*)(address));
+	else if (type & jse_type_char)
+		return JSTValueFromDouble((double) (unsign)?*(char*)(address):*(signed char*)(address));
+	else if (type & jse_type_short)
+		return JSTValueFromDouble((double) (unsign)?*(unsigned short*)(address):*(short*)(address));
+	else if (type & jse_type_int)
+		return JSTValueFromDouble((double) (unsign)?*(unsigned int*)(address):*(int*)(address));
+	else if (type & jse_type_long)
+		return JSTValueFromDouble((double) (unsign)?*(unsigned long*)(address):*(long*)(address));
+	else if (type & jse_type_int64)
+		return JSTValueFromDouble((double) (unsign)?*(unsigned long long*)(address):*(long long*)(address));
+	else if (type & jse_type_size)
+		return JSTValueFromDouble((double) (unsign)?*(size_t*)(address):*(ssize_t*)(address));
+	else if (type & jse_type_float)
+		return JSTValueFromDouble((double) *(float*)(address));
+	else if (type & jse_type_double)
+		return JSTValueFromDouble((double) *(double*)(address));
+	else
+		return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
+
+}
+
+static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) {
+
+	const char * fname = "sys.memory.read.block", * job = "unable to read pointer contents";
+
+	if (argc != 3) return JSTScriptNativeError("%s: %s: %s arguments", fname, job, (argc > 3)?"too many":"insufficient");
+
+	void * address = JSTValueToPointer(argv[0]);
+	if (! address ) return JSTScriptNativeError("%s: %s: pointer value is null", fname, job);
+
+	int i, type = JSTValueToDouble(argv[1]), count = JSTValueToDouble(argv[2]);
+	JSTValue array[count];
+
+	bool unsign = ((type & jse_type_signed) == 0);
+
+	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value) {
+		for (i = 0; i < count; i++) array[i] = JSTValueFromPointer(((intptr_t*)(address))[i]);
+	}	else if (type & jse_type_bool) {
+		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((bool*)(address))[i]);
+	}	else if (type & jse_type_char) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((char*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((signed char*)(address))[i]);
+	}	else if (type & jse_type_short) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned short*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((short*)(address))[i]);
+	}	else if (type & jse_type_int) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned int*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((int*)(address))[i]);
+	}	else if (type & jse_type_long) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned long*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((long*)(address))[i]);
+	}	else if (type & jse_type_int64) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned long long*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((long long*)(address))[i]);
+	}	else if (type & jse_type_size) {
+		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((size_t*)(address))[i]);
+		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((ssize_t*)(address))[i]);
+	}	else if (type & jse_type_float) {
+		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((float*)(address))[i]);
+	}	else if (type & jse_type_double) {
+		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((double*)(address))[i]);
+	}	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
+
+	JSTObject result = JSObjectMakeArray(ctx, count, array, exception);
+	JSTObjectSetProperty(result, "address", argv[0], 0);
+	JSTObjectSetProperty(result, "type", argv[1], 0);
+
+	return (JSTValue) result;
+
+}
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io, stream, file, read, memory;
+	JSTObject sys, object, engine, io, stream, file, read, write, memory;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
@@ -690,6 +777,10 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(memory, "allocate", jst_memory_allocate, 0);
 	JSTObjectSetMethod(memory, "resize", jst_memory_resize, 0);
 	JSTObjectSetMethod(memory, "clear", jst_memory_clear, 0);
+	JSTObjectSetMethod(memory, "read", jst_memory_read, 0);
+
+	read = (JSTObject) JSTObjectGetProperty(memory, "read");
+	JSTObjectSetMethod(read, "block", jst_memory_read_block, 0);
 
 	{
 		char * name = "class";
