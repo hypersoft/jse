@@ -116,7 +116,7 @@ static JSValueRef jst_io_file_open JSTDeclareFunction(path, flags) {
 		if (s == '<') { flags |= O_RSYNC; continue; } else
 		if (s == '>') { flags |= O_SYNC; continue; } else
 		if (s == '^') { flags |= O_DSYNC; continue; } else {
-			JSTScriptNativeError("sys.file.open: invalid access mode: %c", s);
+			JSTScriptNativeError("sys.io.file.open: invalid access mode: %c", s);
 			goto quit;
 		}
 	}
