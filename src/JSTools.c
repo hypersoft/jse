@@ -194,6 +194,15 @@ static JSValueRef jst_io_file_redirect JSTDeclareFunction(fd) {
 	return result;
 }
 
+static JSValueRef jst_io_file_mode JSTDeclareFunction(fd) {
+	JSTValue result = JSTValueUndefined;
+	int val, fd = JSTValueToDouble(argv[0]), mode = JSTValueToDouble(argv[1]);
+	if (val = fchmod(fd, mode) == -1) {
+		JSTScriptNativeError("sys.io.file.mode: unable to change file descriptor %i mode to %i: %s", fd, mode, strerror(errno));
+	} else result = JSTValueFromDouble(val);
+	return result;
+}
+
 static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return JSTValueUndefined;}
 
 static JSValueRef jst_io_path JSTDeclareFunction () {
@@ -708,6 +717,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(file, "pipe", jst_io_file_pipe, 0);
 	JSTObjectSetMethod(file, "clone", jst_io_file_clone, 0);
 	JSTObjectSetMethod(file, "redirect", jst_io_file_redirect, 0);
+	JSTObjectSetMethod(file, "mode", jst_io_file_mode, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
