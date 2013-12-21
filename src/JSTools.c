@@ -79,7 +79,7 @@ static JSValueRef jst_sys_run JSTDeclareFunction (file, [global object]) {
 		}
 		result = JSTScriptEval(script, (argc == 2)?(JSTObject)argv[1]:NULL, file, 1); g_free(src);
 	} else {
-		JSTScriptNativeError("unable to get file `%s' contents", file);
+		JSTScriptNativeError("sys.run: unable to get contents of file: `%s'", file);
 	}
 	JSTStringFreeUTF8(file);
 	return result;
