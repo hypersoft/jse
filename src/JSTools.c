@@ -144,7 +144,7 @@ static JSValueRef jst_io_file_stream JSTDeclareFunction(fd, access) {
 }
 
 static JSValueRef jst_io_file_pipe JSTDeclareFunction(void) {
-	JSTObject array = (JSTObject) JSTScriptNativeEval("[]", NULL); int fd[2];
+	JSTObject array = JSObjectMakeArray(ctx, 0, NULL, exception); int fd[2];
 	if (pipe(fd) == 0) {
 		JSTObjectSetPropertyAtIndex(array, 0, JSTValueFromDouble(fd[0]));
 		JSTObjectSetPropertyAtIndex(array, 1, JSTValueFromDouble(fd[1]));
@@ -152,6 +152,24 @@ static JSValueRef jst_io_file_pipe JSTDeclareFunction(void) {
 	}
 	JSTScriptNativeError("sys.io.file.pipe: unable to create pipe: %s", strerror(errno));
 	return JSTValueUndefined;
+}
+
+static JSValueRef jst_io_file_clone JSTDeclareFunction(fd) {
+	JSTValue result = JSTValueUndefined;
+	int val, fd = JSTValueToDouble(argv[0]);
+	if (val = dup(fd) == -1) {
+		JSTScriptNativeError("sys.io.file.clone: unable to clone descriptor %i: %s", fd, strerror(errno));
+	} else result = JSTValueFromDouble(val);
+	return result;
+}
+
+static JSValueRef jst_io_file_redirect JSTDeclareFunction(fd) {
+	JSTValue result = JSTValueUndefined;
+	int val, fd1 = JSTValueToDouble(argv[0]), fd2 = JSTValueToDouble(argv[1]);
+	if (val = dup2(fd1, fd2) == -1) {
+		JSTScriptNativeError("sys.io.file.redirect: unable to redirect file descriptor %i to %i: %s", fd2, fd1, strerror(errno));
+	} else result = JSTValueFromDouble(val);
+	return result;
 }
 
 static JSValueRef jst_io_flush JSTDeclareFunction(void) { sync(); return JSTValueUndefined;}
@@ -666,6 +684,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(file, "write", jst_io_file_write, 0);
 	JSTObjectSetMethod(file, "stream", jst_io_file_stream, 0);
 	JSTObjectSetMethod(file, "pipe", jst_io_file_pipe, 0);
+	JSTObjectSetMethod(file, "clone", jst_io_file_clone, 0);
+	JSTObjectSetMethod(file, "redirect", jst_io_file_redirect, 0);
 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
