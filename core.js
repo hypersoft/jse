@@ -1,5 +1,4 @@
 #!bin/jse
 
-var x = sys.io.file.pipe();
+sys.io.file.open("test.js");
 
-print.line(x)

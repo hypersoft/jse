@@ -92,22 +92,44 @@ static JSValueRef jst_sys_eval JSTDeclareFunction(source, file, line) {
 }
 
 static JSValueRef jst_io_file_open JSTDeclareFunction(path, flags) {
-	// this version simplifies, create is separate from open!
-	JSTValue result = JSTValueUndefined; int flags = 0;
-	char * path = JSTValueToUTF8(argv[0]), * access = JSTValueToUTF8(argv[1]);
 
-	if (strcmp(access, "r") == 0) flags = O_RDONLY;
-	else if (strcmp(access, "w") == 0) flags = O_WRONLY;
-	else if (strcmp(access, "rw") == 0) flags = O_RDWR;
-	else {
-		JSTScriptNativeError("sys.file.open: invalid access mode: %s", access);
-		goto quit;
+	JSTValue result = JSTValueUndefined; int flags = 0;
+	char s, * scan, * path = JSTValueToUTF8(argv[0]), * access = "rw";
+
+	if (argc > 1) access = JSTValueToUTF8(argv[1]);
+	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+	if (argc > 2) mode = JSTValueToDouble(argv[2]);
+
+	for (scan = access; *scan; scan++) { s = *scan;
+		if (s == 'r') {
+			if (scan[1] == 'w') flags |= O_RDWR, scan++;
+			else flags |= O_RDONLY;
+			continue;
+		} else
+		if (s == '&') { flags |= O_CREAT; continue; } else
+		if (s == 'w') { flags |= O_WRONLY; continue; } else
+		if (s == 'e') { flags |= O_EXCL; continue; } else
+		if (s == 't') { flags |= O_NOCTTY; continue; } else
+		if (s == '+') { flags |= O_APPEND; continue; } else
+		if (s == '-') { flags |= O_TRUNC; continue; } else
+		if (s == '!') { flags |= O_NONBLOCK; continue; } else
+		if (s == '<') { flags |= O_RSYNC; continue; } else
+		if (s == '>') { flags |= O_SYNC; continue; } else
+		if (s == '^') { flags |= O_DSYNC; continue; } else {
+			JSTScriptNativeError("sys.file.open: invalid access mode: %c", s);
+			goto quit;
+		}
 	}
 
-	result = JSTValueFromDouble(open(path, flags));
+	int fd = (argc > 2)? open(path, flags, mode) : open(path, flags);
+
+	if (fd == -1)
+		JSTScriptNativeError("sys.io.file.open: unable to open `%s': %s", path, strerror(errno));
+	else
+		result = JSTValueFromDouble(fd);
 
 quit:
-	free(path); free(access);
+	free(path); if (argc > 1) free(access);
 	return result;
 
 }
