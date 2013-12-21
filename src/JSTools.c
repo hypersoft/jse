@@ -363,12 +363,18 @@ static JSTDeclareSetProperty(jst_object_class_set) {
 
 static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
 	JSStringRef name; size_t i, length; void * exception = NULL;
-	JSTObject keys = (JSTObject) JSTScriptNativeEval("Object.keys(this)", (JSTObject)
-		JSTObjectGetProperty((JSTObject) JSTObjectGetPrivate(object), jst_object_class_value)
-	);
-	length = JSTValueToDouble(JSTObjectGetProperty(keys, "length"));
+	char *kk = "keys", * keys = jst_object_class_value;
+	JSTObject interface = JSTObjectGetPrivate(object),
+	hash = (JSTObject) JSTObjectGetProperty(interface, keys);
+	if (JSTObjectHasProperty(interface, kk)) {
+		keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
+		hash = JSTObjectGetProperty(hash, keys);
+		free(keys);
+	}
+	JSTObject list = (JSTObject) JSTScriptNativeEval("Object.keys(this)", hash);
+	length = JSTValueToDouble(JSTObjectGetProperty(list, "length"));
 	for (i = 0; i < length; i++) { JSPropertyNameAccumulatorAddName(
-		propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(keys, i)))
+		propertyNames, (name = JSTValueToString(JSTObjectGetPropertyAtIndex(list, i)))
 		);  JSTStringRelease(name);
 	}
 }
@@ -405,10 +411,19 @@ static JSTDeclareHasInstance(jst_object_is_product) {
 
 static JSTDeclareHasProperty(jst_object_query) {
 	void *exception = NULL;
-	return JSObjectHasProperty(ctx, (JSTObject)
-		(JSTObject) JSTObjectGetProperty(JSTObjectGetPrivate(object), jst_object_class_value),
-		propertyName
-	);
+	// if interface has property "keys" that string value will be used to retrieve
+	// the hash table from the class value, otherwise the class value will be used
+	// as the hash table.
+	// This process is repeated verbatim for the GetPropertyNames callback.
+	char *kk = "keys", * keys = jst_object_class_value;
+	JSTObject interface = JSTObjectGetPrivate(object),
+	hash = (JSTObject) JSTObjectGetProperty(interface, keys);
+	if (JSTObjectHasProperty(interface, kk)) {
+		keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
+		hash = JSTObjectGetProperty(hash, keys);
+		free(keys);
+	}
+	return JSObjectHasProperty(ctx, hash, propertyName);
 }
 
 static JSTValue jst_object_create JSTDeclareFunction(JSTObject prototype, JSTObject interface, JSTObject data) {
