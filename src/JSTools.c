@@ -368,7 +368,7 @@ static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
 	hash = (JSTObject) JSTObjectGetProperty(interface, keys);
 	if (JSTObjectHasProperty(interface, kk)) {
 		keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
-		hash = JSTObjectGetProperty(hash, keys);
+		hash = (JSTObject) JSTObjectGetProperty(hash, keys);
 		free(keys);
 	}
 	JSTObject list = (JSTObject) JSTScriptNativeEval("Object.keys(this)", hash);
@@ -420,7 +420,7 @@ static JSTDeclareHasProperty(jst_object_query) {
 	hash = (JSTObject) JSTObjectGetProperty(interface, keys);
 	if (JSTObjectHasProperty(interface, kk)) {
 		keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
-		hash = JSTObjectGetProperty(hash, keys);
+		hash = (JSTObject) JSTObjectGetProperty(hash, keys);
 		free(keys);
 	}
 	return JSObjectHasProperty(ctx, hash, propertyName);
