@@ -105,6 +105,17 @@ sys.type = function(data) {
 
 sys.object.config([false, false], sys.type, 'width', 'code');
 
+function coreType(name) { // called and removed by init after widths have been set
+	this.name = name;
+	this.value = sys.type.code[name];
+	this.width = sys.type.width[name];
+}; coreType.prototype = {
+	constructor: coreType,
+	valueOf:function(){return this.value},
+	toString:function(){return this.name}
+}
+
+
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
 };  sys.object.map(sys.engine, {get time(){return Date.now() - sys.date}}, [true, false]);
@@ -206,5 +217,4 @@ sys.engine.toString = function toString(){
 })(sys._io_path);
 
 sys.global.exit = sys.exit;
-
 

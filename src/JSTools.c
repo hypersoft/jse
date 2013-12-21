@@ -733,8 +733,8 @@ static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) 
 	}	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
 
 	JSTObject result = JSObjectMakeArray(ctx, count, array, exception);
-	JSTObjectSetProperty(result, "address", argv[0], 0);
-	JSTObjectSetProperty(result, "type", argv[1], 0);
+	JSTObjectSetProperty(result, "address", argv[0], JSTObjectPropertyHidden);
+	JSTObjectSetProperty(result, "type", argv[1], JSTObjectPropertyHidden);
 
 	return (JSTValue) result;
 
@@ -857,6 +857,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		"sys.type.width.int64 = %i, sys.type.width.float = %i, "
 		"sys.type.width.double = %i, sys.type.width.value = %i, "
 		"sys.type.width.string = %i; Object.freeze(sys.type.width);"
+		"for (name in sys.type.code) sys.type[name] = new coreType(name); delete coreType; "
 		/* other convenient data */
 		"sys.byteOrder = %i",
 		sizeof(bool), sizeof(char),
