@@ -5,24 +5,15 @@ sys.user = sys.userOf();
 // sys.env
 (function(keys, read, write, erase){
 
-sys.env = sys.object.create({name: 'env',
-	init:function(data, prototype){for (name in keys()) data[name] = null},
+sys.env = sys.object.create({
+	name: 'env', keys: 'keys',
+	init:function(data, prototype){data.keys = keys()},
 	get: function(data, item){ return read(item) },
 	set:function(data, item, value){
-		var status = write(item, value);
-		if (status == 0) {
-			data[item] = null; // tracks enum...
-			return true;
-		}
-		return false;
+		return (write(item, value) == 0) ? true : false
 	},
 	delete:function(data, item){
-		var status = erase(item);
-		if (status == 0) {
-			delete data[item]; // tracks enum...
-			return true;
-		}
-		return false;
+		return (erase(item) == 0) ? true : false
 	},
 });
 

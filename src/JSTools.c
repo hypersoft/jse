@@ -336,7 +336,18 @@ static JSTDeclareDeleteProperty(jst_object_class_delete) {
 	JSTObjectDeleteProperty(interface, ss);
 	JSTValue result = JSTFunctionCall(delete, object, data, JSTStringToValue(propertyName, false));
 	JSTObjectSetProperty(interface, ss, delete, 0);
-	return JSTValueToBoolean(result);
+	if (JSTValueToBoolean(result)) {
+		// remove property existence from custom hash
+		char *kk = "keys", * keys = jst_object_class_value;
+		if (JSTObjectHasProperty(interface, kk)) {
+			JSTObject hash = (JSTObject) JSTObjectGetProperty(interface, keys);
+			keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
+			hash = (JSTObject) JSTObjectGetProperty(hash, keys);
+			JSObjectDeleteProperty(ctx, hash, propertyName, exception);
+			free(keys);
+		}
+		return true;
+	} else return false;
 }
 
 static JSTDeclareGetProperty(jst_object_class_get) {
@@ -358,7 +369,18 @@ static JSTDeclareSetProperty(jst_object_class_set) {
 	JSTObjectDeleteProperty(interface, ss);
 	JSTValue result = JSTFunctionCall(setter, object, data, JSTStringToValue(propertyName, false), value);
 	JSTObjectSetProperty(interface, ss, setter, 0);
-	return JSTValueToBoolean(result);
+	if (JSTValueToBoolean(result)) {
+		// store property existence in custom hash
+		char *kk = "keys", * keys = jst_object_class_value;
+		if (JSTObjectHasProperty(interface, kk)) {
+			JSTObject hash = (JSTObject) JSTObjectGetProperty(interface, keys);
+			keys = JSTValueToUTF8(JSTObjectGetProperty(interface, kk));
+			hash = (JSTObject) JSTObjectGetProperty(hash, keys);
+			JSObjectSetProperty(ctx, hash, propertyName, JSTValueNull, 0, exception);
+			free(keys);
+		}
+		return true;
+	} else return false;
 }
 
 static JSTDeclareGetPropertyNames(jst_object_class_enumerate) {
