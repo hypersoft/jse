@@ -1,6 +1,6 @@
 #include "JSTools.inc"
 #include "JSTInit.inc"
-#include "sys/main.inc"
+#include "sys.inc"
 //#include "JSTools/Native.inc"
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
@@ -142,10 +142,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTScriptNativeEval(script, global); free(script);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
-	read = JSTClassInstance(NULL, NULL);
-	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
-	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
-
 	stream = (JSTObject) JSTObjectGetProperty(io, "stream");
 	JSTObjectSetProperty(stream, "read", read, 0);
 
@@ -158,14 +154,18 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(stream, "position", jst_io_stream_position, 0);
 	JSTObjectSetMethod(stream, "eof", jst_io_stream_eof, 0);
 	JSTObjectSetMethod(stream, "descriptor", jst_io_stream_descriptor, 0);
+	JSTObjectSetMethod(stream, "wide", jst_io_stream_wide, 0);
+	JSTObjectSetMethod(stream, "read", jst_io_stream_read, 0);
+	JSTObjectSetMethod(stream, "write", jst_io_stream_write, 0);
+
+	read = (JSTObject) JSTObjectGetProperty(stream, "read");
+	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
+	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
+	JSTObjectSetProperty(global, "read", read, 0);
 
 	JSTObjectSetMethod(stream, "error", jst_io_stream_error, 0);
 	JSTObject error = (JSTObject) JSTObjectGetProperty(stream, "error");
 	JSTObjectSetMethod(error, "clear", jst_io_stream_error_clear, 0);
-
-	JSTObjectSetMethod(error, "wide", jst_io_stream_wide, 0);
-
-	JSTObjectSetProperty(global, "read", read, 0);
 
 	return global;
 

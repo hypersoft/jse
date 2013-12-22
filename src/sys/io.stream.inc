@@ -70,6 +70,24 @@ static JSValueRef jst_io_stream_print JSTDeclareFunction () {
 	return JSTValueFromDouble(count);
 }
 
+static JSValueRef jst_io_stream_read JSTDeclareFunction () {
+	if (argc != 4) return JSTScriptNativeError(
+		"sys.io.stream.read: expected 4 arguments, recieved %i", argc
+	);
+	FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
+	size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
+	return JSTValueFromDouble(fread(data, width, length, stream));
+}
+
+static JSValueRef jst_io_stream_write JSTDeclareFunction () {
+	if (argc != 4) return JSTScriptNativeError(
+		"sys.io.stream.write: expected 4 arguments, recieved %i", argc
+	);
+	FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
+	size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
+	return JSTValueFromDouble(fwrite(data, width, length, stream));
+}
+
 static JSValueRef jst_io_stream_read_line JSTDeclareFunction () {
 	char *buffer = NULL; ssize_t length = 0;
 	ssize_t result = getline(&buffer, &length, JSTValueToPointer(argv[0]));
