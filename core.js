@@ -1,5 +1,5 @@
 #!bin/jse
 
-a = sys.memory.read.block(sys.argv, sys.type.signed, sys.argc);
+a = sys.memory.read.block(sys.argv, sys.type.pointer, sys.argc);
 
 

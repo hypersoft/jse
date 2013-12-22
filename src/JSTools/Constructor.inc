@@ -4,6 +4,8 @@ extern JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exceptio
 
 #else
 
+extern const char * JSTReservedAddress;
+
 JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exception, JSTObject c, ...) {
 	va_list ap; register size_t argc = 0, count = 0; va_start(ap, c); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, c);

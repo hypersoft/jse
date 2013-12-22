@@ -16,7 +16,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
 typedef char32_t UTF32;
 typedef char16_t UTF16;
 typedef char UTF8;
@@ -30,8 +29,8 @@ typedef char UTF8;
 #include "JSTools/Constructor.inc"
 #include "JSTools/Context.inc"
 #include "JSTools/Declare.inc"
-#include "JSTools/Function.inc"
 #include "JSTools/String.inc"
+#include "JSTools/Function.inc"
 #include "JSTools/Object.inc"
 #include "JSTools/Value.inc"
 #include "JSTools/Script.inc"
@@ -40,16 +39,23 @@ typedef char UTF8;
 
 #ifdef JSTools_h
 
-extern const void * JSTReservedAddress;
-
 extern JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]);
-extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
-extern JSTValue JSTFunctionCall_(JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
-extern JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
-extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
-extern JSTValue JSTValueFromJSON_ JSTUtility(char * p);
 extern char * JSTConstructUTF8(char * format, ...);
 
-#endif
+#else
 
+const char * JSTReservedAddress =
+
+	"Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
+
+const char * CODENAME = JSE_CODENAME;
+const char * VERSION = JSE_BUILDNO;
+const char * VENDOR = JSE_VENDOR;
+
+char * JSTConstructUTF8(char * format, ...) {
+	va_list ap; va_start(ap, format); char * message = NULL;
+	vasprintf(&message, format, ap); return message;
+}
+
+#endif
 

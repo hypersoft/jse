@@ -55,6 +55,7 @@
 extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 extern int JSTNativeTypeGetSize(int t);
 extern const char * JSTNativeTypeGetName(int t);
+extern JSTObject JSTNativeInit_ JSTUtility(JSTObject js);
 
 #else
 

@@ -1,18 +1,4 @@
 
-#ifdef JSTools_h
-
-extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
-
-#else
-
-JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
-	JSTValue result = JSTAction(JSValueMakeString, s);
-	if (release) JSTStringRelease(s);
-	return result;
-}
-
-#endif
-
 #define JSTValueGetType(v) JSTAction(JSValueGetType, v)
 
 #define JSTValueTypeUndefined kJSTypeUndefined
@@ -58,4 +44,29 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 #define JSTValueToPointer(v) ((void*)((unsigned long)JSTValueToDouble(v)))
 #define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((unsigned long) p)))
 
+
+#ifdef JSTools_h
+
+extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
+extern JSTValue JSTValueFromJSON_ JSTUtility(char * p);
+
+#else
+
+JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
+	JSTValue result = JSTAction(JSValueMakeString, s);
+	if (release) JSTStringRelease(s);
+	return result;
+}
+
+JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
+	JSTValue result = NULL;
+	if (p) {
+		JSTString s = JSTStringFromUTF8(p);
+		result = JSTAction(JSValueMakeFromJSONString, s);
+		JSTStringRelease(s);
+	}
+	return result;
+}
+
+#endif
 
