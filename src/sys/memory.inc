@@ -1,3 +1,5 @@
+#include "sys/memory.block.inc"
+
 static JSTValue jst_memory_release JSTDeclareFunction(Pointer target) {
 	free(JSTValueToPointer(argv[0]));
 	return JSTValueUndefined;
@@ -11,27 +13,64 @@ static JSValueRef jst_memory_allocate JSTDeclareFunction () {
 }
 
 static JSValueRef jst_memory_resize JSTDeclareFunction () {
-	void *buf = JSTValueToPointer(argv[0]);
-	int width = JSTValueToDouble(argv[1]);
-	int count = JSTValueToDouble(argv[2]);
-	JSTValue result = JSTValueFromPointer(realloc(buf, width * count));
+	void * buf; size_t width, length;
+	if (argc == 3) {
+		buf = JSTValueToPointer(argv[0]),
+		width = JSTValueToDouble(argv[1]),
+		length = JSTValueToDouble(argv[2]);
+	} else if (argc == 2) {
+		JSTObject block = (JSTObject) argv[0];
+		buf = JSTValueToPointer(block),
+		width = JSTValueToDouble(JSTObjectGetProperty(block, "width"));
+		length = JSTValueToDouble(argv[1]);
+	} else return JSTScriptNativeError(
+		"sys.memory.resize: expected 2 or 3 arguments: found `%i'", argc
+	);
+	JSTValue result = JSTValueFromPointer(realloc(buf, width * length));
 	return result;
 }
 
 static JSValueRef jst_memory_clear JSTDeclareFunction () {
-	void *buf = JSTValueToPointer(argv[0]);
-	int width = JSTValueToDouble(argv[1]);
-	int count = JSTValueToDouble(argv[2]);
-	memset(buf, 0, width * count);
+	void * buf; size_t width, length;
+	if (argc == 3) {
+		buf = JSTValueToPointer(argv[0]),
+		width = JSTValueToDouble(argv[1]),
+		length = JSTValueToDouble(argv[2]);
+	} else if (argc == 2) {
+		JSTObject block = (JSTObject) argv[0];
+		buf = JSTValueToPointer(block),
+		width = JSTValueToDouble(JSTObjectGetProperty(block, "width"));
+		length = JSTValueToDouble(argv[1]);
+	} else if (argc == 1) {
+		JSTObject block = (JSTObject) argv[0];
+		buf = JSTValueToPointer(block),
+		width = JSTValueToDouble(JSTObjectGetProperty(block, "width"));
+		length = JSTValueToDouble(JSTObjectGetProperty(block, "length"));
+	} else return JSTScriptNativeError(
+		"sys.memory.resize: expected 1-3 arguments: found `%i'", argc
+	);
+	memset(buf, 0, width * length);
 	return JSTValueUndefined;
 }
 
 static JSValueRef jst_memory_open JSTDeclareFunction () {
-	if (argc != 4) return JSTScriptNativeError("sys.memory.open: unable to initialize memory stream: %s arguments", (argc > 4)?"too many":"insufficient");
-	void * buf = JSTValueToPointer(argv[0]);
-	int width = JSTValueToDouble(argv[1]), length = JSTValueToDouble(argv[2]);
-	char * mode = JSTValueToUTF8(argv[3]);
-	FILE * stream = fmemopen(buf, width*length, mode);
+
+	FILE * stream; void * data; size_t size; char * mode;
+
+	if (argc == 4) {
+		data = JSTValueToPointer(argv[0]),
+		size = JSTValueToDouble(argv[1]) * JSTValueToDouble(argv[2]),
+		mode = JSTValueToPointer(argv[3]);
+	} else if (argc == 2) {
+		JSTObject block = (JSTObject) argv[0];
+		data = JSTValueToPointer(block),
+		size = JSTValueToDouble(JSTObjectGetProperty(block, "size")),
+		mode = JSTValueToPointer(argv[1]);
+	} else return JSTScriptNativeError(
+		"sys.memory.open: expected 2 or 4 arguments, recieved %i", argc
+	);
+
+	stream = fmemopen(data, size, mode);
 	if (stream == NULL) {
 		return JSTScriptNativeError("sys.memory.open: unable to open memory block: %s", strerror(errno));
 	}

@@ -48,19 +48,37 @@ static JSValueRef jst_io_file_close JSTDeclareFunction () {
 }
 
 static JSValueRef jst_io_file_read JSTDeclareFunction () {
-	int file = JSTValueToDouble(argv[0]);
-	void *buf = JSTValueToPointer(argv[1]);
-	int count = JSTValueToDouble(argv[2]);
-	JSTValue result = JSTValueFromDouble(read(file, buf, count));
-	return result;
+	if (argc == 3) {
+		int file = JSTValueToDouble(argv[0]);
+		void * data = JSTValueToPointer(argv[1]);
+		size_t size = JSTValueToDouble(argv[2]);
+		return JSTValueFromDouble(read(file, data, size));
+	} else if (argc == 2) {
+		int file = JSTValueToDouble(argv[0]);
+		JSTObject block = (JSTObject) argv[1];
+		void * data = JSTValueToPointer(block);
+		size_t size = JSTValueToDouble(JSTObjectGetProperty(block, "size"));
+		return JSTValueFromDouble(read(file, data, size));
+	} else return JSTScriptNativeError(
+		"sys.io.file.read: expected 2 or 3 arguments, recieved %i", argc
+	);
 }
 
 static JSValueRef jst_io_file_write JSTDeclareFunction () {
-	int file = JSTValueToDouble(argv[0]);
-	void *buf = JSTValueToPointer(argv[1]);
-	int count = JSTValueToDouble(argv[2]);
-	JSTValue result = JSTValueFromDouble(write(file, buf, count));
-	return result;
+	if (argc == 3) {
+		int file = JSTValueToDouble(argv[0]);
+		void * data = JSTValueToPointer(argv[1]);
+		size_t size = JSTValueToDouble(argv[2]);
+		return JSTValueFromDouble(write(file, data, size));
+	} else if (argc == 2) {
+		int file = JSTValueToDouble(argv[0]);
+		JSTObject block = (JSTObject) argv[1];
+		void * data = JSTValueToPointer(block);
+		size_t size = JSTValueToDouble(JSTObjectGetProperty(block, "size"));
+		return JSTValueFromDouble(write(file, data, size));
+	} else return JSTScriptNativeError(
+		"sys.io.file.write: expected 2 or 3 arguments, recieved %i", argc
+	);
 }
 
 // converts fd to stream *

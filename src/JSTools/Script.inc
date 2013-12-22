@@ -1,6 +1,6 @@
 #define JSTScriptEval(p1, o, p2, i) JST(JSTScriptEval_, p1, o, p2, i)
 #define JSTScriptCheckSyntax(p1, p2, i) JST(JSTScriptCheckSyntax_, p1, p2, i)
-#define JSTScriptNativeEval(pScript, oThis) JSTScriptEval(pScript, oThis, __FILE__, __LINE__)
+#define JSTScriptNativeEval(pScript, oThis) JSTScriptEval(pScript, (JSTObject) oThis, __FILE__, __LINE__)
 
 #define JSTScriptError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("Error", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
 #define JSTScriptEvalError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("EvalError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))

@@ -207,7 +207,7 @@ sys.engine.toString = function toString(){
 
 sys.global.exit = sys.exit;
 
-// Anything that needs to initialized postscript
+// Anything that needs initialized postscript
 sys.postscript = function() {
 
 	var coreType = function coreType(name) {
@@ -215,7 +215,7 @@ sys.postscript = function() {
 		this.value = sys.type.code[name];
 		this.width = sys.type.width[name];
 	};  coreType.prototype = {
-		constructor: coreType,
+		constructor: sys.type,
 		valueOf:function(){return this.value},
 		toString:function(){return this.name}
 	};	for (name in sys.type.code) sys.type[name] = new coreType(name);
@@ -228,8 +228,30 @@ sys.postscript = function() {
 		return sys.io.stream.buffer(stream, 0, 1, 0);
 	}
 
-	sys.io.stream.buffer.blocks = function buffer(stream, buffer, length) {
-		return sys.io.stream.buffer(stream, buffer, 2, length);
+	sys.io.stream.buffer.block = function buffer(stream, block) {
+		if (block.constructor != sys.memory.block) throw new TypeError(
+			"sys.io.stream.buffer.block: argument 2: expected sys.memory.block"
+		);
+		return sys.io.stream.buffer(stream, block, 2, block.size);
+	}
+
+	sys.memory.block.prototype = {
+		constructor: sys.memory.block,
+		valueOf:function(){return this.address},
+		free:function(){
+			if (this.allocated === true) sys.memory.release(this);
+			this.allocated = false, this.address = 0, this.length = 0, this.type = 0;
+		},
+		clear:function(){sys.memory.clear(this)},
+		get size(){return this.type.width * this.length},
+		get width(){return this.type.width},
+		get length(){return this.__length__},
+		set length(newLength){
+			if (this.allocated) {
+				this.address = sys.memory.resize(this, newLength);
+				this.__length__ = newLength;
+			}
+		},
 	}
 
 	delete sys.postscript;

@@ -1,11 +1,7 @@
 #!bin/jse
 
-var buffer = sys.memory.allocate(1, 2);
+b = sys.memory.block(null, sys.type.pointer, 16);
 
-io.stream.buffer.void(stdin);
+print.line(Object.keys(b));
 
-io.stream.read(stdin, buffer, 1, 1);
-io.stream.write(stderr, buffer, 1, 1);
-
-sys.memory.release(buffer);
-
+b.free()

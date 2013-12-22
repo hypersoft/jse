@@ -71,26 +71,42 @@ static JSValueRef jst_io_stream_print JSTDeclareFunction () {
 }
 
 static JSValueRef jst_io_stream_read JSTDeclareFunction () {
-	if (argc != 4) return JSTScriptNativeError(
-		"sys.io.stream.read: expected 4 arguments, recieved %i", argc
+	if (argc == 4) {
+		FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
+		size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
+		return JSTValueFromDouble(fread(data, width, length, stream));
+	} else if (argc == 2) {
+		FILE * stream = JSTValueToPointer(argv[0]);
+		JSTObject block = (JSTObject) argv[1];
+		void * data = JSTValueToPointer(block);
+		size_t width = JSTValueToDouble(JSTObjectGetProperty(block, "width")),
+		length = JSTValueToDouble(JSTObjectGetProperty(block, "length"));
+		return JSTValueFromDouble(fread(data, width, length, stream));
+	} else return JSTScriptNativeError(
+		"sys.io.stream.read: expected 2 or 4 arguments, recieved %i", argc
 	);
-	FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
-	size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
-	return JSTValueFromDouble(fread(data, width, length, stream));
 }
 
 static JSValueRef jst_io_stream_write JSTDeclareFunction () {
-	if (argc != 4) return JSTScriptNativeError(
-		"sys.io.stream.write: expected 4 arguments, recieved %i", argc
+	if (argc == 4) {
+		FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
+		size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
+		return JSTValueFromDouble(fwrite(data, width, length, stream));
+	} else if (argc == 2) {
+		FILE * stream = JSTValueToPointer(argv[0]);
+		JSTObject block = (JSTObject) argv[1];
+		void * data = JSTValueToPointer(block);
+		size_t width = JSTValueToDouble(JSTObjectGetProperty(block, "width")),
+		length = JSTValueToDouble(JSTObjectGetProperty(block, "length"));
+		return JSTValueFromDouble(fwrite(data, width, length, stream));
+	} else return JSTScriptNativeError(
+		"sys.io.stream.write: expected 2 or 4 arguments, recieved %i", argc
 	);
-	FILE * stream = JSTValueToPointer(argv[0]); void * data = JSTValueToPointer(argv[1]);
-	size_t width = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
-	return JSTValueFromDouble(fwrite(data, width, length, stream));
 }
 
 static JSValueRef jst_io_stream_buffer JSTDeclareFunction () {
 	if (argc != 4) return JSTScriptNativeError(
-		"sys.io.stream.read: expected 4 arguments, recieved %i", argc
+		"sys.io.stream.buffer: expected 4 arguments, recieved %i", argc
 	);
 	FILE * stream = JSTValueToPointer(argv[0]); void * buffer = JSTValueToPointer(argv[1]);
 	size_t mode = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);

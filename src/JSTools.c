@@ -44,6 +44,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(memory, "write", jst_memory_write, 0);
 	JSTObjectSetMethod(memory, "open", jst_memory_open, 0);
 	JSTObjectSetMethod(memory, "stream", jst_memory_stream, 0);
+	JSTObjectSetMethod(memory, "block", jst_memory_block, 0);
 
 	read = (JSTObject) JSTObjectGetProperty(memory, "read");
 	JSTObjectSetMethod(read, "block", jst_memory_read_block, 0);
