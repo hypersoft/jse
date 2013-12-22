@@ -238,6 +238,12 @@ sys.postscript = function() {
 	sys.memory.block.prototype = {
 		constructor: sys.memory.block,
 		valueOf:function(){return this.address},
+		addressOf:function(index){
+			if (index >= this.length || index < 0) throw new RangeError(
+				"sys.memory.block.addressOf: index out of bounds"
+			);
+			return this.address+index
+		},
 		free:function(){
 			if (this.allocated === true) sys.memory.release(this);
 			this.allocated = false, this.address = 0, this.length = 0, this.type = 0;
