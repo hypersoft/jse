@@ -1,7 +1,7 @@
 #include "JSTools.inc"
 #include "JSTInit.inc"
-//#include "JSTools/Native.inc"
 #include "sys/main.inc"
+//#include "JSTools/Native.inc"
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
