@@ -119,29 +119,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTScriptEval(JSTInitScript, global, "jse.init.js", 1);
 	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
-	char * script = JSTConstructUTF8(
-		"sys.type.width.bool = %i, sys.type.width.char = %i, "
-		"sys.type.width.short = %i, sys.type.width.long = %i, "
-		"sys.type.width.size = %i, sys.type.width.pointer = %i, "
-		"sys.type.width.int64 = %i, sys.type.width.float = %i, "
-		"sys.type.width.double = %i, sys.type.width.value = %i, "
-		"sys.type.width.string = %i; Object.freeze(sys.type.width);"
-		"for (name in sys.type.code) sys.type[name] = new coreType(name); delete coreType; "
-		/* other convenient data */
-		"sys.byteOrder = %i",
-		sizeof(bool), sizeof(char),
-		sizeof(short), sizeof(long),
-		sizeof(size_t), sizeof(intptr_t),
-		sizeof(long long), sizeof(float),
-		sizeof(double), sizeof(intptr_t),
-		sizeof(intptr_t),
-		/* other convenient data */
-		G_BYTE_ORDER
-	);
-
-	JSTScriptNativeEval(script, global); free(script);
-	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
-
 	stream = (JSTObject) JSTObjectGetProperty(io, "stream");
 	JSTObjectSetProperty(stream, "read", read, 0);
 
@@ -157,6 +134,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(stream, "wide", jst_io_stream_wide, 0);
 	JSTObjectSetMethod(stream, "read", jst_io_stream_read, 0);
 	JSTObjectSetMethod(stream, "write", jst_io_stream_write, 0);
+	JSTObjectSetMethod(stream, "buffer", jst_io_stream_buffer, 0);
 
 	read = (JSTObject) JSTObjectGetProperty(stream, "read");
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
@@ -166,6 +144,30 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(stream, "error", jst_io_stream_error, 0);
 	JSTObject error = (JSTObject) JSTObjectGetProperty(stream, "error");
 	JSTObjectSetMethod(error, "clear", jst_io_stream_error_clear, 0);
+
+	char * script = JSTConstructUTF8(
+		"sys.type.width.bool = %i, sys.type.width.char = %i, "
+		"sys.type.width.short = %i, sys.type.width.long = %i, "
+		"sys.type.width.size = %i, sys.type.width.pointer = %i, "
+		"sys.type.width.int64 = %i, sys.type.width.float = %i, "
+		"sys.type.width.double = %i, sys.type.width.value = %i, "
+		"sys.type.width.string = %i; Object.freeze(sys.type.width);"
+		/* other convenient data */
+		"sys.byteOrder = %i; "
+		/* finalization */
+		"sys.postscript(); ",
+		sizeof(bool), sizeof(char),
+		sizeof(short), sizeof(long),
+		sizeof(size_t), sizeof(intptr_t),
+		sizeof(long long), sizeof(float),
+		sizeof(double), sizeof(intptr_t),
+		sizeof(intptr_t),
+		/* other convenient data */
+		G_BYTE_ORDER
+	);
+
+	JSTScriptNativeEval(script, global); free(script);
+	if (JSTScriptHasError) JSTScriptReportException(), exit(1);
 
 	return global;
 

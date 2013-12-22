@@ -88,6 +88,15 @@ static JSValueRef jst_io_stream_write JSTDeclareFunction () {
 	return JSTValueFromDouble(fwrite(data, width, length, stream));
 }
 
+static JSValueRef jst_io_stream_buffer JSTDeclareFunction () {
+	if (argc != 4) return JSTScriptNativeError(
+		"sys.io.stream.read: expected 4 arguments, recieved %i", argc
+	);
+	FILE * stream = JSTValueToPointer(argv[0]); void * buffer = JSTValueToPointer(argv[1]);
+	size_t mode = JSTValueToDouble(argv[2]), length = JSTValueToDouble(argv[3]);
+	return JSTValueFromDouble(setvbuf(stream, buffer, mode, length));
+}
+
 static JSValueRef jst_io_stream_read_line JSTDeclareFunction () {
 	char *buffer = NULL; ssize_t length = 0;
 	ssize_t result = getline(&buffer, &length, JSTValueToPointer(argv[0]));

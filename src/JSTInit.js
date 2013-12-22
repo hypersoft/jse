@@ -105,17 +105,6 @@ sys.type = function(data) {
 
 sys.object.config([false, false], sys.type, 'width', 'code');
 
-function coreType(name) { // called and removed by init after widths have been set
-	this.name = name;
-	this.value = sys.type.code[name];
-	this.width = sys.type.width[name];
-}; coreType.prototype = {
-	constructor: coreType,
-	valueOf:function(){return this.value},
-	toString:function(){return this.name}
-}
-
-
 sys.engine.toString = function toString(){
 	return sys.engine.vendor + " JSE " +sys.engine.codename+ " v" + sys.engine.version
 };  sys.object.map(sys.engine, {get time(){return Date.now() - sys.date}}, [true, false]);
@@ -177,7 +166,7 @@ sys.engine.toString = function toString(){
 			var argv = Array.apply(null, arguments); argv.push(sys.io.lfs);
 			return sys.io.stream.print.apply(sys.io.stream, argv);
 		};
-		
+
 	})(sys._io_stream_print, sys._io_stream_pointer);
 	delete sys._io_stream_print, delete sys._io_stream_pointer;
 
@@ -217,4 +206,34 @@ sys.engine.toString = function toString(){
 })(sys._io_path);
 
 sys.global.exit = sys.exit;
+
+// Anything that needs to initialized postscript
+sys.postscript = function() {
+
+	var coreType = function coreType(name) {
+		this.name = name;
+		this.value = sys.type.code[name];
+		this.width = sys.type.width[name];
+	};  coreType.prototype = {
+		constructor: coreType,
+		valueOf:function(){return this.value},
+		toString:function(){return this.name}
+	};	for (name in sys.type.code) sys.type[name] = new coreType(name);
+
+	sys.io.stream.buffer.void = function buffer(stream) {
+		return sys.io.stream.buffer(stream, 0, 0, 0);
+	}
+
+	sys.io.stream.buffer.lines = function buffer(stream) {
+		return sys.io.stream.buffer(stream, 0, 1, 0);
+	}
+
+	sys.io.stream.buffer.blocks = function buffer(stream, buffer, length) {
+		return sys.io.stream.buffer(stream, buffer, 2, length);
+	}
+
+	delete sys.postscript;
+
+}
+
 
