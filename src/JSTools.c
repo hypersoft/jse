@@ -36,7 +36,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	memory = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "memory", memory, 0);
-	JSTObjectSetMethod(memory, "release", jst_memory_release, 0);
+	JSTObjectSetMethod(memory, "free", jst_memory_free, 0);
 	JSTObjectSetMethod(memory, "allocate", jst_memory_allocate, 0);
 	JSTObjectSetMethod(memory, "resize", jst_memory_resize, 0);
 	JSTObjectSetMethod(memory, "clear", jst_memory_clear, 0);
@@ -156,7 +156,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		/* other convenient data */
 		"sys.byteOrder = %i; "
 		/* finalization */
-		"sys.postscript(); ",
+		"sys.postScript(); ",
 		sizeof(bool), sizeof(char),
 		sizeof(short), sizeof(long),
 		sizeof(size_t), sizeof(intptr_t),

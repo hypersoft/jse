@@ -208,7 +208,7 @@ sys.engine.toString = function toString(){
 sys.global.exit = sys.exit;
 
 // Anything that needs initialized postscript
-sys.postscript = function() {
+sys.postScript = function() {
 
 	var coreType = function coreType(name) {
 		this.name = name;
@@ -245,7 +245,7 @@ sys.postscript = function() {
 			return this.address + index
 		},
 		free:function(){
-			if (this.allocated === true) sys.memory.release(this);
+			if (this.allocated === true) sys.memory.free(this);
 			this.allocated = false, this.address = 0, this.length = 0, this.type = 0;
 		},
 		clear:function(){sys.memory.clear(this)},
@@ -260,7 +260,7 @@ sys.postscript = function() {
 		},
 	}
 
-	delete sys.postscript;
+	delete sys.postScript;
 
 }
 

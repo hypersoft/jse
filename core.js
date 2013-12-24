@@ -10,4 +10,4 @@ io.stream.close(file);
 
 print.line(sys.fromUTF8(buffer[0]));
 
-
+buffer.free()
