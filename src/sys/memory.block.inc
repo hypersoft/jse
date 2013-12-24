@@ -10,7 +10,7 @@ static JSTDeclareGetProperty(jst_memory_block_get) {
 	index = JSTValueToDouble(property);
 	length = JSTValueToDouble(JSTObjectGetProperty(object, "length"));
 
-	if (index < 0 || index > length) {
+	if (index < 0 || index >= length) {
 		JSTScriptNativeError("sys.memory.block: get [%i]: range over flow", index);
 		return NULL;
 	}
@@ -24,9 +24,9 @@ static JSTDeclareGetProperty(jst_memory_block_get) {
 	type = JSTValueToDouble(JSTObjectGetProperty(object, "type"));
 	unsign = ((type & jse_type_signed) == 0);
 
-	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value)
+	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value) {
 		return JSTValueFromPointer(*(intptr_t*)(address));
-	else if (type & jse_type_bool)
+	} else if (type & jse_type_bool)
 		return JSTValueFromDouble((double) *(bool*)(address));
 	else if (type & jse_type_char)
 		return JSTValueFromDouble((double) (unsign)?*(char*)(address):*(signed char*)(address));

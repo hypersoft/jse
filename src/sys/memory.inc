@@ -6,10 +6,13 @@ static JSTValue jst_memory_release JSTDeclareFunction(Pointer target) {
 }
 
 static JSValueRef jst_memory_allocate JSTDeclareFunction () {
-	int width = JSTValueToDouble(argv[0]);
-	int count = JSTValueToDouble(argv[1]);
-	JSTValue result = JSTValueFromPointer(malloc(width * count));
-	return result;
+	int width, length;
+	if (JSTValueIsNumber(argv[0])) width = JSTValueToDouble(argv[0]);
+	else { // TODO: fix this type width retrieval with error correction
+		width = JSTValueToDouble(JSTObjectGetProperty((JSTObject)argv[0], "width"));
+	}
+	length = JSTValueToDouble(argv[1]);
+	return JSTValueFromPointer(malloc(width * length));
 }
 
 static JSValueRef jst_memory_resize JSTDeclareFunction () {
@@ -77,11 +80,11 @@ static JSValueRef jst_memory_open JSTDeclareFunction () {
 	return JSTValueFromPointer(stream);
 }
 
-static JSValueRef jst_memory_stream JSTDeclareFunction (**input, *length) {
+static JSValueRef jst_memory_stream JSTDeclareFunction () {
 	if (argc != 2) return JSTScriptNativeError("sys.memory.stream: unable to initialize memory stream: %s arguments", (argc > 2)?"too many":"insufficient");
-	char ** input = JSTValueToPointer(argv[0]);
+	char ** buffer = JSTValueToPointer(argv[0]);
 	size_t * length = JSTValueToPointer(argv[1]);
-	FILE * stream = open_memstream(input, length);
+	FILE * stream = open_memstream(buffer, length);
 	if (stream == NULL) {
 		return JSTScriptNativeError("sys.memory.stream: unable to instantiate memory stream: %s", strerror(errno));
 	}
@@ -125,7 +128,7 @@ static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
 }
 
-static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) {
+static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, length) {
 
 	const char * fname = "sys.memory.read.block", * job = "unable to read pointer contents";
 
@@ -134,40 +137,40 @@ static JSTValue jst_memory_read_block JSTDeclareFunction (address, type, count) 
 	void * address = JSTValueToPointer(argv[0]);
 	if (! address ) return JSTScriptNativeError("%s: %s: address argument is null", fname, job);
 
-	int i, type = JSTValueToDouble(argv[1]), count = JSTValueToDouble(argv[2]);
-	JSTValue array[count];
+	int i, type = JSTValueToDouble(argv[1]), length = JSTValueToDouble(argv[2]);
+	JSTValue array[length];
 
 	bool unsign = ((type & jse_type_signed) == 0);
 
 	if (type & jse_type_pointer || type & jse_type_string || type & jse_type_value) {
-		for (i = 0; i < count; i++) array[i] = JSTValueFromPointer(((intptr_t*)(address))[i]);
+		for (i = 0; i < length; i++) array[i] = JSTValueFromPointer(((intptr_t*)(address))[i]);
 	}	else if (type & jse_type_bool) {
-		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((bool*)(address))[i]);
+		for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((bool*)(address))[i]);
 	}	else if (type & jse_type_char) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((char*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((signed char*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((char*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((signed char*)(address))[i]);
 	}	else if (type & jse_type_short) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned short*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((short*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((unsigned short*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((short*)(address))[i]);
 	}	else if (type & jse_type_int) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned int*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((int*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((unsigned int*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((int*)(address))[i]);
 	}	else if (type & jse_type_long) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned long*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((long*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((unsigned long*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((long*)(address))[i]);
 	}	else if (type & jse_type_int64) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((unsigned long long*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((long long*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((unsigned long long*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((long long*)(address))[i]);
 	}	else if (type & jse_type_size) {
-		if (unsign) for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((size_t*)(address))[i]);
-		else for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((ssize_t*)(address))[i]);
+		if (unsign) for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((size_t*)(address))[i]);
+		else for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((ssize_t*)(address))[i]);
 	}	else if (type & jse_type_float) {
-		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((float*)(address))[i]);
+		for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((float*)(address))[i]);
 	}	else if (type & jse_type_double) {
-		for (i = 0; i < count; i++) array[i] = JSTValueFromDouble(((double*)(address))[i]);
+		for (i = 0; i < length; i++) array[i] = JSTValueFromDouble(((double*)(address))[i]);
 	}	else return JSTScriptNativeError("%s: %s: `%i' is an unknown type", fname, job, type);
 
-	JSTObject result = JSObjectMakeArray(ctx, count, array, exception);
+	JSTObject result = JSObjectMakeArray(ctx, length, array, exception);
 	JSTObjectSetProperty(result, "address", argv[0], JSTObjectPropertyHidden);
 	JSTObjectSetProperty(result, "type", argv[1], JSTObjectPropertyHidden);
 

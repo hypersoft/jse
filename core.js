@@ -1,7 +1,15 @@
 #!bin/jse
 
-b = sys.memory.block(null, sys.type.pointer, 16);
+var ptr = sys.type.pointer, size = sys.type.size;
 
-print.line(b.addressOf(15));
+var buffer = sys.memory.block(0, ptr, 1);
+var length = sys.memory.allocate(size, 1);
 
-b.free()
+var file = sys.memory.stream(buffer, length);
+
+io.stream.print(file, "fuck");
+io.stream.close(file);
+
+print.line(sys.fromUTF8(buffer[0]));
+
+

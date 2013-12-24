@@ -242,7 +242,7 @@ sys.postscript = function() {
 			if (index >= this.length || index < 0) throw new RangeError(
 				"sys.memory.block.addressOf: index out of bounds"
 			);
-			return this.address+index
+			return this.address + index
 		},
 		free:function(){
 			if (this.allocated === true) sys.memory.release(this);
@@ -255,8 +255,8 @@ sys.postscript = function() {
 		set length(newLength){
 			if (this.allocated) {
 				this.address = sys.memory.resize(this, newLength);
-				this.__length__ = newLength;
 			}
+			this.__length__ = newLength;
 		},
 	}
 
