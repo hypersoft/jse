@@ -130,11 +130,11 @@ static JSTValue jst_memory_block JSTDeclareFunction (address, type, length) {
 	JSTObject object = JSTClassInstance(jst_memory_block_class, NULL);
 	JSTObjectSetPrototype(object, JSTObjectGetProperty(function, "prototype"));
 
-	void * address = JSTValueToPointer(argv[0]);
+	void * address = JSTValueToPointer(argv[1]);
 	size_t length = (argc > 2) ? JSTValueToDouble(argv[2]) : 1;
 
 	if (address == 0) {
-		JSTObject type = (JSTObject) argv[1];
+		JSTObject type = (JSTObject) argv[0];
 		size_t width = JSTValueToDouble(JSTObjectGetProperty(type, "width"));
 		if (length == 0) return JSTScriptNativeError("sys.memory.block: block length is null");
 		if (width == 0)	return JSTScriptNativeError("sys.memory.block: block width is null");
@@ -145,7 +145,7 @@ static JSTValue jst_memory_block JSTDeclareFunction (address, type, length) {
 	}
 
 	JSTObjectSetProperty(object, "address", JSTValueFromPointer(address), JSTObjectPropertyHidden);
-	JSTObjectSetProperty(object, "type", argv[1], JSTObjectPropertyHidden);
+	JSTObjectSetProperty(object, "type", argv[0], JSTObjectPropertyHidden);
 	JSTObjectSetProperty(object, "__length__", JSTValueFromDouble(length), JSTObjectPropertyHidden);
 
 	return (JSTValue) object;

@@ -1,9 +1,9 @@
 #!bin/jse
 
-var ptr = sys.type.pointer, size = sys.type.size;
+var ptr = sys.type.pointer
 
-var buffer = sys.memory.block(0, ptr, 1);
-var length = sys.memory.allocate(size, 1);
+var buffer = sys.memory.block(ptr, 0, 1);
+var length = sys.memory.allocate(sys.type.size, 1);
 
 var file = sys.memory.stream(buffer, length);
 
