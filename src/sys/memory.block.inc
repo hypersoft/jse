@@ -130,10 +130,10 @@ static JSTValue jst_memory_block JSTDeclareFunction (address, type, length) {
 	JSTObject object = JSTClassInstance(jst_memory_block_class, NULL);
 	JSTObjectSetPrototype(object, JSTObjectGetProperty(function, "prototype"));
 
-	void * address = JSTValueToPointer(argv[1]);
-	size_t length = (argc > 2) ? JSTValueToDouble(argv[2]) : 1;
+	size_t length = JSTValueToDouble(argv[1]);
+	void * address = (argc > 2) ? JSTValueToPointer(argv[2]) : NULL;
 
-	if (address == 0) {
+	if (address == NULL) {
 		JSTObject type = (JSTObject) argv[0];
 		size_t width = JSTValueToDouble(JSTObjectGetProperty(type, "width"));
 		if (length == 0) return JSTScriptNativeError("sys.memory.block: block length is null");
