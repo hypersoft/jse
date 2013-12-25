@@ -88,8 +88,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(sys, "_io_stream_print", jst_io_stream_print, 0);
 	JSTObjectSetMethod(sys, "_io_stream_pointer", jst_io_stream_pointer, 0);
 
-	JSTObjectSetMethod(sys, "_error_number", jst_error_number, 0);
-	JSTObjectSetMethod(sys, "_error_message", jst_error_message, 0);
+	JSTObjectSetMethod(sys, "_error_number", jst_error_number, JSTObjectPropertyHidden);
+	JSTObjectSetMethod(sys, "_error_message", jst_error_message, JSTObjectPropertyHidden);
 
 	engine = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "engine", engine, 0);
