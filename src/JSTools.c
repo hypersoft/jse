@@ -142,6 +142,11 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
 	JSTObjectSetProperty(global, "read", read, 0);
 
+	JSTObject process = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(stream, "process", process, 0);
+	JSTObjectSetMethod(process, "open", jst_io_stream_process_open, 0);
+	JSTObjectSetMethod(process, "close", jst_io_stream_process_close, 0);
+
 	JSTObjectSetMethod(stream, "error", jst_io_stream_error, 0);
 	JSTObject error = (JSTObject) JSTObjectGetProperty(stream, "error");
 	JSTObjectSetMethod(error, "clear", jst_io_stream_error_clear, 0);

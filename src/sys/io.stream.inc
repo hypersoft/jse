@@ -139,3 +139,19 @@ static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
 	return JSTValueUndefined;
 }
 
+static JSValueRef jst_io_stream_process_open JSTDeclareFunction () {
+	char * command = JSTValueToUTF8(argv[0]), * type = JSTValueToUTF8(argv[1]);
+	FILE * stream = popen(command, type);
+	if (stream == NULL)
+		return JSTScriptNativeError("sys.io.stream.process.open: unable to exec `%s': %s", command, strerror(errno));
+	return JSTValueFromPointer(stream);
+}
+
+static JSValueRef jst_io_stream_process_close JSTDeclareFunction () {
+	FILE * stream = JSTValueToPointer(argv[0]);
+	int result = pclose(stream);
+	if (result == -1)
+		return JSTScriptNativeError("sys.io.stream.process.close: unable to close process: %s", strerror(errno));
+	return JSTValueUndefined;
+}
+

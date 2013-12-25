@@ -15,5 +15,6 @@ io.stream.close(file);
 // print the data from the stream buffer
 print.line(sys.fromUTF8(buffer.value));
 
-// free the buffer
-sys.memory.free(buffer, length);
+// free the buffers
+sys.memory.free(buffer.value), buffer.free(), length.free();
+
