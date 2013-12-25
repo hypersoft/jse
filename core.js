@@ -9,7 +9,7 @@ scanned = io.stream.read.format(stdin, "%i/%i/%i", buffer(0), buffer(1), buffer(
 if (scanned == 3)
 	print.line("Month: ", buffer[0], " Day: ", buffer[1], " Year: ", buffer[2])
 else {
-	print.error(sys.main+": unable to scan date!\n");
+	print.error.line(sys.main, ": unable to scan date!");
 	e = 1;
 }
 
