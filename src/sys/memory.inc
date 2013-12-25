@@ -1,7 +1,7 @@
 #include "sys/memory.block.inc"
 
 static JSTValue jst_memory_free JSTDeclareFunction(Pointer target) {
-	free(JSTValueToPointer(argv[0]));
+	size_t i; for (i = 0; i < argc; i++) free(JSTValueToPointer(argv[i]));
 	return JSTValueUndefined;
 }
 

@@ -237,27 +237,114 @@ sys.postScript = function() {
 
 	sys.memory.block.prototype = {
 		constructor: sys.memory.block,
-		valueOf:function(){return this.address},
-		addressOf:function(index){
-			if (index >= this.length || index < 0) throw new RangeError(
-				"sys.memory.block.addressOf: index out of bounds"
-			);
-			return this.address + index
-		},
-		free:function(){
-			if (this.allocated === true) sys.memory.free(this);
-			this.allocated = false, this.address = 0, this.length = 0, this.type = 0;
+		valueOf:function(){return this.pointer.address},
+		get free(){
+			return this.pointer.free;
 		},
 		clear:function(){sys.memory.clear(this)},
-		get size(){return this.type.width * this.length},
-		get width(){return this.type.width},
+		get address(){return this.pointer.address},
+		set address(v){this.pointer.address = v},
+		get allocated(){return this.pointer.allocated},
+		set allocated(v){this.pointer.allocated = v},
+		get type(){return this.pointer.type},
+		set type(v){this.pointer.type = v},
+		get width(){return this.pointer.type.width},
+		get size(){return this.pointer.type.width * this.length},
 		get length(){return this.__length__},
 		set length(newLength){
 			if (this.allocated) {
-				this.address = sys.memory.resize(this, newLength);
+				var x = sys.memory.resize(this.pointer.address, this.width, newLength);
+				this.pointer.address = x;
 			}
 			this.__length__ = newLength;
 		},
+	}
+
+	Object.isPointer = function isPointer(test){
+		return test.constructor == sys.memory.pointer;
+	}
+
+	Object.isSystemType = function isSystemType(test){
+		return test.constructor == sys.type;
+	}
+
+	sys.memory.pointer = function(address, type, allocated) {
+
+		if (!Object.isPointer(this))
+			throw new TypeError("sys.memory.pointer: not called as constructor");
+
+		if (Object.isSystemType(address)) {
+			allocated = type, type = address;
+			if (allocated == true) address = sys.memory.allocate(type, 1);
+			else address = 0;
+		}
+
+		this.address = address;
+		this.type = type;
+		this.allocated = Boolean(allocated);
+
+	}
+
+	sys.memory.pointer.prototype = {
+
+		constructor: sys.memory.pointer, allocated: false,
+
+		__address__: null,
+		set address(value){
+			var v = parseInt(value); if (isNaN(v))
+			throw new TypeError("sys.memory.pointer: set address: property value is not an integer");
+			this.__address__ = v;
+		},
+		get address() {
+			return this.__address__;
+		},
+
+		__type__: null,
+		set type(value){
+			if (!Object.isSystemType(value))
+				throw new TypeError("sys.memory.pointer: set type: property value is not a system type");
+			this.__type__ = value;
+		},
+		get type(){
+			return this.__type__;
+		},
+
+		get free(){
+			if (this.allocated != true) return undefined;
+			var object = this;
+			return function free() {
+				sys.memory.free(object);
+				object.address = 0, object.allocated = false;
+			}
+		},
+
+		valueOf:function(){return this.address},
+
+		get value(){ // return this pointer content
+			if (this.address === 0) throw new ReferenceError("sys.memory.pointer: cannot dereference null pointer");
+			return sys.memory.read(this.address, this.type);
+		},
+		set value(v){ // set this pointer content
+			if (this.address === 0) throw new ReferenceError("sys.memory.pointer: cannot set null pointer contents");
+			sys.memory.write(this.address, this.type, v);
+		},
+
+		toBlock:function(length, allocated){
+			length = (arguments.length > 0)? parseInt(length): 1; if (isNaN(length))
+				throw new TypeError("sys.memory.pointer: toBlock: length argument is not an integer");
+			if (arguments.length > 1) this.allocated = allocated;
+			return sys.memory.block(this, length);
+		},
+
+		// points for style
+
+		get '*'(){ // return this pointer content
+			return this.value;
+		},
+		set '*'(v){ // set this pointer content
+			this.value = v;
+		},
+
 	}
 
 	delete sys.postScript;

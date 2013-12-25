@@ -111,10 +111,24 @@ static JSTDeclareHasProperty(jst_memory_block_query) {
 	return true;
 }
 
+static JSTValue jst_memory_block_addressOf JSTDeclareFunction(index) {
+	if (argc != 1 || !JSTValueIsNumber(argv[0]))
+		return JSTScriptNativeError("sys.memory.block: get offset: expected integer index");
+	int width, length, index; void * address;
+	width = JSTValueToDouble(JSTObjectGetProperty(function, "width")),
+	length = JSTValueToDouble(JSTObjectGetProperty(function, "length")),
+	index = JSTValueToDouble(argv[0]);
+	if (index >= length || index < 0)
+		return JSTScriptNativeError("sys.memory.block: get offset address: index out of range");
+	address = JSTValueToPointer(JSTObjectGetProperty(function, "address"));
+	return JSTValueFromPointer(address + (width * index));
+}
+
 void jst_memory_block_init() {
 	JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 	jsClass.attributes = JSTClassPropertyManualPrototype,
 	jsClass.className = "block",
+	jsClass.callAsFunction = &jst_memory_block_addressOf,
 	jsClass.setProperty = &jst_memory_block_set,
 	jsClass.getProperty = &jst_memory_block_get,
 	jsClass.hasProperty = &jst_memory_block_query,
@@ -122,31 +136,15 @@ void jst_memory_block_init() {
 	jst_memory_block_class = JSClassRetain(JSClassCreate(&jsClass));
 }
 
-static JSTValue jst_memory_block JSTDeclareFunction (address, type, length) {
+static JSTValue jst_memory_block JSTDeclareFunction (pointer, length) {
 
-	if (argc < 2) return JSTScriptNativeError("sys.memory.block: insufficient arguments");
+	if (argc != 2) return JSTScriptNativeError("sys.memory.block: insufficient arguments: expected: pointer, length");
 	else if (!jst_memory_block_class) jst_memory_block_init();
 
 	JSTObject object = JSTClassInstance(jst_memory_block_class, NULL);
 	JSTObjectSetPrototype(object, JSTObjectGetProperty(function, "prototype"));
-
-	size_t length = JSTValueToDouble(argv[1]);
-	void * address = (argc > 2) ? JSTValueToPointer(argv[2]) : NULL;
-
-	if (address == NULL) {
-		JSTObject type = (JSTObject) argv[0];
-		size_t width = JSTValueToDouble(JSTObjectGetProperty(type, "width"));
-		if (length == 0) return JSTScriptNativeError("sys.memory.block: block length is null");
-		if (width == 0)	return JSTScriptNativeError("sys.memory.block: block width is null");
-		address = calloc(length, width);
-		JSTObjectSetProperty(object, "allocated", JSTValueFromBoolean(true), JSTObjectPropertyHidden);
-	} else {
-		JSTObjectSetProperty(object, "allocated", JSTValueFromBoolean(false), JSTObjectPropertyHidden);
-	}
-
-	JSTObjectSetProperty(object, "address", JSTValueFromPointer(address), JSTObjectPropertyHidden);
-	JSTObjectSetProperty(object, "type", argv[0], JSTObjectPropertyHidden);
-	JSTObjectSetProperty(object, "__length__", JSTValueFromDouble(length), JSTObjectPropertyHidden);
+	JSTObjectSetProperty(object, "pointer", argv[0], JSTObjectPropertyHidden);
+	JSTObjectSetProperty(object, "length", argv[1], 0);
 
 	return (JSTValue) object;
 
