@@ -140,6 +140,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	read = (JSTObject) JSTObjectGetProperty(stream, "read");
 	JSTObjectSetMethod(read, "line", jst_io_stream_read_line, 0);
 	JSTObjectSetMethod(read, "field", jst_io_stream_read_field, 0);
+	JSTObjectSetMethod(read, "format", jst_io_stream_read_format, 0);
 	JSTObjectSetProperty(global, "read", read, 0);
 
 	JSTObject process = JSTClassInstance(NULL, NULL);

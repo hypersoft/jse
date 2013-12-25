@@ -129,6 +129,21 @@ static JSValueRef jst_io_stream_read_field JSTDeclareFunction (FILE *, int char)
 	return string;
 }
 
+static JSValueRef jst_io_stream_read_format JSTDeclareFunction (fmt, ...) {
+	if (argc < 3) return JSTScriptNativeError("sys.io.stream.read.format: insufficient arguments");
+	void * callVM  = dcNewCallVM(argc * sizeof(void*));
+	dcMode(callVM, 0);
+	FILE * stream = JSTValueToPointer(argv[0]);
+	char * fmt = JSTValueToUTF8(argv[1]);
+	dcArgPointer(callVM, stream), dcArgPointer(callVM, fmt);
+	size_t i, r; for (i = 2; i < argc; i++) dcArgPointer(callVM, JSTValueToPointer(argv[i]));
+	r = dcCallInt(callVM, fscanf); /* kill it */ dcFree(callVM);
+	if (r == EOF)
+		JSTScriptNativeError("sys.io.stream.read.format: unable to scan format `%s': %s", fmt, strerror(errno));
+	if (ferror(stream)) clearerr(stream); free(fmt);
+	return JSTValueFromDouble(r);
+}
+
 static JSValueRef jst_io_stream_pointer JSTDeclareFunction () {
 	if (argc > 0) {
 		int stream = JSTValueToDouble(argv[0]);
@@ -143,7 +158,8 @@ static JSValueRef jst_io_stream_process_open JSTDeclareFunction () {
 	char * command = JSTValueToUTF8(argv[0]), * type = JSTValueToUTF8(argv[1]);
 	FILE * stream = popen(command, type);
 	if (stream == NULL)
-		return JSTScriptNativeError("sys.io.stream.process.open: unable to exec `%s': %s", command, strerror(errno));
+		JSTScriptNativeError("sys.io.stream.process.open: unable to exec `%s': %s", command, strerror(errno));
+	free(command), free(type);
 	return JSTValueFromPointer(stream);
 }
 

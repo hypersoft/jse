@@ -9,6 +9,7 @@ static JSTDeclareGetProperty(jst_memory_block_get) {
 	if (JSTValueToBoolean(JSTScriptNativeEval("isNaN(parseInt(this))", property))) return NULL;
 	index = JSTValueToDouble(property);
 	length = JSTValueToDouble(JSTObjectGetProperty(object, "length"));
+	width = JSTValueToDouble(JSTObjectGetProperty(object, "width"));
 
 	if (index < 0 || index >= length) {
 		JSTScriptNativeError("sys.memory.block: get [%i]: range over flow", index);
@@ -19,7 +20,7 @@ static JSTDeclareGetProperty(jst_memory_block_get) {
 	if (address == NULL) {
 		JSTScriptNativeError("sys.memory.block: get [%i]: block address is null", index);
 		return NULL;
-	} else address += index;
+	} else address += (index*width);
 
 	type = JSTValueToDouble(JSTObjectGetProperty(object, "type"));
 	unsign = ((type & jse_type_signed) == 0);
@@ -58,6 +59,7 @@ static JSTDeclareSetProperty(jst_memory_block_set) {
 	if (JSTValueToBoolean(JSTScriptNativeEval("isNaN(parseInt(this))", property))) return false;
 	index = JSTValueToDouble(property);
 	length = JSTValueToDouble(JSTObjectGetProperty(object, "length"));
+	width = JSTValueToDouble(JSTObjectGetProperty(object, "width"));
 
 	if (index < 0 || index > length) {
 		return JSTScriptNativeError("sys.memory.block: set [%i]: range over flow", index);
@@ -66,7 +68,7 @@ static JSTDeclareSetProperty(jst_memory_block_set) {
 	address = JSTValueToPointer(JSTObjectGetProperty(object, "address"));
 	if (address == NULL) {
 		return JSTScriptNativeError("sys.memory.block: set [%i]: block address is null", index);
-	} else address += index;
+	} else address += (index*width);
 
 	type = JSTValueToDouble(JSTObjectGetProperty(object, "type"));
 	if (type & jse_type_const) {
