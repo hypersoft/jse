@@ -5,7 +5,7 @@
 
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
-	JSTObject sys, object, engine, io, stream, file, read, write, memory;
+	JSTObject sys, object, engine, io, stream, file, read, write, memory, string;
 
 	sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, 0);
@@ -90,6 +90,20 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	JSTObjectSetMethod(sys, "_error_number", jst_error_number, JSTObjectPropertyHidden);
 	JSTObjectSetMethod(sys, "_error_message", jst_error_message, JSTObjectPropertyHidden);
+
+	string = JSTClassInstance(NULL, NULL);
+	JSTObjectSetProperty(sys, "string", string, 0);
+	JSTObjectSetMethod(string, "read", jst_string_read, 0);
+	read = (JSTObject) JSTObjectGetProperty(string, "read");
+	JSTObjectSetMethod(read, "field", jst_string_read_field, 0);
+	JSTObjectSetMethod(read, "line", jst_string_read_line, 0);
+	JSTObjectSetMethod(read, "format", jst_string_read_format, 0);
+	JSTObjectSetMethod(string, "toUTF8", jst_string_toUTF8, 0);
+	JSTObjectSetMethod(string, "fromUTF8", jst_string_fromUTF8, 0);
+	JSTObjectSetMethod(string, "toUTF16", jst_string_toUTF16, 0);
+	JSTObjectSetMethod(string, "fromUTF16", jst_string_fromUTF16, 0);
+	JSTObjectSetMethod(string, "toUTF32", jst_string_toUTF32, 0);
+	JSTObjectSetMethod(string, "fromUTF32", jst_string_fromUTF32, 0);
 
 	engine = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "engine", engine, 0);
