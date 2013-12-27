@@ -13,7 +13,7 @@ io.stream.print(file, "wow this text was printed in a memory stream");
 io.stream.close(file);
 
 // print the data from the stream buffer
-print.line(sys.fromUTF8(buffer.value));
+print.line(sys.string.fromUTF8(buffer.value));
 
 // free the buffers
 sys.memory.free(buffer.value), buffer.free(), length.free();

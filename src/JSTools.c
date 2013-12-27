@@ -20,11 +20,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(sys, "gid", JSTValueFromDouble(getgid()), 0);
 	JSTObjectSetProperty(sys, "pid", JSTValueFromDouble(getpid()), 0);
 
-	JSTObjectSetMethod(sys, "toUTF8", jst_to_utf8, 0);
-	JSTObjectSetMethod(sys, "fromUTF8", jst_from_utf8, 0);
-	JSTObjectSetMethod(sys, "toUTF32", jst_to_utf32, 0);
-	JSTObjectSetMethod(sys, "fromUTF32", jst_from_utf32, 0);
-
 	JSTObjectSetMethod(sys, "_env_read", jst_env_read, 0);
 	JSTObjectSetMethod(sys, "_env_write", jst_env_write, 0);
 	JSTObjectSetMethod(sys, "_env_delete", jst_env_delete, 0);

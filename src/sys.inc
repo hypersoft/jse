@@ -66,29 +66,6 @@ static JSValueRef jst_run JSTDeclareFunction (file, [global object]) {
 	return result;
 }
 
-static JSTValue jst_to_utf8 JSTDeclareFunction(Value target) {
-	// must have one arg of type String
-	return JSTValueFromPointer(JSTValueToUTF8(argv[0]));
-}
-
-static JSTValue jst_from_utf8 JSTDeclareFunction(Pointer target) {
-	// must have one arg of type char *
-	return JSTValueFromUTF8(JSTValueToPointer(argv[0]));
-}
-
-static JSTValue jst_to_utf32 JSTDeclareFunction(Value target) {
-	JSTString jss = JSTValueToString(argv[0]);
-	size_t len = JSTValueToDouble(JSTObjectGetProperty(argv[0], "length"));
-	return JSTValueFromPointer(JSTStringToUTF32(jss, len, true));
-}
-
-static JSTValue jst_from_utf32 JSTDeclareFunction(Value target) {
-	char * utf32 = JSTValueToPointer(argv[0]);
-	JSTString source = JSTStringFromUTF32(utf32, -1, false);
-	JSTValue result = JSTValueFromString(source, true);
-	return result;
-}
-
 static JSValueRef jst_eval JSTDeclareFunction(source, file, line) {
 	char * source = JSTValueToUTF8(argv[0]), * file = JSTValueToUTF8(argv[1]);
 	JSTValue result = JSTScriptEval(source, this, file, JSTValueToDouble(argv[2]));
