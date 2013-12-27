@@ -22,6 +22,7 @@
 #include "sys/io.inc"
 #include "sys/memory.inc"
 #include "sys/object.inc"
+#include "sys/string.inc"
 
 JSObjectRef jst_passwd_struct_to_object(JSContextRef ctx, uid_t uid, JSValueRef * exception) {
 	JSObjectRef result = JSTClassInstance(NULL, NULL);
