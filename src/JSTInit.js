@@ -347,6 +347,18 @@ sys.postScript = function() {
 
 	}
 
+	sys.string.read.line = function(pointer) {
+		var lineAddress = sys.string.indexOf(pointer, "\n");
+		var length = lineAddress - pointer;
+		return sys.string.read(pointer, length);
+	}
+
+	sys.string.read.field = function(pointer, char) {
+		var lineAddress = sys.string.indexOf(pointer, char);
+		var length = lineAddress - pointer;
+		return sys.string.read(pointer, length);
+	}
+
 	delete sys.postScript;
 
 }

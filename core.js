@@ -1,9 +1,8 @@
 #!bin/jse
 
-var input = String.toUTF8("Hello World");
+var input = String.toUTF8("Hello\nWorld");
 
-var string = sys.string.indexOf(input, "ll");
-
-print.line(String.fromUTF8(string))
+print.line(sys.string.read.line(input))
 
 sys.memory.free(input);
+
