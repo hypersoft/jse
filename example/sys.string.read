@@ -7,3 +7,4 @@ var string = sys.string.read(input, 4);
 print.line(string)
 
 sys.memory.free(input);
+

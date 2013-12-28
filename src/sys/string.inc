@@ -1,6 +1,10 @@
 	
 static JSValueRef jst_string_read JSTDeclareFunction (pointer, length) {
-	return JSTScriptNativeError("sys.string.read: this operation is currently unsupported");
+	char * result, * source = JSTValueToPointer(argv[0]);
+	size_t length = JSTValueToDouble(argv[1]);
+	char buffer[length+1]; buffer[length] = 0;
+	result = strncpy(buffer, source, length);
+	return JSTValueFromUTF8(buffer);
 }
 
 static JSValueRef jst_string_read_field JSTDeclareFunction (pointer, delimiter) {
