@@ -7,17 +7,19 @@ static JSValueRef jst_string_read JSTDeclareFunction (pointer, length) {
 	return JSTValueFromUTF8(buffer);
 }
 
-static JSValueRef jst_string_read_field JSTDeclareFunction (pointer, delimiter) {
-	char
-	* source = JSTValueToPointer(argv[0]),
-	* delimiter = JSTValueToPointer(argv[1]);
-	return JSTScriptNativeError("sys.string.read.field: this operation is currently unsupported");
-}
+// These are implemented in script post init...
 
-static JSValueRef jst_string_read_line JSTDeclareFunction (pointer) {
-	char * source = JSTValueToPointer(argv[0]);
-	return JSTScriptNativeError("sys.string.read.line: this operation is currently unsupported");
-}
+/*static JSValueRef jst_string_read_field JSTDeclareFunction (pointer, delimiter) {*/
+/*	char*/
+/*	* source = JSTValueToPointer(argv[0]),*/
+/*	* delimiter = JSTValueToPointer(argv[1]);*/
+/*	return JSTScriptNativeError("sys.string.read.field: this operation is currently unsupported");*/
+/*}*/
+
+/*static JSValueRef jst_string_read_line JSTDeclareFunction (pointer) {*/
+/*	char * source = JSTValueToPointer(argv[0]);*/
+/*	return JSTScriptNativeError("sys.string.read.line: this operation is currently unsupported");*/
+/*}*/
 
 static JSValueRef jst_string_read_format JSTDeclareFunction (pointer, format, ...) {
 	if (argc < 3) return JSTScriptNativeError("sys.io.stream.read.format: insufficient arguments");

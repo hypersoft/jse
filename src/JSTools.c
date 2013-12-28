@@ -88,15 +88,14 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 
 	string = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(sys, "string", string, 0);
-	JSTObjectSetMethod(string, "read", jst_string_read, 0);
 	JSTObjectSetMethod(string, "indexOf", jst_string_indexOf, 0);
-
+	JSTObjectSetMethod(string, "read", jst_string_read, 0);
 	read = (JSTObject) JSTObjectGetProperty(string, "read");
-	JSTObjectSetMethod(read, "field", jst_string_read_field, 0);
-	JSTObjectSetMethod(read, "line", jst_string_read_line, 0);
 	JSTObjectSetMethod(read, "format", jst_string_read_format, 0);
+	// implemented in script post init
+/*	JSTObjectSetMethod(read, "field", jst_string_read_field, 0);*/
+/*	JSTObjectSetMethod(read, "line", jst_string_read_line, 0);*/
 
-	// used to be located on sys.string now located on String
 	string = (JSTObject) JSTObjectGetProperty(global, "String");
 	JSTObjectSetMethod(string, "toUTF8", jst_string_toUTF8, 0);
 	JSTObjectSetMethod(string, "fromUTF8", jst_string_fromUTF8, 0);
