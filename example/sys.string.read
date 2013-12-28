@@ -1,6 +1,6 @@
 #!bin/jse
 
-var input = sys.string.toUTF8("Hello World");
+var input = String.toUTF8("Hello World");
 
 var string = sys.string.read(input, 4);
 
