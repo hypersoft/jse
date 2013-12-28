@@ -12,7 +12,18 @@ static JSValueRef jst_string_read_line JSTDeclareFunction (pointer, index) {
 }
 
 static JSValueRef jst_string_read_format JSTDeclareFunction (pointer, format, ...) {
-	return JSTScriptNativeError("sys.string.read.format: this operation is currently unsupported");
+	if (argc < 3) return JSTScriptNativeError("sys.io.stream.read.format: insufficient arguments");
+	void * callVM  = dcNewCallVM(argc * sizeof(void*));
+	dcMode(callVM, 0);
+	char * string = JSTValueToPointer(argv[0]);
+	char * fmt = JSTValueToUTF8(argv[1]);
+	dcArgPointer(callVM, string), dcArgPointer(callVM, fmt);
+	size_t i, r; for (i = 2; i < argc; i++) dcArgPointer(callVM, JSTValueToPointer(argv[i]));
+	r = dcCallInt(callVM, sscanf); /* kill it */ dcFree(callVM);
+	if (r == EOF)
+		JSTScriptNativeError("sys.string.read.format: unable to scan format `%s': %s", fmt, strerror(errno));
+	free(fmt);
+	return JSTValueFromDouble(r);
 }
 
 static JSValueRef jst_string_indexOf JSTDeclareFunction (pointer, substring) {
