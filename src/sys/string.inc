@@ -8,10 +8,14 @@ static JSValueRef jst_string_read JSTDeclareFunction (pointer, length) {
 }
 
 static JSValueRef jst_string_read_field JSTDeclareFunction (pointer, delimiter) {
+	char
+	* source = JSTValueToPointer(argv[0]),
+	* delimiter = JSTValueToPointer(argv[1]);
 	return JSTScriptNativeError("sys.string.read.field: this operation is currently unsupported");
 }
 
-static JSValueRef jst_string_read_line JSTDeclareFunction (pointer, index) {
+static JSValueRef jst_string_read_line JSTDeclareFunction (pointer) {
+	char * source = JSTValueToPointer(argv[0]);
 	return JSTScriptNativeError("sys.string.read.line: this operation is currently unsupported");
 }
 
@@ -31,7 +35,13 @@ static JSValueRef jst_string_read_format JSTDeclareFunction (pointer, format, ..
 }
 
 static JSValueRef jst_string_indexOf JSTDeclareFunction (pointer, substring) {
-	return JSTScriptNativeError("sys.string.indexOf: this operation is currently unsupported");
+	char
+	* result,
+	* source = JSTValueToPointer(argv[0]),
+	* substr = JSTValueToUTF8(argv[1]);
+	result = g_strstr_len(source, -1, substr);
+	free(substr);
+	return JSTValueFromPointer(result);
 }
 
 static JSValueRef jst_string_toUTF8 JSTDeclareFunction (string) {
