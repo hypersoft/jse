@@ -129,7 +129,7 @@ static JSValueRef jst_io_stream_read_field JSTDeclareFunction (FILE *, int char)
 	return string;
 }
 
-static JSValueRef jst_io_stream_read_format JSTDeclareFunction (fmt, ...) {
+static JSValueRef jst_io_stream_read_format JSTDeclareFunction (FILE, fmt, ...) {
 	if (argc < 3) return JSTScriptNativeError("sys.io.stream.read.format: insufficient arguments");
 	void * callVM  = dcNewCallVM(argc * sizeof(void*));
 	dcMode(callVM, 0);
