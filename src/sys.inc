@@ -102,7 +102,10 @@ static JSValueRef jst_execute JSTDeclareFunction () {
 	dest = argument + oargc; int secondary=0;
 
 	while (secondary < argc) {
-		if (JSTValueIsNull(argv[secondary])) return JSTScriptReportException();
+		if (JSTValueIsNull(argv[secondary])) {
+			JSTScriptReportException();
+			return NULL;
+		}
 		JSTString tmp = JSTValueToString(argv[secondary]);
 		dest[secondary] = JSTStringToUTF8(tmp, true);
 		secondary++;

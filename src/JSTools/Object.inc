@@ -35,7 +35,7 @@ JSTStringRelease(name); \
 
 extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
 extern void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
-extern JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
+extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
 extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 
 #else
@@ -50,11 +50,11 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
 	return result;
 }
 
-JSTValue JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
-	JSTValue result = NULL;
+void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
+	void * result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = JST(JSObjectGetProperty, o, s);
+		result = (void*) JST(JSObjectGetProperty, o, s);
 		JSTStringRelease(s);
 	}
 	return result;

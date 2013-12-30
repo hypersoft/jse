@@ -56,7 +56,7 @@ sys.object.property = function method(host, value, accessor, permissions) {
 
 };
 
-sys.object.config = function(host, perm) {
+sys.object.config = function(perm, host) {
 	if (! Object.isExtensible(host)) throw new TypeError (
 		"expected extensible object, found non-extensible "+typeof host
 	);	var i; for (i = 2; i < arguments.length; i++) {
@@ -66,17 +66,6 @@ sys.object.config = function(host, perm) {
 			Object.defineProperty(host, value, pd)
 		}
 	}
-};
-
-sys.object.unlist = function(host) {
-	var va = Array.apply(null, arguments);
-	va.unshift([false, true]);
-	sys.object.config.apply(null, va);
-};
-
-sys.object.cloak = function names(host) {
-	var arg = Object.getOwnPropertyNames(host);
-	sys.object.unlist.apply(null, arg);
 };
 
 sys.object.map = function data(host, value, permissions){
@@ -111,6 +100,16 @@ sys.engine.toString = function toString(){
 
 // initialize sys.error
 (function error(sys_error_number, sys_error_message){
+
+	// fatal return codes, modify these on the newly constructed
+	// object for custom error exit codes.
+	Error.prototype.code = 2;
+	SyntaxError.prototype.code = 3;
+	TypeError.prototype.code = 4;
+	RangeError.prototype.code = 5;
+	ReferenceError.prototype.code = 6;
+	EvalError.prototype.code = 7;
+	URIError.prototype.code = 8;
 
 	sys.error = {
 		get number(){return sys_error_number()},
@@ -211,14 +210,26 @@ sys.global.exit = sys.exit;
 sys.postScript = function() {
 
 	var coreType = function coreType(name) {
-		this.name = name;
-		this.value = sys.type.code[name];
+		this.name = name,
+		this.value = sys.type.code[name],
 		this.width = sys.type.width[name];
 	};  coreType.prototype = {
 		constructor: sys.type,
-		valueOf:function(){return this.value},
-		toString:function(){return this.name}
-	};	for (name in sys.type.code) sys.type[name] = new coreType(name);
+		valueOf:function(){return this.__value__ || this.value},
+		toString:function(){return this.__name__ || this.name}
+	};
+
+	sys.object.config([false, false], coreType.prototype, 'constructor', 'valueOf', 'toString');
+	for (name in sys.type.code) sys.type[name] = new coreType(name);
+	sys.type.prototype = coreType.prototype;
+
+	Object.isPointer = function isPointer(test){
+		return test instanceof sys.memory.pointer;
+	}
+
+	Object.isSystemType = function isSystemType(test){
+		return test instanceof sys.type;
+	}
 
 	sys.io.stream.buffer.void = function buffer(stream) {
 		return sys.io.stream.buffer(stream, 0, 0, 0);
@@ -258,14 +269,6 @@ sys.postScript = function() {
 			}
 			this.__length__ = newLength;
 		},
-	}
-
-	Object.isPointer = function isPointer(test){
-		return test.constructor == sys.memory.pointer;
-	}
-
-	Object.isSystemType = function isSystemType(test){
-		return test.constructor == sys.type;
 	}
 
 	sys.memory.pointer = function(address, type, allocated) {

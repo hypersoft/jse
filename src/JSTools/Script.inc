@@ -12,7 +12,7 @@
 
 #define JSTScriptSetError(e) (*exception = e)
 #define JSTScriptHasError (!JSTValueIsVoid(*exception) && JSTValueIsObject(*exception))
-#define JSTScriptReportException() (JST(JSTScriptReportException_), JSTValueNull)
+#define JSTScriptReportException() (JST(JSTScriptReportException_))
 
 #define JSTScriptFunction(sName, iParamCount, pArgNames, sBody, sURL, iLine) JST(JSObjectMakeFunction, sName, iParamCount, pArgNames, sBody sURL, iLine)
 
@@ -25,7 +25,7 @@
 extern JSTValue JSTScriptEval_ JSTUtility(char *p1, JSTObject o, char * p2, size_t i);
 extern bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
 extern void JSTScriptNativeError_(JSTContext ctx, JSTValue *exception, char * file, int line, char * format, ...);
-extern void JSTScriptReportException_(JSTContext ctx, JSTValue *exception);
+extern int JSTScriptReportException_(JSTContext ctx, JSTValue *exception);
 
 #else
 
@@ -49,13 +49,33 @@ void JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception
 	free(message);
 }
 
-void JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
-	register char *b = JSTValueToUTF8(*exception);
+int JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
+
 	JSTObject e = (JSTObject) *exception; *exception = NULL;
-	fprintf(stderr, "JSE Fatal Error Dump: %s\n", b); free(b);
-	b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
-	fprintf(stderr, "%s\n", b);
-	free(b);
+
+	/* properties of e:
+		name
+		code
+		message
+		line
+		sourceURL
+	*/
+
+	char * message = JSTValueToUTF8(JSTObjectGetProperty(e, "message"));
+	char * name = JSTValueToUTF8(JSTObjectGetProperty(e, "name"));
+	char * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
+	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
+
+	fprintf(stderr, "JSE Fatal %s: %s: file `%s': line %i\n", name, message, url, line);
+	free(message), free(url);
+
+	if (!JSTValueIsVoid(JSTObjectGetProperty(e, "stack"))) {
+		char * b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
+		fprintf(stderr, "%s\n", b); free(b);
+	}
+
+	return JSTValueToDouble(JSTObjectGetProperty(e, "code"));
+
 }
 
 #endif

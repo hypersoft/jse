@@ -3,6 +3,11 @@
 #include "sys.inc"
 //#include "JSTools/Native.inc"
 
+typedef struct dummy {
+	char a;
+	double b;
+} dummy;
+
 JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
 
 	JSTObject sys, object, engine, io, stream, file, read, write, memory, string;
@@ -175,7 +180,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		/* other convenient data */
 		"sys.byteOrder = %i; "
 		/* finalization */
-		"sys.postScript(); ",
+		"sys.postScript(); sys.memory.alignment = %i;",
 		sizeof(bool), sizeof(char),
 		sizeof(short), sizeof(long),
 		sizeof(size_t), sizeof(intptr_t),
@@ -183,7 +188,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		sizeof(double), sizeof(intptr_t),
 		sizeof(intptr_t),
 		/* other convenient data */
-		G_BYTE_ORDER
+		G_BYTE_ORDER, G_MEM_ALIGN
 	);
 
 	JSTScriptNativeEval(script, global); free(script);

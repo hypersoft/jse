@@ -13,7 +13,8 @@ char * ioFileReadAllText(char * file) {
 
 int main(int argc, char *argv[], char *envp[]) {
 
-	JSTContext ctx = JSTContextCreateInGroup(JSTContextGroupCreate(), NULL);
+	void * ctxgroup = (void*)JSTContextGroupCreate();
+	JSTContext ctx = JSTContextCreateInGroup(ctxgroup, NULL);
 	JSTObject global = JSTContextGetGlobalObject(ctx);
 	JSTObject e = NULL; JSTValue *exception = (void*)&e;
 
@@ -25,10 +26,14 @@ int main(int argc, char *argv[], char *envp[]) {
 			script+=2;
 			while ((c = *script) && c != '\n') script++;
 		}
-		JSTScriptEval(script, NULL, argv[1], 1); g_free(src); JSGarbageCollect(ctx);
+		JSTScriptEval(script, NULL, argv[1], 1); g_free(src);
 	} else { JSTScriptNativeError("unable to read user script: `%s'", argv[1]); }
 
-	if (e) JSTScriptReportException();
+	// Game Over! finalize methods won't be called!
+	if (e) return JSTScriptReportException();
+
+	JSTContextRelease((JSGlobalContextRef)ctx);
+	JSTContextGroupRelease(ctxgroup);
 
 }
 
