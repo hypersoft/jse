@@ -97,7 +97,7 @@ static JSTDeclareConstructor(jst_object_new) {
 	if (JSTObjectHasProperty(new, pp)) this = JSTClassInstance(NULL, NULL),
 		JSTObjectSetPrototype(this, JSTObjectGetProperty(new, pp));
 	else this = (JSTObject) JSTObjectGetProperty(interface, jst_object_class_value);
-	product = (JSTObject) JSObjectCallAsFunction(ctx, new, this, argumentCount, arguments, exception);
+	product = (JSTObject) JSObjectCallAsFunction(ctx, new, this, argc, argv, exception);
 	return (JSTValueIsVoid(product)) ? this : product;
 }
 

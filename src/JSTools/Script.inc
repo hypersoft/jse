@@ -66,7 +66,10 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue *except
 	char * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
 	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
 
-	fprintf(stderr, "JSE Fatal %s: %s: file `%s': line %i\n", name, message, url, line);
+	fprintf(stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
+		message, (*message)?": ":"", url, line
+	);
+
 	free(message), free(url);
 
 	if (!JSTValueIsVoid(JSTObjectGetProperty(e, "stack"))) {

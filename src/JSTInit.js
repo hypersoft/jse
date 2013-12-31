@@ -82,7 +82,7 @@ sys.type = function(data) {
 	list = data.split('*').join(' pointer ').replace(/\s+/g, ' ').split(' ');
 	for (i in list) { if ((item = list[i]) == '') continue;
 		else if (item in sys.type.code) result |= sys.type.code[item]; 
-		else throw new TypeError(item+" is not a type");
+		else throw new TypeError(item+" is not a system type");
 	};  return result;
 };  sys.type.code = Object.freeze({
 	const: 1, signed: 2, int: 4, struct: 8,
@@ -102,14 +102,46 @@ sys.engine.toString = function toString(){
 (function error(sys_error_number, sys_error_message){
 
 	// fatal return codes, modify these on the newly constructed
-	// object for custom error exit codes.
+	// object for custom exit error codes.
+	// 1 is left for custom errors in cases where you need a 1 or 0 exit status.
 	Error.prototype.code = 2;
+	Error.prototype.reverse = 0;
 	SyntaxError.prototype.code = 3;
 	TypeError.prototype.code = 4;
 	RangeError.prototype.code = 5;
 	ReferenceError.prototype.code = 6;
 	EvalError.prototype.code = 7;
 	URIError.prototype.code = 8;
+
+	// modify the error info detailing the fault of this error..
+	// optionally "arrest" a number of stack frames
+	Error.prototype.fromCaller = function(arrest) {
+
+		arrest = parseInt(arrest);
+		if (isNaN(arrest)) arrest = 0;
+		if (arrest < 0) arrest = -arrest; // accept negatives
+
+		var stack = this.stack.split('\n');
+		if (stack.length == 1) return this; // just pretend this didn't happen...
+		var data = stack[this.reverse+1].split('@');
+		var source = data[1].split(':');
+		this.sourceURL = source[0], this.line = source[1];
+
+		if (!Boolean(arrest)) {
+			data = stack[this.reverse].split('@');
+			data[0] += ' caller '+this.name
+			stack[this.reverse++] = data.join('@')
+		} else {
+			while(arrest-- && stack.length > 1) {
+				stack.shift();
+				//if (Boolean(this.reverse)) this.reverse--;
+			}
+		}
+
+		this.stack = stack.join('\n');
+		return this;
+
+	}
 
 	sys.error = {
 		get number(){return sys_error_number()},
@@ -119,7 +151,7 @@ sys.engine.toString = function toString(){
 		trace: function stack(e) {
 			var p = e || new Error(); var stack = p.stack.split('\n').reverse()
 			stack.toString = function(){
-				return 'stack trace: { '+stack.join(' } --> { ').split('@').join(': ')+' }';
+				return 'Stack Trace: { '+stack.join(' } --> { ').split('@').join(': ')+' }';
 			}; return stack;
 		},
 		toString: function toString(){return sys_error_message(sys_error_number())},
@@ -249,9 +281,7 @@ sys.postScript = function() {
 	sys.memory.block.prototype = {
 		constructor: sys.memory.block,
 		valueOf:function(){return this.pointer.address},
-		get free(){
-			return this.pointer.free;
-		},
+		get free(){return this.pointer.free},
 		clear:function(){sys.memory.clear(this)},
 		get address(){return this.pointer.address},
 		set address(v){this.pointer.address = v},

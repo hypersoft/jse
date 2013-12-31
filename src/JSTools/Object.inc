@@ -18,6 +18,11 @@ JST(JSObjectSetProperty, o, name, JSTAction(JSObjectMakeFunctionWithCallback, na
 JSTStringRelease(name); \
 }
 
+#define JSTObjectSetConstructor(o, n, c, m, a)	if (JSTValueIsObject(o)) { JSTString name = JSTStringFromUTF8(n); \
+JST(JSObjectSetProperty, o, name, JSTAction(JSObjectMakeConstructor, c, m), a); \
+JSTStringRelease(name); \
+}
+
 #define JSTObjectIsFunction(o) JSObjectIsFunction(ctx, o)
 #define JSTObjectIsConstructor(o) JSTAction(JSObjectIsConstructor, o)
 

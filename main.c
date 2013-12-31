@@ -29,11 +29,12 @@ int main(int argc, char *argv[], char *envp[]) {
 		JSTScriptEval(script, NULL, argv[1], 1); g_free(src);
 	} else { JSTScriptNativeError("unable to read user script: `%s'", argv[1]); }
 
-	// Game Over! finalize methods won't be called!
+	// You've failed young Jedi, Game Over! Finalize methods won't be called!
 	if (e) return JSTScriptReportException();
 
 	JSTContextRelease((JSGlobalContextRef)ctx);
 	JSTContextGroupRelease(ctxgroup);
-
+//	char bool frack;
+	return 0;
 }
 
