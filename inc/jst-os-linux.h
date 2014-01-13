@@ -32,7 +32,6 @@ typedef char32_t UTF32;
 typedef char16_t UTF16;
 typedef char UTF8;
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 

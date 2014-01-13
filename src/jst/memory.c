@@ -114,16 +114,16 @@ static JSTValue jst_memory_clear JSTDeclareFunction(address, width, units) {
 	);
 
 	if (width == 1)	{
-		int8_t * clear = address;
+		gint8 * clear = address;
 		for (index = 0; index < units; index++) clear[index] = 0;
 	} else if (width == 2) {
-		int16_t * clear = address;
+		gint16 * clear = address;
 		for (index = 0; index < units; index++) clear[index] = 0;
 	} else if (width == 4) {
-		int32_t * clear = address;
+		gint32 * clear = address;
 		for (index = 0; index < units; index++) clear[index] = 0L;
 	} else if (width == 8) {
-		int64_t * clear = address;
+		gint64 * clear = address;
 		for (index = 0; index < units; index++) clear[index] = 0LL;
 	} else return JSTScriptNativeError(JST_TYPE_ERROR,
 		"unable to clear memory: expected width of 1, 2, 4, or 8: found %i", width
@@ -133,7 +133,7 @@ static JSTValue jst_memory_clear JSTDeclareFunction(address, width, units) {
 
 static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
-	void * address; int32_t type;
+	void * address; gint32 type;
 
 	if (!JSTArgumentToPointer(0, &address) || !JSTArgumentToInt(1, &type)) return NULL;
 	else if (!address) return JSTScriptNativeError(
@@ -147,13 +147,13 @@ static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
 	if (type & jst_type_integer) {
 		if (type & jst_type_1)
-			return JSTValueFromDouble((double) (unsign)?*(int8_t*)(address):*(uint8_t*)(address));
+			return JSTValueFromDouble((double) (unsign)?*(gint8*)(address):*(guint8*)(address));
 		else if (type & jst_type_2)
-			return JSTValueFromDouble((double) (unsign)?*(uint16_t*)(address):*(int16_t*)(address));
+			return JSTValueFromDouble((double) (unsign)?*(guint16*)(address):*(gint16*)(address));
 		else if (type & jst_type_4)
-			return JSTValueFromDouble((double) (unsign)?*(uint32_t*)(address):*(int32_t*)(address));
+			return JSTValueFromDouble((double) (unsign)?*(guint32*)(address):*(gint32*)(address));
 		else if (type & jst_type_8)
-			return JSTValueFromDouble((double) (unsign)?*(uint64_t*)(address):*(int64_t*)(address));
+			return JSTValueFromDouble((double) (unsign)?*(guint64*)(address):*(gint64*)(address));
 	} else {
 		if (type & jst_type_1)
 			return JSTValueFromDouble((double) *(bool*)(address));
@@ -171,7 +171,7 @@ static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
 static JSTValue jst_memory_write JSTDeclareFunction (address, type, value) {
 
-	void * address; int32_t type;
+	void * address; gint32 type;
 
 	if (! JSTArgumentToPointer(0, &address)) return NULL;
 	else if (! address ) return JSTScriptNativeError(
@@ -186,10 +186,10 @@ static JSTValue jst_memory_write JSTDeclareFunction (address, type, value) {
 	if (type & jst_type_reference || type & jst_type_string || type & jst_type_value)
 		*(intptr_t*)(address) = (intptr_t)value;
 	else if (type & jst_type_integer) {
-		if (type & jst_type_1) *(int8_t*)(address) = (int8_t) value;
-		else if (type & jst_type_2) *(int16_t*)(address) = (int16_t) value;
-		else if (type & jst_type_4) *(int32_t*)(address) = (int32_t) value;
-		else if (type & jst_type_8) *(int64_t*)(address) = (int64_t) value;
+		if (type & jst_type_1) *(gint8*)(address) = (gint8) value;
+		else if (type & jst_type_2) *(gint16*)(address) = (gint16) value;
+		else if (type & jst_type_4) *(gint32*)(address) = (gint32) value;
+		else if (type & jst_type_8) *(gint64*)(address) = (gint64) value;
 		else goto fail;
 	} else {
 		if (type & jst_type_1) *(bool*)(address) = (bool) value; 

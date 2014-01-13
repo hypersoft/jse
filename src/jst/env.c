@@ -191,7 +191,7 @@ static JSTDeclareInitializer(jst_env_initializer) {
 
 }
 
-static JSTClass jst_env_init(envp) {
+static JSTClass jst_env_init() {
 
 	JSTClassFunction functions[] = {
 		{"free", &jst_env_free, JSTObjectPropertyAPI},
@@ -223,7 +223,7 @@ static JSTClass jst_env_init(envp) {
 }
 
 /*
-	This webkit constructor business is an utter mess. Trying to emulate the functionality
+	This WebKit constructor business is an utter mess. Trying to emulate the functionality
 	of the standard classes requires too much "esoteric" knowledge.
 
 	The easiest way to implement this functionality is to define two native functions:

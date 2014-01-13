@@ -74,36 +74,36 @@ bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index
 	double integer = JSTValueToDouble(value);
 
 	if (bits == 8) { // char first, most likely repetitive conversion
-		if (integer < INT8_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT8) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is less than %i",
-			index, 8, integer, INT8_MIN
-		); else if (integer > INT8_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			index, 8, integer, G_MININT8
+		); else if (integer > G_MAXINT8)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is greater than %i",
-			index, 8, integer, INT8_MAX
+			index, 8, integer, G_MAXINT8
 		);
-		*(int8_t*) dest = (int8_t) integer;
+		*(gint8*) dest = (gint8) integer;
 	} else if (bits == 32) { // then long, most likely conversion
-		if (integer < INT32_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT32) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is less than %i",
-			index, 32, integer, INT32_MIN
-		); else if (integer > INT32_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			index, 32, integer, G_MININT32
+		); else if (integer > G_MAXINT32)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is greater than %i",
-			index, 32, integer, INT32_MAX
+			index, 32, integer, G_MAXINT32
 		);
-		*(int32_t*) dest = (int32_t) integer;
+		*(gint32*) dest = (gint32) integer;
 	} else if (bits == 16) {  // then short, least likely conversion
-		if (integer < INT16_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT16) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is less than %i",
-			index, 16, integer, INT16_MIN
-		); else if (integer > INT16_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			index, 16, integer, G_MININT16
+		); else if (integer > G_MAXINT16)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert argument %i to %i-bit integer: %.0g is greater than %i",
-			index, 16, integer, INT16_MAX
+			index, 16, integer, G_MAXINT16
 		);
-		*(int16_t*) dest = (int16_t) integer;
+		*(gint16*) dest = (gint16) integer;
 	} else if (bits == 64) { // then this, which is the "fastest conversion"
 		// NOTE: long long has more integer bits than double
 		// double can only hold 52 bits of integer (2^53)!
-		*(int64_t*) dest = (int64_t) integer;
+		*(gint64*) dest = (gint64) integer;
 	}
 	return true;
 }
@@ -137,36 +137,36 @@ bool JSTValueToInt_ JSTUtility(int bits, JSTValue input, void * dest) {
 	double integer = JSTValueToDouble(value);
 
 	if (bits == 8) { // char first, most likely repetitive conversion
-		if (integer < INT8_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT8) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is less than %i",
-			8, integer, INT8_MIN
-		); else if (integer > INT8_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			8, integer, G_MININT8
+		); else if (integer > G_MAXINT8)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is greater than %i",
-			8, integer, INT8_MAX
+			8, integer, G_MAXINT8
 		);
-		*(int8_t*) dest = (int8_t) integer;
+		*(gint8*) dest = (gint8) integer;
 	} else if (bits == 32) { // then long, most likely conversion
-		if (integer < INT32_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT32) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is less than %i",
-			32, integer, INT32_MIN
-		); else if (integer > INT32_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			32, integer, G_MININT32
+		); else if (integer > G_MAXINT32)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is greater than %i",
-			32, integer, INT32_MAX
+			32, integer, G_MAXINT32
 		);
-		*(int32_t*) dest = (int32_t) integer;
+		*(gint32*) dest = (gint32) integer;
 	} else if (bits == 16) { // then short, least likely conversion
-		if (integer < INT16_MIN) return JSTScriptNativeError(JST_RANGE_ERROR,
+		if (integer < G_MININT16) return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is less than %i",
-			16, integer, INT16_MIN
-		); else if (integer > INT16_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+			16, integer, G_MININT16
+		); else if (integer > G_MAXINT16)  return JSTScriptNativeError(JST_RANGE_ERROR,
 			"cannot convert value to %i-bit integer: %.0g is greater than %i",
-			16, integer, INT16_MAX
+			16, integer, G_MAXINT16
 		);
-		*(int16_t*) dest = (int32_t) integer;
+		*(gint16*) dest = (gint32) integer;
 	} else if (bits == 64) { // then long long, which is the fastest conversion
 		// NOTE: long long has more integer bits than double
 		// double can only hold 52 bits of integer (2^53)!
-		*(int64_t*) dest = (int64_t) integer;
+		*(gint64*) dest = (gint64) integer;
 	}
 	return true;
 }
@@ -197,11 +197,11 @@ bool JSTArgumentToPointer_ JSTUtility(int argc, JSTValue argv[], int index, void
 	if (integer < 0) return JSTScriptNativeError(JST_RANGE_ERROR,
 		"cannot convert argument %i to pointer: %.0g is less than 0",
 		index, integer
-	); else if (integer > UINTPTR_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+	); else if (integer > G_MAXUINT)  return JSTScriptNativeError(JST_RANGE_ERROR,
 		"cannot convert argument %i to pointer: %.0g is greater than %u",
-		index, integer, UINTPTR_MAX
+		index, integer, G_MAXUINT
 	);
-	*(uintptr_t*) dest = (uintptr_t) integer;
+	*(guintptr*) dest = (guintptr) integer;
 
 	return true;
 }
@@ -229,11 +229,11 @@ bool JSTValueToPointer_ JSTUtility(JSTValue input, void * dest) {
 
 	if (integer < 0) return JSTScriptNativeError(JST_RANGE_ERROR,
 		"cannot convert value to pointer: %.0g is less than 0", integer
-	); else if (integer > UINTPTR_MAX)  return JSTScriptNativeError(JST_RANGE_ERROR,
+	); else if (integer > G_MAXUINT)  return JSTScriptNativeError(JST_RANGE_ERROR,
 		"cannot convert value to pointer: %.0g is greater than %u",
-		integer, UINTPTR_MAX
+		integer, G_MAXUINT
 	);
-	*(uintptr_t*) dest = (uintptr_t) integer;
+	*(guintptr*) dest = (guintptr) integer;
 
 	return true;
 }
@@ -726,21 +726,21 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(sys, "gid", JSTValueFromDouble(getgid()), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(sys, "pid", JSTValueFromDouble(getpid()), JSTObjectPropertyAPI);
 
-	JSTObjectSetProperty(global, "sys_int8_min", JSTValueFromDouble(INT8_MIN), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_int8_max", JSTValueFromDouble(INT8_MAX), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_uint8_max", JSTValueFromDouble(UINT8_MAX), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int8_min", JSTValueFromDouble(G_MININT8), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int8_max", JSTValueFromDouble(G_MAXINT8), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_uint8_max", JSTValueFromDouble(G_MAXUINT8), JSTObjectPropertyAPI);
 
-	JSTObjectSetProperty(global, "sys_int16_min", JSTValueFromDouble(INT16_MIN), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_int16_max", JSTValueFromDouble(INT16_MAX), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_uint16_max", JSTValueFromDouble(UINT16_MAX), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int16_min", JSTValueFromDouble(G_MININT16), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int16_max", JSTValueFromDouble(G_MAXINT16), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_uint16_max", JSTValueFromDouble(G_MAXUINT16), JSTObjectPropertyAPI);
 
-	JSTObjectSetProperty(global, "sys_int32_min", JSTValueFromDouble(INT32_MIN), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_int32_max", JSTValueFromDouble(INT32_MAX), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_uint32_max", JSTValueFromDouble(UINT32_MAX), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int32_min", JSTValueFromDouble(G_MININT32), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int32_max", JSTValueFromDouble(G_MAXINT32), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_uint32_max", JSTValueFromDouble(G_MAXUINT32), JSTObjectPropertyAPI);
 
-	JSTObjectSetProperty(global, "sys_int64_min", JSTValueFromDouble(INT64_MIN), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_int64_max", JSTValueFromDouble(INT64_MAX), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(global, "sys_uint64_max", JSTValueFromDouble(UINT64_MAX), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int64_min", JSTValueFromDouble(G_MININT64), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_int64_max", JSTValueFromDouble(G_MAXINT64), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(global, "sys_uint64_max", JSTValueFromDouble(G_MAXUINT64), JSTObjectPropertyAPI);
 
 
 	/* advanced memory interface */
