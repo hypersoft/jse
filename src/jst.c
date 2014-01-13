@@ -413,7 +413,7 @@ JSTString JSTStringFromUTF32(register const gunichar *ucs4, size_t len, bool rel
 
 JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 	if (!s) return NULL;
-	JSTValue result = JSTAction(JSValueMakeString, s);
+	JSTValue result = JSValueMakeString(ctx, s);
 	if (release) JSTStringRelease(s);
 	return result;
 }
@@ -422,7 +422,7 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
 	JSTValue result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = JSTAction(JSValueMakeFromJSONString, s);
+		result = JSValueMakeFromJSONString(ctx, s);
 		JSTStringRelease(s);
 	}
 	return result;
