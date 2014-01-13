@@ -35,7 +35,7 @@ static JSValueRef jst_error_number JSTDeclareFunction () {
 }
 
 static JSValueRef jst_error_message JSTDeclareFunction () {
-	if (argc == 1) return JSTValueFromUTF8(strerror(JSTValueToDouble(argv[0])));
+	if (argc == 1) return JSTValueFromUTF8(g_strerror(JSTValueToDouble(argv[0])));
 	return JSTValueUndefined;
 }
 

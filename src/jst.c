@@ -341,7 +341,7 @@ JSTValue JSTScriptEval_ JSTUtility(const char *p1, JSTObject o, const char * p2,
 
 void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception, const char * file, int line, int errorType, const char * format, ...) {
 	va_list ap; va_start(ap, format); char * message = NULL;
-	vasprintf(&message, format, ap);
+	g_vasprintf(&message, format, ap);
 	if (errorType == 2) JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
 	else if (errorType == 3) JSTScriptEval("throw(this)", JSTScriptSyntaxError(message), file, line);
 	else if (errorType == 4) JSTScriptEval("throw(this)", JSTScriptTypeError(message), file, line);
@@ -350,7 +350,7 @@ void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue *excepti
 	else if (errorType == 7) JSTScriptEval("throw(this)", JSTScriptEvalError(message), file, line);
 	else if (errorType == 8) JSTScriptEval("throw(this)", JSTScriptURIError(message), file, line);
 	else JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
-	free(message);
+	g_free(message);
 	return NULL;
 }
 
@@ -371,15 +371,15 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue *except
 	char * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
 	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
 
-	fprintf(stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
+	g_fprintf(stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
 		message, (*message)?": ":"", url, line
 	);
 
-	free(message), free(url);
+	g_free(message), g_free(url);
 
 	if (!JSTValueIsVoid(JSTObjectGetProperty(e, "stack"))) {
 		char * b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
-		fprintf(stderr, "%s\n", b); free(b);
+		fprintf(stderr, "%s\n", b); g_free(b);
 	}
 
 	return JSTValueToDouble(JSTObjectGetProperty(e, "code"));
@@ -390,7 +390,7 @@ char * JSTStringToUTF8 (JSTString s, bool release) {
 	if (!s) return NULL;
 	register size_t bufferLength = 0; register void * buffer = NULL;
 	if (s && (bufferLength = JSStringGetMaximumUTF8CStringSize(s)))
-		JSStringGetUTF8CString(s, (buffer = malloc(bufferLength)), bufferLength);
+		JSStringGetUTF8CString(s, (buffer = g_malloc(bufferLength)), bufferLength);
 	if (release) JSTStringRelease(s);
 	return buffer;
 }
@@ -431,7 +431,7 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
 char * JSTConstructUTF8(char * format, ...) {
 	if (!format) return NULL;
 	va_list ap; va_start(ap, format); char * message = NULL;
-	vasprintf(&message, format, ap); return message;
+	g_vasprintf(&message, format, ap); return message;
 }
 
 static JSValueRef jst_execute JSTDeclareFunction () {
@@ -464,10 +464,6 @@ static JSValueRef jst_execute JSTDeclareFunction () {
 	dest = argument + oargc; int secondary=0;
 
 	while (secondary < argc) {
-		if (JSTValueIsNull(argv[secondary])) {
-			JSTScriptReportException();
-			return NULL;
-		}
 		JSTString tmp = JSTValueToString(argv[secondary]);
 		dest[secondary] = JSTStringToUTF8(tmp, true);
 		secondary++;
@@ -548,7 +544,7 @@ static JSValueRef jst_set_path JSTDeclareFunction () {
 	JSValueRef result = (status)?NULL:JSTValueFromDouble(status);
 	JSTStringFreeUTF8(val);
 
-	if (status) return JSTScriptNativeError(JST_URI_ERROR, strerror(errno));
+	if (status) return JSTScriptNativeError(JST_URI_ERROR, g_strerror(errno));
 	
 	return result;
 }
@@ -629,6 +625,7 @@ static JSValueRef jst_base64_encode JSTDeclareFunction () {
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected string argument");
 
 	char * input = JSTValueToUTF8(argv[0]);
+	// TODO: wtf is the g_ ?
 	size_t len = strlen(input);
 	char * base64 = g_base64_encode(input, len);
 
@@ -645,6 +642,7 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected string argument");
 
 	char * input = JSTValueToUTF8(argv[0]);
+	// TODO: wtf is the g_ ?
 	size_t len = strlen(input);
 	char * output = g_base64_decode(input, &len);
 

@@ -29,6 +29,8 @@ DAMAGE.
 
 /* Architecture/Compiler/Platform Independent Stuff Here */
 
+#include <string.h>
+
 #define jst_type_1 1
 #define jst_type_2 2
 #define jst_type_4 4
@@ -70,6 +72,7 @@ DAMAGE.
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <glib/gstdio.h>
+#include <glib/gprintf.h>
 
 #include "JavaScriptCore/JavaScript.h"
 #include "JavaScriptCore/JSBase.h"
@@ -174,8 +177,8 @@ DAMAGE.
 #define JSTScriptFunction(sName, iParamCount, pArgNames, sBody, sURL, iLine) JSObjectMakeFunction(ctx, sName, iParamCount, pArgNames, sBody sURL, iLine, exception)
 #define JSTStringRelease(s) JSStringRelease(s)
 #define JSTStringFromUTF8(p) JSStringCreateWithUTF8CString(p)
-#define JSTStringFreeUTF8(p) free(p)
-#define JSTStringFreeUTF32(p) free(p)
+#define JSTStringFreeUTF8(p) g_free(p)
+#define JSTStringFreeUTF32(p) g_free(p)
 #define JSTStringFromUTF16(b, c) JSStringCreateWithCharacters(b, c)
 #define JSTStringUTF16(s) JSStringGetCharactersPtr(s)
 #define JSTStringUTF16Length(s) JSStringGetLength(s)

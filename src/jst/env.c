@@ -60,7 +60,7 @@ static JSTDeclareSetProperty(jst_env_set) {
 		}
 	}
 
-	free(key);
+	g_free(key);
 
 	return result;
 
@@ -82,7 +82,7 @@ static JSTDeclareGetProperty(jst_env_get) {
 		if (value) result = JSTValueFromUTF8(value);
 	}
 
-	free(key);
+	g_free(key);
 
 	return result;
 
@@ -106,7 +106,7 @@ static JSTDeclareDeleteProperty(jst_env_delete) {
 		result = true;
 	}
 
-	free(key);
+	g_free(key);
 
 	return result;
 

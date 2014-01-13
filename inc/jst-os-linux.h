@@ -35,5 +35,4 @@ typedef char UTF8;
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <string.h>
 
