@@ -3,11 +3,7 @@
 declare -i MAJOR="0"
 declare -i MINOR="3"
 declare -i MINORMAX="99"
-<<<<<<< HEAD:bin/buildnum
 declare -i REVISION="717"
-=======
-declare -i REVISION="559"
->>>>>>> Hyperstone:tool/buildnum
 declare -i REVISIONMAX="999"
 
 buildnum () 
