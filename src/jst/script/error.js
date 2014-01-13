@@ -27,7 +27,6 @@ DAMAGE.
 
 */
 
-
 // fatal return codes, modify these on the newly constructed
 // object for custom exit error codes.
 // 1 is left for custom errors in cases where you need a 1 or 0 exit status.
@@ -57,8 +56,8 @@ Error.prototype.fromCaller = function(arrest) {
 
 	if (!Boolean(arrest)) {
 		data = stack[this.reverse].split('@');
-		data[0] += ' caller '+this.name
-		stack[this.reverse++] = data.join('@')
+		data[0] += ' caller '+this.name;
+		stack[this.reverse++] = data.join('@');
 	} else {
 		while(arrest-- && stack.length > 1) {
 			stack.shift();
@@ -68,23 +67,35 @@ Error.prototype.fromCaller = function(arrest) {
 	this.stack = stack.join('\n');
 	return this;
 
-}
+};
 
 // This must be defined here in this file, as if something goes wrong, the error
 // reporter won't operate as intended without this definition.
 
 sys.error = {
-	get number(){return sys_error_number()},
-	set number(v){return sys_error_number(v)},
-	get message(){return sys_error_message()},
-	clear: function clear(){return ! sys_error_number(0)},
+	get number(){
+		return sys_error_number();
+	},
+	set number(v){
+		return sys_error_number(v);
+	},
+	get message(){
+		return sys_error_message();
+	},
+	clear: function clear(){
+		return ! sys_error_number(0);
+	},
 	trace: function stack(e) {
-		var p = e || new Error(); var stack = p.stack.split('\n').reverse()
+		var p = e || new Error(); var stack = p.stack.split('\n').reverse();
 		stack.toString = function(){
 			return 'Stack Trace: { '+stack.join(' } --> { ').split('@').join(': ')+' }';
 		}; return stack;
 	},
-	toString: function toString(){return sys_error_message(sys_error_number())},
-	valueOf: function valueOf(){return sys_error_number()},
+	toString: function toString(){
+		return sys_error_message(sys_error_number());
+	},
+	valueOf: function valueOf(){
+		return sys_error_number();
+	}
 };
 

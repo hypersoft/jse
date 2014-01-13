@@ -450,7 +450,7 @@ Type.flags = new Flags(
 
 );
 
-sys.command = function(command) {
+sys.command = function() {
 	this.argv = Array.apply(null, arguments);
 	var bound = sys_execute.bind(this);
 	bound.capture = this;
