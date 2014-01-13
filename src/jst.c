@@ -243,7 +243,7 @@ JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exception, JSTO
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, c);
 	if (argc > 32) return JSTObjectUndefined; JSTValue argv[argc+1];
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
-	argv[count] = NULL; return JST(JSObjectCallAsConstructor, c, argc, argv);
+	argv[count] = NULL; return JSObjectCallAsConstructor(ctx, c, argc, argv, exception);
 }
 
 JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f) {
@@ -261,14 +261,14 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObjec
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, object);
 	if (argc > 32) return JSTValueUndefined; JSTValue argv[argc+1];
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
-	argv[count] = NULL; return JST(JSObjectCallAsFunction, method, object, argc, argv);
+	argv[count] = NULL; return JSObjectCallAsFunction(ctx, method, object, argc, argv, exception);
 }
 
 JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, char * n, void * m, int a) {
 	JSTObject method = NULL;
 	if (JSTValueIsObject(o)) {
-		JSTString name = (n)?:JSTStringFromUTF8(n):NULL; 
-		if (m) JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), name, (method = JSTAction(JSObjectMakeFunctionWithCallback, name, m)), a); 
+		JSTString name = (n)?JSTStringFromUTF8(n):NULL; 
+		if (m) JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), name, (method = JSObjectMakeFunctionWithCallback(ctx, name, m)), a, exception); 
 		JSTStringRelease(name); 
 	}
 	return method;
@@ -278,7 +278,7 @@ JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c,
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
-		JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), name, (constructor = JSTAction(JSObjectMakeConstructor, c, m)), a);
+		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), name, (constructor =JSObjectMakeConstructor(ctx, c, m)), a, exception);
 		JSTStringRelease(name);
 	}
 	return constructor;
@@ -288,7 +288,7 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = JST(JSObjectDeleteProperty, (o)?o:JSContextGetGlobalObject(ctx), s);
+		result = JSObjectDeleteProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, exception);
 		JSTStringRelease(s);
 	}
 	return result;
@@ -298,7 +298,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
 	void * result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = (void*) JST(JSObjectGetProperty, (o)?o:JSContextGetGlobalObject(ctx), s);
+		result = (void*) JSObjectGetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, exception);
 		JSTStringRelease(s);
 	}
 	return result;
@@ -308,7 +308,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
 void * JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a) {
 	if (p && v) {
 		JSTString s = JSTStringFromUTF8(p);
-		JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), s, v, a);
+		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, v, a, exception);
 		JSTStringRelease(s);
 	}
 	return (void*)v;
@@ -327,14 +327,14 @@ bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
 bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i) {
 	if (!p1 || !p2) return true;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
-	bool result = JST(JSCheckScriptSyntax, s[0], s[1], i);
+	bool result = JSCheckScriptSyntax(ctx, s[0], s[1], i, exception);
 	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
 }
 
 JSTValue JSTScriptEval_ JSTUtility(const char *p1, JSTObject o, const char * p2, size_t i) {
 	if (!p1 || !p2) return NULL;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
-	JSTValue result = JST(JSEvaluateScript, s[0], (o)?o:JSContextGetGlobalObject(ctx), s[1], i);
+	JSTValue result = JSEvaluateScript(ctx, s[0], (o)?o:JSContextGetGlobalObject(ctx), s[1], i, exception);
 	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
 	return result;
 }
@@ -404,7 +404,7 @@ UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release) {
 }
 
 JSTString JSTStringFromUTF32(register const gunichar *ucs4, size_t len, bool release) {
-	if (!ucs4 || !len) return NULL
+	if (!ucs4 || !len) return NULL;
 	long bytes = 0; const gunichar2 * utf16 = g_ucs4_to_utf16(ucs4, len, &bytes, NULL, NULL);
 	if (release) g_free((void*)ucs4);
 	JSTString result = JSTStringFromUTF16(utf16, bytes); g_free((void*)utf16);
