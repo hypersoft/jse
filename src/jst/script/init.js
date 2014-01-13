@@ -29,8 +29,11 @@ DAMAGE.
 
 Object.hideProperties = function(object, list) {
 	var desc, index, name, type = typeof object;
-	if (type !== 'object') throw new TypeError(type+" is not an object").fromCaller(-1);
-	else if (!Object.isExtensible(object)) throw new TypeError("object is not extensible").fromCaller(-1);
+	if (type !== 'object') throw new TypeError(type+" is not an object"
+	).fromCaller(-1);
+	else if (!Object.isExtensible(object)) throw new TypeError(
+		"object is not extensible"
+	).fromCaller(-1);
 	for (index in list) { name = String(list[index]);
 		if (object.propertyIsEnumerable(name)) {
 			desc = Object.getOwnPropertyDescriptor(object, name);
@@ -44,8 +47,9 @@ Object.hideProperties = function(object, list) {
 
 Object.maskPrototype = function(object) {
 	return Object.hideProperties(object, [
-		'valueOf', 'toString', 'hasOwnProperty', 'constructor', 'toLocaleString',
-		'toJSON', 'propertyIsEnumerable', 'isPrototypeOf', 'toObject'
+		'valueOf', 'toString', 'hasOwnProperty', 'constructor',
+		'toLocaleString', 'toJSON', 'propertyIsEnumerable', 'isPrototypeOf',
+		'toObject'
 	]);
 };
 
@@ -54,11 +58,18 @@ Object.setPrototypeOf = function(object, proto) {
 };
 
 Flags = function(array, prototype){
-	if (array.length >= 31) throw new RangeError("flags exceed integer bits").fromCaller(-1);
-	if (prototype === undefined) for (index in array) this[array[index]] = (1 << index);
+	var index;
+	if (array.length >= 31) throw new RangeError("flags exceed integer bits"
+	).fromCaller(-1);
+	if (prototype === undefined)
+		for (index in array) this[array[index]] = (1 << index);
 	else {
-		if (typeof prototype !== 'object') throw new TypeError("flag prototype != object").fromCaller(-1);
-		Object.defineProperty(this, "*prototype", {value:prototype, enumerable:false, writeable:false});
+		if (typeof prototype !== 'object') throw new TypeError(
+			"flag prototype != object"
+		).fromCaller(-1);
+		Object.defineProperty(this, "*prototype", {
+			value:prototype, enumerable:false, writeable:false
+		});
 		for (index in array) {
 			this[array[index]] = Object.create(prototype, {
 				value:{value:(1 << index), writeable:false, configurable:false},
@@ -75,12 +86,19 @@ Flags = function(array, prototype){
 		if (arguments.length < 2) throw new Error().fromCaller(-1);
 		for (i = 1; i < arguments.length; i++) {
 			if (typeof arguments[i] === 'string') {
-				if (arguments[i] in this === false) throw new ReferenceError("unknown flag name '"+arguments[i]+"' at argument "+i).fromCaller(-1);
+				if (arguments[i] in this === false) throw new ReferenceError(
+					"unknown flag name '"+arguments[i]+"' at argument "+i
+				).fromCaller(-1);
 				value |= Number(this[arguments[i]]);
 			} else {
 				var number = parseInt(arguments[i]);
-				if (isNaN(number)) throw new TypeError("argument "+i+" is not a integer or string");
-				if (number > Flags.max || number < Flags.min) throw new RangeError("numeric argument at index "+i+" exceeds value bounds").fromCaller(-1);
+				if (isNaN(number)) throw new TypeError(
+					"argument "+i+" is not a integer or string"
+				);
+				if (number > Flags.max || number < Flags.min) throw new
+				RangeError(
+					"numeric argument at index "+i+" exceeds value bounds"
+				).fromCaller(-1);
 				value |= Number(arguments[i]);
 			}
 		}
@@ -97,7 +115,9 @@ Flags = function(array, prototype){
 		}
 		if (arguments.length === 3) 	{
 			var string = "";
-			for(name in this) string += (head + name + sum + Number(this[name]) + sep);
+			for(name in this) string += (
+				head + name + sum + Number(this[name]) + sep
+			);
 			return string;
 		}
 		return Object.prototype.toString.call(this);
@@ -115,8 +135,9 @@ function Type(model) {
 	}); delete model.data;
 
 	for (name in model) {
-		if (name in this === false)
-			throw new TypeError("property name "+name+" is not a valid type property").fromCaller(-1);
+		if (name in this === false) throw new TypeError(
+			"property name "+name+" is not a valid type property"
+		).fromCaller(-1);
 		try {this[name] = model[name];} catch(e) {throw e.fromCaller(-1)}
 	}
 
@@ -145,8 +166,8 @@ Type.Data = function(data){
 },  Type.Data.prototype = {
 	name:undefined, alias:undefined, autoWidth:true, width:undefined,
 	reference:undefined, struct:undefined, union:undefined, constant:undefined,
-	array:undefined, value:undefined, utf:undefined, integer:undefined, signed:undefined,
-	dynamic:undefined, byteOrder:undefined
+	array:undefined, value:undefined, utf:undefined, integer:undefined,
+	signed:undefined, dynamic:undefined, byteOrder:undefined
 };
 
 Type.Array2d = function(rows, cols) {
@@ -192,9 +213,12 @@ Type.limit.max = function(type, integer){
 	if (Boolean(integer)) {
 		var max = 0;
 		if (type.width === 1) max = (type.unsigned === true) ? 0xFF : 0x7F;
-		else if (type.width === 2) max = (type.unsigned === true) ? 0xFFFF : 0x7FFF;
-		else if (type.width === 4) max = (type.unsigned === true) ? 0xFFFFFFFF : 0x7FFFFFFF;
-		else if (type.width === 8) max = (type.unsigned === true) ? 0xffffffffffffffff : 0x7fffffffffffffff;
+		else if (type.width === 2) max = (type.unsigned === true) ?
+			0xFFFF : 0x7FFF;
+		else if (type.width === 4) max = (type.unsigned === true) ?
+			0xFFFFFFFF : 0x7FFFFFFF;
+		else if (type.width === 8) max = (type.unsigned === true) ?
+			0xffffffffffffffff : 0x7fffffffffffffff;
 		return max;
 	}
 	return Number.MAX_VALUE;
@@ -207,7 +231,8 @@ Type.Width = function(number, integer) {
 			width:number, min:null, max:null, bits:null
 		},  enumerable:false
 	});
-	this.data.max = Type.limit.max(this.data, integer), this.data.min = Type.limit.min(this.data, integer);
+	this.data.max = Type.limit.max(this.data, integer),
+	this.data.min = Type.limit.min(this.data, integer),
 	this.data.bits = number * 8;
 },  Type.Width.prototype = Object.hideProperties({
 	get max(){return this.data.max;}, get min(){return this.data.min;},
@@ -219,7 +244,8 @@ Type.Width = function(number, integer) {
 
 Type.align = function(address, type) {
 	if (isNaN(address)) throw new TypeError().fromCaller(-1);
-	var width = (type instanceof Type) ? Number(type.width) : sys.memory.alignment;
+	var width = (type instanceof Type) ?
+		Number(type.width) : sys.memory.alignment;
 	if (isNaN(width)) throw new TypeError().fromCaller(-1);
 	var unaligned = (address % width);
 	if (unaligned !== 0) {
@@ -236,7 +262,8 @@ Type.prototype = Object.create({
 		} else if ('rows' in v) {
 			this.data.array.rows = v.rows;
 			if ('cols' in v) {
-				if (this.data.array.cols !== undefined) throw new ReferenceError()
+				if (this.data.array.cols !== undefined) throw new
+					ReferenceError()
 				this.data.array.cols = v.cols;
 			}
 		}
@@ -244,13 +271,16 @@ Type.prototype = Object.create({
 	get label(){
 		var block = this.data.array.toString();
 		if (block !== "") block = " " + block;
-		if (this.float) return (this.width === 4)? "single" : "double" + block +" precision float";
+		if (this.float) return (this.width === 4) ?
+			"single" : "double" + block +" precision float";
 		else if (this.boolean) return "boolean" + block;
 		else if (this.utf) return this.width.bits + " bit character" + block;
 		else if (this.value) return "JavaScript value" + block;
-		else if (this.reference) return "pointer" + block + " to " + this.reference.label;
+		else if (this.reference)
+			return "pointer" + block + " to " + this.reference.label;
 		else if (this.integer && this.width)
-			return (this.signed)? "signed " : "unsigned " + this.width.bits + " bit integer" + block;
+			return (this.signed) ?
+				"signed ":"unsigned "+this.width.bits +" bit integer"+block;
 		return "void";
 	},
 	get integer() {
@@ -258,7 +288,8 @@ Type.prototype = Object.create({
         },
 	set integer(v) {
 		if (this.data.integer === undefined) this.data.integer = Boolean(v);
-		if (Boolean(this.data.autoWidth)) this.data.width = new Type.Width(4, true);
+		if (Boolean(this.data.autoWidth))
+			this.data.width = new Type.Width(4, true);
 	},
 	get signed() {
             return Boolean(this.data.signed);
@@ -286,7 +317,9 @@ Type.prototype = Object.create({
             return this.data.reference || Boolean(false);
         },
 	set reference(v){
-		if (v.reference === v) throw new ReferenceError("infinite type recursion detected").fromCaller(-1)
+		if (v.reference === v) throw new ReferenceError(
+			"infinite type recursion detected"
+		).fromCaller(-1);
 		else if (v === true || v === false) this.data.reference = v;
 		else if(!v instanceof Type) throw new ReferenceError();
 		else this.data.reference = Type.duplicate(v);
@@ -296,7 +329,9 @@ Type.prototype = Object.create({
             return this.data.utf || Boolean(false);
         },
 	set utf(v){
-		if(v !== 8 && v !== 16 && v !== 32) throw new TypeError().fromCaller(-1);
+		if(v !== 8 && v !== 16 && v !== 32) throw new TypeError(
+			"invalid utf type width "+v
+		).fromCaller(-1);
 		if (this.data.utf !== undefined || this.data.autoWidth !== true)
 			throw new TypeError(Type.limit(this, v+" bit utf")).fromCaller(-1);
 		if (v === 8 && this.data.signed === undefined) this.signed = true;
@@ -307,10 +342,14 @@ Type.prototype = Object.create({
             return this.data.width || 0;
         },
 	set width(v){
-		if(v !== 1 || v !== 2 || v !== 4 || v !== 8) throw new TypeError().fromCaller(-1);
+		if (v !== 1 || v !== 2 || v !== 4 || v !== 8) throw new TypeError(
+			"invalid type width"
+		).fromCaller(-1);
 		if (this.data.width !== undefined && !Boolean(this.data.autoWidth))
 			throw new TypeError(Type.limit(this, (v*8)+" bits")).fromCaller(-1)
-		this.data.autoWidth = false, this.data.width = new Type.Width(v, this.integer);
+		this.data.autoWidth = false, this.data.width = new Type.Width(
+			v, this.integer
+		);
 	},
 	get size(){
 		if (!Boolean(this.data.width)) throw new ReferenceError(
@@ -323,14 +362,19 @@ Type.prototype = Object.create({
 		return Boolean(!this.integer && (this.width === 4 || this.width === 8));
 	},
 	set float(v){
-		if (this.width) throw new TypeError(Type.limit(this, "precision floating point")).fromCaller(-1);
+		if (this.width) throw new TypeError(
+			Type.limit(this, "precision floating point")
+		).fromCaller(-1);
 		else if (v === 1 || v === 'single' || v === true) this.width = 4;
 		else if (v === 2 || v === 'double') this.width = 8;
 		else throw new TypeError().fromCaller(-1);
 		this.integer = false;
 	},
 	get boolean() {
-		return Boolean(this.integer === true && this.width === 1 && Boolean(this.utf) === false && this.signed === undefined);
+		return Boolean(this.integer === true &&
+			this.width === 1 && Boolean(this.utf) === false &&
+			this.signed === undefined
+		);
 	},
 	set boolean(v) {
 		if (this.width !== undefined || this.utf !== false)
@@ -342,35 +386,52 @@ Type.prototype = Object.create({
             return Boolean(this.data.constant);
         },
 	set constant(v){
-		if (this.data.constant !== undefined) throw new TypeError().fromCaller(-1);
-		else if (v !== true && v !== false) throw new TypeError().fromCaller(-1);
+		if (this.data.constant !== undefined) throw new TypeError(
+			"constant property already defined"
+		).fromCaller(-1);
+		else if (v !== true && v !== false) throw new TypeError(
+			"expected boolean value"
+		).fromCaller(-1);
 		this.data.constant = Boolean(v);
 	},
 	get value(){
             return Boolean(this.data.value);
         },
 	set value(v){
-		if (this.data.value !== undefined) throw new TypeError().fromCaller(-1);
-		else if (v !== true && v !== false) throw new TypeError().fromCaller(-1);
-		else if (this.width) throw new TypeError().fromCaller(-1);
+		if (this.data.value !== undefined) throw new TypeError(
+			"type value property already defined"
+		).fromCaller(-1);
+		else if (v !== true && v !== false) throw new TypeError(
+			"expected boolean value"
+		).fromCaller(-1);
+		else if (this.width) throw new TypeError(
+			"type width has already been defined"
+		).fromCaller(-1);
 		this.data.value = Boolean(v);
 	}
 }, {
 	constructor: {value:Type, enumerable:false},
 	toString: {value:function(profile){
 		if (profile in Type.format) return Type.format[profile].call(this);
-		else throw new ReferenceError("unknown type format: "+profile).fromCaller(-1);
+		else throw new ReferenceError(
+			"unknown type format: "+profile
+		).fromCaller(-1);
 	},  enumerable:false},
 	valueOf:{value:function(profile){
 		if (profile in Type.encode) return Type.encode[profile].call(this);
-		else throw new ReferenceError("unknown type encoder: "+profile).fromCaller(-1);
+		else throw new ReferenceError(
+			"unknown type encoder: "+profile
+		).fromCaller(-1);
 	},  enumerable:false}
 });
 
 Type.flags = new Flags(
 
-	["1", "2", "4", "8", "void", "constant", "integer", "signed", "utf", "value",
-	"string", "reference", "array", "struct", "union", "dynamic", "host", "network"],
+	[
+		"1", "2", "4", "8", "void", "constant", "integer", "signed", "utf",
+		"value", "string", "reference", "array", "struct", "union", "dynamic",
+		"host", "network"
+	],
 
 	Object.create(null, {
 		toString: {
@@ -407,15 +468,26 @@ sys.class = function(name, construct, exec, prototype) {
 
 	var f = eval("(function "+name+"() {" +
 	"	if (this instanceof arguments.callee) {" +
-	"		return Object.setPrototypeOf(arguments.callee.construct.apply(null, arguments), arguments.callee.prototype);" +
+	"		return Object.setPrototypeOf(" +
+	"			arguments.callee.construct.apply(null, arguments)," +
+	"			arguments.callee.prototype" +
+	"		);" +
 	"	} else {" +
-	"		return Object.setPrototypeOf(arguments.callee.exec.apply(null, arguments), arguments.callee.prototype);" +
+	"		return Object.setPrototypeOf(" +
+	"			arguments.callee.exec.apply(null, arguments)," +
+	"			arguments.callee.prototype" +
+	"		);" +
 	"	}" +
 	"})");
 
 	var enterface = Object.defineProperties(f, {
-		construct:{value:construct, enumerable:false, writeable:false, configurable:false},
-		exec:{value:exec, enumerable:false, writeable:false, configurable:false},
+		construct:{
+			value:construct,
+			enumerable:false, writeable:false, configurable:false
+		},
+		exec:{
+			value:exec, enumerable:false, writeable:false, configurable:false
+		},
 		prototype:{value:prototype,enumerable:false,configurable:false}
 	}).bind(this);
 
