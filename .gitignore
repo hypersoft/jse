@@ -1,10 +1,7 @@
+inc/license.h
+inc/notice.h
+tool/bin2inc
+src/jst/error.inc
+src/jst/init.inc
+bin/jst.o
 bin/jse
-bin/lib*
-bin/*.o
-inc/JavaScriptCore
-inc/dyncall
-*.s
-src/*.s
-src/JSTInit.inc
-src/JSTNative.inc
-kb
