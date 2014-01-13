@@ -49,7 +49,7 @@ Error.prototype.fromCaller = function(arrest) {
 	if (arrest < 0) arrest = -arrest; // accept negatives
 
 	var stack = this.stack.split('\n');
-	if (stack.length == 1) return this; // just pretend this didn't happen...
+	if (stack.length === 1) return this; // just pretend this didn't happen...
 	var data = stack[this.reverse+1].split('@');
 	var source = data[1].split(':');
 	this.sourceURL = source[0], this.line = source[1];

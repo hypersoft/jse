@@ -711,7 +711,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 		Briefly, function takes no arguments and works with the startup envp.
 		Constructor takes an optional argument, that will default to a copy
 		of envp, for use as an argument to exec functions accepting envp parameter.
-		These functions are augmented in script to provide standard javascript
+		These functions are augmented in script to provide standard JavaScript
 		constructor function behavior.
 	*/
 	JSTObjectSetMethod(global, "sys_env_function", jst_env_function, JSTObjectPropertyAPI);
