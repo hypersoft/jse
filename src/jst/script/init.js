@@ -40,30 +40,30 @@ Object.hideProperties = function(object, list) {
 		}
 	}
 	return object;
-}
+};
 
 Object.maskPrototype = function(object) {
 	return Object.hideProperties(object, [
 		'valueOf', 'toString', 'hasOwnProperty', 'constructor', 'toLocaleString',
 		'toJSON', 'propertyIsEnumerable', 'isPrototypeOf', 'toObject'
 	]);
-}
+};
 
 Object.setPrototypeOf = function(object, proto) {
 	return sys_set_prototype(object, proto);
-}
+};
 
 Flags = function(array, prototype){
 	if (array.length >= 31) throw new RangeError("flags exceed integer bits").fromCaller(-1);
 	if (prototype === undefined) for (index in array) this[array[index]] = (1 << index);
 	else {
-		if (typeof prototype != 'object') throw new TypeError("flag prototype != object").fromCaller(-1);
+		if (typeof prototype !== 'object') throw new TypeError("flag prototype != object").fromCaller(-1);
 		Object.defineProperty(this, "*prototype", {value:prototype, enumerable:false, writeable:false});
 		for (index in array) {
 			this[array[index]] = Object.create(prototype, {
 				value:{value:(1 << index), writeable:false, configurable:false},
 				name:{value:array[index], writeable:false, configurable:false},
-				group:{value:this, writeable:false, configurable:false},
+				group:{value:this, writeable:false, configurable:false}
 			});
 		}
 	}
@@ -76,7 +76,7 @@ Flags = function(array, prototype){
 		for (i = 1; i < arguments.length; i++) {
 			if (typeof arguments[i] === 'string') {
 				if (arguments[i] in this === false) throw new ReferenceError("unknown flag name '"+arguments[i]+"' at argument "+i).fromCaller(-1);
-				value |= Number(this[arguments[i]])
+				value |= Number(this[arguments[i]]);
 			} else {
 				var number = parseInt(arguments[i]);
 				if (isNaN(number)) throw new TypeError("argument "+i+" is not a integer or string");
@@ -86,7 +86,7 @@ Flags = function(array, prototype){
 		}
 		return Object.create(prototype, {
 			value:{value:value, writeable:false, configurable:false},
-			name:{value:name, writeable:false, configurable:false},
+			name:{value:name, writeable:false, configurable:false}
 		});
 	}, enumerable:false, writeable:false, configurable:false},
 	toString: {value:function(head, sum, sep){
@@ -95,8 +95,8 @@ Flags = function(array, prototype){
 				return this.toString("#define "+sep, " ", "\n");
 			}
 		}
-		if (arguments.length == 3) 	{
-			var string = ""
+		if (arguments.length === 3) 	{
+			var string = "";
 			for(name in this) string += (head + name + sum + Number(this[name]) + sep);
 			return string;
 		}
@@ -115,9 +115,9 @@ function Type(model) {
 	}); delete model.data;
 
 	for (name in model) {
-		if (name in this == false)
+		if (name in this === false)
 			throw new TypeError("property name "+name+" is not a valid type property").fromCaller(-1);
-		try {this[name] = model[name]} catch(e) {throw e.fromCaller(-1)}
+		try {this[name] = model[name];} catch(e) {throw e.fromCaller(-1)}
 	}
 
 }
@@ -125,15 +125,15 @@ function Type(model) {
 Type.duplicate = function(type){
 	if (!type instanceof Type) throw new TypeError().fromCaller(-1);
 	return new Type({data:type.data});
-}
+};
 
 Type.format = {
-	'undefined':function(){return this.label},
+	'undefined':function(){return this.label;}
 };
 
 Type.encode = {
-	'undefined':function(){return this.flags || 0},
-}
+	'undefined':function(){return this.flags || 0;}
+};
 
 Type.Data = function(data){
 	var array = new Type.Array2d();
@@ -156,49 +156,49 @@ Type.Array2d = function(rows, cols) {
 	toString:function(){
 		var val = "";
 		if (this.rows) {
-			val = "array["+this.rows+"]"
-			if (this.cols != undefined) val += "["+this.cols+"]"
+			val = "array["+this.rows+"]";
+			if (this.cols !== undefined) val += "["+this.cols+"]";
 		}
 		return val;
 	},
 	valueOf:function(){
 		var val = 0;
 		if (this.rows) {
-			val = this.rows
-			if (this.cols != undefined) val *= this.cols
+			val = this.rows;
+			if (this.cols !== undefined) val *= this.cols;
 		}
 		return val;
 	}
-}
+};
 
 Type.limit = function(type, invalid){
-	return "cannot change type " + type.label + " to " + invalid + " type"
-}
+	return "cannot change type " + type.label + " to " + invalid + " type";
+};
 
 Type.limit.min = function(type, integer) {
 	if (Boolean(integer)) {
 		if (Boolean(type.unsigned)) return 0;
-		var min = 0
-		if (type.width == 1) min = -0x80;
-		else if (type.width == 2) min = -0x8000;
-		else if (type.width == 4) min = -0x80000000;
-		else if (type.width == 8) min = -0x8000000000000000;
+		var min = 0;
+		if (type.width === 1) min = -0x80;
+		else if (type.width === 2) min = -0x8000;
+		else if (type.width === 4) min = -0x80000000;
+		else if (type.width === 8) min = -0x8000000000000000;
 		return min;
 	}
 	return Number.MIN_VALUE;
-}
+};
 
 Type.limit.max = function(type, integer){
 	if (Boolean(integer)) {
-		var max = 0
-		if (type.width == 1) max = (type.unsigned == true) ? 0xFF : 0x7F
-		else if (type.width == 2) max = (type.unsigned == true) ? 0xFFFF : 0x7FFF
-		else if (type.width == 4) max = (type.unsigned == true) ? 0xFFFFFFFF : 0x7FFFFFFF
-		else if (type.width == 8) max = (type.unsigned == true) ? 0xffffffffffffffff : 0x7fffffffffffffff
+		var max = 0;
+		if (type.width === 1) max = (type.unsigned === true) ? 0xFF : 0x7F;
+		else if (type.width === 2) max = (type.unsigned === true) ? 0xFFFF : 0x7FFF;
+		else if (type.width === 4) max = (type.unsigned === true) ? 0xFFFFFFFF : 0x7FFFFFFF;
+		else if (type.width === 8) max = (type.unsigned === true) ? 0xffffffffffffffff : 0x7fffffffffffffff;
 		return max;
 	}
 	return Number.MAX_VALUE;
-}
+};
 
 Type.Width = function(number, integer) {
 	if (!this instanceof Type.Width) throw new TypeError();
@@ -210,41 +210,41 @@ Type.Width = function(number, integer) {
 	this.data.max = Type.limit.max(this.data, integer), this.data.min = Type.limit.min(this.data, integer);
 	this.data.bits = number * 8;
 },  Type.Width.prototype = Object.hideProperties({
-	get max(){return this.data.max}, get min(){return this.data.min},
-	get bits(){return this.data.bits},
+	get max(){return this.data.max;}, get min(){return this.data.min;},
+	get bits(){return this.data.bits;},
 	constructor: Type.Width,
-	valueOf: function(){return this.data.width},
-	toString: function(){return this.data.width}
+	valueOf: function(){return this.data.width;},
+	toString: function(){return this.data.width;}
 },  ['constructor', 'valueOf', 'toString']);
 
 Type.align = function(address, type) {
 	if (isNaN(address)) throw new TypeError().fromCaller(-1);
 	var width = (type instanceof Type) ? Number(type.width) : sys.memory.alignment;
 	if (isNaN(width)) throw new TypeError().fromCaller(-1);
-	var unaligned = (address % width)
-	if (unaligned != 0) {
+	var unaligned = (address % width);
+	if (unaligned !== 0) {
 		return Number(address + (width - unaligned));
 	} else return address;
-}
+};
 
 Type.prototype = Object.create({
-	get array(){return Object.create(this.data.array)},
+	get array(){return Object.create(this.data.array);},
 	set array(v){
-		if (this.data.array.rows != undefined) throw new ReferenceError()
-		if (typeof v == 'number') {
+		if (this.data.array.rows !== undefined) throw new ReferenceError()
+		if (typeof v === 'number') {
 			this.data.array.rows = v;
 		} else if ('rows' in v) {
-			this.data.array.rows = v.rows
+			this.data.array.rows = v.rows;
 			if ('cols' in v) {
-				if (this.data.array.cols != undefined) throw new ReferenceError()
-				this.data.array.cols = v.cols
+				if (this.data.array.cols !== undefined) throw new ReferenceError()
+				this.data.array.cols = v.cols;
 			}
 		}
 	},
 	get label(){
 		var block = this.data.array.toString();
-		if (block != "") block = " " + block
-		if (this.float) return (this.width == 4)? "single" : "double" + block +" precision float";
+		if (block !== "") block = " " + block;
+		if (this.float) return (this.width === 4)? "single" : "double" + block +" precision float";
 		else if (this.boolean) return "boolean" + block;
 		else if (this.utf) return this.width.bits + " bit character" + block;
 		else if (this.value) return "JavaScript value" + block;
@@ -253,18 +253,22 @@ Type.prototype = Object.create({
 			return (this.signed)? "signed " : "unsigned " + this.width.bits + " bit integer" + block;
 		return "void";
 	},
-	get integer() {return Boolean(this.data.integer)},
+	get integer() {
+            return Boolean(this.data.integer);
+        },
 	set integer(v) {
-		if (this.data.integer === undefined) this.data.integer = Boolean(v)
+		if (this.data.integer === undefined) this.data.integer = Boolean(v);
 		if (Boolean(this.data.autoWidth)) this.data.width = new Type.Width(4, true);
 	},
-	get signed() {return Boolean(this.data.signed)},
+	get signed() {
+            return Boolean(this.data.signed);
+        },
 	set signed(v) {
 		var s = "signed", u = "unsigned"; v = Boolean(v);
 		if (this.data.integer === undefined) this.integer = true;
 		else if (!Boolean(this.data.integer))
 			throw new TypeError(Type.limit(this, (v)?s:u)).fromCaller(-1)				
-		else if (this.data.signed != undefined)
+		else if (this.data.signed !== undefined)
 			throw new TypeError(Type.limit(this, (v)?s:u)).fromCaller(-1)					
 		this.data.signed = v;
 	},
@@ -272,9 +276,15 @@ Type.prototype = Object.create({
 		return Boolean(this.data.signed === false);
 	},
 	set unsigned(v) {
-		try {this.signed = !Boolean(v)} catch(e) {throw e.fromCaller(-1)}
+		try {
+                    this.signed = !Boolean(v);
+                } catch(e) {
+                    throw e.fromCaller(-1);
+                }
 	},
-	get reference(){return this.data.reference || Boolean(false)},
+	get reference(){
+            return this.data.reference || Boolean(false);
+        },
 	set reference(v){
 		if (v.reference === v) throw new ReferenceError("infinite type recursion detected").fromCaller(-1)
 		else if (v === true || v === false) this.data.reference = v;
@@ -282,29 +292,35 @@ Type.prototype = Object.create({
 		else this.data.reference = Type.duplicate(v);
 		this.integer = true, this.width = 4;
 	},
-	get utf(){return this.data.utf || Boolean(false)},
+	get utf(){
+            return this.data.utf || Boolean(false);
+        },
 	set utf(v){
-		if(v != 8 && v != 16 && v != 32) throw new TypeError().fromCaller(-1);
-		if (this.data.utf != undefined || this.data.autoWidth != true)
+		if(v !== 8 && v !== 16 && v !== 32) throw new TypeError().fromCaller(-1);
+		if (this.data.utf !== undefined || this.data.autoWidth !== true)
 			throw new TypeError(Type.limit(this, v+" bit utf")).fromCaller(-1);
-		if (v == 8 && this.data.signed === undefined) this.signed = true
+		if (v === 8 && this.data.signed === undefined) this.signed = true;
 		else this.signed = false;
 		this.data.utf = v, this.width = v/8;
 	},
-	get width(){return this.data.width || 0},
+	get width(){
+            return this.data.width || 0;
+        },
 	set width(v){
-		if(!v == 1 || !v == 2 || !v == 4 || !v == 8) throw new TypeError().fromCaller(-1);
-		if (this.data.width != undefined && !Boolean(this.data.autoWidth))
+		if(v !== 1 || v !== 2 || v !== 4 || v !== 8) throw new TypeError().fromCaller(-1);
+		if (this.data.width !== undefined && !Boolean(this.data.autoWidth))
 			throw new TypeError(Type.limit(this, (v*8)+" bits")).fromCaller(-1)
 		this.data.autoWidth = false, this.data.width = new Type.Width(v, this.integer);
 	},
 	get size(){
-		if (!Boolean(this.data.width)) throw new ReferenceError("cannot calculate size of "+this.label).fromCaller(-1);
-		var length = Number(this.array) || 1
+		if (!Boolean(this.data.width)) throw new ReferenceError(
+                    "cannot calculate size of "+this.label
+                ).fromCaller(-1);
+		var length = Number(this.array) || 1;
 		return (this.width * length);
 	},
 	get float(){
-		return !this.integer && this.width == 4 || this.width == 8;
+		return Boolean(!this.integer && (this.width === 4 || this.width === 8));
 	},
 	set float(v){
 		if (this.width) throw new TypeError(Type.limit(this, "precision floating point")).fromCaller(-1);
@@ -314,27 +330,31 @@ Type.prototype = Object.create({
 		this.integer = false;
 	},
 	get boolean() {
-		return Boolean(this.integer === true && this.width == 1 && Boolean(this.utf) == false && this.signed === undefined)
+		return Boolean(this.integer === true && this.width === 1 && Boolean(this.utf) === false && this.signed === undefined);
 	},
 	set boolean(v) {
-		if (this.width != undefined || this.utf != false)
+		if (this.width !== undefined || this.utf !== false)
 			throw new TypeError(Type.limit(this, "boolean")).fromCaller(-1);
 		else if (!Boolean(v)) throw new TypeError().fromCaller(-1);
 		else this.integer = true, this.width = 1;
 	},
-	get constant(){return Boolean(this.data.constant)},
+	get constant(){
+            return Boolean(this.data.constant);
+        },
 	set constant(v){
-		if (this.data.constant != undefined) throw new TypeError().fromCaller(-1);
-		else if (v != true && v != false) throw new TypeError().fromCaller(-1);
+		if (this.data.constant !== undefined) throw new TypeError().fromCaller(-1);
+		else if (v !== true && v !== false) throw new TypeError().fromCaller(-1);
 		this.data.constant = Boolean(v);
 	},
-	get value(){return Boolean(this.data.value)},
+	get value(){
+            return Boolean(this.data.value);
+        },
 	set value(v){
-		if (this.data.value != undefined) throw new TypeError().fromCaller(-1);
-		else if (v != true && v != false) throw new TypeError().fromCaller(-1);
+		if (this.data.value !== undefined) throw new TypeError().fromCaller(-1);
+		else if (v !== true && v !== false) throw new TypeError().fromCaller(-1);
 		else if (this.width) throw new TypeError().fromCaller(-1);
 		this.data.value = Boolean(v);
-	},
+	}
 }, {
 	constructor: {value:Type, enumerable:false},
 	toString: {value:function(profile){
@@ -344,7 +364,7 @@ Type.prototype = Object.create({
 	valueOf:{value:function(profile){
 		if (profile in Type.encode) return Type.encode[profile].call(this);
 		else throw new ReferenceError("unknown type encoder: "+profile).fromCaller(-1);
-	},  enumerable:false},
+	},  enumerable:false}
 });
 
 Type.flags = new Flags(
@@ -354,26 +374,31 @@ Type.flags = new Flags(
 
 	Object.create(null, {
 		toString: {
-			value:function(){return this.name},
+			value:function(){
+                            return this.name;
+                        },
 			enumerable:false
 		},
 		valueOf: {
-			value:function(){return this.value},
+			value:function(){
+                            return this.value;
+                        },
 			enumerable:false
-		},
+		}
 	})
 
 );
-
 
 sys.command = function(command) {
 	this.argv = Array.apply(null, arguments);
 	var bound = sys_execute.bind(this);
 	bound.capture = this;
 	bound.argv = this.argv;
-	bound.toString = function(){return this.argv[0]};
+	bound.toString = function(){
+            return this.argv[0];
+        };
 	return bound;
-}
+};
 
 sys.include = sys_include;
 sys.global.exit = sys_exit;
@@ -397,6 +422,6 @@ sys.class = function(name, construct, exec, prototype) {
 	prototype.constructor = enterface;
 
 	return enterface;
-}
+};
 
 sys.env = sys.class('env', sys_env_constructor, sys_env_function, {});
