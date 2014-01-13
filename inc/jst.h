@@ -241,9 +241,9 @@ DAMAGE.
 
 /* Test system architecture */
 #if defined (__ia64__) || defined(_M_IA64)
-#define JSTArchitecture "64-bit";
+#define JSTArchitecture "64"
 #elif defined (_M_IX86) || defined (i386)
-#define JSTArchitecture "32-bit";
+#define JSTArchitecture "32"
 #else
 /* Not listed? Check: http://sourceforge.net/p/predef/wiki/Architectures/ */
 #error CPU Architecture Not Supported
@@ -254,7 +254,7 @@ DAMAGE.
 #define JSTOperatingSystem "GNU/Linux"
 #include "jst-os-linux.h"
 #elif __ANDROID__   
-#define JSTOperatingSystem "Android";
+#define JSTOperatingSystem "Android"
 #include "jst-os-linux.h"
 #elif defined (_WIN64) || defined (_WIN32)
 #define JSTOperatingSystem "Windows"
