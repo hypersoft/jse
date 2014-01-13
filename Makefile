@@ -9,6 +9,10 @@ JSTSources := $(shell echo src/jst/{error,env,memory,file}.c src/jst.c)
 
 all: bin/jse
 
+bin:
+	@printf '\nCreating output directory...\n'
+	@mkdir bin
+
 tool/bin2inc: tool/bin2inc.c
 	@printf '\nBuilding Hypersoft Systems bin2inc...\n'
 	gcc $< -o $@
@@ -33,7 +37,7 @@ bin/jst.o: ${JSTHeaders} ${JSTScripts} ${JSTSources}
 	@printf '\nBuilding Hypersoft Systems JST...\n'
 	gcc -c src/jst.c -o $@ ${BUILDCOMMON}
 
-bin/jse: bin/jst.o src/jse.c
+bin/jse: bin bin/jst.o src/jse.c
 	@printf '\nBuilding Hypersoft Systems JSE...\n'
 	gcc  bin/jst.o src/jse.c -o $@ ${BUILDCOMMON} 
 	@tool/buildnum -q
