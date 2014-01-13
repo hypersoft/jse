@@ -1,0 +1,27 @@
+
+Portions of this software "Hypersoft Systems JSE" and "Hypersoft Systems JST", are
+powered by and used under license from several contributing authors, companines and
+sources, each with its own respective licensing as described within this notice.
+
+-----------------------------------------------------------------------------------
+
+glibc is provided by The Free Software Foundation and The GNU C Library Project
+under the terms of the GNU LGPL V3
+
+GLib is provided by The Gnome Foundation under the terms of the GNU LGPL V3
+
+WebKitGTK+ Copyright (C) 2006, 2008 Apple Inc. and others is licensed under the
+terms of the BSD 2.0 License
+
+JavaScriptCore is provided by Apple and others under the terms of the GNU  LGPL V3
+
+libdl is provided by Many Authors under the terms of the Apache 2.0 License
+
+DynCall is provided by Daniel Adler and Tassilo Philipp under a custom license
+modeled after the ISC License
+
+-----------------------------------------------------------------------------------
+
+Depending on your vendor, you may already have these license documents available to
+you for local review on-demand. If you are unable to locate these documents with a
+source or binary distribution please contact your vendor for assistance.
