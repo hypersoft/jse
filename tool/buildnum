@@ -1,0 +1,174 @@
+#!/bin/bash
+
+declare -i MAJOR="0"
+declare -i MINOR="3"
+declare -i MINORMAX="99"
+<<<<<<< HEAD:bin/buildnum
+declare -i REVISION="717"
+=======
+declare -i REVISION="559"
+>>>>>>> Hyperstone:tool/buildnum
+declare -i REVISIONMAX="999"
+
+buildnum () 
+{ 
+    : "A self replicating build number database script";
+    : "Written by Triston J. Taylor (C) 2013 All Rights Reserved";
+    function tense () 
+    { 
+        ((verbose)) && printf -v format %s "Build No. $format"
+    };
+    function stamp () 
+    { 
+        tense;
+        printf "$format" $MAJOR $MINOR $REVISION
+    };
+    function report () 
+    { 
+        ((report)) && stamp
+    };
+    function noBiDiRequest () 
+    { 
+        ((generate)) || { 
+            echo "$0: error: bi-directional request: set for information in progress; prognostic: terminate";
+            exit 1
+        } 1>&2
+    };
+    function acceptFinalOption () 
+    { 
+        noBiDiRequest;
+        (($# > 1)) && { 
+            echo "$0: invocation error: option $1 must be the final argument";
+            exit 1
+        } 1>&2;
+        report;
+        exit 0
+    };
+    function acceptFinalArgument () 
+    { 
+        (($# > 2)) && { 
+            echo "$0: invocation error: option $1 argument '$2' must be the final argument";
+            exit 1
+        } 1>&2
+    };
+    function catdb () 
+    { 
+        printf "%s\n\n%s\n\n%s\n\n%s;\n\n" '#!/bin/bash' "`declare -p MAJOR MINOR MINORMAX REVISION REVISIONMAX`" "`declare -f buildnum`" 'buildnum "$@"'
+    };
+    local -i update=1 generate=1 report=1 verbose=0;
+    local target="$0" format='%i.%i.%i\n';
+    while [[ "${1:0:1}" = - ]]; do
+        : "Pass option -g to get the current build info";
+        [[ $1 == '-g' ]] && { 
+            acceptFinalOption "$@"
+        };
+        : "Pass option -G to get the verbose current build info";
+        [[ $1 == '-G' ]] && { 
+            let verbose=1;
+            acceptFinalOption "$@"
+        };
+        : "Pass option -m to manually increment minor";
+        [[ $1 == '-m' ]] && { 
+            let REVISION=$((REVISIONMAX + 1));
+            shift;
+            continue
+        };
+        : "Pass option -M to manually increment major";
+        [[ $1 == '-M' ]] && { 
+            let MINOR=$((MINORMAX + 1)) REVISION=0;
+            shift;
+            continue
+        };
+        : "Pass option -p to preview the next build number";
+        [[ $1 == '-p' ]] && { 
+            let update=0 generate=1;
+            shift;
+            continue
+        };
+        : "Pass option -P to preview the verbose next build number";
+        [[ $1 == '-P' ]] && { 
+            let verbose=1 update=0 generate=1;
+            shift;
+            continue
+        };
+        : "Pass option -q to mute generate -> report";
+        : "This option adversely affects default operation, -p, and -P";
+        [[ $1 == '-q' ]] && { 
+            let report=0;
+            shift;
+            continue
+        };
+        : "Pass option -f FORMAT to set the output format according to printf FORMAT";
+        : "The function recieves 3 integer arguments: MAJOR MINOR REVISION";
+        : "The default format is: (verbose) %i.%i.%i";
+        : "If verbose is specified, by any parameter its effect cannot be undone";
+        [[ $1 == '-f' ]] && { 
+            format="$2";
+            shift 2;
+            continue
+        };
+        : "Pass option --float to set the format to a stringified floating point";
+        : "representation";
+        [[ $1 == '--float' ]] && { 
+            format='%i.%i%i\n';
+            shift;
+            continue
+        };
+        : "Pass option -smm INTEGER to set the MINORMAX";
+        [[ $1 == '-smm' ]] && { 
+            let MINORMAX=$2 generate=0;
+            shift 2;
+            continue
+        };
+        : "Pass option -gmm to get the MINORMAX";
+        [[ $1 == '-gmm' ]] && { 
+            acceptFinalOption "$@";
+            echo MINORMAX=$MINORMAX;
+            return 0
+        };
+        : "Pass option -srm INTEGER to set the REVISIONMAX";
+        [[ $1 == '-srm' ]] && { 
+            let REVISIONMAX=$2 generate=0;
+            shift 2;
+            continue
+        };
+        : "Pass option -grm to get the REVISIONMAX";
+        [[ $1 == '-grm' ]] && { 
+            acceptFinalOption "$@";
+            echo REVISIONMAX=$REVISIONMAX;
+            return 0
+        };
+        : "Pass option -v to enable verbose";
+        [[ $1 == '-v' ]] && { 
+            let verbose=1;
+            shift 1;
+            continue
+        };
+        : "Pass option -c to clear the build number database";
+        : "Pass option -c FILE to create a new build number database";
+        [[ $1 == '-c' ]] && { 
+            acceptFinalArgument "$@";
+            declare -i MAJOR="0" MINOR="0" REVISION="0";
+            target="${2:-$target}";
+            catdb > "$target";
+            chmod +x "$target";
+            return 0
+        };
+        printf "$0: invocation error: unrecognized option: %s\n" "$1" 1>&2;
+        exit 1;
+    done;
+    ((generate)) && { 
+        let REVISION++;
+        (( REVISION > REVISIONMAX )) && { 
+            let MINOR++ REVISION=0
+        };
+        (( MINOR > MINORMAX )) && { 
+            let MAJOR++ MINOR=0 REVISION=0
+        };
+        report
+    };
+    ((update)) && catdb > "$target"
+}
+
+buildnum "$@";
+

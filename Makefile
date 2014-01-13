@@ -1,58 +1,44 @@
-
-DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 
-JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc) src/JSTInit.inc src/JSTNative.inc
-JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h src/JSTNative.inc inc/*.inc
+BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell tool/buildnum -p)"'
 
-BUILDCOMMON := -fno-strict-aliasing -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
-ASM := -S -fverbose-asm -masm=intel
+#since this is a GCC/GNU/Linux file we only require headers for this spec.
+JSTHeaders := $(shell echo inc/{jst,license,notice,jst-comp-gcc,jst-os-linux}.h)
+JSTScripts := $(shell echo src/jst/{error,init}.inc) # auto-built only
+JSTSources := $(shell echo src/jst/{error,env,memory,file}.c src/jst.c)
 
 all: bin/jse
 
-${DYNCALL}:
-	@bin/dynhacker
+tool/bin2inc: tool/bin2inc.c
+	@printf '\nBuilding Hypersoft Systems bin2inc...\n'
+	gcc $< -o $@
+
+inc/license.h: tool/bin2inc doc/license.txt
+	@printf '\nBuilding Hypersoft Systems JSE License...\n'	
+	tool/bin2inc SoftwareLicenseText < doc/license.txt > $@
+
+inc/notice.h: tool/bin2inc doc/notice.txt
+	@printf '\nBuilding Hypersoft Systems JSE Notice...\n'	
+	tool/bin2inc SoftwareNoticeText < doc/notice.txt > $@
+
+src/jst/error.inc: tool/bin2inc src/jst/script/error.js
+	@printf '\nBuilding Hypersoft Systems JST Error Script...\n'	
+	tool/bin2inc JSTErrorScript < src/jst/script/error.js > $@
+
+src/jst/init.inc: tool/bin2inc src/jst/script/init.js
+	@printf '\nBuilding Hypersoft Systems JST Init Script...\n'	
+	tool/bin2inc JSTInitScript < src/jst/script/init.js > $@
+
+bin/jst.o: ${JSTHeaders} ${JSTScripts} ${JSTSources}
+	@printf '\nBuilding Hypersoft Systems JST...\n'
+	gcc -c src/jst.c -o $@ ${BUILDCOMMON}
+
+bin/jse: bin/jst.o src/jse.c
+	@printf '\nBuilding Hypersoft Systems JSE...\n'
+	gcc  bin/jst.o src/jse.c -o $@ ${BUILDCOMMON} 
+	@tool/buildnum -q
 	@echo ''
-
-src/JSTInit.inc: src/JSTInit.js
-	@bin/bin2inc JSTInitScript $< > $@;
-
-src/JSTNative.inc: src/JSTNative.js
-	@bin/bin2inc JSTNativeScript $< > $@;
-
-bin/JSTools.o: ${JSTDEPENDS}
-	@echo compiling Hypersoft Systems JSTools
-	gcc -c src/JSTools.c -o $@ ${BUILDCOMMON}
-	@echo ''
-
-bin/jse: ${JSEDEPENDS}
-	@echo compiling Hypersoft Systems JSE
-	gcc  bin/*.o bin/*.a main.c -o $@ ${BUILDCOMMON} 
-	@bin/buildnum -q;
-	@echo ''
-
-install:
-	@printf 'installing: '
-	@cp -vt /bin bin/jse
-
-source:
-	gcc -E ${BUILDCOMMON} main.c
-
-src/JSTools.s: ${JSTDEPENDS}
-	gcc ${ASM} ${BUILDCOMMON} src/JSTools.c -o $@
-
-main.s: ${JSEDEPENDS}
-	gcc ${ASM} ${BUILDCOMMON} main.c -o $@
-
-asm: main.s src/JSTools.s
-
-kb:
-	mkdir kb
-
-kb/glib-html-2.39.0: kb
-	wget -O - https://developer.gnome.org/glib/glib-html-2.39.0.tar.gz | tar zxf - -C kb
-
-glib-html-kb: kb/glib-html-2.39.0
 
 clean:
-	@rm -rf bin/jse bin/*.a bin/*.o inc/dyncall *.s src/*.s src/JSTInit.inc
+	@rm -vrf inc/license.h inc/notice.h tool/bin2inc ${JSTScripts} bin/*.o bin/jse
+
