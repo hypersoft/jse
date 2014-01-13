@@ -1,5 +1,0 @@
-#!bin/jse
-
-// elapsed running msecs
-print.line(sys.engine.time)
-

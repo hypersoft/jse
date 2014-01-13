@@ -1,9 +1,0 @@
-#!bin/jse
-
-sys.object.property(this, {"shebang":"#!"}, function(data, name, value){
-	return name+": "+data[name];
-});
-
-print.line(shebang)
-
-
