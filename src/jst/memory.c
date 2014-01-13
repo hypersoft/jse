@@ -98,7 +98,7 @@ static JSTValue jst_memory_clear JSTDeclareFunction(address, width, units) {
 
 	void * address; size_t index, width = 1, units = 0;
 
-	if (!JSTValueToPointer(argv[0], &address)) return NULL;
+	if (!JSTArgumentToPointer(0, &address)) return NULL;
 	else if (!address) return JSTScriptNativeError(
 		JST_TYPE_ERROR, jst_memory_error_null, "cannot clear memory"
 	);
