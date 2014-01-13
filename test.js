@@ -6,5 +6,5 @@ var echo = new sys.command("echo");
 
 var env = new sys.env();
 
-echo(env.HOME);
+echo(sys.engine.arch);
 

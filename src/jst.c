@@ -684,7 +684,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(engine, "version", JSTValueFromUTF8(VERSION), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(engine, "codeName", JSTValueFromUTF8(CODENAME), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(engine, "os", JSTValueFromUTF8(JSTOperatingSystem), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(engine, "arch", JSTValueFromUTF8(JSTArchitecture), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(engine, "arch", JSTValueFromDouble(JSTArchitecture), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(engine, "path", JSTValueFromUTF8(argv[0]), JSTObjectPropertyAPI);
 
 	/* common environment utilities */

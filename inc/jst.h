@@ -241,9 +241,9 @@ DAMAGE.
 
 /* Test system architecture */
 #if defined (__ia64__) || defined(_M_IA64)
-#define JSTArchitecture "64"
+#define JSTArchitecture 64
 #elif defined (_M_IX86) || defined (i386)
-#define JSTArchitecture "32"
+#define JSTArchitecture 32
 #else
 /* Not listed? Check: http://sourceforge.net/p/predef/wiki/Architectures/ */
 #error CPU Architecture Not Supported
