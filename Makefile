@@ -1,6 +1,6 @@
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 
-BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell tool/buildnum -p)"'
+BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Hyperstone"' -DJSE_BUILDNO='"$(shell tool/buildnum -p)"'
 
 #since this is a GCC/GNU/Linux file we only require headers for this spec.
 JSTHeaders := $(shell echo inc/{jst,license,notice,jst-comp-gcc,jst-os-linux}.h)
