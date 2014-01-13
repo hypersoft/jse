@@ -26,5 +26,4 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObjec
 	argv[count] = NULL; return JST(JSObjectCallAsFunction, method, object, argc, argv);
 }
 
-
 #endif

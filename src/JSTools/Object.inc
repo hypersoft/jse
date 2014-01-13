@@ -13,18 +13,12 @@
 #define JSTObjectGetPrivate(o) JSObjectGetPrivate(o)
 #define JSTObjectSetPrivate(o, p) JSObjectSetPrivate(o, p)
 
-#define JSTObjectSetMethod(o, n, m, a)	if (JSTValueIsObject(o)) { JSTString name = JSTStringFromUTF8(n); \
-JST(JSObjectSetProperty, o, name, JSTAction(JSObjectMakeFunctionWithCallback, name, m), a); \
-JSTStringRelease(name); \
-}
+#define JSTObjectSetMethod(o, n, m, a) JST(JSTObjectSetMethod_, o, n, m, a)
 
-#define JSTObjectSetConstructor(o, n, c, m, a)	if (JSTValueIsObject(o)) { JSTString name = JSTStringFromUTF8(n); \
-JST(JSObjectSetProperty, o, name, JSTAction(JSObjectMakeConstructor, c, m), a); \
-JSTStringRelease(name); \
-}
+#define JSTObjectSetConstructor(o, n, c, m, a) JST(JSTObjectSetConstructor_, o, n, c, m, a)
 
 #define JSTObjectIsFunction(o) JSObjectIsFunction(ctx, o)
-#define JSTObjectIsConstructor(o) JSTAction(JSObjectIsConstructor, o)
+#define JSTObjectIsConstructor(o) JSObjectIsConstructor(ctx, o)
 
 #define JSTObjectToValue(o) ((JSTValue) o)
 #define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
@@ -35,9 +29,12 @@ JSTStringRelease(name); \
 #define JSTObjectPropertyHidden kJSPropertyAttributeDontEnum
 #define JSTObjectPropertyReadOnly kJSPropertyAttributeReadOnly
 #define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete
+#define JSTObjectPropertyAPI (JSTObjectPropertyHidden | JSTObjectPropertyReadOnly | JSTObjectPropertyRequired)
 
 #ifdef JSTools_h
 
+extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, JSTString n, void * m, int a);
+extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, JSTClass c, void * m, int a);
 extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
 extern void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
 extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
@@ -45,11 +42,33 @@ extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
 
 #else
 
+#define JSTValueIsObject(v) JSTAction(JSValueIsObject, v)
+
+JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, char * n, void * m, int a) {
+	JSTObject method = NULL;
+	if (JSTValueIsObject(o)) {
+		JSTString name = JSTStringFromUTF8(n); 
+		JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), name, (method = JSTAction(JSObjectMakeFunctionWithCallback, name, m)), a); 
+		JSTStringRelease(name); 
+	}
+	return method;
+}
+
+JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c, void * m, int a) {
+	JSTObject constructor = NULL;
+	if (JSTValueIsObject(o)) {
+		JSTString name = JSTStringFromUTF8(n);
+		JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), name, (constructor = JSTAction(JSObjectMakeConstructor, c, m)), a);
+		JSTStringRelease(name);
+	}
+	return constructor;
+}
+
 bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = JST(JSObjectDeleteProperty, o, s);
+		result = JST(JSObjectDeleteProperty, (o)?o:JSContextGetGlobalObject(ctx), s);
 		JSTStringRelease(s);
 	}
 	return result;
@@ -59,7 +78,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
 	void * result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = (void*) JST(JSObjectGetProperty, o, s);
+		result = (void*) JST(JSObjectGetProperty, (o)?o:JSContextGetGlobalObject(ctx), s);
 		JSTStringRelease(s);
 	}
 	return result;
@@ -68,7 +87,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
 void JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a) {
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		JST(JSObjectSetProperty, o, s, v, a);
+		JST(JSObjectSetProperty, (o)?o:JSContextGetGlobalObject(ctx), s, v, a);
 		JSTStringRelease(s);
 	}
 }
@@ -77,12 +96,11 @@ bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
-		result = JSTAction(JSObjectHasProperty, o, s);
+		result = JSTAction(JSObjectHasProperty, (o)?o:JSContextGetGlobalObject(ctx), s);
 		JSTStringRelease(s);
 	}
 	return result;
 }
-
 
 #endif
 

@@ -31,10 +31,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	// You've failed young Jedi, Game Over! Finalize methods won't be called!
 	if (e) return JSTScriptReportException();
-
 	JSTContextRelease((JSGlobalContextRef)ctx);
 	JSTContextGroupRelease(ctxgroup);
-//	char bool frack;
 	return 0;
 }
 

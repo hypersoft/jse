@@ -14,10 +14,10 @@
 #define JSTValueIsNumber(v) JSTAction(JSValueIsNumber, v)
 #define JSTValueIsString(v) JSTAction(JSValueIsString, v)
 #define JSTValueIsObject(v) JSTAction(JSValueIsObject, v)
-#define JSTValueIsClassInstance(v, c) JST(JSValueIsObjectOfClass, v, c)
+#define JSTValueIsClassInstance(v, c) JSTAction(JSValueIsObjectOfClass, v, c)
 #define JSTValueIsEqual(v1, v2) JST(JSValueIsEqual, v1, v2)
 #define JSTValueIsStrictEqual(v1, v2) JSTAction(JSValueIsStrictEqual, v1, v2)
-#define JSTValueIsConstructorInstance(v, c) JST(JSValueIsInstanceOfConstructor, v, c)
+#define JSTValueIsConstructorInstance(v, c) JSTAction(JSValueIsInstanceOfConstructor, v, c)
 
 #define JSTValueUndefined JSValueMakeUndefined(ctx)
 #define JSTValueNull JSValueMakeNull(ctx)

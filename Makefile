@@ -2,7 +2,7 @@
 DYNCALL := inc/dyncall
 PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
 
-JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc src/sys/*.inc src/*.inc) src/JSTInit.inc src/JSTNative.inc
+JSTDEPENDS := Makefile ${DYNCALL} src/JSTools.inc $(shell echo src/JST*.[^sh] src/JSTools/*.inc src/sys/*.inc src/*.inc) src/JSTInit.inc src/JSTError.inc
 JSEDEPENDS := Makefile main.c bin/JSTools.o src/JSTools.h src/JSTNative.inc inc/*.inc
 
 BUILDCOMMON := -fno-strict-aliasing -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Redstone"' -DJSE_BUILDNO='"$(shell bin/buildnum -p)"'
@@ -14,11 +14,11 @@ ${DYNCALL}:
 	@bin/dynhacker
 	@echo ''
 
+src/JSTError.inc: src/JSTError.js
+	@bin/bin2inc JSTErrorScript $< > $@;
+
 src/JSTInit.inc: src/JSTInit.js
 	@bin/bin2inc JSTInitScript $< > $@;
-
-src/JSTNative.inc: src/JSTNative.js
-	@bin/bin2inc JSTNativeScript $< > $@;
 
 bin/JSTools.o: ${JSTDEPENDS}
 	@echo compiling Hypersoft Systems JSTools

@@ -31,8 +31,8 @@ typedef char UTF8;
 #include "JSTools/Declare.inc"
 #include "JSTools/String.inc"
 #include "JSTools/Function.inc"
-#include "JSTools/Object.inc"
 #include "JSTools/Value.inc"
+#include "JSTools/Object.inc"
 #include "JSTools/Script.inc"
 
 #endif
