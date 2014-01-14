@@ -278,7 +278,7 @@ JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c,
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
-		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), name, (constructor =JSObjectMakeConstructor(ctx, c, m)), a, exception);
+		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), name, (constructor = JSObjectMakeConstructor(ctx, c, m)), a, exception);
 		JSTStringRelease(name);
 	}
 	return constructor;
@@ -721,10 +721,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * 
 	JSTObjectSetProperty(sys, "argc", JSTValueFromDouble(argc), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(sys, "argv", JSTValueFromPointer(argv), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(sys, "envp", JSTValueFromPointer(envp), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(sys, "uid", JSTValueFromDouble(getuid()), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(sys, "euid", JSTValueFromDouble(geteuid()), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(sys, "gid", JSTValueFromDouble(getgid()), JSTObjectPropertyAPI);
-	JSTObjectSetProperty(sys, "pid", JSTValueFromDouble(getpid()), JSTObjectPropertyAPI);
 
 	JSTObjectSetProperty(global, "sys_int8_min", JSTValueFromDouble(G_MININT8), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(global, "sys_int8_max", JSTValueFromDouble(G_MAXINT8), JSTObjectPropertyAPI);
