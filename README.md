@@ -9,7 +9,7 @@ get started with JSE right away by going to the
 [Download](https://github.com/hypersoft/jse/wiki/Download) page where you can
 learn how to acquire and build the source.
 
-[Donate some spare change](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DG3H6F8DSG4BC)
+[Donate some spare change?](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DG3H6F8DSG4BC)
 
 ### Recommended Reading for Application Developers
 * [Wikipedia: JavaScript](http://en.wikipedia.org/wiki/JavaScript)
