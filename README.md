@@ -1,5 +1,5 @@
-[JSE](https://github.com/hypersoft/jse/wiki/About-JSE) is a
-JSE is a free and open source project conceptualized and maintained by
+[JSE](https://github.com/hypersoft/jse/wiki/About-JSE) is a free and open source
+project conceptualized and maintained by
 [Hypersoft](https://github.com/hypersoft/)
 [(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com)
 
