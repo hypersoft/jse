@@ -5,3 +5,4 @@ src/jst/error.inc
 src/jst/init.inc
 bin/jst.o
 bin/jse
+/nbproject/
