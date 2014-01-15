@@ -45,8 +45,6 @@ DAMAGE.
 #define jst_type_struct 8192
 #define jst_type_union 16384
 #define jst_type_dynamic 32768
-#define jst_type_host 65536
-#define jst_type_network 131072
 
 /*
 	These codes are typically an enumeration of codes to be used with JSTScriptNativeError
