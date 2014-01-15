@@ -5,7 +5,10 @@ BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=nat
 #since this is a GCC/GNU/Linux file we only require headers for this spec.
 JSTHeaders := $(shell echo inc/{jst,license,notice,jst-comp-gcc,jst-os-linux}.h)
 JSTScripts := $(shell echo src/jst/{error,init}.inc) # auto-built only
-JSTSources := $(shell echo src/jst/{error,env,memory,pointer,file}.c src/jst.c)
+JSTSources := $(shell \
+	echo src/jst/{error,type,pointer,env,memory,file}.c \
+	src/jst.c \
+)
 
 all: bin/jse
 

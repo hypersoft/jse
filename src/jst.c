@@ -656,6 +656,8 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 
 #include "jst/error.c"
 #include "jst/init.inc"
+#include "jst/type.c"
+#include "jst/pointer.c"
 #include "jst/env.c"
 #include "jst/memory.c"
 #include "jst/file.c"
@@ -665,6 +667,17 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8
 	JSTObject sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, JSTObjectPropertyAPI);
 	JSTObjectSetProperty(sys, "global", global, JSTObjectPropertyAPI);
+
+	/* base object types */
+	jst_type_init();
+	JSTObjectSetMethod(
+		global, "sys_type", jst_type_constructor, JSTObjectPropertyAPI
+	);
+
+	jst_pointer_init();
+	JSTObjectSetMethod(
+		global, "sys_pointer", jst_pointer, JSTObjectPropertyAPI
+	);
 
 	/* error base */
 	JSTObjectSetMethod(global, "sys_error_number", jst_error_number, JSTObjectPropertyAPI);
@@ -738,7 +751,6 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8
 	JSTObjectSetProperty(global, "sys_int64_min", JSTValueFromDouble(G_MININT64), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(global, "sys_int64_max", JSTValueFromDouble(G_MAXINT64), JSTObjectPropertyAPI);
 	JSTObjectSetProperty(global, "sys_uint64_max", JSTValueFromDouble(G_MAXUINT64), JSTObjectPropertyAPI);
-
 
 	/* advanced memory interface */
 	JSTObject memory = JSTClassInstance(NULL, NULL);

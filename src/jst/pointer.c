@@ -28,11 +28,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-void * jst_pointer_class = NULL;
+JSTClass jst_pointer_class = NULL;
 
 typedef struct jst_pointer_data {
 	void * value;
-	bool allocated;
+	unsigned int type;
 } jst_pointer_data;
 
 static JSTDeclareConvertor(jst_pointer_convert) {
@@ -46,7 +46,7 @@ static JSTDeclareConvertor(jst_pointer_convert) {
 
 static JSTDeclareFinalizer(jst_pointer_finalize) {
 	jst_pointer_data * d = JSTObjectGetPrivate(object);
-	if (d->allocated) g_free(d->value);
+	if (d && (d->type & jst_type_dynamic)) g_free(d->value);
 	g_free(d);
 	JSTObjectSetPrivate(object, NULL);
 }
@@ -56,10 +56,35 @@ JSTValue jst_pointer_free JSTDeclareFunction() {
 	return JSTValueUndefined;
 }
 
-static JSTClass jst_pointer_init() {
+static JSTDeclareSetProperty(jst_pointer_set_type) {
+	jst_pointer_data * d = JSTObjectGetPrivate(object);
+	unsigned int v = JSTValueToDouble(value);
+	d->type = v;
+	return true;
+}
+
+static JSTDeclareGetProperty(jst_pointer_get_type) {
+	jst_pointer_data * d = JSTObjectGetPrivate(object);
+	if (!d) return JSTValueNull;
+	return JSTValueFromDouble(d->type);
+}
+
+JSTClass jst_pointer_init() {
+
+	JSTClassFunction functions[] = {
+		{"free", &jst_pointer_free, JSTObjectPropertyAPI},
+		{NULL, NULL, 0}
+	};
+
+	JSTClassAccessor properties[] = {
+		{"allocated", &jst_pointer_get_type, &jst_pointer_set_type, JSTObjectPropertyAPI},
+		{NULL, NULL, NULL, 0}
+	};
 
 	JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 	jsClass.className = "pointer",
+	jsClass.staticFunctions = functions,
+	jsClass.staticValues = properties,
 	jsClass.convertToType = &jst_pointer_convert,
 	jsClass.finalize = &jst_pointer_finalize;
 	jst_pointer_class = JSClassRetain(JSClassCreate(&jsClass));
@@ -68,39 +93,17 @@ static JSTClass jst_pointer_init() {
 
 }
 
-static JSTValue jst_pointer_constructor JSTDeclareFunction(width, count, zero) {
+JSTValue jst_pointer JSTDeclareFunction(value, type) {
 
-	if (!jst_pointer_class) jst_pointer_init();
-
-	size_t width, count;
+	void * value; unsigned int type = 0;
 	
-	if (!JSTArgumentToInt(0, &width) || !JSTArgumentToInt(1, &count))
-		return NULL;
-
-	jst_pointer_data * d = g_malloc0(sizeof(jst_pointer_data));
-	d->allocated = true;
-	
-	if (argc > 2 && JSTValueToBoolean(argv[2]))
-		d->value = g_malloc0(width * count);
-	else d->value = g_malloc(width * count);
-	
-	JSTObject object = JSTClassInstance(jst_pointer_class, d);
-
-	return object;
-
-}
-
-JSTValue jst_pointer_function JSTDeclareFunction(value, allocated) {
-
-	if (!jst_pointer_class) jst_pointer_init();
-
-	void * value; bool allocated = false;
-	if (!JSTArgumentToPointer(0, &width)) return NULL;
-	if (argc > 1) allocated = JSTValueToBoolean(argv[1]);
+	if (!JSTArgumentToPointer(0, &value)) return NULL;
+	if (argc > 1) type = JSTValueToDouble(argv[1]);
 	
 	jst_pointer_data * d = g_malloc0(sizeof(jst_pointer_data));
-	d->value = value, d->allocated = allocated;
+	d->value = value, d->type = type;
 
 	JSTObject object = JSTClassInstance(jst_pointer_class, d);
 	return object;
+	
 }

@@ -314,6 +314,8 @@ extern const utf8 * CODENAME;
 extern const utf8 * VERSION;
 extern const utf8 * VENDOR;
 
+extern JSTClass jst_pointer_class;
+
 extern bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index, void * dest);
 extern bool JSTValueToInt_ JSTUtility(int bits, JSTValue input, void * dest);
 extern bool JSTArgumentToPointer_ JSTUtility(int argc, JSTValue argv[], int index, void * dest);
