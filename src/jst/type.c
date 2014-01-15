@@ -73,7 +73,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 	}
 	
 	bool result = false, ok = JSTValueToBoolean(value),
-	nInt = (d->autoWidth && d->code & (1 | 2 | 4 | 8 | jst_type_integer) == 0);
+	nInt = (d->autoWidth && (d->code & (1| 2 | 4 | 8 | jst_type_integer)) == 0);
 
 	/* all properties must convert to okay */
 	if (!ok) {
@@ -228,7 +228,7 @@ static JSTDeclareGetProperty(jst_type_get) {
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_dynamic)) {
 		result = JSTValueFromBoolean(d->code & jst_type_dynamic);
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_float)) {
-		result = JSTValueFromBoolean(d->code & jst_type_integer == 0);
+		result = JSTValueFromBoolean((d->code & jst_type_integer) == 0);
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_name)) {
 		result = JSTValueFromUTF8(d->name);
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_integer)) {
@@ -245,7 +245,7 @@ static JSTDeclareGetProperty(jst_type_get) {
 		if (d->abstract) result = d->abstract;
 		else result = JSTValueUndefined;
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_unsigned)) {
-		result = JSTValueFromBoolean(d->code & jst_type_signed == 0);
+		result = JSTValueFromBoolean((d->code & jst_type_signed) == 0);
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_utf)) {
 		result = JSTValueFromBoolean(d->code & jst_type_utf);
 	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_value)) {
