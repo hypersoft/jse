@@ -138,7 +138,11 @@ function Type(model) {
 		if (name in this === false) throw new TypeError(
 			"property name "+name+" is not a valid type property"
 		).fromCaller(-1);
-		try {this[name] = model[name];} catch(e) {throw e.fromCaller(-1)}
+		try {
+			this[name] = model[name];
+		} catch(e) {
+			throw e.fromCaller(-1);
+		}
 	}
 
 }
@@ -149,11 +153,15 @@ Type.duplicate = function(type){
 };
 
 Type.format = {
-	'undefined':function(){return this.label;}
+	'undefined':function(){
+		return this.label;
+	}
 };
 
 Type.encode = {
-	'undefined':function(){return this.flags || 0;}
+	'undefined':function(){
+		return this.flags || 0;
+	}
 };
 
 Type.Data = function(data){
@@ -235,11 +243,22 @@ Type.Width = function(number, integer) {
 	this.data.min = Type.limit.min(this.data, integer),
 	this.data.bits = number * 8;
 },  Type.Width.prototype = Object.hideProperties({
-	get max(){return this.data.max;}, get min(){return this.data.min;},
-	get bits(){return this.data.bits;},
+	get max(){
+		return this.data.max;
+	},
+	get min(){
+		return this.data.min;
+	},
+	get bits(){
+		return this.data.bits;
+	},
 	constructor: Type.Width,
-	valueOf: function(){return this.data.width;},
-	toString: function(){return this.data.width;}
+	valueOf: function(){
+		return this.data.width;
+	},
+	toString: function(){
+		return this.data.width;
+	}
 },  ['constructor', 'valueOf', 'toString']);
 
 Type.align = function(address, type) {
@@ -254,7 +273,9 @@ Type.align = function(address, type) {
 };
 
 Type.prototype = Object.create({
-	get array(){return Object.create(this.data.array);},
+	get array(){
+		return Object.create(this.data.array);
+	},
 	set array(v){
 		if (this.data.array.rows !== undefined) throw new ReferenceError()
 		if (typeof v === 'number') {
@@ -435,14 +456,14 @@ Type.flags = new Flags(
 	Object.create(null, {
 		toString: {
 			value:function(){
-                            return this.name;
-                        },
+				return this.name;
+			},
 			enumerable:false
 		},
 		valueOf: {
 			value:function(){
-                            return this.value;
-                        },
+				return this.value;
+			},
 			enumerable:false
 		}
 	})
