@@ -365,25 +365,35 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue * excep
 		message
 		line
 		sourceURL
+		debug
 	*/
 
+	char * empty = "";
 	utf8 * message = JSTValueToUTF8(JSTObjectGetProperty(e, "message"));
 	utf8 * name = JSTValueToUTF8(JSTObjectGetProperty(e, "name"));
 	utf8 * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
 	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
-
-	g_fprintf(stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
-		message, (* message)?": ":"", url, line
+	size_t code = JSTValueToDouble(JSTObjectGetProperty(e, "code"));
+	bool debug = JSTValueToBoolean(JSTObjectGetProperty(
+		JSTObjectGetProperty(NULL, "Error"), "debug")
+	);
+	
+	if (debug || (code == JST_SYNTAX_ERROR)) g_fprintf(
+		stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
+		message, (* message)?": ":empty, url, line
+	);  else g_fprintf(stderr, "JSE Fatal %s%s%s\n", name, 
+		(* message) ? ": " : empty,
+		(* message) ? message : empty
 	);
 
-	g_free(message), g_free(url);
+	g_free(message), g_free(name), g_free(url);
 
 	if (!JSTValueIsVoid(JSTObjectGetProperty(e, "stack"))) {
 		utf8 * b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
 		fprintf(stderr, "%s\n", b); g_free(b);
 	}
 
-	return JSTValueToDouble(JSTObjectGetProperty(e, "code"));
+	return code;
 
 }
 
