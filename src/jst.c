@@ -380,7 +380,7 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue * excep
 	
 	if (debug || (code == JST_SYNTAX_ERROR)) g_fprintf(
 		stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, message,
-		(* message)? ": " : empty, url, line
+		(* message) ? ": " : empty, url, line
 	);  else g_fprintf(stderr, "JSE Fatal %s%s%s\n", name, 
 		(* message) ? ": " : empty,
 		(* message) ? message : empty
