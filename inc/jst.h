@@ -333,14 +333,14 @@ extern JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * excepti
 extern JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObject method, JSTObject object, ...);
 extern JSTObject JSTFunctionCallback_ JSTUtility(utf8 * p, void * f);
 extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a);
-extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, int a);
+extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, size_t a);
 extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p);
 extern void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_t a);
 extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p);
 extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p);
 extern JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, size_t i);
 extern bool JSTScriptCheckSyntax_ JSTUtility(utf8 * p1, utf8 * p2, size_t i);
-extern void * JSTScriptNativeError_(JSTContext ctx, JSTValue * exception, const utf8 * file, int line, int errorType, const utf8 * format, ...);
+extern void * JSTScriptNativeError_(JSTContext ctx, JSTValue * exception, const utf8 * file, size_t line, size_t errorType, const utf8 * format, ...);
 extern int JSTScriptReportException_(JSTContext ctx, JSTValue * exception);
 extern utf8 * JSTStringToUTF8 (JSTString s, bool release);
 extern utf32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release);
@@ -348,5 +348,5 @@ extern JSTString JSTStringFromUTF32(register utf32 * text, size_t len, bool rele
 extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
 extern JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p);
 extern utf8 * JSTConstructUTF8(utf8 * format, ...);
-extern JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, utf8 * argv[], utf8 * envp[]);
+extern JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8 * envp[]);
 

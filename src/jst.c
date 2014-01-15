@@ -274,7 +274,7 @@ JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a)
 	return method;
 }
 
-JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, int a) {
+JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, size_t a) {
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
@@ -339,7 +339,7 @@ JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2
 	return result;
 }
 
-void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue * exception, const utf8 * file, int line, int errorType, const utf8 * format, ...) {
+void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue * exception, const utf8 * file, size_t line, size_t errorType, const utf8 * format, ...) {
 	va_list ap; va_start(ap, format); utf8 * message = NULL;
 	g_vasprintf(&message, format, ap);
 	if (errorType == 2) JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
@@ -659,7 +659,7 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 #include "jst/memory.c"
 #include "jst/file.c"
 
-JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, utf8 * argv[], utf8 * envp[]) {
+JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8 * envp[]) {
 
 	JSTObject sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, JSTObjectPropertyAPI);
