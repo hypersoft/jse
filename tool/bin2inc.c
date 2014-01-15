@@ -40,12 +40,12 @@ size_t encode(char * name) {
 
 	while ((c = fgetc(stdin)) != EOF) {
 		printf("0x%02x, ", c), l++, w++;
-		if (w == 13) printf("\n\t"), w = 0;
+		if (w == 12) printf("\n\t"), w = 0;
 	}
 
-	size_t padding = (13 - w);
+	size_t padding = (12 - w);
 
-	while (w < 12) printf("0x%02x, ", 0), w++;
+	while (w < 11) printf("0x%02x, ", 0), w++;
 
 	printf("0x%02x\n\n}; size_t %s_bytes = %i;\n\n", 0, name, l);
 	printf("/* %s zero-padding: %i */\n\n", name, padding);
