@@ -295,7 +295,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #endif
 
 #ifndef JSTUtility
-// stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
+// http://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
 #warning See URL in comments
 #error You do not have a compiler known to support optional variadic macro arguments.
 #endif
