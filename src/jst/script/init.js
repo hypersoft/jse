@@ -167,7 +167,7 @@ Type.Data = function(data){
 	name:undefined, alias:undefined, autoWidth:true, width:undefined,
 	reference:undefined, struct:undefined, union:undefined, constant:undefined,
 	array:undefined, value:undefined, utf:undefined, integer:undefined,
-	signed:undefined, dynamic:undefined, byteOrder:undefined
+	signed:undefined, dynamic:undefined
 };
 
 Type.Array2d = function(rows, cols) {
@@ -429,8 +429,7 @@ Type.flags = new Flags(
 
 	[
 		"1", "2", "4", "8", "void", "constant", "integer", "signed", "utf",
-		"value", "string", "reference", "array", "struct", "union", "dynamic",
-		"host", "network"
+		"value", "string", "reference", "array", "struct", "union", "dynamic"
 	],
 
 	Object.create(null, {
