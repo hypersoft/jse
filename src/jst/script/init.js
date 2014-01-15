@@ -138,7 +138,11 @@ function Type(model) {
 		if (name in this === false) throw new TypeError(
 			"property name "+name+" is not a valid type property"
 		).fromCaller(-1);
-		try {this[name] = model[name];} catch(e) {throw e.fromCaller(-1)}
+		try {
+			this[name] = model[name];
+		} catch(e) {
+			throw e.fromCaller(-1);
+		}
 	}
 
 }
@@ -149,11 +153,15 @@ Type.duplicate = function(type){
 };
 
 Type.format = {
-	'undefined':function(){return this.label;}
+	'undefined':function(){
+		return this.label;
+	}
 };
 
 Type.encode = {
-	'undefined':function(){return this.flags || 0;}
+	'undefined':function(){
+		return this.flags || 0;
+	}
 };
 
 Type.Data = function(data){
@@ -235,11 +243,22 @@ Type.Width = function(number, integer) {
 	this.data.min = Type.limit.min(this.data, integer),
 	this.data.bits = number * 8;
 },  Type.Width.prototype = Object.hideProperties({
-	get max(){return this.data.max;}, get min(){return this.data.min;},
-	get bits(){return this.data.bits;},
+	get max(){
+		return this.data.max;
+	},
+	get min(){
+		return this.data.min;
+	},
+	get bits(){
+		return this.data.bits;
+	},
 	constructor: Type.Width,
-	valueOf: function(){return this.data.width;},
-	toString: function(){return this.data.width;}
+	valueOf: function(){
+		return this.data.width;
+	},
+	toString: function(){
+		return this.data.width;
+	}
 },  ['constructor', 'valueOf', 'toString']);
 
 Type.align = function(address, type) {
@@ -254,7 +273,9 @@ Type.align = function(address, type) {
 };
 
 Type.prototype = Object.create({
-	get array(){return Object.create(this.data.array);},
+	get array(){
+		return Object.create(this.data.array);
+	},
 	set array(v){
 		if (this.data.array.rows !== undefined) throw new ReferenceError()
 		if (typeof v === 'number') {
@@ -284,16 +305,16 @@ Type.prototype = Object.create({
 		return "void";
 	},
 	get integer() {
-            return Boolean(this.data.integer);
-        },
+		return Boolean(this.data.integer);
+	},
 	set integer(v) {
 		if (this.data.integer === undefined) this.data.integer = Boolean(v);
 		if (Boolean(this.data.autoWidth))
 			this.data.width = new Type.Width(4, true);
 	},
 	get signed() {
-            return Boolean(this.data.signed);
-        },
+		return Boolean(this.data.signed);
+	},
 	set signed(v) {
 		var s = "signed", u = "unsigned"; v = Boolean(v);
 		if (this.data.integer === undefined) this.integer = true;
@@ -308,14 +329,14 @@ Type.prototype = Object.create({
 	},
 	set unsigned(v) {
 		try {
-                    this.signed = !Boolean(v);
-                } catch(e) {
-                    throw e.fromCaller(-1);
-                }
+	        this.signed = !Boolean(v);
+		} catch(e) {
+			throw e.fromCaller(-1);
+		}
 	},
 	get reference(){
-            return this.data.reference || Boolean(false);
-        },
+		return this.data.reference || Boolean(false);
+	},
 	set reference(v){
 		if (v.reference === v) throw new ReferenceError(
 			"infinite type recursion detected"
@@ -326,8 +347,8 @@ Type.prototype = Object.create({
 		this.integer = true, this.width = 4;
 	},
 	get utf(){
-            return this.data.utf || Boolean(false);
-        },
+		return this.data.utf || Boolean(false);
+	},
 	set utf(v){
 		if(v !== 8 && v !== 16 && v !== 32) throw new TypeError(
 			"invalid utf type width "+v
@@ -339,8 +360,8 @@ Type.prototype = Object.create({
 		this.data.utf = v, this.width = v/8;
 	},
 	get width(){
-            return this.data.width || 0;
-        },
+		return this.data.width || 0;
+	},
 	set width(v){
 		if (v !== 1 || v !== 2 || v !== 4 || v !== 8) throw new TypeError(
 			"invalid type width"
@@ -353,8 +374,8 @@ Type.prototype = Object.create({
 	},
 	get size(){
 		if (!Boolean(this.data.width)) throw new ReferenceError(
-                    "cannot calculate size of "+this.label
-                ).fromCaller(-1);
+			"cannot calculate size of "+this.label
+		).fromCaller(-1);
 		var length = Number(this.array) || 1;
 		return (this.width * length);
 	},
@@ -383,8 +404,8 @@ Type.prototype = Object.create({
 		else this.integer = true, this.width = 1;
 	},
 	get constant(){
-            return Boolean(this.data.constant);
-        },
+		return Boolean(this.data.constant);
+	},
 	set constant(v){
 		if (this.data.constant !== undefined) throw new TypeError(
 			"constant property already defined"
@@ -395,8 +416,8 @@ Type.prototype = Object.create({
 		this.data.constant = Boolean(v);
 	},
 	get value(){
-            return Boolean(this.data.value);
-        },
+		return Boolean(this.data.value);
+	},
 	set value(v){
 		if (this.data.value !== undefined) throw new TypeError(
 			"type value property already defined"
@@ -435,14 +456,14 @@ Type.flags = new Flags(
 	Object.create(null, {
 		toString: {
 			value:function(){
-                            return this.name;
-                        },
+				return this.name;
+			},
 			enumerable:false
 		},
 		valueOf: {
 			value:function(){
-                            return this.value;
-                        },
+				return this.value;
+			},
 			enumerable:false
 		}
 	})
@@ -455,8 +476,8 @@ sys.command = function() {
 	bound.capture = this;
 	bound.argv = this.argv;
 	bound.toString = function(){
-            return this.argv[0];
-        };
+		return this.argv[0];
+	};
 	return bound;
 };
 
