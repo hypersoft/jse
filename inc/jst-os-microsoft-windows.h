@@ -28,27 +28,26 @@ DAMAGE.
 */
 
 /* 
- * File:   jst-os-linux.h
+ * File:   jst-os-microsoft-windows.h
  * Author: triston
  *
- * Created on January 14, 2014, 7:31 PM
+ * Created on January 14, 2014, 7:18 PM
  */
 
-#ifndef JST_OS_LINUX_H
-#define	JST_OS_LINUX_H
+#ifndef JST_OS_MICROSOFT_WINDOWS_H
+#define	JST_OS_MICROSOFT_WINDOWS_H
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-	
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-	
+
 #ifdef	__cplusplus
 }
 #endif
 
-#endif	/* JST_OS_LINUX_H */
+#endif	/* JST_OS_MICROSOFT_WINDOWS_H */
 

@@ -29,8 +29,6 @@ DAMAGE.
 
 /* Architecture/Compiler/Platform Independent Stuff Here */
 
-#include <string.h>
-
 #define jst_type_1 1
 #define jst_type_2 2
 #define jst_type_4 4
@@ -74,10 +72,9 @@ DAMAGE.
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 
-typedef char utf8;
+typedef gchar utf8;
 typedef gunichar2 utf16;
 typedef gunichar utf32;
-typedef gunichar ucs4;
 
 #include "JavaScriptCore/JavaScript.h"
 #include "JavaScriptCore/JSBase.h"
@@ -170,13 +167,13 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTScriptCheckSyntax(p1, p2, i) JSTScriptCheckSyntax_(ctx, p1, p2, i, exception)
 #define JSTScriptNativeEval(pScript, oThis) JSTScriptEval(pScript, (JSTObject) oThis, __FILE__, __LINE__)
 
-#define JSTScriptError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("Error", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptSyntaxError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("SyntaxError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptTypeError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("TypeError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptRangeError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("RangeError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptReferenceError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("ReferenceError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptEvalError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("EvalError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptURIError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("URIError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "Error"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptSyntaxError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "SyntaxError"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptTypeError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "TypeError"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptRangeError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "RangeError"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptReferenceError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "ReferenceError"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptEvalError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "EvalError"), JSTStringToValue(JSTStringFromUTF8(p), true))
+#define JSTScriptURIError(p) JSTConstructorCall((JSTObject)JSTObjectGetProperty(NULL, "URIError"), JSTStringToValue(JSTStringFromUTF8(p), true))
 #define JSTScriptSetError(e) (* exception = e)
 #define JSTScriptHasError (!JSTValueIsVoid(* exception) && JSTValueIsObject(* exception))
 #define JSTScriptReportException() (JSTScriptReportException_(ctx, exception))
@@ -220,12 +217,12 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTValueToUTF8(v) JSTStringToUTF8(JSTValueToString(v), true)
 #define JSTValueProtect(v) JSValueProtect(ctx, v)
 #define JSTValueUnprotect(v) JSValueUnprotect(ctx, v)
-#define JSTValueParseInt(v) JSTScriptNativeEval(JSTEvalInt, v)
+#define JSTValueParseInt(v) JSTFunctionCall(JSTObjectGetProperty(NULL, JSTConstParseInt), NULL, v)
 
 #define JSTValueIsVoid(v) (!v || JSTValueIsNull(v) || JSTValueIsUndefined(v))
 #define JSTValueIsFunction(v) (v && JSTValueIsObject(v) && JSTObjectIsFunction(v))
 #define JSTValueIsConstructor(v) (v && JSTValueIsObject(v) && JSTObjectIsConstructor(v))
-#define JSTValueIsNaN(v) JSTValueToBoolean(JSTScriptNativeEval(JSTEvalNaN, v))
+#define JSTValueIsNaN(v) JSTValueToBoolean(JSTFunctionCall(JSTObjectGetProperty(NULL, JSTConstIsNaN), NULL, v))
 
 #define JSTArgumentToInt(i, d) JSTArgumentToInt_(ctx, argc, (const struct OpaqueJSValue **)argv, bitsof(* d), i, d, exception)
 #define JSTArgumentToPointer(i, d) JSTArgumentToPointer_(ctx, argc, (const struct OpaqueJSValue **)argv, i, d, exception)
@@ -267,15 +264,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #include "jst-os-linux.h"
 #elif defined (_WIN64) || defined (_WIN32)
 #define JSTOperatingSystem "Windows"
-/*
-  you will need to add a jst-os-windows.h file to .\inc providing the missing data
-  you should be clear to comment out this error, to allow the compiler to notify
-  you of the missing symbols required.
-*/
-//#include "jst-os-windows.h"
-#error No Microsoft Windows Solution known for missing Linux headers!
-/* add other operating systems as supported */
-/*
+#include "jst-os-microsoft-windows.h"
 #elif __BEOS__    
 #define JSTOperatingSystem "BeOS"
 #elif __FreeBSD__
@@ -300,7 +289,6 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTOperatingSystem "OS/2"
 #elif __SYMBIAN32__
 #define JSTOperatingSystem "Symbian OS"
-*/
 #else
 /* Not listed? Check: http://sourceforge.net/p/predef/wiki/OperatingSystems/ */
 #error Operating System Not Supported
@@ -312,8 +300,8 @@ typedef JSContextGroupRef JSTContextGroup;
 #error You do not have a compiler known to support optional variadic macro arguments.
 #endif
 
-extern const utf8 * JSTEvalNaN;
-extern const utf8 * JSTEvalInt;
+extern const utf8 * JSTConstIsNaN;
+extern const utf8 * JSTConstParseInt;
 
 extern const utf8 * JSTReservedAddress;
 
@@ -331,22 +319,22 @@ extern bool JSTValueToPointer_ JSTUtility(JSTValue input, void * dest);
 
 extern JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * exception, JSTObject c, ...);
 extern JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObject method, JSTObject object, ...);
-extern JSTObject JSTFunctionCallback_ JSTUtility(utf8 * p, void * f);
-extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a);
-extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, size_t a);
-extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p);
-extern void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_t a);
-extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p);
-extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p);
+extern JSTObject JSTFunctionCallback_ JSTUtility(const utf8 * p, void * f);
+extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, const utf8 * n, void * m, int a);
+extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, const utf8 * n, JSTClass c, void * m, size_t a);
+extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, const utf8 * p);
+extern void * JSTObjectSetProperty_ JSTUtility(JSTObject o, const utf8 * p, JSTValue v, size_t a);
+extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, const utf8 * p);
+extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, const utf8 * p);
 extern JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, size_t i);
-extern bool JSTScriptCheckSyntax_ JSTUtility(utf8 * p1, utf8 * p2, size_t i);
+extern bool JSTScriptCheckSyntax_ JSTUtility(const utf8 * p1, const utf8 * p2, size_t i);
 extern void * JSTScriptNativeError_(JSTContext ctx, JSTValue * exception, const utf8 * file, size_t line, size_t errorType, const utf8 * format, ...);
 extern int JSTScriptReportException_(JSTContext ctx, JSTValue * exception);
 extern utf8 * JSTStringToUTF8 (JSTString s, bool release);
 extern utf32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release);
 extern JSTString JSTStringFromUTF32(register utf32 * text, size_t len, bool release);
 extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
-extern JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p);
-extern utf8 * JSTConstructUTF8(utf8 * format, ...);
+extern JSTValue JSTValueFromJSON_ JSTUtility(const utf8 * p);
+extern utf8 * JSTConstructUTF8(const utf8 * format, ...);
 extern JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8 * envp[]);
 

@@ -32,8 +32,8 @@ DAMAGE.
 #include "license.h"
 #include "notice.h"
 
-const utf8 * JSTEvalNaN = "isNaN(this)";
-const utf8 * JSTEvalInt = "parseInt(this)";
+const utf8 * JSTConstIsNaN = "isNaN";
+const utf8 * JSTConstParseInt = "parseInt";
 
 const utf8 * JSTReservedAddress =
 
@@ -246,7 +246,7 @@ JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * exception, JST
 	argv[count] = NULL; return JSObjectCallAsConstructor(ctx, c, argc, argv, exception);
 }
 
-JSTObject JSTFunctionCallback_ JSTUtility(utf8 * p, void * f) {
+JSTObject JSTFunctionCallback_ JSTUtility(const utf8 * p, void * f) {
 	JSTObject result = NULL;
 	if (p && f) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -264,7 +264,7 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObje
 	argv[count] = NULL; return JSObjectCallAsFunction(ctx, method, object, argc, argv, exception);
 }
 
-JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a) {
+JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, const utf8 * n, void * m, int a) {
 	JSTObject method = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL; 
@@ -274,7 +274,7 @@ JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a)
 	return method;
 }
 
-JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, size_t a) {
+JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, const utf8 * n, JSTClass c, void * m, size_t a) {
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
@@ -284,7 +284,7 @@ JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c,
 	return constructor;
 }
 
-bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p) {
+bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, const utf8 * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -294,7 +294,7 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p) {
 	return result;
 }
 
-void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p) {
+void * JSTObjectGetProperty_ JSTUtility(JSTObject o, const utf8 * p) {
 	void * result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -305,7 +305,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p) {
 }
 
 // Returns the value set as a void *
-void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_t a) {
+void * JSTObjectSetProperty_ JSTUtility(JSTObject o, const utf8 * p, JSTValue v, size_t a) {
 	if (p && v) {
 		JSTString s = JSTStringFromUTF8(p);
 		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, v, a, exception);
@@ -314,7 +314,7 @@ void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_
 	return (void*)v;
 }
 
-bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p) {
+bool JSTObjectHasProperty_ JSTUtility(JSTObject o, const utf8 * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -324,7 +324,7 @@ bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p) {
 	return result;
 }
 
-bool JSTScriptCheckSyntax_ JSTUtility(utf8 * p1, utf8 * p2, size_t i) {
+bool JSTScriptCheckSyntax_ JSTUtility(const utf8 * p1, const utf8 * p2, size_t i) {
 	if (!p1 || !p2) return true;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
 	bool result = JSCheckScriptSyntax(ctx, s[0], s[1], i, exception);
@@ -418,7 +418,7 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 	return result;
 }
 
-JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p) {
+JSTValue JSTValueFromJSON_ JSTUtility(const utf8 * p) {
 	JSTValue result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -428,7 +428,7 @@ JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p) {
 	return result;
 }
 
-utf8 * JSTConstructUTF8(utf8 * format, ...) {
+utf8 * JSTConstructUTF8(const utf8 * format, ...) {
 	if (!format) return NULL;
 	va_list ap; va_start(ap, format); utf8 * message = NULL;
 	g_vasprintf(&message, format, ap); return message;

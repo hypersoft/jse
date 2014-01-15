@@ -10,6 +10,7 @@
         <in>jst-comp-gcc.h</in>
         <in>jst-comp-vs-10.h</in>
         <in>jst-os-linux.h</in>
+        <in>jst-os-microsoft-windows.h</in>
         <in>jst.h</in>
         <in>license.h</in>
         <in>notice.h</in>
