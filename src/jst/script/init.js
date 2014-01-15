@@ -347,7 +347,7 @@ Type.prototype = Object.create({
 		this.integer = true, this.width = 4;
 	},
 	get utf(){
-		return this.data.utf || Boolean(false);
+		return (this.data.utf || Boolean(false));
 	},
 	set utf(v){
 		if(v !== 8 && v !== 16 && v !== 32) throw new TypeError(
