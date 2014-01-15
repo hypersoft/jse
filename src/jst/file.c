@@ -38,7 +38,7 @@ static JSTValue jst_file_test JSTDeclareFunction(filename, flags) {
 	}
 
 	char * filename = JSTValueToUTF8(argv[0]);
-	int flags = JSTValueToDouble(argv[1]);
+	size_t flags = JSTValueToDouble(argv[1]);
 	JSTValue result = JSTValueFromBoolean(g_file_test(filename, flags));
 	g_free(filename);
 	return result;
