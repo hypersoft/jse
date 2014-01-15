@@ -1,6 +1,6 @@
 #!bin/jse
 
-Error.debug = "on"
+Error.debug = "on";
 
 var echo = new sys.command("echo");
 
