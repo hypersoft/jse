@@ -47,6 +47,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define jst_type_union 16384
 #define jst_type_dynamic 32768
 
+#define JSTCodeTypeExact(d, f) ((d & (f) == (f)) ? true : false)
+#define JSTCodeTypeIsValue(d) (d & jst_type_value)
+#define JSTCodeTypeIsInteger(d) ((d & jst_type_integer) ? : true : false)
+#define JSTCodeTypeIsBoolean(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 1) ? true : false))
+#define JSTCodeTypeIsSigned(d) ((d & jst_type_signed) ? true : false)
+#define JSTCodeTypeIsUnsigned(d) (!d->autoSign && (d & jst_type_signed) ? false : true)
+#define JSTCodeTypeIsConstant(d) ((d & jst_type_constant) ? true : false)
+#define JSTCodeTypeIsDynamic(d) ((d & jst_type_dynamic) ? true : false)
+#define JSTCodeTypeIsStructure(d) (d & jst_type_reference)
+#define JSTCodeTypeIsReference(d) (d & jst_type_reference)
+#define JSTCodeTypeIsUnion(d) (d & jst_type_union)
+#define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) ? true : false)
+#define JSTCodeTypeWidth(d) ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : (d & 8) ? 8 : 0)
+#define JSTCodeTypeUTF(d) (JSTCodeTypeIsUTF(d) ? ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : 0) : 0)
+#define JSTCodeTypeFloat(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 4) ? 4 : (d & 8) ? 8 : 0))
+
 /*
 	These codes are typically an enumeration of codes to be used with JSTScriptNativeError
 	These codes should sync with the error codes found in src/jst/script/error.js
@@ -161,6 +177,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTObjectPropertyReadOnly kJSPropertyAttributeReadOnly
 #define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete
 #define JSTObjectPropertyAPI (JSTObjectPropertyHidden | JSTObjectPropertyReadOnly | JSTObjectPropertyRequired)
+#define JSTObjectPropertyState (JSTObjectPropertyReadOnly | JSTObjectPropertyRequired)
 
 #define JSTScriptEval(p1, o, p2, i) JSTScriptEval_(ctx, p1, o, p2, i, exception)
 #define JSTScriptCheckSyntax(p1, p2, i) JSTScriptCheckSyntax_(ctx, p1, p2, i, exception)
