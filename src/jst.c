@@ -32,16 +32,16 @@ DAMAGE.
 #include "license.h"
 #include "notice.h"
 
-const char * JSTEvalNaN = "isNaN(this)";
-const char * JSTEvalInt = "parseInt(this)";
+const utf8 * JSTEvalNaN = "isNaN(this)";
+const utf8 * JSTEvalInt = "parseInt(this)";
 
-const char * JSTReservedAddress =
+const utf8 * JSTReservedAddress =
 
 	"Hypersoft Systems JSE Copyright 2013 Triston J. Taylor, All Rights Reserved.";
 
-const char * CODENAME = JSE_CODENAME;
-const char * VERSION = JSE_BUILDNO;
-const char * VENDOR = JSE_VENDOR;
+const utf8 * CODENAME = JSE_CODENAME;
+const utf8 * VERSION = JSE_BUILDNO;
+const utf8 * VENDOR = JSE_VENDOR;
 
 /* strict argument to integer conversion */
 bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index, void * dest) {
@@ -238,7 +238,7 @@ bool JSTValueToPointer_ JSTUtility(JSTValue input, void * dest) {
 	return true;
 }
 
-JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exception, JSTObject c, ...) {
+JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * exception, JSTObject c, ...) {
 	va_list ap; register size_t argc = 0, count = 0; va_start(ap, c); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, c);
 	if (argc > 32) return JSTObjectUndefined; JSTValue argv[argc+1];
@@ -246,7 +246,7 @@ JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exception, JSTO
 	argv[count] = NULL; return JSObjectCallAsConstructor(ctx, c, argc, argv, exception);
 }
 
-JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f) {
+JSTObject JSTFunctionCallback_ JSTUtility(utf8 * p, void * f) {
 	JSTObject result = NULL;
 	if (p && f) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -256,7 +256,7 @@ JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f) {
 	return result;
 }
 
-JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...) {
+JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObject method, JSTObject object, ...) {
 	va_list ap; register size_t argc = 0, count = 0; va_start(ap, object); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, object);
 	if (argc > 32) return JSTValueUndefined; JSTValue argv[argc+1];
@@ -264,7 +264,7 @@ JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObjec
 	argv[count] = NULL; return JSObjectCallAsFunction(ctx, method, object, argc, argv, exception);
 }
 
-JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, char * n, void * m, int a) {
+JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a) {
 	JSTObject method = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL; 
@@ -274,7 +274,7 @@ JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, char * n, void * m, int a)
 	return method;
 }
 
-JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c, void * m, int a) {
+JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, int a) {
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
@@ -284,7 +284,7 @@ JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c,
 	return constructor;
 }
 
-bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
+bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -294,7 +294,7 @@ bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p) {
 	return result;
 }
 
-void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
+void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p) {
 	void * result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -305,7 +305,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p) {
 }
 
 // Returns the value set as a void *
-void * JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a) {
+void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_t a) {
 	if (p && v) {
 		JSTString s = JSTStringFromUTF8(p);
 		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, v, a, exception);
@@ -314,7 +314,7 @@ void * JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t
 	return (void*)v;
 }
 
-bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
+bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p) {
 	bool result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -324,14 +324,14 @@ bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p) {
 	return result;
 }
 
-bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i) {
+bool JSTScriptCheckSyntax_ JSTUtility(utf8 * p1, utf8 * p2, size_t i) {
 	if (!p1 || !p2) return true;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
 	bool result = JSCheckScriptSyntax(ctx, s[0], s[1], i, exception);
 	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
 }
 
-JSTValue JSTScriptEval_ JSTUtility(const char *p1, JSTObject o, const char * p2, size_t i) {
+JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, size_t i) {
 	if (!p1 || !p2) return NULL;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
 	JSTValue result = JSEvaluateScript(ctx, s[0], (o)?o:JSContextGetGlobalObject(ctx), s[1], i, exception);
@@ -339,8 +339,8 @@ JSTValue JSTScriptEval_ JSTUtility(const char *p1, JSTObject o, const char * p2,
 	return result;
 }
 
-void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue *exception, const char * file, int line, int errorType, const char * format, ...) {
-	va_list ap; va_start(ap, format); char * message = NULL;
+void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue * exception, const utf8 * file, int line, int errorType, const utf8 * format, ...) {
+	va_list ap; va_start(ap, format); utf8 * message = NULL;
 	g_vasprintf(&message, format, ap);
 	if (errorType == 2) JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
 	else if (errorType == 3) JSTScriptEval("throw(this)", JSTScriptSyntaxError(message), file, line);
@@ -354,9 +354,9 @@ void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue *excepti
 	return NULL;
 }
 
-int JSTScriptReportException_(register JSTContext ctx, register JSTValue *exception) {
+int JSTScriptReportException_(register JSTContext ctx, register JSTValue * exception) {
 
-	JSTObject e = (JSTObject) *exception; *exception = NULL;
+	JSTObject e = (JSTObject) * exception; * exception = NULL;
 
 	/* properties of e:
 		name
@@ -366,19 +366,19 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue *except
 		sourceURL
 	*/
 
-	char * message = JSTValueToUTF8(JSTObjectGetProperty(e, "message"));
-	char * name = JSTValueToUTF8(JSTObjectGetProperty(e, "name"));
-	char * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
+	utf8 * message = JSTValueToUTF8(JSTObjectGetProperty(e, "message"));
+	utf8 * name = JSTValueToUTF8(JSTObjectGetProperty(e, "name"));
+	utf8 * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
 	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
 
 	g_fprintf(stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, 
-		message, (*message)?": ":"", url, line
+		message, (* message)?": ":"", url, line
 	);
 
 	g_free(message), g_free(url);
 
 	if (!JSTValueIsVoid(JSTObjectGetProperty(e, "stack"))) {
-		char * b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
+		utf8 * b = JSTValueToUTF8(JSTScriptNativeEval("sys.error.trace(this)", e));
 		fprintf(stderr, "%s\n", b); g_free(b);
 	}
 
@@ -386,7 +386,7 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue *except
 
 }
 
-char * JSTStringToUTF8 (JSTString s, bool release) {
+utf8 * JSTStringToUTF8 (JSTString s, bool release) {
 	if (!s) return NULL;
 	register size_t bufferLength = 0; register void * buffer = NULL;
 	if (s && (bufferLength = JSStringGetMaximumUTF8CStringSize(s)))
@@ -395,19 +395,19 @@ char * JSTStringToUTF8 (JSTString s, bool release) {
 	return buffer;
 }
 
-UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release) {
-	if (!jss || !len) return NULL;
-	const gunichar2 * utf16 = JSTStringUTF16(jss);
-	void * result = g_utf16_to_ucs4(utf16, len, NULL, NULL, NULL);
-	if (release) JSTStringRelease(jss);
+utf32 * JSTStringToUTF32(register JSTString text, size_t len, bool release) {
+	if (!text || !len) return NULL;
+	const utf16 * utf = JSTStringUTF16(text);
+	void * result = g_utf16_to_ucs4(utf, len, NULL, NULL, NULL);
+	if (release) JSTStringRelease(text);
 	return result;
 }
 
-JSTString JSTStringFromUTF32(register const gunichar *ucs4, size_t len, bool release) {
-	if (!ucs4 || !len) return NULL;
-	long bytes = 0; const gunichar2 * utf16 = g_ucs4_to_utf16(ucs4, len, &bytes, NULL, NULL);
-	if (release) g_free((void*)ucs4);
-	JSTString result = JSTStringFromUTF16(utf16, bytes); g_free((void*)utf16);
+JSTString JSTStringFromUTF32(register utf32 * text, size_t len, bool release) {
+	if (!text || !len) return NULL;
+	long bytes = 0; utf16 * utf = g_ucs4_to_utf16(text, len, &bytes, NULL, NULL);
+	if (release) g_free(text);
+	JSTString result = JSTStringFromUTF16(utf, bytes); g_free(utf);
 	return result;
 }
 
@@ -418,7 +418,7 @@ JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release) {
 	return result;
 }
 
-JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
+JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p) {
 	JSTValue result = NULL;
 	if (p) {
 		JSTString s = JSTStringFromUTF8(p);
@@ -428,16 +428,16 @@ JSTValue JSTValueFromJSON_ JSTUtility(char * p) {
 	return result;
 }
 
-char * JSTConstructUTF8(char * format, ...) {
+utf8 * JSTConstructUTF8(utf8 * format, ...) {
 	if (!format) return NULL;
-	va_list ap; va_start(ap, format); char * message = NULL;
+	va_list ap; va_start(ap, format); utf8 * message = NULL;
 	g_vasprintf(&message, format, ap); return message;
 }
 
 static JSValueRef jst_execute JSTDeclareFunction () {
 
 	int child_status = 0, allocated = 0, deallocated = 0;
-	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
+	utf8 * exec_child_out = NULL, * exec_child_err = NULL; gint exec_child_status = 0;
 
 	JSObjectRef exec = JSTObjectUndefined;
 
@@ -452,8 +452,8 @@ static JSValueRef jst_execute JSTDeclareFunction () {
 
 	if (JSTScriptHasError) { return JSTValueUndefined; }
 
-	char * argument[oargc + argc + 1];
-	char ** dest = argument;
+	utf8 * argument[oargc + argc + 1];
+	utf8 ** dest = argument;
 
 	while (allocated < oargc) {
 		JSTString tmp = JSTValueToString(JSTObjectGetPropertyAtIndex(oargv, allocated));
@@ -506,12 +506,12 @@ static JSValueRef jst_exit JSTDeclareFunction () {
 static JSValueRef jst_include JSTDeclareFunction (file) {
 
 	JSTValue result;
-	char *script = NULL, *src = NULL, *file = (argc)?JSTValueToUTF8(argv[0]):NULL;
+	utf8 * script = NULL, * src = NULL, * file = (argc)?JSTValueToUTF8(argv[0]):NULL;
 
 	if (g_file_get_contents(file, &src, NULL, NULL)) {
 		script = src; int c = 0;
-		if (*script == '#' && *(script+1) == '!') {
-			script+=2; while ((c = *script) && c != '\n') script++;
+		if (* script == '#' && *(script+1) == '!') {
+			script+=2; while ((c = * script) && c != '\n') script++;
 		}
 		result = JSTScriptEval(script, NULL, file, 1); g_free(src);
 	} else {
@@ -539,7 +539,7 @@ static JSValueRef jst_set_path JSTDeclareFunction () {
 	if (argc != 1)
 		return JSTScriptNativeError(JST_TYPE_ERROR, "expected path argument");
 
-	char * val = JSTValueToUTF8(argv[0]);
+	utf8 * val = JSTValueToUTF8(argv[0]);
 	int status = g_chdir(val);
 	JSValueRef result = (status)?NULL:JSTValueFromDouble(status);
 	JSTStringFreeUTF8(val);
@@ -554,7 +554,7 @@ static JSValueRef jst_get_path JSTDeclareFunction () {
 	if (argc != 0)
 		return JSTScriptNativeError(JST_TYPE_ERROR, "unexpected argument");
 
-	char * path = g_get_current_dir();
+	utf8 * path = g_get_current_dir();
 	JSTValue result = JSTValueFromUTF8(path);
 	g_free(path);
 
@@ -566,7 +566,7 @@ static JSValueRef jst_get_path JSTDeclareFunction () {
 // if pathInput is not supplied, the current working directory will be substituted.
 static JSValueRef jst_get_path_basename JSTDeclareFunction (String pathInput) {
 
-	char * pathResult, * pathInput = NULL;
+	utf8 * pathResult, * pathInput = NULL;
 
 	if (argc == 0) {
 		pathInput = g_get_current_dir();
@@ -578,7 +578,7 @@ static JSValueRef jst_get_path_basename JSTDeclareFunction (String pathInput) {
 		pathInput = JSTValueToUTF8(argv[0]);
 	}
 
-	if (pathInput == NULL || *pathInput == 0) {
+	if (pathInput == NULL || * pathInput == 0) {
 		g_free(pathInput);
 		return JSTScriptNativeError(JST_URI_ERROR, "path argument is empty");
 	}
@@ -595,7 +595,7 @@ static JSValueRef jst_get_path_basename JSTDeclareFunction (String pathInput) {
 
 static JSValueRef jst_get_path_directory JSTDeclareFunction (String pathInput) {
 
-	char * pathResult, * pathInput = NULL;
+	utf8 * pathResult, * pathInput = NULL;
 
 	if (argc != 1) return
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected single path argument");
@@ -604,7 +604,7 @@ static JSValueRef jst_get_path_directory JSTDeclareFunction (String pathInput) {
 
 	pathInput = JSTValueToUTF8(argv[0]);
 
-	if (pathInput == NULL || *pathInput == 0) {
+	if (pathInput == NULL || * pathInput == 0) {
 		g_free(pathInput);
 		return JSTScriptNativeError(JST_URI_ERROR, "path argument is empty");
 	}
@@ -624,10 +624,10 @@ static JSValueRef jst_base64_encode JSTDeclareFunction () {
 	if (argc != 1) return
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected string argument");
 
-	char * input = JSTValueToUTF8(argv[0]);
+	utf8 * input = JSTValueToUTF8(argv[0]);
 	// TODO: wtf is the g_ ?
 	size_t len = strlen(input);
-	char * base64 = g_base64_encode(input, len);
+	utf8 * base64 = g_base64_encode(input, len);
 
 	g_free(input);
 	JSValueRef result = JSTValueFromUTF8(base64);
@@ -641,10 +641,10 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 	if (argc != 1) return 
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected string argument");
 
-	char * input = JSTValueToUTF8(argv[0]);
+	utf8 * input = JSTValueToUTF8(argv[0]);
 	// TODO: wtf is the g_ ?
 	size_t len = strlen(input);
-	char * output = g_base64_decode(input, &len);
+	utf8 * output = g_base64_decode(input, &len);
 
 	g_free(input);
 	JSValueRef result = JSTValueFromUTF8(output);
@@ -659,7 +659,7 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 #include "jst/memory.c"
 #include "jst/file.c"
 
-JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]) {
+JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, utf8 * argv[], utf8 * envp[]) {
 
 	JSTObject sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, JSTObjectPropertyAPI);

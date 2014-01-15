@@ -74,6 +74,11 @@ DAMAGE.
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 
+typedef char utf8;
+typedef gunichar2 utf16;
+typedef gunichar utf32;
+typedef gunichar ucs4;
+
 #include "JavaScriptCore/JavaScript.h"
 #include "JavaScriptCore/JSBase.h"
 #include "JavaScriptCore/JSContextRef.h"
@@ -89,27 +94,28 @@ DAMAGE.
 #define JSTValueTypeString kJSTypeString
 #define JSTValueTypeObject kJSTypeObject
 
-#define JSTString JSStringRef
-#define JSTContext JSContextRef
-#define JSTValue JSValueRef
+typedef JSStringRef JSTString;
+typedef JSContextRef JSTContext;
+typedef JSValueRef JSTValue;
+typedef JSObjectRef JSTObject;
+typedef JSClassRef JSTClass;
+typedef JSStaticValue JSTClassAccessor;
+typedef JSStaticFunction JSTClassFunction;
+typedef JSClassDefinition JSTClassDefinition;
+typedef JSContextRef JSTContext;
+typedef JSContextGroupRef JSTContextGroup;
+
 #define JSTValueNull JSValueMakeNull(ctx)
 #define JSTValueUndefined JSValueMakeUndefined(ctx)
-#define JSTObject JSObjectRef
 #define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
 #define JSTObjectNull ((JSTObject) JSTValueNull)
 #define JSTObjectToValue(o) ((JSTValue) o)
-#define JSTClass JSClassRef
-#define JSTClassAccessor JSStaticValue
-#define JSTClassFunction JSStaticFunction
-#define JSTClassDefinition JSClassDefinition
 #define JSTClassEmptyDefinition kJSClassDefinitionEmpty
 #define JSTClassCreate(d) JSClassCreate(d)
 #define JSTClassRetain(c) JSClassRetain(c)
 #define JSTClassRelease(c) JSClassRelease(c)
 #define JSTClassPropertyNone kJSClassAttributeNone
 #define JSTClassPropertyManualPrototype kJSClassAttributeNoAutomaticPrototype
-#define JSTContext JSContextRef
-#define JSTContextGroup JSContextGroupRef
 #define JSTContextGroupCreate JSContextGroupCreate
 #define JSTContextGroupRetain JSContextGroupRetain
 #define JSTContextGroupRelease JSContextGroupRelease
@@ -171,8 +177,8 @@ DAMAGE.
 #define JSTScriptReferenceError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("ReferenceError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
 #define JSTScriptEvalError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("EvalError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
 #define JSTScriptURIError(p) JSTConstructorCall((JSTObject)JSTScriptNativeEval("URIError", NULL), JSTStringToValue(JSTStringFromUTF8(p), true))
-#define JSTScriptSetError(e) (*exception = e)
-#define JSTScriptHasError (!JSTValueIsVoid(*exception) && JSTValueIsObject(*exception))
+#define JSTScriptSetError(e) (* exception = e)
+#define JSTScriptHasError (!JSTValueIsVoid(* exception) && JSTValueIsObject(* exception))
 #define JSTScriptReportException() (JSTScriptReportException_(ctx, exception))
 #define JSTScriptFunction(sName, iParamCount, pArgNames, sBody, sURL, iLine) JSObjectMakeFunction(ctx, sName, iParamCount, pArgNames, sBody sURL, iLine, exception)
 #define JSTStringRelease(s) JSStringRelease(s)
@@ -221,9 +227,9 @@ DAMAGE.
 #define JSTValueIsConstructor(v) (v && JSTValueIsObject(v) && JSTObjectIsConstructor(v))
 #define JSTValueIsNaN(v) JSTValueToBoolean(JSTScriptNativeEval(JSTEvalNaN, v))
 
-#define JSTArgumentToInt(i, d) JSTArgumentToInt_(ctx, argc, (const struct OpaqueJSValue **)argv, bitsof(*d), i, d, exception)
+#define JSTArgumentToInt(i, d) JSTArgumentToInt_(ctx, argc, (const struct OpaqueJSValue **)argv, bitsof(* d), i, d, exception)
 #define JSTArgumentToPointer(i, d) JSTArgumentToPointer_(ctx, argc, (const struct OpaqueJSValue **)argv, i, d, exception)
-#define JSTValueToInt(v, d) JSTValueToInt_(ctx, bitsof(*d), v, d, exception)
+#define JSTValueToInt(v, d) JSTValueToInt_(ctx, bitsof(* d), v, d, exception)
 #define JSTValueToPointer(v, d) JSTValueToPointer_(ctx, v, d, exception)
 #define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((unsigned long) p)))
 
@@ -306,45 +312,41 @@ DAMAGE.
 #error You do not have a compiler known to support optional variadic macro arguments.
 #endif
 
-#define JSTUTF8 char
-#define JSTUTF16 char16_t
-#define JSTUTF32 char32_t
+extern const utf8 * JSTEvalNaN;
+extern const utf8 * JSTEvalInt;
 
-extern const char * JSTEvalNaN;
-extern const char * JSTEvalInt;
-
-extern const char * JSTReservedAddress;
+extern const utf8 * JSTReservedAddress;
 
 extern const unsigned char SoftwareLicenseText[];
 extern const unsigned char SoftwareNoticeText[];
 
-extern const char * CODENAME;
-extern const char * VERSION;
-extern const char * VENDOR;
+extern const utf8 * CODENAME;
+extern const utf8 * VERSION;
+extern const utf8 * VENDOR;
 
 extern bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index, void * dest);
 extern bool JSTValueToInt_ JSTUtility(int bits, JSTValue input, void * dest);
 extern bool JSTArgumentToPointer_ JSTUtility(int argc, JSTValue argv[], int index, void * dest);
 extern bool JSTValueToPointer_ JSTUtility(JSTValue input, void * dest);
 
-extern JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue *exception, JSTObject c, ...);
-extern JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue *exception, JSTObject method, JSTObject object, ...);
-extern JSTObject JSTFunctionCallback_ JSTUtility(char * p, void * f);
-extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, char * n, void * m, int a);
-extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, char * n, JSTClass c, void * m, int a);
-extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, char * p);
-extern void * JSTObjectSetProperty_ JSTUtility(JSTObject o, char *p, JSTValue v, size_t a);
-extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, char * p);
-extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, char * p);
-extern JSTValue JSTScriptEval_ JSTUtility(const char *p1, JSTObject o, const char * p2, size_t i);
-extern bool JSTScriptCheckSyntax_ JSTUtility(char *p1, char *p2, size_t i);
-extern void * JSTScriptNativeError_(JSTContext ctx, JSTValue *exception, const char * file, int line, int errorType, const char * format, ...);
-extern int JSTScriptReportException_(JSTContext ctx, JSTValue *exception);
-extern char * JSTStringToUTF8 (JSTString s, bool release);
-extern UTF32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release);
-extern JSTString JSTStringFromUTF32(register const gunichar *ucs4, size_t len, bool release);
+extern JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * exception, JSTObject c, ...);
+extern JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObject method, JSTObject object, ...);
+extern JSTObject JSTFunctionCallback_ JSTUtility(utf8 * p, void * f);
+extern JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, utf8 * n, void * m, int a);
+extern JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, utf8 * n, JSTClass c, void * m, int a);
+extern bool JSTObjectHasProperty_ JSTUtility(JSTObject o, utf8 * p);
+extern void * JSTObjectSetProperty_ JSTUtility(JSTObject o, utf8 * p, JSTValue v, size_t a);
+extern void * JSTObjectGetProperty_ JSTUtility(JSTObject o, utf8 * p);
+extern bool JSTObjectDeleteProperty_ JSTUtility(JSTObject o, utf8 * p);
+extern JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, size_t i);
+extern bool JSTScriptCheckSyntax_ JSTUtility(utf8 * p1, utf8 * p2, size_t i);
+extern void * JSTScriptNativeError_(JSTContext ctx, JSTValue * exception, const utf8 * file, int line, int errorType, const utf8 * format, ...);
+extern int JSTScriptReportException_(JSTContext ctx, JSTValue * exception);
+extern utf8 * JSTStringToUTF8 (JSTString s, bool release);
+extern utf32 * JSTStringToUTF32(register JSTString jss, size_t len, bool release);
+extern JSTString JSTStringFromUTF32(register utf32 * text, size_t len, bool release);
 extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
-extern JSTValue JSTValueFromJSON_ JSTUtility(char * p);
-extern char * JSTConstructUTF8(char * format, ...);
-extern JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, char * argv[], char * envp[]);
+extern JSTValue JSTValueFromJSON_ JSTUtility(utf8 * p);
+extern utf8 * JSTConstructUTF8(utf8 * format, ...);
+extern JSTObject JSTInit_ JSTUtility(JSTObject global, int argc, utf8 * argv[], utf8 * envp[]);
 
