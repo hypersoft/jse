@@ -429,8 +429,7 @@ Type.flags = new Flags(
 
 	[
 		"1", "2", "4", "8", "void", "constant", "integer", "signed", "utf",
-		"value", "string", "reference", "array", "struct", "union", "dynamic",
-		"host", "network"
+		"value", "string", "reference", "array", "struct", "union", "dynamic"
 	],
 
 	Object.create(null, {
