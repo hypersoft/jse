@@ -60,6 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JSTCodeTypeIsReference(d) (d & jst_type_reference)
 #define JSTCodeTypeIsUnion(d) (d & jst_type_union)
 #define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) ? true : false)
+#define JSTCodeTypeIsFloat(d) ((!JSTCodeTypeIsInteger(d)) ? ((d & (4|8)) ? true : false) : false)
+#define JSTCodeTypeIsVoid(d) (!(d & (1|2|4|8)))
 #define JSTCodeTypeWidth(d) ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : (d & 8) ? 8 : 0)
 #define JSTCodeTypeUTF(d) (JSTCodeTypeIsUTF(d) ? ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : 0) : 0)
 #define JSTCodeTypeFloat(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 4) ? 4 : (d & 8) ? 8 : 0))
