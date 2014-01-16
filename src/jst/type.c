@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define JSTTypeRequest(p) JSTStringCompareToUTF8(propertyName, p)
 
+#define JSTTypeApply(d, f) (d->code |= (f))
 #define JSTTypeExact(d, f) JSTCodeTypeExact(d->code)
 #define JSTTypeAlias(d) (d->alias)
 #define JSTTypeArray(d) (d->array)
