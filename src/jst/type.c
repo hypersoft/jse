@@ -121,9 +121,10 @@ static JSTDeclareSetProperty(jst_type_set) {
 		);
 	} else if (JSTTypeRequest(jst_prop_integer)) {
 		if (!JSTTypeIsFloat(d) && !JSTTypeIsInteger(d)) {
-			d->code |= jst_type_integer;
-			if (d->autoSign) d->code |= jst_type_signed;
-			if (d->autoWidth) d->code |= sizeof(gint);
+			JSTTypeApply(d,	jst_type_integer |
+				(JSTTypeIsSignable(d) ? jst_type_signed : 0) |
+				(JSTTypeIsSizeable(d) ? sizeof(gint) : 0)			
+			);
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to integer: type already defined"
 		);
