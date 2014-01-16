@@ -365,20 +365,13 @@ static JSTDeclareGetProperty(jst_type_get_width) {
 		JST_REFERENCE_ERROR, jst_type_error_no_data
 	);
 
-	unsigned int width = 0;
-	
-	if (d->code & jst_type_1) width = 1;
-	else if (d->code & jst_type_2) width = 2;
-	else if (d->code & jst_type_4) width = 4;
-	else if (d->code & jst_type_8) width = 8;
-	
+	unsigned int width = JSTTypeWidth(d);	
 	result = JSTValueToObject(JSTValueFromDouble(width));
 	
-	JSTObjectSetProperty(
-		result, jst_prop_bits, JSTValueFromDouble(
+	JSTObjectSetProperty(result, jst_prop_bits,
+		JSTValueFromDouble(
 			(width) ? (width << 3) : 0
-		),
-		JSTObjectPropertyState
+		),  JSTObjectPropertyState
 	);
 	
 	return result;
@@ -395,7 +388,7 @@ static JSTDeclareSetProperty(jst_type_set_width) {
 
 	if (d->autoWidth) {
 		unsigned int width = JSTValueToDouble(value);
-		if (width == 1 || width == 2 || width == 4 || width == 8) {
+		if (JSTCodeTypeWidth(width)) {
 			d->code |= width;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"%u is not a valid native type width", width
