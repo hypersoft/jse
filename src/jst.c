@@ -44,6 +44,8 @@ const utf8 * CODENAME = JSE_CODENAME;
 const utf8 * VERSION = JSE_BUILDNO;
 const utf8 * VENDOR = JSE_VENDOR;
 
+#include "jst/english.c"
+
 /* strict argument to integer conversion */
 bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index, void * dest) {
 
@@ -605,6 +607,26 @@ static JSValueRef jst_get_path_basename JSTDeclareFunction (String pathInput) {
 
 }
 
+static JSValueRef jst_get_path_link JSTDeclareFunction (String pathInput) {
+	utf8 * pathResult = NULL, * pathInput = NULL;
+	JSTValue result = NULL;
+	if (argc) {
+		GError * error = NULL; 
+		pathInput = JSTValueToUTF8(argv[0]);
+		pathResult = g_file_read_link(pathInput, &error);
+		if (error) {
+			JSTScriptNativeError(JST_URI_ERROR, error->message);
+			g_error_free(error);
+		} else {
+			result = JSTValueFromUTF8(pathResult);
+		}
+		g_free(pathInput), g_free(pathResult);
+	} else JSTScriptNativeError(JST_REFERENCE_ERROR,
+		"expected argument: path"
+	);
+	return result;
+}
+
 static JSValueRef jst_get_path_directory JSTDeclareFunction (String pathInput) {
 
 	utf8 * pathResult, * pathInput = NULL;
@@ -719,7 +741,8 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8
 	/* portable path operators */
 	JSTObjectSetMethod(global, "sys_set_path", jst_set_path, JSTObjectPropertyAPI);
 	JSTObjectSetMethod(global, "sys_get_path", jst_get_path, JSTObjectPropertyAPI);
-	JSTObjectSetMethod(global, "sys_get_path_basename", jst_get_path_basename, JSTObjectPropertyAPI);
+	JSTObjectSetMethod(global, "sys_get_path_base", jst_get_path_basename, JSTObjectPropertyAPI);
+	JSTObjectSetMethod(global, "sys_get_path_link", jst_get_path_link, JSTObjectPropertyAPI);
 	JSTObjectSetMethod(global, "sys_get_path_directory", jst_get_path_directory, JSTObjectPropertyAPI);
 
 	/* since we can't setup path until after script augmentation of the object these are full names */

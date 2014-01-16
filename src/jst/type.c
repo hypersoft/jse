@@ -28,35 +28,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+
+#define JSTTypeRequest(p) JSTStringCompareToUTF8(propertyName, p)
+
+#define JSTTypeExact(d, f) JSTCodeTypeExact(d->code)
+#define JSTTypeAlias(d) (d->alias)
+#define JSTTypeWidth(d) JSTCodeTypeWidth(d->code)
+#define JSTTypeIsValue(d) JSTCodeTypeIsValue(d->code)
+#define JSTTypeIsInteger(d) JSTCodeTypeIsInteger(d->code)
+#define JSTTypeIsBoolean(d) JSTCodeTypeIsBoolean(d->code)
+#define JSTTypeIsSigned(d) JSTCodeTypeIsSigned(d->code)
+#define JSTTypeIsUnsigned(d) JSTCodeTypeIsUnsigned(d->code)
+#define JSTTypeIsSignable(d) (d->autoSign)
+#define JSTTypeIsConstant(d) JSTCodeTypeIsConstant(d->code)
+#define JSTTypeIsDynamic(d) JSTCodeTypeIsDynamic(d->code)
+#define JSTTypeIsStructure(d) JSTCodeTypeIsStructure(d->code)
+#define JSTTypeStructure(d) (JSTTypeIsStructure(d) ? d->structure : NULL)
+#define JSTTypeIsReference(d) JSTCodeTypeIsReference(d->code)
+#define JSTTypeReference(d) (JSTTypeIsReference(d) ? d->reference : NULL)
+#define JSTTypeIsUnion(d) JSTCodeTypeIsUnion(d->code)
+#define JSTTypeUnion(d) (JSTTypeIsUnion(d) ? d->abstract : NULL)
+#define JSTTypeIsUTF(d) JSTCodeTypeIsUTF(d->code)
+#define JSTTypeUTF(d) JSTCodeTypeUTF(d->code)
+#define JSTTypeFloat(d) ((d->floating) ? JSTCodeTypeFloat(d->code) : 0)
+
 JSTClass jst_type_class = NULL;
 
 const utf8 * jst_type_error_no_data = "no type data available";
 
-const utf8 * jst_type_prop_array = "array";
-const utf8 * jst_type_prop_constant = "constant";
-const utf8 * jst_type_prop_dynamic = "dynamic";
-const utf8 * jst_type_prop_float = "float";
-const utf8 * jst_type_prop_name = "name";
-const utf8 * jst_type_prop_integer = "integer";
-const utf8 * jst_type_prop_reference = "reference";
-const utf8 * jst_type_prop_signed = "signed";
-const utf8 * jst_type_prop_struct = "struct";
-const utf8 * jst_type_prop_union = "union";
-const utf8 * jst_type_prop_unsigned = "unsigned";
-const utf8 * jst_type_prop_utf = "utf";
-const utf8 * jst_type_prop_value = "value";
-const utf8 * jst_type_prop_width = "width";
-const utf8 * jst_type_prop_bits = "bits";
-
 typedef struct jst_type_data {
-	utf8 * name;
+	utf8 * alias;
 	unsigned int code;
 	JSTObject reference;
 	JSTObject structure;
 	JSTObject abstract; // union
 	unsigned int dimensions[2];
-	bool autoWidth, autoSign;
-	gushort readOnly;
+	bool floating, autoWidth, autoSign, readOnly;
 } jst_type_data;
 
 static char * jst_type_validate(char * key) {
@@ -72,8 +79,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 		return true;
 	}
 	
-	bool result = false, ok = JSTValueToBoolean(value),
-	nInt = (d->autoWidth && (d->code & (1| 2 | 4 | 8 | jst_type_integer)) == 0);
+	bool result = false, ok = JSTValueToBoolean(value);
 
 	/* all properties must convert to okay */
 	if (!ok) {
@@ -84,95 +90,86 @@ static JSTDeclareSetProperty(jst_type_set) {
 		JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type data: type is read only"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_array)) {
-		g_error(
-			"jst_type_set property: %s is not yet implemented",
-			jst_type_prop_array
-		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_constant)) {
-		if ((d->code & jst_type_constant) == 0) {
+	} else if (JSTTypeRequest(jst_prop_constant)) {
+		if (!JSTTypeIsConstant(d)) {
 			d->code |= jst_type_constant;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to constant: constant property already set"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_dynamic)) {
-		if ((d->code & jst_type_dynamic) == 0) {
+	} else if (JSTTypeRequest(jst_prop_dynamic)) {
+		if (!JSTTypeIsDynamic(d)) {
 			d->code |= jst_type_dynamic;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to dynamic: dynamic property already set"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_float)) {
+	} else if (JSTTypeRequest(jst_prop_float)) {
 		unsigned int precision = JSTValueToDouble(value);
 		if (precision == 1 || precision == 2) {
-			if (d->autoSign && nInt) {
+			if (!JSTTypeWidth(d)) {
 				d->code |= (precision << 2);
-				d->autoSign = d->autoWidth = false;
+				d->autoSign = d->autoWidth = false, d->floating = true;
 			} else JSTScriptNativeError(JST_TYPE_ERROR,
 				"cannot set type to floating point: type already defined"
 			);
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"%u is not a valid floating point precision", precision
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_name)) {
-		g_error(
-			"jst_type_set property: %s is not yet implemented",
-			jst_type_prop_name
-		);		
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_integer)) {
-		if ((d->code & jst_type_integer) == 0) {
+	} else if (JSTTypeRequest(jst_prop_integer)) {
+		puts("hit set integer");
+		if (true) {
 			d->code |= jst_type_integer;
 			if (d->autoSign) d->code |= jst_type_signed;
 			if (d->autoWidth) d->code |= sizeof(gint);
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to integer: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_reference)) {
-		if (d->autoSign && nInt) {
+	} else if (JSTTypeRequest(jst_prop_reference)) {
+		if (!JSTTypeWidth(d)) {
 			JSTValueProtect(value);
 			d->reference = (JSTObject) value,
-			d->code |= sizeof(guintptr) | jst_type_integer,
+			d->code |= (sizeof(guintptr)|jst_type_integer|jst_type_reference),
 			d->autoSign = d->autoWidth = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type reference: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_signed)) {
-		if (d->autoSign) {
+	} else if (JSTTypeRequest(jst_prop_signed)) {
+		if (JSTTypeIsSignable(d)) {
 			d->code |= (jst_type_signed | jst_type_integer);
 			if (d->autoWidth) d->code |= (sizeof(gint));
 			d->autoSign = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot modify type sign: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_struct)) {
-		if (d->autoSign && nInt) {
+	} else if (JSTTypeRequest(jst_prop_struct)) {
+		if (!JSTTypeWidth(d)) {
 			JSTValueProtect(value);
 			d->structure = (JSTObject) value,
-			d->code |= sizeof(guintptr) | jst_type_integer,
+			d->code |= (sizeof(guintptr) | jst_type_integer | jst_type_struct),
 			d->autoSign = d->autoWidth = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
-			"cannot set type structure: type already defined"
+			"cannot set type to structure: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_union)) {
-		if (d->autoSign && nInt) {
+	} else if (JSTTypeRequest(jst_prop_union)) {
+		if (!JSTTypeWidth(d)) {
 			JSTValueProtect(value);
 			d->abstract = (JSTObject) value,
-			d->code |= sizeof(guintptr) | jst_type_integer,
+			d->code |= (sizeof(guintptr) | jst_type_integer | jst_type_union),
 			d->autoSign = d->autoWidth = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type union: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_unsigned)) {
-		if (d->autoSign) {
+	} else if (JSTTypeRequest(jst_prop_unsigned)) {
+		if (JSTTypeIsSignable(d)) {
 			d->code |= jst_type_integer;
 			if (d->autoWidth) d->code |= sizeof(guint);
 			d->autoSign = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot modify type sign: type already defined"
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_utf)) {
+	} else if (JSTTypeRequest(jst_prop_utf)) {
 		unsigned int utfx = JSTValueToDouble(value);
 		if (utfx == 8 || utfx == 16 || utfx == 32) {
-			if (nInt) {
+			if (!JSTTypeWidth(d)) {
 				d->code |= ((utfx >> 3) | jst_type_utf | jst_type_integer);
 				d->autoWidth = false;
 			} else JSTScriptNativeError(JST_TYPE_ERROR,
@@ -181,25 +178,13 @@ static JSTDeclareSetProperty(jst_type_set) {
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"%u is not a valid UTF specification", utfx
 		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_value)) {
-		if (d->autoSign && nInt) {
+	} else if (JSTTypeRequest(jst_prop_value)) {
+		if (!JSTTypeWidth(d)) {
 			d->code |= (jst_type_value | sizeof(guintptr) | jst_type_integer),
 			d->autoSign = d->autoWidth = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to %s: type already defined",
-			jst_type_prop_value
-		);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_width)) {
-		if (d->autoWidth) {
-			unsigned int width = JSTValueToDouble(value);
-			if (width == 1 || width == 2 || width == 4 || width == 8) {
-				d->code |= width;
-			} else JSTScriptNativeError(JST_TYPE_ERROR,
-				"%u is not a valid native type width", width
-			);
-			d->autoWidth = false;
-		} else JSTScriptNativeError(JST_TYPE_ERROR,
-			"cannot set type %s: property already defined", jst_type_prop_width
+			jst_prop_value
 		);
 	}
 
@@ -218,54 +203,29 @@ static JSTDeclareGetProperty(jst_type_get) {
 		return JSTValueUndefined;
 	} else d->readOnly = true;
 
-	if (JSTStringCompareToUTF8(propertyName, jst_type_prop_array)) {
-		g_error(
-			"jst_type_get property: %s is not yet implemented",
-			jst_type_prop_array
-		);		
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_constant)) {
-		result = JSTValueFromBoolean(d->code & jst_type_constant);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_dynamic)) {
-		result = JSTValueFromBoolean(d->code & jst_type_dynamic);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_float)) {
-		result = JSTValueFromBoolean((d->code & jst_type_integer) == 0);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_name)) {
-		result = JSTValueFromUTF8(d->name);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_integer)) {
-		result = JSTValueFromBoolean(d->code & jst_type_integer);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_reference)) {
-		if (d->reference) result = d->reference;
-		else result = JSTValueUndefined;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_signed)) {
-		result = JSTValueFromBoolean(d->code & jst_type_signed);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_struct)) {
-		if (d->structure) result = d->structure;
-		else result = JSTValueUndefined;		
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_union)) {
-		if (d->abstract) result = d->abstract;
-		else result = JSTValueUndefined;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_unsigned)) {
+	if (JSTTypeRequest(jst_prop_constant)) {
+		result = JSTValueFromBoolean(JSTTypeIsConstant(d));
+	} else if (JSTTypeRequest(jst_prop_dynamic)) {
+		result = JSTValueFromBoolean(JSTTypeIsDynamic(d));
+	} else if (JSTTypeRequest(jst_prop_float)) {
+		result = JSTValueFromDouble(JSTTypeFloat(d));
+	} else if (JSTTypeRequest(jst_prop_integer)) {
+		result = JSTValueFromDouble((JSTTypeIsInteger(d) ? JSTTypeWidth(d) : 0));
+	} else if (JSTTypeRequest(jst_prop_reference)) {
+		result = JSTTypeIsReference(d)?JSTTypeReference(d):JSTValueFromBoolean(false);
+	} else if (JSTTypeRequest(jst_prop_signed)) {
+		result = JSTValueFromBoolean(JSTTypeIsSigned(d));
+	} else if (JSTTypeRequest(jst_prop_struct)) {
+		result = JSTTypeIsStructure(d)?JSTTypeStructure(d):JSTValueFromBoolean(false);
+	} else if (JSTTypeRequest(jst_prop_union)) {
+		result = JSTTypeIsUnion(d)?JSTTypeUnion(d):JSTValueFromBoolean(false);
+	} else if (JSTTypeRequest(jst_prop_unsigned)) {
 		result = JSTValueFromBoolean((d->code & jst_type_signed) == 0);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_utf)) {
-		result = JSTValueFromBoolean(d->code & jst_type_utf);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_value)) {
-		result = JSTValueFromBoolean(d->code & jst_type_value);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_width)) {
-		unsigned int width = 0;
-		if (d->code & jst_type_1) width = 1;
-		else if (d->code & jst_type_2) width = 2;
-		else if (d->code & jst_type_4) width = 4;
-		else if (d->code & jst_type_8) width = 8;
-		result = JSTValueFromDouble(width);
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_bits)) {
-		unsigned int bits = 0;
-		if (d->code & jst_type_1) bits = 8;
-		else if (d->code & jst_type_2) bits = 16;
-		else if (d->code & jst_type_4) bits = 32;
-		else if (d->code & jst_type_8) bits = 64;
-		result = JSTValueFromDouble(bits);
+	} else if (JSTTypeRequest(jst_prop_utf)) {
+		result = JSTValueFromDouble(JSTTypeUTF(d));
+	} else if (JSTTypeRequest(jst_prop_value)) {
+		result = JSTValueFromBoolean(JSTTypeIsValue(d));
 	}
-
 	return result;
 
 }
@@ -292,62 +252,57 @@ static JSTDeclareGetPropertyNames(jst_type_enumerate) {
 	if (!d) return;
 
 	JSTString copy;
+	
+	if (JSTTypeIsConstant(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_constant);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	}
 
-	copy = JSTStringFromUTF8(jst_type_prop_bits);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_constant);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_dynamic);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_float);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_name);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_integer);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_reference);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_signed);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_struct);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_union);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_unsigned);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_utf);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_value);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
-
-	copy = JSTStringFromUTF8(jst_type_prop_width);
-	JSPropertyNameAccumulatorAddName(propertyNames, copy);
-	JSTStringRelease(copy);
+	if (JSTTypeIsDynamic(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_dynamic);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	}
+	
+	if (JSTTypeIsReference(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_reference);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeIsStructure(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_struct);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeIsUnion(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_union);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeIsUTF(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_utf);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeIsValue(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_value);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeFloat(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_float);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	} else if (JSTTypeIsInteger(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_integer);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+		if (JSTTypeIsSigned(d)) {	
+			copy = JSTStringFromUTF8(jst_prop_signed);
+			JSPropertyNameAccumulatorAddName(propertyNames, copy);
+			JSTStringRelease(copy);
+		} else if (JSTTypeIsUnsigned(d)) {	
+			copy = JSTStringFromUTF8(jst_prop_unsigned);
+			JSPropertyNameAccumulatorAddName(propertyNames, copy);
+			JSTStringRelease(copy);
+		}
+	}
 
 }
 
@@ -358,37 +313,17 @@ static JSTDeclareHasProperty(jst_type_query) {
 
 	bool result = false;
 	
-	if (JSTStringCompareToUTF8(propertyName, jst_type_prop_array)) {
-		result = false;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_bits)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_constant)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_dynamic)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_float)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_name)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_integer)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_reference)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_signed)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_struct)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_union)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_unsigned)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_utf)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_value)) {
-		result = true;
-	} else if (JSTStringCompareToUTF8(propertyName, jst_type_prop_width)) {
-		result = true;
-	}
+	if (JSTTypeRequest(jst_prop_reference)) result = JSTTypeReference(d);
+	else if (JSTTypeRequest(jst_prop_constant)) result = JSTTypeIsConstant(d);
+	else if (JSTTypeRequest(jst_prop_dynamic)) result = JSTTypeIsDynamic(d);
+	else if (JSTTypeRequest(jst_prop_float)) result = JSTTypeFloat(d);
+	else if (JSTTypeRequest(jst_prop_integer)) result = JSTTypeIsInteger(d);
+	else if (JSTTypeRequest(jst_prop_signed)) result = JSTTypeIsSigned(d);
+	else if (JSTTypeRequest(jst_prop_struct)) result = JSTTypeIsStructure(d);
+	else if (JSTTypeRequest(jst_prop_union)) result = JSTTypeIsUnion(d);
+	else if (JSTTypeRequest(jst_prop_unsigned)) result = JSTTypeIsUnsigned(d);
+	else if (JSTTypeRequest(jst_prop_utf)) result = JSTTypeUTF(d);
+	else if (JSTTypeRequest(jst_prop_value)) JSTTypeIsValue(d);
 
 	return result;
 
@@ -405,22 +340,107 @@ static JSTDeclareConvertor(jst_type_convert) {
 	if (type == JSTValueTypeNumber) {
 		return JSTValueFromDouble(d->code);
 	} else if (type == JSTValueTypeString) {
-		return JSTValueFromUTF8(d->name);
+		if (d->alias) return JSTValueFromUTF8(d->alias);
+		return JSTObjectGetProperty(object, jst_prop_name);
 	}
 	
 	return false;
 }
 
-jst_type_data * jst_type_data_new(const utf8 * name, unsigned int code) {
+static JSTDeclareGetProperty(jst_type_get_state) {
+	jst_type_data * d = JSTObjectGetPrivate(object);
+
+	if (!d) return JSTScriptNativeError(
+		JST_REFERENCE_ERROR, jst_type_error_no_data
+	);
+
+	return JSTValueFromBoolean((d)? d->readOnly : false);
+}
+
+static JSTDeclareGetProperty(jst_type_get_width) {
+	
+	jst_type_data * d = JSTObjectGetPrivate(object); JSTObject result;
+	
+	if (!d) return JSTScriptNativeError(
+		JST_REFERENCE_ERROR, jst_type_error_no_data
+	);
+
+	unsigned int width = 0;
+	
+	if (d->code & jst_type_1) width = 1;
+	else if (d->code & jst_type_2) width = 2;
+	else if (d->code & jst_type_4) width = 4;
+	else if (d->code & jst_type_8) width = 8;
+	
+	result = JSTValueToObject(JSTValueFromDouble(width));
+	
+	JSTObjectSetProperty(
+		result, jst_prop_bits, JSTValueFromDouble(
+			(width) ? (width << 3) : 0
+		),
+		JSTObjectPropertyState
+	);
+	
+	return result;
+	
+}
+
+static JSTDeclareSetProperty(jst_type_set_width) {
+	
+	jst_type_data * d = JSTObjectGetPrivate(object);
+
+	if (!d) return JSTScriptNativeError(
+		JST_REFERENCE_ERROR, jst_type_error_no_data
+	);
+
+	if (d->autoWidth) {
+		unsigned int width = JSTValueToDouble(value);
+		if (width == 1 || width == 2 || width == 4 || width == 8) {
+			d->code |= width;
+		} else JSTScriptNativeError(JST_TYPE_ERROR,
+			"%u is not a valid native type width", width
+		);
+		d->autoWidth = false;
+	} else JSTScriptNativeError(JST_TYPE_ERROR,
+		"cannot set type width: property already defined"
+	);
+
+	return true;
+}
+
+static JSTDeclareGetProperty(jst_type_get_array) {
+	jst_type_data * d = JSTObjectGetPrivate(object);
+
+	if (!d) return JSTScriptNativeError(
+		JST_REFERENCE_ERROR, jst_type_error_no_data
+	);
+
+	JSTObject result = NULL;
+
+	return result;
+}
+
+static JSTDeclareSetProperty(jst_type_set_array) {
+	jst_type_data * d = JSTObjectGetPrivate(object);
+
+	if (!d) return JSTScriptNativeError(
+		JST_REFERENCE_ERROR, jst_type_error_no_data
+	);
+
+	return true;
+}
+
+
+jst_type_data * jst_type_data_new(const utf8 * alias, unsigned int code) {
 	jst_type_data * d = g_malloc0(sizeof(jst_type_data));
-	d->name = g_strdup(name), d->code = code,
+	d->alias = (alias) ? g_strdup(alias) : NULL, d->code = code,
 	d->autoSign = d->autoWidth = true;
 	return d;
 }
 
 void jst_type_data_free(jst_type_data * d) {
 	if (d) {
-		g_free(d->name); g_free(d);
+		g_free(d->alias), g_free(d);
 	}
 }
 
@@ -431,12 +451,47 @@ static JSTDeclareFinalizer(jst_type_finalize) {
 
 static JSTClass jst_type_init() {
 
+	JSTClassAccessor properties[] = {
+		{
+			jst_prop_alias,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_read_only,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_name,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_native,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_width,
+			&jst_type_get_width, &jst_type_set_width,
+			JSTObjectPropertyRequired
+		},
+		{
+			jst_prop_array,
+			&jst_type_get_array, &jst_type_set_array,
+			JSTObjectPropertyRequired
+		},
+		{NULL, NULL, NULL, 0}
+	};
+
 	JSTClassDefinition jsClass = JSTClassEmptyDefinition;
 	jsClass.className = "type",
 	jsClass.attributes = JSTClassPropertyManualPrototype,
 	jsClass.setProperty = &jst_type_set,
 	jsClass.getProperty = &jst_type_get,
 	jsClass.deleteProperty = &jst_type_delete,
+	jsClass.staticValues = properties,
 	jsClass.hasProperty = &jst_type_query,
 	jsClass.getPropertyNames = &jst_type_enumerate,
 	jsClass.convertToType = &jst_type_convert,
@@ -447,7 +502,74 @@ static JSTClass jst_type_init() {
 
 }
 
-static JSTValue jst_type_constructor JSTDeclareFunction(name, code) {
+static void * jst_type_parse_code JSTUtility(JSTObject object, size_t code) {
+
+	jst_type_data * d = JSTObjectGetPrivate(object);
+
+	if (!d) {
+		JSTScriptNativeError(JST_REFERENCE_ERROR, jst_type_error_no_data);
+		return NULL;
+	}
+		
+	if (
+		JSTCodeTypeIsReference(code) ||
+		JSTCodeTypeIsStructure(code) ||
+		JSTCodeTypeIsUnion(code) ||
+		JSTCodeTypeIsArray(code)
+	) {
+		JSTScriptNativeError(JST_REFERENCE_ERROR,
+			"unable to complete type request: no object data available"
+		);
+		return NULL;
+	}
+	
+	if (JSTCodeTypeIsConstant(code)) d->code |= jst_type_constant;
+	if (JSTCodeTypeIsDynamic(code)) d->code |= jst_type_dynamic;
+	
+	size_t floater = JSTCodeTypeFloat(code);
+
+	if (floater) {
+		d->code |= floater;
+		d->autoSign = d->autoWidth = false, d->floating = true;
+		return object;
+	}
+
+	if (JSTCodeTypeIsBoolean(code)) {
+		d->code |= 1;
+		d->autoSign = d->autoWidth = false;
+		return object;
+	}
+
+	if (JSTCodeTypeIsInteger(code)) {
+		d->code |= (sizeof(gint) | jst_type_integer);
+		if (JSTCodeTypeIsValue(code)) {
+			d->code |= jst_type_value,
+			d->autoSign = d->autoWidth = false;
+			return object;
+		}
+		if (JSTCodeTypeIsSigned(code)) {
+			d->code |= (jst_type_signed);
+			d->autoSign = false;			
+		} else {
+			d->autoSign = false;
+		}
+		if (JSTCodeTypeUTF(code)) {
+			d->code |= (JSTCodeTypeWidth(code) | jst_type_utf);
+			d->autoWidth = false;
+			return object;
+		}
+		size_t width = JSTCodeTypeWidth(code);
+		if (width) {
+			d->code |= width;
+			d->autoWidth = false;
+		}
+	}
+
+	return object;
+	
+}
+
+static JSTValue jst_type_constructor JSTDeclareFunction() {
 
 	if (argc != 2) return JSTScriptNativeError(JST_REFERENCE_ERROR,
 		"expected arguments: name, code"
@@ -456,9 +578,11 @@ static JSTValue jst_type_constructor JSTDeclareFunction(name, code) {
 	utf8 * name = JSTValueToUTF8(argv[0]);
 	size_t code = JSTValueToDouble(argv[1]);
 	
-	jst_type_data * private = jst_type_data_new(name, code);
+	jst_type_data * private = jst_type_data_new(name, 0);
 	
-	JSTObject object = JSTClassInstance(jst_type_class, private);
+	JSTObject object = jst_type_parse_code(
+		ctx, JSTClassInstance(jst_type_class, private), code, exception
+	);
 
 	return object;
 

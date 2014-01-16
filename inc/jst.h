@@ -49,10 +49,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define JSTCodeTypeExact(d, f) ((d & (f) == (f)) ? true : false)
 #define JSTCodeTypeIsValue(d) (d & jst_type_value)
-#define JSTCodeTypeIsInteger(d) ((d & jst_type_integer) ? : true : false)
+#define JSTCodeTypeIsInteger(d) ((d & jst_type_integer) ? true : false)
+#define JSTCodeTypeIsArray(d) ((d & jst_type_array) ? true : false)
 #define JSTCodeTypeIsBoolean(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 1) ? true : false))
 #define JSTCodeTypeIsSigned(d) ((d & jst_type_signed) ? true : false)
-#define JSTCodeTypeIsUnsigned(d) (!d->autoSign && (d & jst_type_signed) ? false : true)
+#define JSTCodeTypeIsUnsigned(d) (JSTCodeTypeIsInteger(d) && (d & jst_type_signed) ? false : true)
 #define JSTCodeTypeIsConstant(d) ((d & jst_type_constant) ? true : false)
 #define JSTCodeTypeIsDynamic(d) ((d & jst_type_dynamic) ? true : false)
 #define JSTCodeTypeIsStructure(d) (d & jst_type_reference)
