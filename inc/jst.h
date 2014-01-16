@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JSTCodeTypeIsUnsigned(d) (JSTCodeTypeIsInteger(d) && (d & jst_type_signed) ? false : true)
 #define JSTCodeTypeIsConstant(d) ((d & jst_type_constant) ? true : false)
 #define JSTCodeTypeIsDynamic(d) ((d & jst_type_dynamic) ? true : false)
-#define JSTCodeTypeIsStructure(d) (d & jst_type_reference)
+#define JSTCodeTypeIsStructure(d) (d & jst_type_struct)
 #define JSTCodeTypeIsReference(d) (d & jst_type_reference)
 #define JSTCodeTypeIsUnion(d) (d & jst_type_union)
 #define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) ? true : false)
