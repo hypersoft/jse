@@ -91,19 +91,19 @@ static JSTDeclareSetProperty(jst_type_set) {
 		JSTScriptNativeError(JST_TYPE_ERROR,
 			"invalid property value: setting must be true"
 		);
-	} else if (d->readOnly) {
+	} else if (JSTTypeIsReadOnly(d)) {
 		JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type data: type is read only"
 		);
 	} else if (JSTTypeRequest(jst_prop_constant)) {
 		if (!JSTTypeIsConstant(d)) {
-			d->code |= jst_type_constant;
+			JSTTypeApply(d, jst_type_constant);
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to constant: constant property already set"
 		);
 	} else if (JSTTypeRequest(jst_prop_dynamic)) {
 		if (!JSTTypeIsDynamic(d)) {
-			d->code |= jst_type_dynamic;
+			JSTTypeApply(d, jst_type_dynamic);
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to dynamic: dynamic property already set"
 		);
@@ -111,7 +111,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 		unsigned int precision = JSTValueToDouble(value);
 		if (precision == 1 || precision == 2) {
 			if (!JSTTypeWidth(d)) {
-				d->code |= (precision << 2);
+				JSTTypeApply(d, precision << 2);
 				d->autoSign = d->autoWidth = false, d->floating = true;
 			} else JSTScriptNativeError(JST_TYPE_ERROR,
 				"cannot set type to floating point: type already defined"
@@ -120,8 +120,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 			"%u is not a valid floating point precision", precision
 		);
 	} else if (JSTTypeRequest(jst_prop_integer)) {
-		puts("hit set integer");
-		if (true) {
+		if (!JSTTypeIsFloat(d) && !JSTTypeIsInteger(d)) {
 			d->code |= jst_type_integer;
 			if (d->autoSign) d->code |= jst_type_signed;
 			if (d->autoWidth) d->code |= sizeof(gint);
