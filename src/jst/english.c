@@ -38,6 +38,7 @@ const utf8 * jst_prop_base = "base";
 const utf8 * jst_prop_bass = "bass";
 const utf8 * jst_prop_bits = "bits";
 const utf8 * jst_prop_block = "block";
+const utf8 * jst_prop_boolean = "boolean";
 const utf8 * jst_prop_caption = "caption";
 const utf8 * jst_prop_char = "char";
 const utf8 * jst_prop_clear = "clear";
