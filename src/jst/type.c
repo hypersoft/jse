@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define JSTTypeExact(d, f) JSTCodeTypeExact(d->code)
 #define JSTTypeAlias(d) (d->alias)
+#define JSTTypeArray(d) (d->array)
 #define JSTTypeWidth(d) JSTCodeTypeWidth(d->code)
 #define JSTTypeUTF(d) JSTCodeTypeUTF(d->code)
 #define JSTTypeFloat(d) ((d->floating) ? JSTCodeTypeFloat(d->code) : 0)
@@ -40,14 +41,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JSTTypeReference(d) (JSTTypeIsReference(d) ? d->reference : NULL)
 #define JSTTypeUnion(d) (JSTTypeIsUnion(d) ? d->abstract : NULL)
 
+#define JSTTypeIsSignable(d) (d->autoSign)
+#define JSTTypeIsSizeable(d) (d->autoWidth)
+#define JSTTypeIsFloat(d) (d->floating)
+#define JSTTypeIsReadOnly(d) (d->readOnly)
+
+#define JSTTypeIsArray(d) (JSTCodeTypeIsArray(d->code))
 #define JSTTypeIsValue(d) JSTCodeTypeIsValue(d->code)
 #define JSTTypeIsInteger(d) JSTCodeTypeIsInteger(d->code)
 #define JSTTypeIsBoolean(d) JSTCodeTypeIsBoolean(d->code)
 #define JSTTypeIsSigned(d) JSTCodeTypeIsSigned(d->code)
 #define JSTTypeIsUnsigned(d) JSTCodeTypeIsUnsigned(d->code)
-#define JSTTypeIsSignable(d) (d->autoSign)
 #define JSTTypeIsVoid(d) JSTCodeTypeIsVoid(d->code)
-#define JSTTypeIsFloat(d) JSTCodeTypeIsFloat(d->code)
 #define JSTTypeIsConstant(d) JSTCodeTypeIsConstant(d->code)
 #define JSTTypeIsDynamic(d) JSTCodeTypeIsDynamic(d->code)
 #define JSTTypeIsStructure(d) JSTCodeTypeIsStructure(d->code)
