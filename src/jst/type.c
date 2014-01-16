@@ -66,10 +66,6 @@ typedef struct jst_type_data {
 	bool floating, autoWidth, autoSign, readOnly;
 } jst_type_data;
 
-static char * jst_type_validate(char * key) {
-	return NULL;
-}
-
 static JSTDeclareSetProperty(jst_type_set) {
 
 	jst_type_data * d = JSTObjectGetPrivate(object);
