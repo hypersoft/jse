@@ -1,6 +1,7 @@
-PKGCONFIG := $(shell pkg-config --cflags --libs javascriptcoregtk-3.0)
+PKGCONFIG != pkg-config --cflags --libs javascriptcoregtk-3.0
+BUILDNO != bash tool/buildnum -p
 
-BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Hyperstone"' -DJSE_BUILDNO='"$(shell tool/buildnum -p)"'
+BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=native -DJSE_VENDOR='"Hypersoft Systems"' -DJSE_CODENAME='"Hyperstone"' -DJSE_BUILDNO='"${BUILDNO}"'
 
 #since this is a GCC/GNU/Linux file we only require headers for this spec.
 JSTHeaders := $(shell echo inc/{jst,license,notice,jst-comp-gcc,jst-os-linux}.h)
@@ -10,8 +11,12 @@ JSTSources := $(shell \
 	src/jst.c \
 )
 
-all: bin/jse
+all: bin/bash bin/jse
 
+bin/bash:
+	@printf "Attempting to create symlink to /bin/bash..\nEnter Root "
+	@su root -c 'ln -s '`bash -c 'type -p bash'`' /bin/bash'
+	
 bin:
 	@printf '\nCreating output directory...\n'
 	@mkdir bin
