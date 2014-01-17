@@ -191,8 +191,16 @@ static JSTDeclareSetProperty(jst_type_set) {
 			"cannot set type to %s: type already defined",
 			jst_prop_value
 		);
+	} else if (JSTTypeRequest(jst_prop_boolean)) {
+		if (!JSTTypeWidth(d) && !JSTTypeIsInteger(d)) {
+			d->code |= 1,
+			d->autoSign = d->autoWidth = false;
+		} else JSTScriptNativeError(JST_TYPE_ERROR,
+			"cannot set type to %s: type already defined",
+			jst_prop_boolean
+		);
 	} else if (JSTTypeRequest(jst_prop_array)) {
-		if (JSTTypeIsArray(d)) {
+		if (!JSTTypeIsArray(d)) {
 			JSTObject arrayConstructor = JSTObjectGetProperty(
 				NULL, "Array"
 			);
@@ -245,6 +253,8 @@ static JSTDeclareGetProperty(jst_type_get) {
 		result = JSTValueFromBoolean(JSTTypeIsDynamic(d));
 	} else if (JSTTypeRequest(jst_prop_float)) {
 		result = JSTValueFromDouble(JSTTypeFloat(d));
+	} else if (JSTTypeRequest(jst_prop_boolean)) {
+		result = JSTValueFromBoolean(JSTTypeIsBoolean(d));
 	} else if (JSTTypeRequest(jst_prop_integer)) {
 		result = JSTValueFromDouble((JSTTypeIsInteger(d) ? JSTTypeWidth(d) : 0));
 	} else if (JSTTypeRequest(jst_prop_reference)) {
