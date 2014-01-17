@@ -158,6 +158,7 @@ const utf8 * jst_prop_utf = "utf";
 const utf8 * jst_prop_value = "value";
 const utf8 * jst_prop_version = "version";
 const utf8 * jst_prop_vertical = "vertical";
+const utf8 * jst_prop_void = "void";
 const utf8 * jst_prop_weight = "weight";
 const utf8 * jst_prop_width = "width";
 const utf8 * jst_prop_x = "x";
