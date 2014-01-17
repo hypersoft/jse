@@ -277,6 +277,7 @@ static JSTDeclareGetProperty(jst_type_get) {
 				JSTValueFromDouble(d->dimensions[0]),
 				JSTValueFromDouble(d->dimensions[1]),		
 			};
+			// Can't set the fucking prototype on this bitch!
 			result = JSTObjectArray(2, array);
 		}
 	}
