@@ -191,6 +191,37 @@ static JSTDeclareSetProperty(jst_type_set) {
 			"cannot set type to %s: type already defined",
 			jst_prop_value
 		);
+	} else if (JSTTypeRequest(jst_prop_array)) {
+		if (JSTTypeIsArray(d)) {
+			JSTObject arrayConstructor = JSTObjectGetProperty(
+				NULL, "Array"
+			);
+			if (JSTValueIsNumber(value)) {
+				d->dimensions[0] = JSTValueToDouble(value);
+			} else if (
+				JSTValueIsObject(value) &&
+				JSTValueIsConstructorInstance(value, arrayConstructor)
+			) {
+				size_t len = JSTValueToDouble(
+					JSTObjectGetProperty(value, jst_prop_length)
+				);
+				JSTValue x, y;
+				if (len) {
+					guint
+						* xp = &(d->dimensions[0]),
+						* yp = &(d->dimensions[1]);
+					x = JSTObjectGetPropertyAtIndex(value, 0);
+					if (len > 1 && JSTValueToInt(x, xp)) {
+						y = JSTObjectGetPropertyAtIndex(value, 1);
+						JSTValueToInt(y, yp);					
+					}
+				}
+			} else JSTScriptNativeError(JST_TYPE_ERROR,
+				"cannot set type to array: expect number or [x, y]"
+			);
+		} else JSTScriptNativeError(JST_TYPE_ERROR,
+			"cannot set type to array: type already defined"
+		);
 	}
 
 	return result;
@@ -199,7 +230,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 
 static JSTDeclareGetProperty(jst_type_get) {
 
-	JSTValue result = NULL;
+	JSTValue result = JSTValueUndefined;
 
 	jst_type_data * d = JSTObjectGetPrivate(object);
 
@@ -230,6 +261,14 @@ static JSTDeclareGetProperty(jst_type_get) {
 		result = JSTValueFromDouble(JSTTypeUTF(d));
 	} else if (JSTTypeRequest(jst_prop_value)) {
 		result = JSTValueFromBoolean(JSTTypeIsValue(d));
+	} else if (JSTTypeRequest(jst_prop_array)) {
+		if (JSTTypeIsArray(d)) {
+			JSTValue array[2] = {
+				JSTValueFromDouble(d->dimensions[0]),
+				JSTValueFromDouble(d->dimensions[1]),		
+			};
+			result = JSTObjectArray(2, array);
+		}
 	}
 	return result;
 
@@ -258,6 +297,12 @@ static JSTDeclareGetPropertyNames(jst_type_enumerate) {
 
 	JSTString copy;
 	
+	if (JSTTypeIsArray(d)) {	
+		copy = JSTStringFromUTF8(jst_prop_array);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);
+	}
+
 	if (JSTTypeIsConstant(d)) {	
 		copy = JSTStringFromUTF8(jst_prop_constant);
 		JSPropertyNameAccumulatorAddName(propertyNames, copy);
@@ -270,7 +315,11 @@ static JSTDeclareGetPropertyNames(jst_type_enumerate) {
 		JSTStringRelease(copy);
 	}
 	
-	if (JSTTypeIsReference(d)) {	
+	if (JSTTypeIsBoolean(d)) {
+		copy = JSTStringFromUTF8(jst_prop_boolean);
+		JSPropertyNameAccumulatorAddName(propertyNames, copy);
+		JSTStringRelease(copy);		
+	} else if (JSTTypeIsReference(d)) {	
 		copy = JSTStringFromUTF8(jst_prop_reference);
 		JSPropertyNameAccumulatorAddName(propertyNames, copy);
 		JSTStringRelease(copy);
@@ -319,6 +368,8 @@ static JSTDeclareHasProperty(jst_type_query) {
 	bool result = false;
 	
 	if (JSTTypeRequest(jst_prop_reference)) result = JSTTypeReference(d);
+	else if (JSTTypeRequest(jst_prop_array)) result = JSTTypeIsArray(d);
+	else if (JSTTypeRequest(jst_prop_boolean)) result = JSTTypeIsBoolean(d);
 	else if (JSTTypeRequest(jst_prop_constant)) result = JSTTypeIsConstant(d);
 	else if (JSTTypeRequest(jst_prop_dynamic)) result = JSTTypeIsDynamic(d);
 	else if (JSTTypeRequest(jst_prop_float)) result = JSTTypeFloat(d);
@@ -359,7 +410,20 @@ static JSTDeclareGetProperty(jst_type_get_state) {
 		JST_REFERENCE_ERROR, jst_type_error_no_data
 	);
 
-	return JSTValueFromBoolean((d)? d->readOnly : false);
+	JSTValue result = JSTValueUndefined;
+	void * data = NULL;
+	
+	if (JSTTypeRequest(jst_prop_read_only))
+		result = JSTValueFromBoolean((d)? JSTTypeIsReadOnly(d) : false);
+	else if (JSTTypeRequest(jst_prop_alias) && (data = JSTTypeAlias(d)))
+		result = JSTValueFromUTF8(data);
+	else if (JSTTypeRequest(jst_prop_name)) {
+		result = JSTValueFromUTF8(data);
+	} else if (JSTTypeRequest(jst_prop_native)) {
+		result = JSTValueFromUTF8(data);
+	}
+
+	return result;
 }
 
 static JSTDeclareGetProperty(jst_type_get_width) {
@@ -406,29 +470,6 @@ static JSTDeclareSetProperty(jst_type_set_width) {
 	return true;
 }
 
-static JSTDeclareGetProperty(jst_type_get_array) {
-	jst_type_data * d = JSTObjectGetPrivate(object);
-
-	if (!d) return JSTScriptNativeError(
-		JST_REFERENCE_ERROR, jst_type_error_no_data
-	);
-
-	JSTObject result = NULL;
-
-	return result;
-}
-
-static JSTDeclareSetProperty(jst_type_set_array) {
-	jst_type_data * d = JSTObjectGetPrivate(object);
-
-	if (!d) return JSTScriptNativeError(
-		JST_REFERENCE_ERROR, jst_type_error_no_data
-	);
-
-	return true;
-}
-
-
 jst_type_data * jst_type_data_new(const utf8 * alias, unsigned int code) {
 	jst_type_data * d = g_malloc0(sizeof(jst_type_data));
 	d->alias = (alias) ? g_strdup(alias) : NULL, d->code = code,
@@ -473,11 +514,6 @@ static JSTClass jst_type_init() {
 		{
 			jst_prop_width,
 			&jst_type_get_width, &jst_type_set_width,
-			JSTObjectPropertyRequired
-		},
-		{
-			jst_prop_array,
-			&jst_type_get_array, &jst_type_set_array,
 			JSTObjectPropertyRequired
 		},
 		{NULL, NULL, NULL, 0}
