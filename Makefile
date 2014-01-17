@@ -15,8 +15,9 @@ all: bin/bash bin/jse
 
 bin/bash:
 	@printf "Attempting to create symlink to /bin/bash..\nEnter Root "
-	@su root -c 'ln -s '`bash -c 'type -p bash'`' /bin/bash'
-	
+	@su root -c 'ln -s '`bash -c 'type -p bash'`' /bin/bash' && \
+	printf "Success! You will need to run make again to satisfy make requirements\n" && false
+
 bin:
 	@printf '\nCreating output directory...\n'
 	@mkdir bin
