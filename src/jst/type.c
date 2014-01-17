@@ -220,6 +220,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 						* yp = &(d->dimensions[1]);
 					x = JSTObjectGetPropertyAtIndex(value, 0);
 					if (len > 1 && JSTValueToInt(x, xp)) {
+						d->code |= jst_type_array;
 						y = JSTObjectGetPropertyAtIndex(value, 1);
 						JSTValueToInt(y, yp);					
 					}
@@ -423,8 +424,17 @@ static JSTDeclareGetProperty(jst_type_get_state) {
 
 	JSTValue result = JSTValueUndefined;
 	void * data = NULL;
-	
-	if (JSTTypeRequest(jst_prop_read_only))
+
+	if (JSTTypeRequest(jst_prop_size)) { // should return sizeof
+		guint size = JSTTypeWidth(d);
+		if (size) {
+			if (JSTTypeIsArray(d)) {
+				guint x = d->dimensions[0], y = d->dimensions[1];
+				size *= (x && y) ? (x * y) : (x) ? x : 1;
+			}
+		}
+		result = JSTValueFromDouble(size);
+	} if (JSTTypeRequest(jst_prop_read_only))
 		result = JSTValueFromBoolean((d)? JSTTypeIsReadOnly(d) : false);
 	else if (JSTTypeRequest(jst_prop_alias) && (data = JSTTypeAlias(d)))
 		result = JSTValueFromUTF8(data);
@@ -433,6 +443,8 @@ static JSTDeclareGetProperty(jst_type_get_state) {
 	} else if (JSTTypeRequest(jst_prop_native)) {
 		result = JSTValueFromUTF8(data);
 	}
+	
+	// TODO: possibly add json property
 
 	return result;
 }
@@ -508,17 +520,22 @@ static JSTClass jst_type_init() {
 			JSTObjectPropertyState
 		},
 		{
-			jst_prop_read_only,
-			&jst_type_get_state, NULL,
-			JSTObjectPropertyState
-		},
-		{
 			jst_prop_name,
 			&jst_type_get_state, NULL,
 			JSTObjectPropertyState
 		},
 		{
 			jst_prop_native,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_read_only,
+			&jst_type_get_state, NULL,
+			JSTObjectPropertyState
+		},
+		{
+			jst_prop_size,
 			&jst_type_get_state, NULL,
 			JSTObjectPropertyState
 		},
