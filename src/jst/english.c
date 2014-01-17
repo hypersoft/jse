@@ -77,6 +77,7 @@ const utf8 * jst_prop_input = "input";
 const utf8 * jst_prop_int64 = "int64";
 const utf8 * jst_prop_integer = "integer";
 const utf8 * jst_prop_int = "int";
+const utf8 * jst_prop_json = "json";
 const utf8 * jst_prop_key = "key";
 const utf8 * jst_prop_label = "label";
 const utf8 * jst_prop_lateral = "lateral";
