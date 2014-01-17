@@ -605,7 +605,7 @@ static void * jst_type_parse_code JSTUtility(JSTObject object, size_t code) {
 
 static JSTValue jst_type_constructor JSTDeclareFunction() {
 
-	if (argc != 2) return JSTScriptNativeError(JST_REFERENCE_ERROR,
+	if (argc == 0 || argc > 2) return JSTScriptNativeError(JST_REFERENCE_ERROR,
 		"expected arguments: name, code"
 	);
 
