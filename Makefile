@@ -11,9 +11,9 @@ JSTSources := $(shell \
 	src/jst.c \
 )
 
-all: bin/bash bin/jse
+all: bin/jse
 
-bin/bash:
+/bin/bash:
 	@printf "Attempting to create symlink to /bin/bash..\nEnter Root "
 	@su root -c 'ln -s '`bash -c 'type -p bash'`' /bin/bash' && \
 	printf "Success! You will need to run make again to satisfy make requirements\n" && false
@@ -46,7 +46,7 @@ bin/jst.o: ${JSTHeaders} ${JSTScripts} ${JSTSources}
 	@printf '\nBuilding Hypersoft Systems JST...\n'
 	gcc -c src/jst.c -o $@ ${BUILDCOMMON}
 
-bin/jse: bin bin/jst.o src/jse.c
+bin/jse: /bin/bash bin bin/jst.o src/jse.c
 	@printf '\nBuilding Hypersoft Systems JSE...\n'
 	gcc  bin/jst.o src/jse.c -o $@ ${BUILDCOMMON} 
 	@tool/buildnum -q
