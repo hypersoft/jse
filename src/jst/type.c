@@ -610,7 +610,11 @@ static JSTValue jst_type_constructor JSTDeclareFunction() {
 	);
 
 	utf8 * name = JSTValueToUTF8(argv[0]);
-	size_t code = JSTValueToDouble(argv[1]);
+	size_t code = 0;
+	
+	if (argc > 1 && !JSTValueToInt(argv[1], &code)) {
+		return NULL;
+	}
 	
 	jst_type_data * private = jst_type_data_new(name, 0);
 	
