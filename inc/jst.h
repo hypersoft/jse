@@ -94,13 +94,8 @@ typedef gchar utf8;
 typedef gunichar2 utf16;
 typedef gunichar utf32;
 
-#include "JavaScriptCore/JavaScript.h"
-#include "JavaScriptCore/JSBase.h"
-#include "JavaScriptCore/JSContextRef.h"
-#include "JavaScriptCore/JSObjectRef.h"
-#include "JavaScriptCore/JSStringRef.h"
-#include "JavaScriptCore/JSValueRef.h"
-#include "JavaScriptCore/WebKitAvailability.h"
+#include <JavaScriptCore/JavaScript.h>
+#include <JavaScriptCore/WebKitAvailability.h>
 
 #define JSTValueTypeUndefined kJSTypeUndefined
 #define JSTValueTypeNull kJSTypeNull
@@ -220,7 +215,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTValueIsClassInstance(v, c) JSValueIsObjectOfClass(ctx, v, c)
 #define JSTValueIsEqual(v1, v2) JSValueIsEqual(ctx, v1, v2, exception)
 #define JSTValueIsStrictEqual(v1, v2) JSValueIsStrictEqual(ctx, v1, v2)
-#define JSTValueIsConstructorInstance(v, c) JSValueIsInstanceOfConstructor(ctx, v, c)
+#define JSTValueIsConstructorInstance(v, c) JSValueIsInstanceOfConstructor(ctx, v, c, exception)
 
 #define JSTValueFromBoolean(b) JSValueMakeBoolean(ctx, b)
 #define JSTValueFromDouble(d) JSValueMakeNumber(ctx, d)
