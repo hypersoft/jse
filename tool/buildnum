@@ -3,7 +3,7 @@
 declare -i MAJOR="0"
 declare -i MINOR="3"
 declare -i MINORMAX="99"
-declare -i REVISION="777"
+declare -i REVISION="781"
 declare -i REVISIONMAX="999"
 
 buildnum () 
@@ -161,9 +161,9 @@ buildnum ()
         (( MINOR > MINORMAX )) && { 
             let MAJOR++ MINOR=0 REVISION=0
         };
-        report
+        report;
     };
-    ((update)) && catdb > "$target"
+    ((update)) && catdb > "$target" || true;
 }
 
 buildnum "$@";
