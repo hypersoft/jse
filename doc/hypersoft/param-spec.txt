@@ -1,0 +1,56 @@
+SYNOPSYS:
+
+/*
+	@param-spec: MIME/TYPE
+	param-spec({PSEUDO-CLASS PARAMETER, ...}, {...})
+
+	COMMENTS
+
+	param-spec(PSEUDO-CLASS PARAMETER, PSEUDO-CLASS PARAMETER)
+	COMMENTS
+
+	param-spec(
+		{PSEUDO-CLASS PARAMETER},
+		{PSEUDO-CLASS PARAMETER, ...},
+		{...}
+	)
+
+	COMMENTS
+
+*/
+
+procedure()
+
+RULES:
+1.  A parameter specification looks like that of a C function type definition.
+2.  Curly braces are used to denote a parameter set.
+3.  If the PARAMETER field is an array it should be followed with: []
+4.  If the PARAMETER field is a hash it should be followed with: {}
+5.  PSEUDO-CLASS is not a program identifier, but a implementation defined value
+6.  PSEUDO-CLASS, nor PARAMETER may contain the following characters: .,[]{}()
+7.  Other than data defined here, PSEUDO-CLASS AND PARAMETER should conform to:
+    the programmatic identifier rules defined by the language interpreter.
+8.  If PSEUDO-CLASS IS 'hash' or 'array' the PARAMETER type characters may be
+    omitted.
+9.  The data must begin with: param-spec
+10. Multiple param specs may be specified by issuing a comma or line break,
+    after each param-spec() definition.
+11. As denoted above, the parameter data may be undefined.
+12. param-spec definitions MAY appear within single line or block comments.
+13. The param-spec definition(s) MUST appear before the implementation defined
+    procedure being documented.
+14. Any comment data following a param-spec or param-spec list IS the
+    implementation defined documentation for that invoke definition.
+15. @param-spec: MIME/TYPE, denotes the implementation defined mime type of the
+    param-spec documentation.
+16. NO documentation data shall precede or follow an @param-spec directive.
+17. Multiple mime type directives are NOT allowed
+18. ... denotes any number and type of arguments
+19. If one wishes to declare a parameter optional, the keyword: optional MAY
+    precede PSEUDO-CLASS
+20. whitespace is a delimiter within any param-spec, which traditionally
+    includes line breaks and tab spaces.
+21. If a procedure only has a single parameter set, curly braces may be ommited,
+    and may be followed by other param-spec definitions
+22. A COMMENT may not appear on the same line as the terminating: ) OF a
+    param-spec
