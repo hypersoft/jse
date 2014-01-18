@@ -176,6 +176,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTObjectPropertyRequired kJSPropertyAttributeDontDelete
 #define JSTObjectPropertyAPI (JSTObjectPropertyHidden | JSTObjectPropertyReadOnly | JSTObjectPropertyRequired)
 #define JSTObjectPropertyState (JSTObjectPropertyReadOnly | JSTObjectPropertyRequired)
+#define JSTObjectPropertyObscure (JSTObjectPropertyHidden | JSTObjectPropertyRequired)
 
 #define JSTScriptEval(p1, o, p2, i) JSTScriptEval_(ctx, p1, o, p2, i, exception)
 #define JSTScriptCheckSyntax(p1, p2, i) JSTScriptCheckSyntax_(ctx, p1, p2, i, exception)
