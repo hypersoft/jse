@@ -54,6 +54,86 @@ Object.maskPrototype = function(object) {
 	]);
 };
 
+/* create a JavaScript Accessor */
+var Accessor = function(object, name, get, set, enumerable, configurable) {
+	var descriptor = {};
+	try {
+		if (name === undefined) {
+			throw new TypeError("Property name is undefined");
+		}
+		if (typeof get !== 'function') {
+			throw new TypeError("Property get must be a function");
+		} else if (typeof set !== 'function') {
+			throw new TypeError("Property set must be a function");
+		}
+		if (get) descriptor.get = get;
+		if (set) descriptor.set = set;
+		if (enumerable === true) descriptor.enumerable = true;
+		if (configurable === true) descriptor.configurable = true;
+		Object.defineProperty(object, name, descriptor);
+	} catch(e) { throw e.fromCaller(-1); }
+	return object;
+};
+
+var Accessors = function(object, list, enumerable, configurable) {
+	try {
+		if (!Array.prototype.isPrototypeOf(list)) {
+			throw new TypeError("Property list must be an array");
+		}
+		for (var index in list) {
+			var item = list[index];
+			Accessor(
+				object, item.name, item.get, item.set,
+				enumerable, configurable
+			);
+		};
+	} catch(e) { throw e.fromCaller(-1); }
+	return object;
+};
+
+var Property = function(
+	object, name, value, enumerable, writable, configurable
+) {
+	var descriptor = {value: value};
+	try {
+		if (name === undefined) {
+			throw new TypeError("Property name is undefined")
+		}
+		if (enumerable === true) descriptor.enumerable = true;
+		if (writable === true) descriptor.writable = true;
+		if (configurable === true) descriptor.configurable = true;
+		Object.defineProperty(object, name, descriptor);
+	} catch(e) { throw e.fromCaller(-1); }
+	return object;
+};
+
+var Properties = function(object, list, enumerable, writable, configurable) {
+	try {
+		if (!Array.prototype.isPrototypeOf(list)) {
+			throw new TypeError("Property list must be an array");
+		}
+		for (var index in list) {
+			var item = list[index];
+			Property(
+				object, item.name, item.value,
+				enumerable, writable, configurable
+			);
+		};
+	} catch(e) { throw e.fromCaller(-1); }
+	return object;
+};
+
+/* create a "fully qualified" JavaScript constructor prototype */
+var Prototype = function(constructor, prototype) {
+	try {
+		if (prototype === undefined) prototype = Object.create({});
+		return Property(
+			prototype, "constructor", constructor,
+			false, false, false
+		);
+	} catch(e) { throw e.fromCaller(-1); }
+};
+
 Object.setPrototypeOf = function(object, proto) {
 	return sys_set_prototype(object, proto);
 };
