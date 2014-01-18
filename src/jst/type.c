@@ -279,7 +279,9 @@ static JSTDeclareGetProperty(jst_type_get) {
 				JSTValueFromDouble(d->dimensions[1]),		
 			};
 			// Can't set the fucking prototype on this bitch!
-			result = JSTObjectArray(2, array);
+			result = JSTScriptNativeEval("new Array()", NULL);
+			JSTObjectSetPropertyAtIndex((void*)result, 0, array[0]);
+			JSTObjectSetPropertyAtIndex((void*)result, 1, array[1]);
 		}
 	}
 	return result;
@@ -438,10 +440,15 @@ static JSTDeclareGetProperty(jst_type_get_state) {
 		result = JSTValueFromBoolean((d)? JSTTypeIsReadOnly(d) : false);
 	else if (JSTTypeRequest(jst_prop_alias) && (data = JSTTypeAlias(d)))
 		result = JSTValueFromUTF8(data);
-	else if (JSTTypeRequest(jst_prop_name)) {
-		result = JSTValueFromUTF8(data);
+	
+	if (JSTTypeRequest(jst_prop_name)) {
+		result = JSTFunctionCall(JSTObjectGetProperty(NULL, "sys_type_name"),
+			object, JSTValueFromUTF8(jst_prop_value)
+		);
 	} else if (JSTTypeRequest(jst_prop_native)) {
-		result = JSTValueFromUTF8(data);
+		result = JSTFunctionCall(JSTObjectGetProperty(NULL, "sys_type_native"),
+			object, JSTValueFromUTF8(jst_prop_value)
+		);
 	}
 	
 	// TODO: possibly add json property
@@ -542,7 +549,7 @@ static JSTClass jst_type_init() {
 		{
 			jst_prop_width,
 			&jst_type_get_width, &jst_type_set_width,
-			JSTObjectPropertyRequired
+			JSTObjectPropertyObscure
 		},
 		{NULL, NULL, NULL, 0}
 	};
