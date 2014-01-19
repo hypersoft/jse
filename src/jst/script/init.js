@@ -227,32 +227,6 @@ Flags = function(array, prototype){
 	}, enumerable:false}
 }), Flags.max = (1 << 30), Flags.min = 1;
 
-Type = sys_type;
-
-Type.flags = new Flags(
-
-	[
-		"1", "2", "4", "8", "void", "constant", "integer", "signed", "utf",
-		"value", "string", "reference", "array", "struct", "union", "dynamic"
-	],
-
-	Object.create(null, {
-		toString: {
-			value:function(){
-				return this.name;
-			},
-			enumerable:false
-		},
-		valueOf: {
-			value:function(){
-				return this.value;
-			},
-			enumerable:false
-		}
-	})
-
-);
-
 sys.command = function() {
 	this.argv = Array.apply(null, arguments);
 	var bound = sys_execute.bind(this);
