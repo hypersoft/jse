@@ -257,7 +257,7 @@ static JSTDeclareGetProperty(jst_type_get) {
 	} else if (JSTTypeRequest(jst_prop_boolean)) {
 		result = JSTValueFromBoolean(JSTTypeIsBoolean(d));
 	} else if (JSTTypeRequest(jst_prop_integer)) {
-		result = JSTValueFromDouble((JSTTypeIsInteger(d) ? JSTTypeWidth(d) : 0));
+		result = JSTValueFromBoolean((JSTTypeIsInteger(d) ? JSTTypeWidth(d) : 0));
 	} else if (JSTTypeRequest(jst_prop_reference)) {
 		result = JSTTypeIsReference(d)?JSTTypeReference(d):JSTValueFromBoolean(false);
 	} else if (JSTTypeRequest(jst_prop_signed)) {
@@ -436,20 +436,15 @@ static JSTDeclareGetProperty(jst_type_get_state) {
 			}
 		}
 		result = JSTValueFromDouble(size);
-	} if (JSTTypeRequest(jst_prop_read_only))
-		result = JSTValueFromBoolean((d)? JSTTypeIsReadOnly(d) : false);
-	else if (JSTTypeRequest(jst_prop_alias) && (data = JSTTypeAlias(d)))
+	} else if (JSTTypeRequest(jst_prop_alias) && (data = JSTTypeAlias(d)))
 		result = JSTValueFromUTF8(data);
-	
-	if (JSTTypeRequest(jst_prop_name)) {
+	else if (JSTTypeRequest(jst_prop_name)) {
 		result = JSTFunctionCall(JSTObjectGetProperty(NULL, "sys_type_name"),
 			object, JSTValueFromUTF8(jst_prop_value)
 		);
-	} else if (JSTTypeRequest(jst_prop_native)) {
-		result = JSTFunctionCall(JSTObjectGetProperty(NULL, "sys_type_native"),
-			object, JSTValueFromUTF8(jst_prop_value)
-		);
-	}
+	} else 	if (JSTTypeRequest(jst_prop_read_only))
+		result = JSTValueFromBoolean((d)? JSTTypeIsReadOnly(d) : false);
+
 	
 	// TODO: possibly add json property
 
@@ -521,10 +516,10 @@ static JSTDeclareFinalizer(jst_type_finalize) {
 static JSTClass jst_type_init() {
 
 	JSTClassAccessor properties[] = {
-		{
+		{ 
 			jst_prop_alias,
 			&jst_type_get_state, NULL,
-			JSTObjectPropertyState
+			JSTObjectPropertyAPI
 		},
 		{
 			jst_prop_name,
@@ -532,14 +527,9 @@ static JSTClass jst_type_init() {
 			JSTObjectPropertyState
 		},
 		{
-			jst_prop_native,
-			&jst_type_get_state, NULL,
-			JSTObjectPropertyState
-		},
-		{
 			jst_prop_read_only,
 			&jst_type_get_state, NULL,
-			JSTObjectPropertyState
+			JSTObjectPropertyAPI
 		},
 		{
 			jst_prop_size,
@@ -640,11 +630,11 @@ static void * jst_type_parse_code JSTUtility(JSTObject object, size_t code) {
 
 static JSTValue jst_type_constructor JSTDeclareFunction() {
 
-	if (argc == 0 || argc > 2) return JSTScriptNativeError(JST_REFERENCE_ERROR,
+	if (argc > 2) return JSTScriptNativeError(JST_REFERENCE_ERROR,
 		"expected arguments: name, code"
 	);
 
-	utf8 * name = JSTValueToUTF8(argv[0]);
+	utf8 * name = (argc) ? JSTValueToUTF8(argv[0]) : NULL;
 	size_t code = 0;
 	
 	if (argc > 1 && !JSTValueToInt(argv[1], &code)) {

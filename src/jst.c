@@ -242,7 +242,7 @@ bool JSTValueToPointer_ JSTUtility(JSTValue input, void * dest) {
 }
 
 JSTObject JSTConstructorCall_(register JSTContext ctx, JSTValue * exception, JSTObject c, ...) {
-	va_list ap; register size_t argc = 0, count = 0; va_start(ap, c); 
+	va_list ap; register gsize argc = 0, count = 0; va_start(ap, c); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, c);
 	if (argc > 32) return JSTObjectUndefined; JSTValue argv[argc+1];
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
@@ -260,7 +260,7 @@ JSTObject JSTFunctionCallback_ JSTUtility(const utf8 * p, void * f) {
 }
 
 JSTValue JSTFunctionCall_(register JSTContext ctx, JSTValue * exception, JSTObject method, JSTObject object, ...) {
-	va_list ap; register size_t argc = 0, count = 0; va_start(ap, object); 
+	va_list ap; register gsize argc = 0, count = 0; va_start(ap, object); 
 	while(va_arg(ap, void*) != JSTReservedAddress) argc++; va_start(ap, object);
 	if (argc > 32) return JSTValueUndefined; JSTValue argv[argc+1];
 	while (count < argc) argv[count++] = va_arg(ap, JSTValue);
@@ -277,7 +277,7 @@ JSTObject JSTObjectSetMethod_ JSTUtility(JSTObject o, const utf8 * n, void * m, 
 	return method;
 }
 
-JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, const utf8 * n, JSTClass c, void * m, size_t a) {
+JSTObject JSTObjectSetConstructor_ JSTUtility(JSTObject o, const utf8 * n, JSTClass c, void * m, gsize a) {
 	JSTObject constructor = NULL;
 	if (JSTValueIsObject(o)) {
 		JSTString name = (n)?JSTStringFromUTF8(n):NULL;
@@ -308,7 +308,7 @@ void * JSTObjectGetProperty_ JSTUtility(JSTObject o, const utf8 * p) {
 }
 
 // Returns the value set as a void *
-void * JSTObjectSetProperty_ JSTUtility(JSTObject o, const utf8 * p, JSTValue v, size_t a) {
+void * JSTObjectSetProperty_ JSTUtility(JSTObject o, const utf8 * p, JSTValue v, gsize a) {
 	if (p && v) {
 		JSTString s = JSTStringFromUTF8(p);
 		JSObjectSetProperty(ctx, (o)?o:JSContextGetGlobalObject(ctx), s, v, a, exception);
@@ -327,14 +327,14 @@ bool JSTObjectHasProperty_ JSTUtility(JSTObject o, const utf8 * p) {
 	return result;
 }
 
-bool JSTScriptCheckSyntax_ JSTUtility(const utf8 * p1, const utf8 * p2, size_t i) {
+bool JSTScriptCheckSyntax_ JSTUtility(const utf8 * p1, const utf8 * p2, gsize i) {
 	if (!p1 || !p2) return true;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
 	bool result = JSCheckScriptSyntax(ctx, s[0], s[1], i, exception);
 	JSTStringRelease(s[0]); JSTStringRelease(s[1]);
 }
 
-JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, size_t i) {
+JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2, gsize i) {
 	if (!p1 || !p2) return NULL;
 	JSTString s[2] = {JSTStringFromUTF8(p1), JSTStringFromUTF8(p2)};
 	JSTValue result = JSEvaluateScript(ctx, s[0], (o)?o:JSContextGetGlobalObject(ctx), s[1], i, exception);
@@ -342,7 +342,7 @@ JSTValue JSTScriptEval_ JSTUtility(const utf8 * p1, JSTObject o, const utf8 * p2
 	return result;
 }
 
-void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue * exception, const utf8 * file, size_t line, size_t errorType, const utf8 * format, ...) {
+void * JSTScriptNativeError_(register JSTContext ctx, register JSTValue * exception, const utf8 * file, gsize line, gsize errorType, const utf8 * format, ...) {
 	va_list ap; va_start(ap, format); utf8 * message = NULL;
 	g_vasprintf(&message, format, ap);
 	if (errorType == 2) JSTScriptEval("throw(this)", JSTScriptError(message), file, line);
@@ -378,8 +378,8 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue * excep
 	utf8 * message = JSTValueToUTF8(JSTObjectGetProperty(e, "message"));
 	utf8 * name = JSTValueToUTF8(JSTObjectGetProperty(e, "name"));
 	utf8 * url = JSTValueToUTF8(JSTObjectGetProperty(e, "sourceURL"));
-	size_t line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
-	size_t code = JSTValueToDouble(JSTObjectGetProperty(e, "code"));
+	gsize line = JSTValueToDouble(JSTObjectGetProperty(e, "line"));
+	gsize code = JSTValueToDouble(JSTObjectGetProperty(e, "code"));
 	
 	if (debug || (code == JST_SYNTAX_ERROR)) g_fprintf(
 		stderr, "JSE Fatal %s: %s%ssource %s: line %i\n", name, message,
@@ -402,14 +402,14 @@ int JSTScriptReportException_(register JSTContext ctx, register JSTValue * excep
 
 utf8 * JSTStringToUTF8 (JSTString s, bool release) {
 	if (!s) return NULL;
-	register size_t bufferLength = 0; register void * buffer = NULL;
+	register gsize bufferLength = 0; register void * buffer = NULL;
 	if (s && (bufferLength = JSStringGetMaximumUTF8CStringSize(s)))
 		JSStringGetUTF8CString(s, (buffer = g_malloc(bufferLength)), bufferLength);
 	if (release) JSTStringRelease(s);
 	return buffer;
 }
 
-utf32 * JSTStringToUTF32(register JSTString text, size_t len, bool release) {
+utf32 * JSTStringToUTF32(register JSTString text, gsize len, bool release) {
 	if (!text || !len) return NULL;
 	const utf16 * utf = JSTStringUTF16(text);
 	void * result = g_utf16_to_ucs4(utf, len, NULL, NULL, NULL);
@@ -417,7 +417,7 @@ utf32 * JSTStringToUTF32(register JSTString text, size_t len, bool release) {
 	return result;
 }
 
-JSTString JSTStringFromUTF32(register utf32 * text, size_t len, bool release) {
+JSTString JSTStringFromUTF32(register utf32 * text, gsize len, bool release) {
 	if (!text || !len) return NULL;
 	long bytes = 0; utf16 * utf = g_ucs4_to_utf16(text, len, &bytes, NULL, NULL);
 	if (release) g_free(text);
@@ -659,8 +659,7 @@ static JSValueRef jst_base64_encode JSTDeclareFunction () {
 		JSTScriptNativeError(JST_TYPE_ERROR, "expected string argument");
 
 	utf8 * input = JSTValueToUTF8(argv[0]);
-	// TODO: wtf is the g_ ?
-	size_t len = strlen(input);
+	gsize len = strlen(input);
 	utf8 * base64 = g_base64_encode(input, len);
 
 	g_free(input);
@@ -677,7 +676,7 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 
 	utf8 * input = JSTValueToUTF8(argv[0]);
 	// TODO: wtf is the g_ ?
-	size_t len = strlen(input);
+	gsize len = strlen(input);
 	utf8 * output = g_base64_decode(input, &len);
 
 	g_free(input);
@@ -695,7 +694,7 @@ static JSValueRef jst_base64_decode JSTDeclareFunction () {
 #include "jst/memory.c"
 #include "jst/file.c"
 
-JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8 * envp[]) {
+JSTObject JSTInit_ JSTUtility(JSTObject global, gsize argc, utf8 * argv[], utf8 * envp[]) {
 
 	JSTObject sys = JSTClassInstance(NULL, NULL);
 	JSTObjectSetProperty(global, "sys", sys, JSTObjectPropertyAPI);

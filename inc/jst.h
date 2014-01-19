@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define jst_type_string 1024
 #define jst_type_reference 2048
 #define jst_type_array 4096
-#define jst_type_struct 8192
+#define jst_type_structure 8192
 #define jst_type_union 16384
 #define jst_type_dynamic 32768
 
@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JSTCodeTypeIsUnsigned(d) (JSTCodeTypeIsInteger(d) && (d & jst_type_signed) ? false : true)
 #define JSTCodeTypeIsConstant(d) ((d & jst_type_constant) ? true : false)
 #define JSTCodeTypeIsDynamic(d) ((d & jst_type_dynamic) ? true : false)
-#define JSTCodeTypeIsStructure(d) (d & jst_type_struct)
+#define JSTCodeTypeIsStructure(d) (d & jst_type_structure)
 #define JSTCodeTypeIsReference(d) (d & jst_type_reference)
 #define JSTCodeTypeIsUnion(d) (d & jst_type_union)
 #define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) ? true : false)
