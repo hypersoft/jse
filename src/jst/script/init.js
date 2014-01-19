@@ -168,7 +168,7 @@ Flags = function(array, prototype){
 			if (typeof arguments[0] === 'string') {
 				name = arguments[0];
 				if (! name in this) throw new ReferenceError(
-					"couldn't find flag '"+name+"'"
+					"Unknown flag '"+name+"'"
 				);
 				return this[name];
 			} else if (arguments[0].constructor === Array) {
@@ -176,7 +176,7 @@ Flags = function(array, prototype){
 				for(var index in names) {
 					name = names[index];
 					if (! name in this) throw new ReferenceError(
-						"couldn't find flag '"+name+"'"
+						"Unknown flag '"+name+"'"
 					).fromCaller(-1);
 					result |= this[name];
 				}
@@ -184,30 +184,32 @@ Flags = function(array, prototype){
 			}
 		} else if (arguments.length > 1) {
 			if (name in this) throw new ReferenceError(
-				"flag "+name+" already defined"
+				"Flag "+name+" already defined"
 			).fromCaller(-1);
 			for (i = 1; i < arguments.length; i++) {
 				if (typeof arguments[i] === 'string') {
-					if (arguments[i] in this === false) throw new ReferenceError(
-						"unknown flag name '"+arguments[i]+"' at argument "+i
-					).fromCaller(-1);
+					if (arguments[i] in this === false)
+						throw new ReferenceError(
+							"Unknown flag '"+ arguments[i] +"' at argument " + i
+						).fromCaller(-1);
 					value |= Number(this[arguments[i]]);
 				} else {
 					var number = parseInt(arguments[i]);
 					if (isNaN(number)) throw new TypeError(
-						"argument "+i+" is not a integer or string"
+						"Argument "+i+" is not a integer or string"
 					);
-					if (number > Flags.max || number < Flags.min) throw new
-					RangeError(
-						"numeric argument at index "+i+" exceeds value bounds"
+					if (number !== 0 &&
+						(number > Flags.max || number < Flags.min)
+					) throw new RangeError(
+						"Numeric argument at index "+i+" exceeds value bounds"
 					).fromCaller(-1);
 					value |= Number(arguments[i]);
 				}
 			}
-			return Object.create(prototype, {
+			return (this[name] = Object.create(prototype, {
 				value:{value:value, writeable:false, configurable:false},
 				name:{value:name, writeable:false, configurable:false}
-			});
+			}));
 		}
 	}, enumerable:false, writeable:false, configurable:false},
 	toString: {value:function(head, sum, sep){
