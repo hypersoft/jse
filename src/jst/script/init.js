@@ -252,20 +252,6 @@ Type.flags = new Flags(
 
 );
 
-// ATM: not being used: see src/type.c: jst_type_get: array
-Object.defineProperty(sys.global, "sys_type_array_prototype", {
-	value: Object.create(Array.prototype, {
-		toString: {value: function() {
-		return '['+this.join(", ")+']';
-	}, enumerable:false, writable:false, configurable:false }
-	}), enumerable:false, writable:false, configurable:false
-});
-
-// Super ugly hack, for rediculous bullshit! Probably broke XE some scripts...
-Array.prototype.toString = function() {
-		return '['+this.join(", ")+']';
-};
-
 sys.command = function() {
 	this.argv = Array.apply(null, arguments);
 	var bound = sys_execute.bind(this);
