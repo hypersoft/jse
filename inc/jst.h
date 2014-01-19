@@ -34,18 +34,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define jst_type_2 2
 #define jst_type_4 4
 #define jst_type_8 8
-#define jst_type_varargs 16
-#define jst_type_constant 32
-#define jst_type_integer 64
-#define jst_type_signed 128
-#define jst_type_utf 256
-#define jst_type_value 512
-#define jst_type_string 1024
-#define jst_type_reference 2048
-#define jst_type_array 4096
-#define jst_type_structure 8192
-#define jst_type_union 16384
-#define jst_type_dynamic 32768
+#define jst_type_reserved_16 16
+#define jst_type_reserved_32 32
+#define jst_type_reserved_64 64
+#define jst_type_reserved_128 128
+#define jst_type_dynamic 256
+#define jst_type_constant 512
+#define jst_type_integer 1024
+#define jst_type_signed 2048
+#define jst_type_utf 4096
+#define jst_type_reference 8192
+#define jst_type_array 16384
+#define jst_type_structure 32768
+#define jst_type_union 65536
+#define jst_type_varargs 131072
+#define jst_type_value 262144
+
 
 #define JSTCodeTypeExact(d, f) ((d & (f) == (f)) ? true : false)
 #define JSTCodeTypeIsValue(d) (d & jst_type_value)
