@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define jst_type_2 2
 #define jst_type_4 4
 #define jst_type_8 8
-#define jst_type_void 16
+#define jst_type_varargs 16
 #define jst_type_constant 32
 #define jst_type_integer 64
 #define jst_type_signed 128
