@@ -54,6 +54,10 @@ Object.maskPrototype = function(object) {
 	]);
 };
 
+Object.setPrototypeOf = function(object, proto) {
+	return sys_set_prototype(object, proto);
+};
+
 /* create a JavaScript Accessor */
 var Accessor = function(object, name, get, set, enumerable, configurable) {
 	var descriptor = {};
@@ -127,15 +131,12 @@ var Properties = function(object, list, enumerable, writable, configurable) {
 var Prototype = function(constructor, prototype) {
 	try {
 		if (prototype === undefined) prototype = Object.create({});
+		else prototype = Object.create(prototype);
 		return Property(
 			prototype, "constructor", constructor,
 			false, false, false
 		);
 	} catch(e) { throw e.fromCaller(-1); }
-};
-
-Object.setPrototypeOf = function(object, proto) {
-	return sys_set_prototype(object, proto);
 };
 
 Flags = function(array, prototype){
