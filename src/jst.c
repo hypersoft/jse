@@ -801,6 +801,7 @@ JSTObject JSTInit_ JSTUtility(JSTObject global, gsize argc, utf8 * argv[], utf8 
 
 	/* sys.memory constant numeric data */
 	JSTObjectSetProperty(memory, "align", JSTValueFromDouble(G_MEM_ALIGN), JSTObjectPropertyAPI);
+	JSTObjectSetProperty(memory, "boolean", JSTValueFromDouble(sizeof(gboolean)), JSTObjectPropertyAPI);
 
 	/* configure sys.memory.byteOrder */
 	JSTObject memoryByteOrder = JSTObjectSetProperty(
