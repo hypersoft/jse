@@ -86,8 +86,7 @@ var Accessors = function(object, list, enumerable, configurable) {
 		}
 		for (var index in list) {
 			var item = list[index];
-			Accessor(
-				object, item.name, item.get, item.set,
+			Accessor(object, item.name, item[0], item[1],
 				enumerable, configurable
 			);
 		};
@@ -118,8 +117,7 @@ var Properties = function(object, list, enumerable, writable, configurable) {
 		}
 		for (var index in list) {
 			var item = list[index];
-			Property(
-				object, item.name, item.value,
+			Property(object, item[0], item[1],
 				enumerable, writable, configurable
 			);
 		};
