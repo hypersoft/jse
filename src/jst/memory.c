@@ -143,7 +143,7 @@ static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
 
 	bool unsign = ((type & jst_type_signed) == 0);
 
-	if (type & jst_type_reference || type & jst_type_string || type & jst_type_value)
+	if (type & jst_type_reference || type & jst_type_value)
 		return JSTValueFromPointer(*(intptr_t*)(address));
 
 	if (type & jst_type_integer) {
@@ -184,7 +184,7 @@ static JSTValue jst_memory_write JSTDeclareFunction (address, type, value) {
 
 	double value = JSTValueToDouble(argv[2]);
 
-	if (type & jst_type_reference || type & jst_type_string || type & jst_type_value)
+	if (type & jst_type_reference || type & jst_type_value)
 		*(intptr_t*)(address) = (intptr_t)value;
 	else if (type & jst_type_integer) {
 		if (type & jst_type_1) *(gint8*)(address) = (gint8) value;
