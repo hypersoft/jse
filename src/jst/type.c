@@ -149,7 +149,7 @@ static JSTDeclareSetProperty(jst_type_set) {
 		if (!JSTTypeWidth(d)) {
 			JSTValueProtect(value);
 			d->structure = (JSTObject) value,
-			d->code |= (sizeof(guintptr) | jst_type_integer | jst_type_struct),
+			d->code |= (sizeof(guintptr) | jst_type_integer | jst_type_structure),
 			d->autoSign = d->autoWidth = false;
 		} else JSTScriptNativeError(JST_TYPE_ERROR,
 			"cannot set type to structure: type already defined"
