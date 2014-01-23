@@ -28,13 +28,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+Object.getPropertyOwner = function (object, property) {
+	if (object.hasOwnProperty(property)) return object;
+	var o;
+	while (o = Object.getProtoypeOf(o)) 
+		if (o.hasOwnProperty(property)) return o;
+	return null;
+};
+
 Object.hideProperties = function(object, list) {
 	var desc, index, name, type = typeof object;
-	if (type !== 'object') throw new TypeError(type+" is not an object"
-	).fromCaller(-1);
-	else if (!Object.isExtensible(object)) throw new TypeError(
+	if (type !== 'object') throw Exception(type+" is not an object")
+	else if (!Object.isExtensible(object)) throw Exception(
 		"object is not extensible"
-	).fromCaller(-1);
+	);
 	for (index in list) { name = String(list[index]);
 		if (object.propertyIsEnumerable(name)) {
 			desc = Object.getOwnPropertyDescriptor(object, name);
@@ -46,96 +53,177 @@ Object.hideProperties = function(object, list) {
 	return object;
 };
 
-Object.maskPrototype = function(object) {
-	return Object.hideProperties(object, [
-		'valueOf', 'toString', 'hasOwnProperty', 'constructor',
-		'toLocaleString', 'toJSON', 'propertyIsEnumerable', 'isPrototypeOf',
-		'toObject'
-	]);
-};
 
 Object.setPrototypeOf = function(object, proto) {
 	return sys_set_prototype(object, proto);
 };
 
-/* create a JavaScript Accessor */
-var Accessor = function(object, name, get, set, enumerable, configurable) {
-	var descriptor = {};
-	try {
-		if (name === undefined) {
-			throw new TypeError("Property name is undefined");
-		}
-		if (typeof get !== 'function') {
-			throw new TypeError("Property get must be a function");
-		} else if (typeof set !== 'function') {
-			throw new TypeError("Property set must be a function");
-		}
-		if (get) descriptor.get = get;
-		if (set) descriptor.set = set;
-		if (enumerable === true) descriptor.enumerable = true;
-		if (configurable === true) descriptor.configurable = true;
-		Object.defineProperty(object, name, descriptor);
-	} catch(e) { throw e.fromCaller(-1); }
-	return object;
-};
+(function init(global){
+	
+	/* create a JavaScript Accessor */
+	var Accessor = function Accessor(object, name, get, set, enumerable, configurable) {
+		var descriptor = {};
+			if (typeof object !== 'object')
+				throw Exception("object argument is not an object");
+			else if (!Object.isExtensible(object))
+				throw Exception("object argument is not extensible");
+			else if (name === undefined)
+				throw Exception("name argument is undefined");
+			else if (get && typeof get !== 'function') 
+				throw Exception("Property get must be a function");
+			else if (set && typeof set !== 'function') 
+				throw Exception("Property set must be a function");
 
-var Accessors = function(object, list, enumerable, configurable) {
-	try {
-		if (!Array.prototype.isPrototypeOf(list)) {
-			throw new TypeError("Property list must be an array");
-		}
-		for (var index in list) {
-			var item = list[index];
-			Accessor(object, item.name, item[0], item[1],
-				enumerable, configurable
-			);
-		};
-	} catch(e) { throw e.fromCaller(-1); }
-	return object;
-};
+			if (get) descriptor.get = get;
+			if (set !== undefined) descriptor.set = set;
+			if (enumerable === true) descriptor.enumerable = true;
+			if (configurable === true) descriptor.configurable = true;
+			Object.defineProperty(object, name, descriptor);
+		return object;
+	};
 
-var Property = function(
-	object, name, value, enumerable, writable, configurable
-) {
-	var descriptor = {value: value};
-	try {
-		if (name === undefined) {
-			throw new TypeError("Property name is undefined")
-		}
-		if (enumerable === true) descriptor.enumerable = true;
-		if (writable === true) descriptor.writable = true;
-		if (configurable === true) descriptor.configurable = true;
-		Object.defineProperty(object, name, descriptor);
-	} catch(e) { throw e.fromCaller(-1); }
-	return object;
-};
-
-var Properties = function(object, list, enumerable, writable, configurable) {
-	try {
-		if (!Array.prototype.isPrototypeOf(list)) {
-			throw new TypeError("Property list must be an array");
-		}
-		for (var index in list) {
-			var item = list[index];
-			Property(object, item[0], item[1],
-				enumerable, writable, configurable
-			);
-		};
-	} catch(e) { throw e.fromCaller(-1); }
-	return object;
-};
-
-/* create a "fully qualified" JavaScript constructor prototype */
-var Prototype = function(constructor, prototype) {
-	try {
-		if (prototype === undefined) prototype = Object.create({});
-		else prototype = Object.create(prototype);
-		return Property(
-			prototype, "constructor", constructor,
-			false, false, false
+	var Accessors = function Accessors(object, list, enumerable, configurable) {
+		if (!Array.prototype.isPrototypeOf(list)) throw Exception(
+			"Property list must be an array"
 		);
-	} catch(e) { throw e.fromCaller(-1); }
-};
+		for (var index in list) {
+			var item = list[index], len = item.length;
+			if (!Array.prototype.isPrototypeOf(item)) throw Exception(
+				"Accessor list property index " +index+ " is not an array"
+			);
+			var enm = (len > 3) ? item[3] : enumerable,
+			cfg = (len > 4) ? item[4] : configurable;
+			Accessor(object, item[0], item[1], item[2], enm, cfg);
+		};
+		return object;
+	};
+
+	var Property = function Property(
+		object, name, value, enumerable, writable, configurable
+	) {
+		var descriptor = {value: value};
+		if (enumerable !== undefined) descriptor.enumerable = Boolean(enumerable);
+		if (writable !== undefined) descriptor.writable = Boolean(writable);
+		if (configurable !== undefined) descriptor.configurable = Boolean(configurable);
+		Object.defineProperty(object, name, descriptor);
+		return object;
+	};
+
+	var Properties = function Properties(object, list, e, w, c) {
+		if (typeof object !== 'object' && typeof object !== 'function') {
+			throw Exception("Property object must be an object");
+		}
+		if (list instanceof Array === false) {
+			throw Exception("Property list must be an array");
+		}
+		for (var index in list) {
+			var item = list[index];
+			if (item instanceof Array === false) throw Exception(
+				"Property list item " +index+ " is not an array"
+			);
+			if (typeof item[0] === 'function') {
+				if ('name' in item[0]) {
+					item.unshift(item[0].name);
+				}	else throw Exception(
+					"Attempting to set property "+index+
+					" as anonymous function property"
+				);
+			}
+			var enm, wrtb, cfg, id, f1, f2;
+			if (typeof item[0] === 'string') {
+				id = item.shift();
+				if (typeof item[0] === 'function') {
+					f1 = item.shift();
+					if (typeof item[0] === 'function') {
+						f2 = item.shift();
+						enm = (item[0] !== undefined) ? item[0] : e,
+						cfg = (item[1] !== undefined) ? item[1] : c;
+						Accessor(object, id, f1, f2, e, c);
+						continue;
+					}
+				} else f1 = item.shift();
+				enm = (item[0] !== undefined) ? item[0] : e,
+				wrtb = (item[1] !== undefined) ? item[1] : w,
+				cfg = (item[2] !== undefined) ? item[2] : c;
+				Property(object, id, f1, enm, wrtb, cfg);
+			}
+		};
+		return object;
+	};
+
+	/* create a "fully qualified" JavaScript constructor prototype */
+	Constructor = function Constructor(c, proto, methods, props) {
+		if (proto === undefined) proto = Object.create({});
+		else proto = Object.create(proto);
+		if (methods) Properties(c, methods, true);
+		if (props) Properties(proto, props);
+		Property(proto, "constructor", c, false);
+		Property(c, "prototype", proto, false);
+		return c;
+	};
+
+	var List = Constructor(
+		function List(){return arguments.callee.fromArray(arguments);},
+		Array.prototype,
+		/* constructor methods */ Array (
+			[function toString(){
+				return this.name;
+			}, false],
+			[function fromArray(array){
+				return Object.create(this.prototype).apply(array);
+			}],
+			[function fromObjectKeys(object){
+				return Object.create(this.prototype).apply(Object.keys(object));
+			}],
+			[function fromObjectNames(object){
+				return Object.create(this.prototype).apply(
+					Object.getOwnPropertyNames(object)
+				);
+			}]
+		),
+		/* prototype properties */ Array (
+			[function invoke(object, method){
+					if (arguments.length === 1) {
+						method = object, object = null;
+					} else if (object instanceof Object === false) throw Exception(
+						"List prototype: invoke: expected object argument"
+					);
+					if (typeof method !== 'function') throw Exception(
+						"List prototype: invoke: expected function argument"
+					)
+				try {
+					return method.apply(object, this);
+				} catch(e) {
+					throw Exception(e.constructor, "List prototype: invoke: "+ e.message);
+				}
+			}, false],
+			[function apply(array){
+				if (array && array.length) this.push.apply(this, array);
+				return this;
+			}, false],
+			[function toObject(self){
+				if (self == undefined) self = {};
+				self = Object.create(self);
+				for (var index in this) self[this[index]] = undefined;
+				return self;
+			}, false],
+			[function join(split){
+				if (split === undefined) {
+					return '['+Array.prototype.join.call(this, ", ")+']';
+				}
+				return Array.prototype.join.apply(this, arguments);
+			}, false],
+			[function hasValue(value){
+				return this.indexOf(value) !== -1;
+			}, false]
+		)
+	);
+
+	return Properties(global, [
+		[Accessor],	[Accessors], [Property], [Properties], [Constructor], [List]
+	],	true, false, false);
+	
+})(sys.global);
 
 Flags = function(array, prototype){
 	var index;
@@ -241,36 +329,36 @@ sys.command = function() {
 sys.include = sys_include;
 sys.global.exit = sys_exit;
 
-sys.class = function(name, construct, exec, prototype) {
-
-	var f = eval("(function "+name+"() {" +
-	"	if (this instanceof arguments.callee) {" +
-	"		return Object.setPrototypeOf(" +
-	"			arguments.callee.construct.apply(null, arguments)," +
-	"			arguments.callee.prototype" +
-	"		);" +
-	"	} else {" +
-	"		return Object.setPrototypeOf(" +
-	"			arguments.callee.exec.apply(null, arguments)," +
-	"			arguments.callee.prototype" +
-	"		);" +
-	"	}" +
-	"})");
-
-	var enterface = Object.defineProperties(f, {
-		construct:{
-			value:construct,
-			enumerable:false, writeable:false, configurable:false
-		},
-		exec:{
-			value:exec, enumerable:false, writeable:false, configurable:false
-		},
-		prototype:{value:prototype,enumerable:false,configurable:false}
-	}).bind(this);
-
-	prototype.constructor = enterface;
-
-	return enterface;
-};
-
-sys.env = sys.class('env', sys_env_constructor, sys_env_function, {});
+//sys.class = function(name, construct, exec, prototype) {
+//
+//	var f = eval("(function "+name+"() {" +
+//	"	if (this instanceof arguments.callee) {" +
+//	"		return Object.setPrototypeOf(" +
+//	"			arguments.callee.construct.apply(null, arguments)," +
+//	"			arguments.callee.prototype" +
+//	"		);" +
+//	"	} else {" +
+//	"		return Object.setPrototypeOf(" +
+//	"			arguments.callee.exec.apply(null, arguments)," +
+//	"			arguments.callee.prototype" +
+//	"		);" +
+//	"	}" +
+//	"})");
+//
+//	var enterface = Object.defineProperties(f, {
+//		construct:{
+//			value:construct,
+//			enumerable:false, writeable:false, configurable:false
+//		},
+//		exec:{
+//			value:exec, enumerable:false, writeable:false, configurable:false
+//		},
+//		prototype:{value:prototype,enumerable:false,configurable:false}
+//	}).bind(this);
+//
+//	prototype.constructor = enterface;
+//
+//	return enterface;
+//};
+//
+//sys.env = sys.class('env', sys_env_constructor, sys_env_function, {});
