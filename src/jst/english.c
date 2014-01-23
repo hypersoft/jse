@@ -155,6 +155,7 @@ const utf8 * jst_prop_value_of = "valueOf";
 const utf8 * jst_prop_union = "union";
 const utf8 * jst_prop_unload = "unload";
 const utf8 * jst_prop_unsigned = "unsigned";
+const utf8 * jst_prop_user_data = "userData";
 const utf8 * jst_prop_utf = "utf";
 const utf8 * jst_prop_value = "value";
 const utf8 * jst_prop_version = "version";
