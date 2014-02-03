@@ -32,7 +32,7 @@ endif
 # issue the proper extension or suffix here....
 
 #if you aren't a unix developer, look over the following file and copy to your config file
-include config/unix.d/build-file-extensions.mk
+include $(BUILD_HOME)config/unix.d/build-file-extensions.mk
 
 # Machine architecture of the form: iX86, alpha, arm, 6800K, etc.
 # See: http://sourceforge.net/p/predef/wiki/Architectures/ FOR common names
