@@ -32,7 +32,8 @@ $(BUILD_DIST)/inc/jsapi.h: $(BUILD_HOME)src/jsapi.h
 include $(BUILD_HOME)support/MakeStats.mk $(BUILD_HOME)support/DynCall.mk
 
 ifndef BUILD_PROFILE
-BUILD_PROFILE = $(BUILD_CFLAGS) -I$(BUILD_OUTPUT) -I$(BUILD_DIST)/inc
+BUILD_PROFILE = $(BUILD_CFLAGS) \
+-I$(BUILD_OUTPUT) -I$(BUILD_DIST)/inc -I$(BUILD_DIST)/inc/dyncall
 endif
 
 ifndef LINK_PROFILE
