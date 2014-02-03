@@ -42,6 +42,7 @@ endif
 # can't single quote anything in function body,
 # must terminate all statements
 # must escape all shell variables: $$varname
+# $0 doesn't refer to anything useful
 
 # This "macro" returns boolean exit status as a string
 BOOLSTR = 1>& /dev/null 2>&- && printf TRUE || printf FALSE
