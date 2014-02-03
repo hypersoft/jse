@@ -28,41 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-const char * jst_memory_error_null = "%s: address argument is null";
-const char * jst_memory_error_constant = "%s: pointer value is constant";
-const char * jst_memory_error_argc = "%s: %s arguments";
 
-const char * jst_memory_error_argv_overflow = "too many";
-const char * jst_memory_error_argv_underflow = "insufficient";
 
-const char * jst_memory_write_failed = "unable to write pointer contents";
-const char * jst_memory_read_failed = "unable to read pointer contents";
-
-const char * jst_memory_invalid_type = "%s: %i is an invalid type";
-
-static JSTValue jst_memory_allocate JSTDeclareFunction(bytes) {
-
-	// a secondary boolean argument may be specified as true if you want zero initialized memory
-
-	size_t bytes;
-
-	if (! JSTArgumentToInt(0, &bytes)) return NULL;
-
-	void * address = (argc > 1 && JSTValueToBoolean(argv[1])) ?
-		g_malloc0(bytes) : g_malloc(bytes)
-	;
-
-	return JSTValueFromPointer(address);
-
-}
-
-static JSTValue jst_memory_free JSTDeclareFunction(address) {
-
-	void * address;
-	if (JSTArgumentToPointer(0, &address)) g_free(address);
-	return NULL;
-
-}
 
 static JSTValue jst_memory_resize JSTDeclareFunction(address, bytes) {
 
@@ -130,80 +97,5 @@ static JSTValue jst_memory_clear JSTDeclareFunction(address, width, units) {
 		"unable to clear memory: expected width of 1, 2, 4, or 8: found %i", width
 	);
 
-}
-
-static JSTValue jst_memory_read JSTDeclareFunction (address, type) {
-
-	void * address; gint32 type;
-
-	if (!JSTArgumentToPointer(0, &address) || !JSTArgumentToInt(1, &type)) return NULL;
-	else if (!address) return JSTScriptNativeError(
-		JST_TYPE_ERROR, jst_memory_error_null, jst_memory_read_failed
-	);
-
-	bool unsign = ((type & jst_type_signed) == 0);
-
-	if (type & jst_type_reference || type & jst_type_value)
-		return JSTValueFromPointer(*(intptr_t*)(address));
-
-	if (type & jst_type_integer) {
-		if (type & jst_type_1)
-			return JSTValueFromDouble((double) (unsign)?*(gint8*)(address):*(guint8*)(address));
-		else if (type & jst_type_2)
-			return JSTValueFromDouble((double) (unsign)?*(guint16*)(address):*(gint16*)(address));
-		else if (type & jst_type_4)
-			return JSTValueFromDouble((double) (unsign)?*(guint32*)(address):*(gint32*)(address));
-		else if (type & jst_type_8)
-			return JSTValueFromDouble((double) (unsign)?*(guint64*)(address):*(gint64*)(address));
-	} else {
-		if (type & jst_type_1)
-			return JSTValueFromDouble((double) *(bool*)(address));
-		else if (type & jst_type_4)
-			return JSTValueFromDouble((double) *(float*)(address));
-		else if (type & jst_type_8)
-			return JSTValueFromDouble((double) *(double*)(address));
-	}
-
-	return JSTScriptNativeError(
-		JST_TYPE_ERROR, jst_memory_invalid_type, jst_memory_read_failed, type
-	);
-
-}
-
-static JSTValue jst_memory_write JSTDeclareFunction (address, type, value) {
-
-	void * address; gint32 type;
-
-	if (! JSTArgumentToPointer(0, &address)) return NULL;
-	else if (! address ) return JSTScriptNativeError(
-		JST_TYPE_ERROR, jst_memory_error_null, jst_memory_write_failed
-	); else if (! JSTArgumentToInt(1, &type)) return NULL;
-	else if (type & jst_type_constant) return JSTScriptNativeError(
-		JST_TYPE_ERROR, jst_memory_error_constant, jst_memory_write_failed
-	);
-
-	double value = JSTValueToDouble(argv[2]);
-
-	if (type & jst_type_reference || type & jst_type_value)
-		*(intptr_t*)(address) = (intptr_t)value;
-	else if (type & jst_type_integer) {
-		if (type & jst_type_1) *(gint8*)(address) = (gint8) value;
-		else if (type & jst_type_2) *(gint16*)(address) = (gint16) value;
-		else if (type & jst_type_4) *(gint32*)(address) = (gint32) value;
-		else if (type & jst_type_8) *(gint64*)(address) = (gint64) value;
-		else goto fail;
-	} else {
-		if (type & jst_type_1) *(bool*)(address) = (bool) value; 
-		else if (type & jst_type_4) *(float*)(address) = (float) value;
-		else if (type & jst_type_8) *(double*)(address) = value;
-		else goto fail;
-	}
-
-	return argv[2];
-
-fail:
-	return JSTScriptNativeError(
-		JST_TYPE_ERROR, jst_memory_invalid_type, jst_memory_write_failed, type
-	);
 }
 

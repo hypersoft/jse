@@ -1,21 +1,47 @@
-SYNOPSYS:
+DEFINITIONS:
+
+  OPTIONS
+
+    Any language specific PROCEDURE keywords such as new, static or volatile.
+
+  PSEUDO-CLASS
+
+    Any implementation defined keywords to associate with the following
+    PARAMETER.
+
+  PARAMETER
+
+    A programmatic identifier optionally followed by {}, or [], meaning object
+    or array respectively
+
+  PROCEDURE
+
+    A language specific procedure call definition
+
+  COMMENT
+
+    Documentation text to be associated with the preceeding param-spec
+
+
+SYNOPSIS:
 
 /*
 	@param-spec: MIME/TYPE
-	param-spec({PSEUDO-CLASS PARAMETER, ...}, {...})
 
-	COMMENTS
+	OPTIONS param-spec({PSEUDO-CLASS PARAMETER, ...}, {...})
 
-	param-spec(PSEUDO-CLASS PARAMETER, PSEUDO-CLASS PARAMETER)
-	COMMENTS
+	COMMENT
 
-	param-spec(
+	OPTIONS param-spec(PSEUDO-CLASS PARAMETER, PSEUDO-CLASS PARAMETER)
+	COMMENT
+
+	OPTIONS param-spec(
 		{PSEUDO-CLASS PARAMETER},
 		{PSEUDO-CLASS PARAMETER, ...},
 		{...}
 	)
 
-	COMMENTS
+	COMMENT
 
 */
 

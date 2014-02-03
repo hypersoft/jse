@@ -28,8 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "jst/error.inc"
-
 static JSValueRef jst_error_number JSTDeclareFunction () {
 	if (argc == 0) return JSTValueFromDouble(errno);
 	else errno = JSTValueToDouble(argv[0]); return argv[0];

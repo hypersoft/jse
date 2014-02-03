@@ -5,9 +5,9 @@ BUILDCOMMON := -Wl,--export-dynamic -ldl ${PKGCONFIG} -Isrc -Iinc -O3 -march=nat
 
 #since this is a GCC/GNU/Linux file we only require headers for this spec.
 JSTHeaders := $(shell echo inc/{jst,license,notice,jst-comp-gcc,jst-os-linux}.h)
-JSTScripts := $(shell echo src/jst/{error,init}.inc) # auto-built only
+JSTScripts := $(shell echo src/jst/{error,extend,flags,sys}.inc) # auto-built only
 JSTSources := $(shell \
-	echo src/jst/{error,type,pointer,env,memory,file}.c \
+	echo src/jst/{sys/class,error,sys/memory}.c \
 	src/jst.c \
 )
 
@@ -34,13 +34,25 @@ inc/notice.h: tool/bin2inc doc/notice.txt
 	@printf '\nBuilding Hypersoft Systems JSE Notice...\n'	
 	tool/bin2inc SoftwareNoticeText < doc/notice.txt > $@
 
+src/jst/type.inc: tool/bin2inc src/jst/script/type.js
+	@printf '\nBuilding Hypersoft Systems JST Type Script...\n'	
+	tool/bin2inc JSTTypeScript < src/jst/script/type.js > $@
+
+src/jst/flags.inc: tool/bin2inc src/jst/script/flags.js
+	@printf '\nBuilding Hypersoft Systems JST Flags Script...\n'	
+	tool/bin2inc JSTFlagsScript < src/jst/script/flags.js > $@
+
+src/jst/extend.inc: tool/bin2inc src/jst/script/extend.js
+	@printf '\nBuilding Hypersoft Systems JST Extend Script...\n'	
+	tool/bin2inc JSTExtendScript < src/jst/script/extend.js > $@
+
 src/jst/error.inc: tool/bin2inc src/jst/script/error.js
 	@printf '\nBuilding Hypersoft Systems JST Error Script...\n'	
 	tool/bin2inc JSTErrorScript < src/jst/script/error.js > $@
 
-src/jst/init.inc: tool/bin2inc src/jst/script/init.js
-	@printf '\nBuilding Hypersoft Systems JST Init Script...\n'	
-	tool/bin2inc JSTInitScript < src/jst/script/init.js > $@
+src/jst/sys.inc: tool/bin2inc src/jst/script/sys.js
+	@printf '\nBuilding Hypersoft Systems JST System Script...\n'	
+	tool/bin2inc JSTSysScript < src/jst/script/sys.js > $@
 
 bin/jst.o: ${JSTHeaders} ${JSTScripts} ${JSTSources}
 	@printf '\nBuilding Hypersoft Systems JST...\n'

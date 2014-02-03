@@ -40,35 +40,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define jst_type_reserved_128 128
 #define jst_type_dynamic 256
 #define jst_type_constant 512
-#define jst_type_integer 1024
-#define jst_type_signed 2048
+#define jst_type_signed 1024
+#define jst_type_integer 2048
 #define jst_type_utf 4096
-#define jst_type_reference 8192
-#define jst_type_array 16384
-#define jst_type_structure 32768
-#define jst_type_union 65536
-#define jst_type_varargs 131072
-#define jst_type_value 262144
+#define jst_type_structure 8192
+#define jst_type_union 16384
+#define jst_type_varargs 32768
+#define jst_type_function 65536
+#define jst_type_object 131072
+#define jst_type_string 262144
+#define jst_type_number 524288
+#define jst_type_boolean 1048576
+#define jst_type_value 2097152
+#define jst_type_reference 4194304
 
-
-#define JSTCodeTypeExact(d, f) ((d & (f) == (f)) ? true : false)
 #define JSTCodeTypeIsValue(d) (d & jst_type_value)
-#define JSTCodeTypeIsInteger(d) ((d & jst_type_integer) ? true : false)
-#define JSTCodeTypeIsArray(d) ((d & jst_type_array) ? true : false)
-#define JSTCodeTypeIsBoolean(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 1) ? true : false))
-#define JSTCodeTypeIsSigned(d) ((d & jst_type_signed) ? true : false)
-#define JSTCodeTypeIsUnsigned(d) (JSTCodeTypeIsInteger(d) && (d & jst_type_signed) ? false : true)
-#define JSTCodeTypeIsConstant(d) ((d & jst_type_constant) ? true : false)
-#define JSTCodeTypeIsDynamic(d) ((d & jst_type_dynamic) ? true : false)
+#define JSTCodeTypeIsInteger(d) ((d & jst_type_integer))
+#define JSTCodeTypeIsBoolean(d) (d & jst_type_boolean)
+#define JSTCodeTypeIsFloat(d) ((! JSTCodeTypeIsInteger(d) ) ? (d & 4) || (d & 8): false)
+#define JSTCodeTypeIsSigned(d) (JSTCodeTypeIsInteger(d) && (d & jst_type_signed))
+#define JSTCodeTypeIsUnsigned(d) (JSTCodeTypeIsInteger(d) && !(d & jst_type_signed))
+#define JSTCodeTypeIsConstant(d) (d & jst_type_constant)
+#define JSTCodeTypeIsDynamic(d) (d & jst_type_dynamic)
 #define JSTCodeTypeIsStructure(d) (d & jst_type_structure)
 #define JSTCodeTypeIsReference(d) (d & jst_type_reference)
 #define JSTCodeTypeIsUnion(d) (d & jst_type_union)
-#define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) ? true : false)
-#define JSTCodeTypeIsFloat(d) ((!JSTCodeTypeIsInteger(d)) ? ((d & (4|8)) ? true : false) : false)
+#define JSTCodeTypeIsUTF(d) ((d & jst_type_utf) && (d & (1|2|4)))
 #define JSTCodeTypeIsVoid(d) (!(d & (1|2|4|8)))
 #define JSTCodeTypeWidth(d) ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : (d & 8) ? 8 : 0)
-#define JSTCodeTypeUTF(d) (JSTCodeTypeIsUTF(d) ? ((d & 1) ? 1 : (d & 2) ? 2 : (d & 4) ? 4 : 0) : 0)
-#define JSTCodeTypeFloat(d) (JSTCodeTypeIsInteger(d) ? 0 : ((d & 4) ? 4 : (d & 8) ? 8 : 0))
 
 /*
 	These codes are typically an enumeration of codes to be used with JSTScriptNativeError
@@ -120,7 +119,7 @@ typedef JSContextRef JSTContext;
 typedef JSContextGroupRef JSTContextGroup;
 
 #define JSTValueNull JSValueMakeNull(ctx)
-#define JSTValueUndefined JSValueMakeUndefined(ctx)
+#define JSTValueUndefined (void*) JSValueMakeUndefined(ctx)
 #define JSTObjectUndefined ((JSTObject) JSTValueUndefined)
 #define JSTObjectNull ((JSTObject) JSTValueNull)
 #define JSTObjectToValue(o) ((JSTValue) o)
@@ -128,6 +127,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTClassCreate(d) JSClassCreate(d)
 #define JSTClassRetain(c) JSClassRetain(c)
 #define JSTClassRelease(c) JSClassRelease(c)
+#define JSTClassRoot(private, prototype) ((void*) JSTClassRoot_(ctx, (void*)private, prototype, exception))
 #define JSTClassPropertyNone kJSClassAttributeNone
 #define JSTClassPropertyManualPrototype kJSClassAttributeNoAutomaticPrototype
 #define JSTContextGroupCreate JSContextGroupCreate
@@ -236,18 +236,20 @@ typedef JSContextGroupRef JSTContextGroup;
 #define JSTValueToUTF8(v) JSTStringToUTF8(JSTValueToString(v), true)
 #define JSTValueProtect(v) JSValueProtect(ctx, v)
 #define JSTValueUnprotect(v) JSValueUnprotect(ctx, v)
-#define JSTValueParseInt(v) JSTFunctionCall(JSTObjectGetProperty(NULL, JSTConstParseInt), NULL, v)
+#define JSTValueParseInt(v) JSTFunctionCall(JSTObjectGetProperty(NULL, jst_prop_parse_int), NULL, v)
 
 #define JSTValueIsVoid(v) (!v || JSTValueIsNull(v) || JSTValueIsUndefined(v))
 #define JSTValueIsFunction(v) (v && JSTValueIsObject(v) && JSTObjectIsFunction(v))
 #define JSTValueIsConstructor(v) (v && JSTValueIsObject(v) && JSTObjectIsConstructor(v))
-#define JSTValueIsNaN(v) JSTValueToBoolean(JSTFunctionCall(JSTObjectGetProperty(NULL, JSTConstIsNaN), NULL, v))
+#define JSTValueIsNaN(v) JSTValueToBoolean(JSTFunctionCall(JSTObjectGetProperty(NULL, jst_prop_is_nan), NULL, v))
 
 #define JSTArgumentToInt(i, d) JSTArgumentToInt_(ctx, argc, (const struct OpaqueJSValue **)argv, bitsof(* d), i, d, exception)
 #define JSTArgumentToPointer(i, d) JSTArgumentToPointer_(ctx, argc, (const struct OpaqueJSValue **)argv, i, d, exception)
 #define JSTValueToInt(v, d) JSTValueToInt_(ctx, bitsof(* d), v, d, exception)
 #define JSTValueToPointer(v, d) JSTValueToPointer_(ctx, v, d, exception)
 #define JSTValueFromPointer(p) ((JSTValue) JSTValueFromDouble(((unsigned long) p)))
+
+#define argo (JSTObject) argv
 
 /* Test system compiler */
 #ifdef __GNUC__
@@ -322,8 +324,8 @@ typedef JSContextGroupRef JSTContextGroup;
 #error You do not have a compiler known to support optional variadic macro arguments.
 #endif
 
-extern const utf8 * JSTConstIsNaN;
-extern const utf8 * JSTConstParseInt;
+extern const utf8 * jst_prop_is_nan;
+extern const utf8 * jst_prop_parse_int;
 
 extern const utf8 * JSTReservedAddress;
 
@@ -334,7 +336,7 @@ extern const utf8 * CODENAME;
 extern const utf8 * VERSION;
 extern const utf8 * VENDOR;
 
-extern JSTClass jst_pointer_class;
+extern JSTClass jst_root_class;
 
 extern bool JSTArgumentToInt_ JSTUtility(int argc, JSTValue argv[], int bits, int index, void * dest);
 extern bool JSTValueToInt_ JSTUtility(int bits, JSTValue input, void * dest);
@@ -361,4 +363,4 @@ extern JSTValue JSTValueFromString_ JSTUtility(JSTString s, bool release);
 extern JSTValue JSTValueFromJSON_ JSTUtility(const utf8 * p);
 extern utf8 * JSTConstructUTF8(const utf8 * format, ...);
 extern JSTObject JSTInit_ JSTUtility(JSTObject global, size_t argc, utf8 * argv[], utf8 * envp[]);
-
+extern JSTObject JSTClassRoot_(JSTContext ctx, void * private, JSTObject prototype, void * exception);

@@ -5,34 +5,11 @@ Copyright (c) 2014, Triston J. Taylor
 
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 */
 
 // fatal return codes, modify these on the newly constructed
 // object for custom exit error codes.
 // 1 is left for custom errors in cases where you need a 1 or 0 exit status.
-Error.prototype.reverse = 0;
-
 Error.prototype.code = 2;
 SyntaxError.prototype.code = 3;
 TypeError.prototype.code = 4;
@@ -41,62 +18,88 @@ ReferenceError.prototype.code = 6;
 EvalError.prototype.code = 7;
 URIError.prototype.code = 8;
 
-// modify the error info detailing the fault of this error..
-// optionally "arrest" a number of stack frames
-Error.prototype.fromCaller = function(arrest) {
 
-	arrest = parseInt(arrest);
-	if (isNaN(arrest)) arrest = 0;
-	if (arrest < 0) arrest = -arrest; // accept negatives
+Exception = (function(Error) {
+	
+	var Exception = function(c, m) {
 
-	var stack = this.stack.split('\n');
-	if (stack.length === 1) return this; // just pretend this didn't happen...
-	var data = stack[this.reverse+1].split('@');
-	var source = data[1].split(':');
-	this.sourceURL = source[0], this.line = source[1];
-
-	if (!Boolean(arrest)) {
-		data = stack[this.reverse].split('@');
-		data[0] += ' caller '+this.name;
-		stack[this.reverse++] = data.join('@');
-	} else {
-		while(arrest-- && stack.length > 1) {
-			stack.shift();
+		if (typeof c === 'string') {
+			m = c, c = Error;
 		}
-	}
 
-	this.stack = stack.join('\n');
-	return this;
+		if (!m) m = "";
+		if (!c) c = Error;
 
-};
+		var error;
+		try {
+			if (typeof c === 'function') throw new c(m);
+			error = c;
+		} catch(e) {
+			error = e;
+			var stack = e.stack.split('\n');
+			stack.shift();
+			error.stack = stack.join('\n');
+		}
+
+		var ex = Object.create(error);
+		if (String(m).length !== 0) ex.message = String(m);
+
+		if (typeof error.stack === 'string') {
+			var stack = error.stack.split('\n');
+			var root = stack[0].replace('@', ':').split(':');
+			if (root.length !== 2) {
+				root[root.length - 1] = "column "+root[root.length - 1];
+				root[root.length - 2] = "line "+root[root.length - 2];
+			}
+			ex.head = root.join(': '), ex.sourceURL = root[1],
+			ex.line = root[2];
+		}
+
+		return Object.freeze(ex);
+
+	};
+
+	Exception.prototype = Error.prototype;
+
+	Exception.stackString = function(e) {
+		var stack = e.stack.replace(/@/g, ':').split('\n');
+		var string = [];
+		while (x = stack.shift()) {
+			var data = x.split(":");
+			string.push(data[0].replace(
+				"global code", "source")+ ": "+data[1]+
+				((data[2] !== undefined) ? ": line "+data[2] : "")+
+				((data[3] !== undefined) ? ": column "+data[3] : "" ));
+		}
+		if (string.length) return string.join('\n');
+		else return undefined;
+	};
+
+	return Exception;
+	
+})(Error);
+
 
 // This must be defined here in this file, as if something goes wrong, the error
 // reporter won't operate as intended without this definition.
 
 sys.error = {
 	get number(){
-		return sys_error_number();
+		return sys.error_number();
 	},
 	set number(v){
-		return sys_error_number(v);
+		return sys.error_number(v);
 	},
 	get message(){
-		return sys_error_message();
+		return sys.error_message();
 	},
 	clear: function clear(){
-		return ! sys_error_number(0);
-	},
-	trace: function stack(e) {
-		var p = e || new Error(); var stack = p.stack.split('\n').reverse();
-		stack.toString = function(){
-			return 'Stack Trace: { '+stack.join(' } --> { ').split('@').join(': ')+' }';
-		}; return stack;
+		return ! sys.error_number(0);
 	},
 	toString: function toString(){
-		return sys_error_message(sys_error_number());
+		return sys.error_message(sys.error_number());
 	},
 	valueOf: function valueOf(){
-		return sys_error_number();
+		return sys.error_number();
 	}
 };
-

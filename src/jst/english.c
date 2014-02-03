@@ -28,6 +28,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+const utf8 * jst_prop_is_nan = "isNaN";
+const utf8 * jst_prop_parse_float = "parseFloat";
+const utf8 * jst_prop_parse_int = "parseInt";
+
 const utf8 * jst_prop_action = "action";
 const utf8 * jst_prop_address = "address";
 const utf8 * jst_prop_advance = "advance";
