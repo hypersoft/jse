@@ -92,3 +92,8 @@ endef
 # example:
 # STDOUT != $(call script, some/on/disk) arg1 arg2 ...;
 
+# Scripts are overall better than functions
+# my_script := $(call script, path/on/disk)
+# my_value != $(my_script) my_argument_1 my_argument_2 ...;
+# or
+# $(shell $(my_script) my_argument_1 my_argument_2 ...)
