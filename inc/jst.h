@@ -245,7 +245,7 @@ typedef JSContextGroupRef JSTContextGroup;
 #endif
 
 /* Test system architecture */
-#if defined (__ia64__) || defined(_M_IA64)
+#if defined (__ia64__) || defined(__IA64__) || defined(__IA64) || defined(__x86_64__)
 #define JSTArchitecture 64
 #elif defined (_M_IX86) || defined (i386)
 #define JSTArchitecture 32
