@@ -1,0 +1,6 @@
+Name: JSE								 # human-readable name
+Description: Hypersoft JavaScript Engine # human-readable description
+Version: 3.0.0
+Requires: javascriptcoregtk-4.0
+Libs.private: -ldl
+Cflags: -I/usr/include/jse

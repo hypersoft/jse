@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="bin2inc">
+        <in>bin2inc.c</in>
+      </df>
+      <df name="dyncall-0.8">
+        <df name="dyncall">
+          <in>dyncall_api.c</in>
+          <in>dyncall_callf.c</in>
+          <in>dyncall_callvm.c</in>
+          <in>dyncall_callvm_base.c</in>
+          <in>dyncall_struct.c</in>
+          <in>dyncall_vector.c</in>
+        </df>
+        <df name="dyncallback">
+          <in>dyncall_alloc_wx.c</in>
+          <in>dyncall_args.c</in>
+          <in>dyncall_callback.c</in>
+          <in>dyncall_thunk.c</in>
+        </df>
+        <df name="dynload">
+          <in>dynload.c</in>
+          <in>dynload_syms.c</in>
+        </df>
+      </df>
+      <df name="ghtml">
+        <in>GhtmlMain.c</in>
+        <in>GhtmlWindow.c</in>
+      </df>
+      <df name="plugin">
+        <in>Address.c</in>
+        <in>DynCall.c</in>
+        <in>Environment.c</in>
+        <in>GNUReadLine.c</in>
+        <in>MachineType.c</in>
+        <in>TypedBuffer.c</in>
+      </df>
+      <df name="src">
+        <in>JseConstructor.c</in>
+        <in>JseException.c</in>
+        <in>JseFunctions.c</in>
+        <in>JseMain.c</in>
+        <in>JseObject.c</in>
+        <in>JseOptionParser.c</in>
+        <in>JseString.c</in>
+        <in>JseValue.c</in>
+        <in>JseWebKit.c</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <itemPath>JseExports.map</itemPath>
+    <itemPath>core.js</itemPath>
+    <itemPath>share/interactive.js</itemPath>
+    <itemPath>script.js</itemPath>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)|(dyncall-0.8)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-fPIC"/>
+      </flagsDictionary>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath>bin/jse</executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="bin2inc/bin2inc.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_api.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_callf.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_callvm.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_callvm_base.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_struct.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncall/dyncall_vector.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncallback/dyncall_alloc_wx.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncallback/dyncall_args.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncallback/dyncall_callback.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dyncallback/dyncall_thunk.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dynload/dynload.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="dyncall-0.8/dynload/dynload_syms.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <folder path="0/bin2inc">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/dyncall-0.8/dyncallback">
+        <cTool>
+          <incDir>
+            <pElem>dyncall-0.8/dyncall</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/ghtml">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/gtk-3.0</pElem>
+            <pElem>/usr/include/at-spi2-atk/2.0</pElem>
+            <pElem>/usr/include/at-spi-2.0</pElem>
+            <pElem>/usr/include/dbus-1.0</pElem>
+            <pElem>/usr/lib/dbus-1.0/include</pElem>
+            <pElem>/usr/include/gio-unix-2.0</pElem>
+            <pElem>/usr/include/cairo</pElem>
+            <pElem>/usr/include/pango-1.0</pElem>
+            <pElem>/usr/include/atk-1.0</pElem>
+            <pElem>/usr/include/pixman-1</pElem>
+            <pElem>/usr/include/freetype2</pElem>
+            <pElem>/usr/include/libpng16</pElem>
+            <pElem>/usr/include/harfbuzz</pElem>
+            <pElem>/usr/include/libdrm</pElem>
+            <pElem>/usr/include/gdk-pixbuf-2.0</pElem>
+            <pElem>/usr/include/libsoup-2.4</pElem>
+            <pElem>/usr/include/libxml2</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/src">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <item path="ghtml/GhtmlMain.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="ghtml/GhtmlWindow.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="plugin/Address.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="plugin/DynCall.c" ex="false" tool="0" flavor2="0">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="plugin/Environment.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="plugin/GNUReadLine.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="plugin/MachineType.c" ex="false" tool="0" flavor2="0">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="plugin/TypedBuffer.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseConstructor.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseException.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseFunctions.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseMain.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseObject.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseOptionParser.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseString.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseValue.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseWebKit.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/gtk-3.0</pElem>
+            <pElem>/usr/include/at-spi2-atk/2.0</pElem>
+            <pElem>/usr/include/at-spi-2.0</pElem>
+            <pElem>/usr/include/dbus-1.0</pElem>
+            <pElem>/usr/lib/dbus-1.0/include</pElem>
+            <pElem>/usr/include/gio-unix-2.0</pElem>
+            <pElem>/usr/include/cairo</pElem>
+            <pElem>/usr/include/pango-1.0</pElem>
+            <pElem>/usr/include/atk-1.0</pElem>
+            <pElem>/usr/include/pixman-1</pElem>
+            <pElem>/usr/include/freetype2</pElem>
+            <pElem>/usr/include/libpng16</pElem>
+            <pElem>/usr/include/harfbuzz</pElem>
+            <pElem>/usr/include/libdrm</pElem>
+            <pElem>/usr/include/gdk-pixbuf-2.0</pElem>
+            <pElem>/usr/include/libsoup-2.4</pElem>
+            <pElem>/usr/include/libxml2</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,0 +1,288 @@
+#include "jse.h"
+
+static int loadCount = 0;
+
+#define LIBCLASS "SharedLibrary"
+JSClass SharedLibraryClass = NULL;
+
+typedef struct SharedLibraryData {
+	void * handle;
+	char path[];
+} SharedLibraryData;
+
+static void LibraryObjectFinalize(JSObject object)
+{
+	SharedLibraryData * p = JSObjectGetPrivate(object);
+	if (p) {
+		dlFreeLibrary(p->handle);
+		g_free(p);
+		JSObjectSetPrivate(object, NULL);
+	}
+}
+
+static bool LibraryObjectHasProperty (JSContext ctx, JSObject object, JSString name)
+{
+	SharedLibraryData * p = JSObjectGetPrivate(object);
+	if (!p) return false;
+
+	char buffer[JSStringUtf8Size(name)];
+	JSStringGetUTF8CString(name, buffer, sizeof(buffer));
+	if (dlFindSymbol(p->handle, buffer)) return true;
+
+	return false;
+}
+
+static JSValue LibraryObjectGetProperty(JSContext ctx, JSObject object, JSString name, JSValue * exception)
+{
+	SharedLibraryData * p = JSObjectGetPrivate(object);
+	if (!p) return NULL;
+
+	char buffer[JSStringUtf8Size(name)];
+	JSStringGetUTF8CString(name, buffer, sizeof(buffer));
+	void * pSymbol = dlFindSymbol(p->handle, buffer);
+	if (!pSymbol) return JSValueMakeUndefined(ctx);
+
+	return JSValueFromNumber(ctx, (unsigned)pSymbol);
+
+}
+
+static JSValue LibraryObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
+{
+	SharedLibraryData * p = JSObjectGetPrivate(object);
+	if (type == kJSTypeString) {
+		return JSValueFromUtf8(ctx, p->path);
+	} else if (type == kJSTypeNumber) {
+		return JSValueFromNumber(ctx, (unsigned)p->handle);
+	}
+	g_assert_not_reached();
+}
+
+static JSClassDefinition LibraryClassDefinition = {
+	0,										/* Version, always 0 */
+											/* ClassAttributes */
+	kJSClassAttributeNoAutomaticPrototype,
+	LIBCLASS,								/* Class Name */
+	NULL,									/* Parent Class */
+	NULL,									/* Static Values */
+	NULL,									/* Static Functions */
+	NULL,									/* Object Initializer */
+	(void*) LibraryObjectFinalize,			/* Object Finalizer */
+	(void*) LibraryObjectHasProperty,		/* Object Has Property */
+	(void*) LibraryObjectGetProperty,		/* Object Get Property */
+	NULL,									/* Object Set Property */
+	NULL,									/* Object Delete Property */
+	NULL,									/* Object Get Property Names */
+	NULL,									/* new Object Call As Function */
+	NULL,									/* new Object Call As Constructor */
+	NULL,									/* Has Instance */
+	(void*) LibraryObjectConvertToType		/* Object Convert To Type */
+};
+
+static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+
+	if (! JSValueIsObjectOfClass(ctx, (void *) this, SharedLibraryClass)) {
+		return JSObjectCallAsConstructor(ctx, function, argc, argv, exception);
+	}
+
+	char * libPath = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
+	if (JSExceptionCaught(exception)) return NULL;
+	else if (! libPath ) {
+		return JSExceptionThrowUtf8(ctx, "ReferenceError", exception, "Library: expected path argument");
+	}
+
+	void * libHandle = dlLoadLibrary(libPath);
+	if (! libHandle) {
+		return JSExceptionThrowUtf8(ctx, "ReferenceError", exception, "Library: Can't find library `%s'", libPath);
+	}
+
+	unsigned bytes = strlen(libPath) + 1;
+	SharedLibraryData * p = g_malloc0(sizeof(SharedLibraryData)+bytes);
+	p->handle = libHandle;
+	memcpy(p->path, libPath, bytes);
+	JSObjectSetPrivate(this, p);
+
+	return this;
+
+}
+
+#define FNCLASS "SharedFunction"
+JSClass SharedFunctionClass = NULL;
+
+static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signature, JSValue argument, bool ellipsisMode, JSValue * exception){
+	double number;
+	if (signature == 'p') {
+		if (JSValueIsString(ctx, argument)) {
+			argument = JSInlineEval(ctx, "[this, 0].toBuffer(this.type || UInt8)", (JSObject) argument, NULL);
+		}
+		number = JSValueToNumber(ctx, argument, exception);
+		dcArgPointer(vm, (void*) (unsigned) number);
+	} else if (signature == 'c' || signature == 's' || signature == 'i') {
+		number = JSValueToNumber(ctx, argument, exception);
+		dcArgInt(vm, number);
+	} else if (signature == 'C' || signature == 'S' || signature == 'I') {
+		number = JSValueToNumber(ctx, argument, exception);
+		dcArgInt(vm, number);
+	} else if (signature == 'l' || signature == 'L') {
+		number = JSValueToNumber(ctx, argument, exception);
+		dcArgLongLong(vm, number);
+	} else if (signature == 'f') {
+		number = JSValueToNumber(ctx, argument, exception);
+		if (ellipsisMode) dcArgDouble(vm, number);
+		else dcArgFloat(vm, number);
+	} else if (signature == 'd') {
+		number = JSValueToNumber(ctx, argument, exception);
+		dcArgDouble(vm, number);
+	}
+}
+
+static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	char * protocol = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "protocol"));
+	int protocolLength = strlen(protocol);
+	bool ellipsisMode = protocol[protocolLength - 1] == 'e';
+
+	void * vm = dcNewCallVM((1 + argc) * sizeof(long long));
+
+	if (ellipsisMode) {
+		dcMode(vm, DC_CALL_C_ELLIPSIS);
+		protocol[--protocolLength] = 0;
+	}
+
+	unsigned i; double number;
+
+	for (i = 0; i < protocolLength; i++) {
+		SharedFunctionWriteSignature(ctx, vm, protocol[i], argv[i], ellipsisMode, exception);
+	}
+
+	if (ellipsisMode && i != argc) {
+		for (i; i < argc; i++) {
+			JSValue argument = argv[i];
+			if (JSValueIsString(ctx, argument)) {
+				SharedFunctionWriteSignature(ctx, vm, 'p', argument, ellipsisMode, exception);
+			} else if (JSValueIsObject(ctx, argument)){
+				if (JSValueToNumber(ctx, JSInlineEval(ctx, "(this.constructor === Address)?1:0", (JSObject) argument, NULL), NULL))
+					SharedFunctionWriteSignature(ctx, vm, 'p', argument, ellipsisMode, exception);
+				else if (JSValueToNumber(ctx, JSInlineEval(ctx, "(this.constructor === Array)?1:0", (JSObject) argument, NULL), NULL)) {
+					puts("Unhandled object type: Array");
+					g_assert_not_reached();
+				} else {
+					char signature = JSValueToNumber(ctx, JSInlineEval(ctx, "(this.type)?String(this.type).charCodeAt(0):0", (JSObject) argument, NULL), NULL);
+					if (signature) SharedFunctionWriteSignature(ctx, vm, signature, argument, ellipsisMode, exception);
+					else {
+						number = JSValueToNumber(ctx, argument, exception);
+						dcArgInt(vm, (unsigned) number);
+					}
+				}
+			} else if (JSValueIsNull(ctx, argument)) {
+				dcArgInt(vm, (unsigned) 0);
+			} else if (JSValueIsUndefined(ctx, argument)) {
+				dcArgInt(vm, (unsigned) 0);
+			} else {
+				number = JSValueToNumber(ctx, argument, exception);
+				dcArgInt(vm, (unsigned) number);
+			}
+		}
+
+	}
+
+	JSValue result = JSValueMakeUndefined(ctx);
+	char * returns = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "returns"));
+	char signature = returns[0];
+	void * handle = (void*)(unsigned)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
+
+	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'p') {
+		result = JSValueFromNumber(ctx, (unsigned)dcCallInt(vm, handle));
+	} else if (signature == 'C' || signature == 'S' || signature == 'I' || signature == 'J') {
+		result = JSValueFromNumber(ctx, (signed)dcCallInt(vm, handle));
+	} else if (signature == 'l') {
+		result = JSValueFromNumber(ctx, (unsigned)dcCallLongLong(vm, handle));
+	} else if (signature == 'L') {
+		result = JSValueFromNumber(ctx, (signed)dcCallLongLong(vm, handle));
+	} else if (signature == 'f') {
+		result = JSValueFromNumber(ctx, dcCallFloat(vm, handle));
+	} else if (signature == 'd') {
+		result = JSValueFromNumber(ctx, dcCallDouble(vm, handle));
+	} else if (signature == 'v') {
+		dcCallVoid(vm, handle);
+	} else {
+		g_printerr("dyncall.vm: unknown signature: `%c' in protocol `%s'\n", signature, protocol);
+		g_assert_not_reached();
+	}
+
+	dcFree(vm);
+	g_free(protocol); g_free(returns);
+
+	return result;
+}
+
+static JSClassDefinition FunctionClassDefinition = {
+	0,										/* Version, always 0 */
+											/* ClassAttributes */
+	kJSClassAttributeNoAutomaticPrototype,
+	FNCLASS,								/* Class Name */
+	NULL,									/* Parent Class */
+	NULL,									/* Static Values */
+	NULL,									/* Static Functions */
+	NULL,									/* Object Initializer */
+	NULL,									/* Object Finalizer */
+	NULL,									/* Object Has Property */
+	NULL,									/* Object Get Property */
+	NULL,									/* Object Set Property */
+	NULL,									/* Object Delete Property */
+	NULL,									/* Object Get Property Names */
+	(void*) SharedFunctionExec,				/* new Object Call As Function */
+	NULL,									/* new Object Call As Constructor */
+	NULL,									/* Has Instance */
+	NULL									/* Object Convert To Type */
+};
+
+static JSValue FunctionObjectConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
+	return JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+}
+
+#define CBCLASS "CallBack"
+JSClass CallBackClass = NULL;
+
+#define VACLASS "varargs"
+JSClass VarArgsClass = NULL;
+
+JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
+{
+	if (!loadCount) {
+		SharedLibraryClass = JSClassCreate(&LibraryClassDefinition);
+		SharedFunctionClass = JSClassCreate(&FunctionClassDefinition);
+		JSClassRetain(SharedLibraryClass);
+		JSClassRetain(SharedFunctionClass);
+	}
+
+	JSObject SharedLibrary;
+	JSObjectSetUtf8Property(ctx, object, LIBCLASS,
+		(JSValue) (SharedLibrary = JSConstructorCreate(
+			ctx, LIBCLASS, SharedLibraryClass, LibraryObjectConstructor
+		)), 0
+	);
+
+	JSObject SharedFunction;
+	JSObjectSetUtf8Property(ctx, object, FNCLASS,
+		(JSValue) (SharedFunction = JSConstructorCreate(
+			ctx, FNCLASS, SharedFunctionClass, FunctionObjectConstructor
+		)), 0
+	);
+
+	loadCount++;
+	return (JSValue) object;
+
+}
+
+void unload(JSContext ctx)
+{
+
+	if (--loadCount) return;
+
+	JSClassRelease(SharedLibraryClass);
+	JSClassRelease(SharedFunctionClass);
+
+}

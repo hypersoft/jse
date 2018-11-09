@@ -1,0 +1,46 @@
+<html><head><title>JavaScript ScratchPad - ghtml</title>
+<style>
+* {
+	font-size: 10pt;
+}
+
+textarea {
+	font-family: mono;
+	width: 100%;
+	height: 80%;
+}
+
+</style>
+<script>
+
+function bodyOnLoad() {
+	window.resizeTo(window.width * .5, window.height * .5);
+	input.focus();
+}
+
+function eOnClick(){
+	result.value = "";
+	var value = String(eval(input.value))
+	return value;
+}
+
+</script>
+</head>
+<body onload=bodyOnLoad()>
+<div>
+
+<p><b>Javascript:</b></p>
+<p><textarea id="input"></textarea></p>
+<table width=100%><tr>
+<td width=90%>
+<b>Result:&nbsp;</b><input id=result type="text" style="width:90%;">
+</td>
+<td align=right>
+<button onclick="result.value = eOnClick();">Evaluate</button>
+</td>
+</tr></table>
+
+</div>
+
+
+</body></html>

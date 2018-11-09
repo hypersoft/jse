@@ -1,8 +1,6 @@
-inc/license.h
-inc/notice.h
-tool/bin2inc
-src/jst/error.inc
-src/jst/init.inc
-bin/jst.o
-bin/jse
-/nbproject/
+bin/
+data/
+include/dyncall/
+lib/
+obj/
+share/plugin/
