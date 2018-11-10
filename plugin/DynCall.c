@@ -164,7 +164,7 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 				if (JSValueToNumber(ctx, JSInlineEval(ctx, "(this.constructor === Address)?1:0", (JSObject) argument, NULL), NULL))
 					SharedFunctionWriteSignature(ctx, vm, 'p', argument, ellipsisMode, exception);
 				else if (JSValueToNumber(ctx, JSInlineEval(ctx, "(this.constructor === Array)?1:0", (JSObject) argument, NULL), NULL)) {
-					puts("Unhandled object type: Array");
+					g_printerr("dyncall.vm: SharedFunction Fault: unsupported object type: Array");
 					g_assert_not_reached();
 				} else {
 					char signature = JSValueToNumber(ctx, JSInlineEval(ctx, "(this.type)?String(this.type).charCodeAt(0):0", (JSObject) argument, NULL), NULL);
@@ -242,6 +242,19 @@ static JSValue FunctionObjectConstructor (JSContext ctx, JSObject function, JSOb
 	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
 	return JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
 }
+
+/* it is disappointing that we do not have a callback class 
+	 however, there is some logic to this. Anything that requires a callback,
+	 should have a definite native translation unit. This helps with debugging,
+	 and voids production of sloppy code that may not be accountable for execution
+	 in operative, theory.
+
+	 so this is a forced limitation, because its a simple thing to do.
+	 if you wan't call back access, you can create your own, but it would,
+	 be far easier to write a plugin, that will always work independent of your
+	 script.
+	 
+*/
 
 #define CBCLASS "CallBack"
 JSClass CallBackClass = NULL;
