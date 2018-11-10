@@ -320,8 +320,14 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 
 JSValue jsChDir(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
-	char * val; JSValueRef
-	val = JSValueToUtf8(ctx, argv[0]);
-	int result = chdir(val);
-	return JSValueMakeNumber(result);
+	char * txt = JSValueToUtf8(ctx, argv[0]);
+	int result = chdir(txt);
+	g_free(txt);
+	return JSValueMakeNumber(ctx, result);
+}
+
+JSValue jsCurrentWorkingDirectory(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	char buffer[8192]; getcwd(buffer, sizeof(buffer));
+	return JSValueFromUtf8(ctx, buffer);
 }

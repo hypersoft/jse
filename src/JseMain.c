@@ -143,6 +143,7 @@ void JSInit(char * command, JSContext ctx) {
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
 	JSObjectCreateFunction(jse.ctx, global, "chdir", jsChDir);
+	JSObjectCreateFunction(jse.ctx, global, "cwd", jsCurrentWorkingDirectory);
 
 	JSLoadPlugin(jse.ctx, "GNUReadLine.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
