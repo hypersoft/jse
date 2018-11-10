@@ -131,39 +131,7 @@ void JSInit(char * command, JSContext ctx) {
 
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
 
-	JSObjectCreateFunction(jse.ctx, global, "include", include);
-
-	// ...
-	JSDefineConstant(jse.ctx, global, O_RDONLY);
-	JSDefineConstant(jse.ctx, global, O_RDWR);
-	JSDefineConstant(jse.ctx, global, O_WRONLY);
-	JSDefineConstant(jse.ctx, global, O_CREAT);
-	JSDefineConstant(jse.ctx, global, O_APPEND);
-	JSDefineConstant(jse.ctx, global, O_CLOEXEC);
-	JSDefineConstant(jse.ctx, global, O_DIRECTORY);
-	JSDefineConstant(jse.ctx, global, O_DSYNC);
-	JSDefineConstant(jse.ctx, global, O_NOCTTY);
-	JSDefineConstant(jse.ctx, global, O_NOFOLLOW);
-	JSDefineConstant(jse.ctx, global, O_NONBLOCK);
-	JSDefineConstant(jse.ctx, global, O_RSYNC);
-	JSDefineConstant(jse.ctx, global, O_SYNC);
-	JSDefineConstant(jse.ctx, global, O_TRUNC);
-
-	JSDefineConstant(jse.ctx, global, S_IRUSR);
-	JSDefineConstant(jse.ctx, global, S_IWUSR);
-	JSDefineConstant(jse.ctx, global, S_IXUSR);
-	JSDefineConstant(jse.ctx, global, S_IRWXU);
-
-	JSDefineConstant(jse.ctx, global, S_IRGRP);
-	JSDefineConstant(jse.ctx, global, S_IWGRP);
-	JSDefineConstant(jse.ctx, global, S_IXGRP);
-	JSDefineConstant(jse.ctx, global, S_IRWXG);
-
-	JSDefineConstant(jse.ctx, global, S_IROTH);
-	JSDefineConstant(jse.ctx, global, S_IWOTH);
-	JSDefineConstant(jse.ctx, global, S_IXOTH);
-	JSDefineConstant(jse.ctx, global, S_IRWXO);
-
+	JSObjectCreateFunction(jse.ctx, global, "source", source);
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
 	JSObjectCreateFunction(jse.ctx, global, "printErrorLine", printErrorLine);
@@ -172,7 +140,6 @@ void JSInit(char * command, JSContext ctx) {
 	JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
 	JSObjectCreateFunction(jse.ctx, global, "checkSyntax", checkSyntax);
 	JSObjectCreateFunction(jse.ctx, global, "run", run);
-
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
 
@@ -180,7 +147,7 @@ void JSInit(char * command, JSContext ctx) {
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	JSValue jsError = NULL;
-	JSInlineEval(jse.ctx, "include('/usr/share/jse/core.js')", NULL, &jsError);
+	JSInlineEval(jse.ctx, "source('/usr/share/jse/core.js')", NULL, &jsError);
 	if (jsError) {
 		JSReportException(jse.ctx, jse.command, jsError);
 		JSTerminate(1);

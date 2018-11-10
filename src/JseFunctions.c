@@ -30,7 +30,7 @@ JSValue terminate(JSContext ctx, JSObject function, JSObject this, size_t argc, 
 
 }
 
-JSValue include(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+JSValue source(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 
 	if (argc != 1) {
