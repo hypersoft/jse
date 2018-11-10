@@ -6,8 +6,7 @@ JSClass MachineTypeClass = NULL;
 static JSValue MachineTypeExec (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	JSObject valueObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "value");
-	JSObjectCallAsFunction(ctx, valueObject, function, argc, argv, exception);
-	return this;
+	return JSObjectCallAsFunction(ctx, valueObject, function, argc, argv, exception);
 }
 
 static JSClassDefinition MachineTypeClassDefinition = {
