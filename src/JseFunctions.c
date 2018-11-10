@@ -1,26 +1,38 @@
 
 #include <bits/stat.h>
 #include <time.h>
+
 static char * JSE_ERROR_CTOR = "Error";
-static char * JSE_SINGLE_ARGUMENT = "%s expected 1 argument, got %zd";
-static char * JSE_MULTI_ARGUMENTS = "%s expected %i arguments, got %zd";
+static char * JSE_SINGLE_ARGUMENT = "%s expected 1 parameter, have: %zd";
+static char * JSE_MULTI_ARGUMENTS = "%s expected %i parameters, have: %zd";
+static char * JSE_AT_LEAST_ARGUMENTS = "%s requires at least %i parameters, have: %zd";
+static char * JSE_AT_LEAST_ONE_ARGUMENT = "%s requires at least 1 parameter, have: %zd";
+
+#define NULL_VALUE JSValueMakeNull(ctx)
+#define THROWING_EXCEPTION(E) (((exception)?*exception = E:0), NULL_VALUE)
+
+#define WANT_NO_PARAMETERS() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, 0, __FUNCTION__, argc)
+#define WANT_EXACT_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, COUNT, __FUNCTION__, argc)
+#define WANT_AT_LEAST_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ARGUMENTS, COUNT, __FUNCTION__, argc)
+#define WANT_AT_LEAST_ONE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ONE_ARGUMENT, __FUNCTION__, argc)
+#define WANT_SINGLE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc)
 
 JSValue terminate(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
-
+	if (argc > 1) {
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
+	}
 	int status = (argc)?JSValueToNumber(ctx, argv[0], exception):0;
-	if (*exception) return JSValueMakeNull(ctx);
+	if (*exception) return NULL_VALUE;
 	JSTerminate(status);
 
 }
 
 JSValue include(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
+
 	if (argc != 1) {
-		if (exception)
-			*exception = JSExceptionFromUtf8
-			(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
 
 	JSValue result = NULL;
@@ -44,17 +56,14 @@ JSValue include(JSContext ctx, JSObject function, JSObject this, size_t argc, co
 	}
 	fail:
 	free(file);	g_free(contents);
-	return (*exception)?JSValueMakeNull(ctx):result;
+	return (*exception)?NULL_VALUE:result;
 
 }
 
 JSValue lastError(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc != 0) {
-		if (exception)
-			*exception = JSExceptionFromUtf8
-			(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, 0, __FUNCTION__, argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_NO_PARAMETERS());
 	}
 	int error = errno;
 	JSObject detail = JSValueToObject(ctx, JSValueFromUtf8(ctx, strerror(error)), NULL);
@@ -66,12 +75,10 @@ JSValue lastError(JSContext ctx, JSObject function, JSObject this, size_t argc, 
 JSValue addPluginPath(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc != 1) {
-		if (exception)
-			*exception = JSExceptionFromUtf8
-			(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
-	if (JSUnloading()) return JSValueMakeNull(ctx);
+
+	if (JSUnloading()) return NULL_VALUE;
 	char * value = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
 	if (g_file_test(value, G_FILE_TEST_IS_DIR))
 		JSAddPluginPath(value);
@@ -87,29 +94,25 @@ JSValue addPluginPath(JSContext ctx, JSObject function, JSObject this, size_t ar
 JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc != 1) {
-		if (exception)
-			*exception = JSExceptionFromUtf8
-			(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
+
 	JSValue result;
 	char * file = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
 	if (*exception) goto fail;
 	result = JSLoadPlugin(ctx, file, this, exception);
 	g_free(file);
 	fail:
-	if (*exception) return JSValueMakeNull(ctx);
+	if (*exception) return NULL_VALUE;
 	else return result;
 }
 
 JSValue printErrorLine(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc != 1) {
-		if (exception)
-			*exception = JSExceptionFromUtf8
-			(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
+
 	JSValue result;
 	char * file = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
 	g_printerr("%s\n", file);
@@ -129,7 +132,7 @@ bool buffer_ends_with_newline(register char * buffer, int length) {
 
 JSValue echo(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
-	uint i, argFinal = argc - 1;
+	unsigned i, argFinal = argc - 1;
 	char *bytes;
 	bool have_newline = false;
 	for (i = 0; i < argc; i++) {
@@ -152,10 +155,10 @@ JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc
 {
 
 	if (argc == 0) {
-		*exception = JSExceptionFromUtf8(ctx, "Error", "checkSyntax expected 1-3 arguments, got %zd", argc);
-		return JSValueMakeNull (ctx);
+		return THROWING_EXCEPTION(WANT_AT_LEAST_ONE_PARAMETER());
 	}
-	JSObject arguments = (JSObject)JSObjectGetUtf8Property(ctx, JSContextGetGlobalObject(ctx), "argv");
+
+	JSObject parameters = (JSObject)JSObjectGetUtf8Property(ctx, JSContextGetGlobalObject(ctx), "argv");
 	JSString script, source;
 	script = JSValueToString(ctx, argv[0], exception);
 	int line = 1;
@@ -172,7 +175,7 @@ JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc
 			return NULL;
 		}
 	} else {
-		JSValue v = JSObjectGetPropertyAtIndex(ctx, arguments, 0, exception);
+		JSValue v = JSObjectGetPropertyAtIndex(ctx, parameters, 0, exception);
 		if (exception && *exception) {
 			JSStringRelease(script);
 			return NULL;
@@ -191,6 +194,11 @@ JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc
 
 JSValue run(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
+
+	if (argc < 1) {
+		return THROWING_EXCEPTION(WANT_AT_LEAST_ONE_PARAMETER());
+	}
+
 	int allocated = 0, deallocated = 0;
 	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
 
