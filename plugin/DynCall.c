@@ -253,6 +253,8 @@ static JSValue FunctionObjectConstructor (JSContext ctx, JSObject function, JSOb
 	 if you wan't call back access, you can create your own, but it would,
 	 be far easier to write a plugin, that will always work independent of your
 	 script.
+
+	 And all the Unix Gurus Say: Seperate your interface from your implementation.
 	 
 */
 
