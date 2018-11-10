@@ -32,6 +32,8 @@ extern "C" {
 #include <glib/gstdio.h>
 #include <JavaScriptCore/JavaScript.h>
 
+#include <inttypes.h>
+
 #define JSDefineConstant(CTX, O, V)	JSObjectSetUtf8Property(CTX, O, #V, JSValueFromNumber(CTX, V), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete)
 
 typedef enum JseOptionType {
