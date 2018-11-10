@@ -2,9 +2,9 @@ An Involved Affair
 
 Scripting Environment Provisions to the JavascriptCore Standard Global Environment
 
-Function: run(String, ...)
+Function: run(String command, ...)
 
-  Run the command given with the parameters given, capturing standard io and status to
+  Run the command given with the remaining parameters given, capturing standard io and status to
   a new prototype of the run function.
 
   Prototype: run.prototype
@@ -19,3 +19,11 @@ Function: run(String, ...)
     valueOf: returns status
 
     toString: returns (stdout || stderr || status) in resolve order.
+
+Function: localPath()
+
+  Retrieve the current directory as a String.
+
+Function: localPath(String path)
+
+  Set the current directory to path.
