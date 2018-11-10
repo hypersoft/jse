@@ -162,7 +162,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 
 	if (!g_strcmp0(name, "vector")) {
 		void * address = AddressFromValue(ctx, object, NULL);
-		if (address != 0 && address == JSObjectGetPrivate(object)) {
+		if (address != 0 && address != JSObjectGetPrivate(object)) {
 			if (exception) *exception = JSExceptionFromUtf8 (
 				ctx,
 				"ReferenceError",
