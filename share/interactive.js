@@ -17,7 +17,7 @@ rel: while (++line) {
 					script += readline("> ");
 					continue;					
 				} else {
-					error(exception);
+					printErrorLine(exception);
 					continue rel;
 				}
 			}
@@ -26,7 +26,7 @@ rel: while (++line) {
 		try {
 			eval(script);
 		} catch (exception) {
-			error(exception);
+			printErrorLine(exception);
 			continue rel;
 		}
 	} else break;

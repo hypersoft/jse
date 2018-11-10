@@ -166,6 +166,8 @@ void JSInit(char * command, JSContext ctx) {
 
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
+	JSObjectCreateFunction(jse.ctx, global, "printErrorLine", printErrorLine);
+	JSObjectCreateFunction(jse.ctx, global, "echo", echo);
 	JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 	JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
 	JSObjectCreateFunction(jse.ctx, global, "checkSyntax", checkSyntax);
@@ -215,7 +217,7 @@ GError * jse_parse_options (
 	JseOption * option,
 	const char * value
 ) {
-	static evalNumber = 0;
+	static int evalNumber = 0;
 	if (option == &jseOptions[0]) {
 		int argc; char ** argv;
 		char buffer[strlen(value)+7]; g_sprintf(buffer, "shell %s", value);

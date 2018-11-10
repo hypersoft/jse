@@ -102,6 +102,52 @@ JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc,
 	else return result;
 }
 
+JSValue printErrorLine(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	if (argc != 1) {
+		if (exception)
+			*exception = JSExceptionFromUtf8
+			(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc);
+		return JSValueMakeNull (ctx);
+	}
+	JSValue result;
+	char * file = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
+	g_printerr("%s\n", file);
+	g_free(file);
+	return JSValueMakeBoolean(ctx, true);
+}
+
+bool buffer_ends_with_newline(register char * buffer, int length) {
+	if (buffer == NULL) return false;
+	if (length == 0) length = strlen(buffer);
+	if (length == 0) return false;
+	register int check = length - 1;
+	if (buffer[check] == 10) return true;
+	if (buffer[check] == 0 && buffer[check - 1] == 10) return true;
+	return false;
+}
+
+JSValue echo(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	uint i, argFinal = argc - 1;
+	char *bytes;
+	bool have_newline = false;
+	for (i = 0; i < argc; i++) {
+		bytes = JSValueToUtf8(ctx, argv[i]);
+		if (! bytes) continue;
+		g_print("%s%s", i ? " " : "", bytes);
+		if (i == argFinal) have_newline = buffer_ends_with_newline(bytes, 0);
+		free(bytes);
+	}
+
+	if (!have_newline) putc('\n', stdout); 
+	
+	fflush(stdout);
+
+	return JSValueMakeBoolean(ctx, true);
+
+}
+
 JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 
@@ -174,7 +220,7 @@ JSValue run(JSContext ctx, JSObject function, JSObject this, size_t argc, const 
 JSValue machineTypeRead(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	// address, element?
-	void * address = (void*)(unsigned)JSValueToNumber(ctx, argv[0], NULL);
+	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
 	long long element = (argc > 1)?JSValueToNumber(ctx, argv[1], NULL):0;
 
 	unsigned code = JSValueToNumber(ctx, (JSValue) this, NULL),
@@ -219,7 +265,7 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 {
 	// address, value
 	// address, element, value
-	void * address = (void*)(unsigned)JSValueToNumber(ctx, argv[0], NULL);
+	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
 	double value = 0; long long element = 0;
 	if (argc == 2) value = JSValueToNumber(ctx, argv[1], NULL);
 	else if (argc > 2)
