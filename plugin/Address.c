@@ -161,7 +161,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 	}	notAnIndex:
 
 	if (!g_strcmp0(name, "vector")) {
-		void * address = AddressFromValue(ctx, object, NULL), currentAddress = JSObjectGetPrivate(object);
+		void * address = AddressFromValue(ctx, object, NULL), * currentAddress = JSObjectGetPrivate(object);
 		if (currentAddress && address != currentAddress ) {
 			if (exception) *exception = JSExceptionFromUtf8 (
 				ctx,
@@ -172,8 +172,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		}
 	} else if (!g_strcmp0(name, "units")) {
 		void * address = AddressFromValue(ctx, object, NULL);
-		if (exception && *exception) return NULL;
-		if (address == 0 || address == JSObjectGetPrivate(object)) {
+		//if (exception && *exception) return NULL;
+		if (address == 0) {
 			int code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL);
 			if (code == 0) return true;
 			int width = code & (1|2|4|8);
