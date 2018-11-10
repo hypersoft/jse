@@ -55,7 +55,7 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		}
 
 		void * address = (void*)(unsigned)JSValueToNumber(ctx, (JSValue) object, NULL);
-		long long element; sscanf(name, "%lld", &name);
+		long long element; sscanf(name, "%lld", &element);
 		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
 
 		if (length == 0) length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
