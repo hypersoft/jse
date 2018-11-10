@@ -32,8 +32,9 @@ static JSClassDefinition MachineTypeClassDefinition = {
 
 static JSValue MachineTypeObjectConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
-	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
-	return JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+	JSObject machineTypeConstructor = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
+	JSObjectCallAsFunction(ctx, machineTypeConstructor, this, argc, argv, exception);
+	return this;
 }
 
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
