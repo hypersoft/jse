@@ -319,11 +319,13 @@ SharedFunction.create = function(){
 		name = arguments[1],
 	/* it is unsaid in this code, that remaining arguments is an array of types */
 	arguments = Array.apply(Array, arguments).slice(2);
-		pointer = this.library[name];
+		pointer = this.library[name]; // pointer to jse: itself; which is a library; having includable headers
+		                              // and system pkgconf.
 	} else if (arguments[0].constructor === SharedLibrary) {
 		lib = arguments[0],
 		type = arguments[1],
 		name = arguments[2],
+	/* same [not]ation and different parameters */
 		arguments = Array.apply(Array, arguments).slice(3);
 		pointer = lib[name];
 	}
