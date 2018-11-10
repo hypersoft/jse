@@ -47,7 +47,7 @@ To Do:
         there are several default plugin paths defined within the code, for global,
         and user scope plugins. all jse features are available in ghtml. you can
         use ghtml to create beautiful apps based on web technology, at the same time,
-        have full forward function call acces to your system libraries.
+        have full forward function call acces to your system libraries and commands.
 
         the webkit platorm has a built in script debugger. the web inspector can be
         used to debug shell scripts, web scripts, and design html pages with wysiwyg
@@ -55,3 +55,4 @@ To Do:
 
         Hack on something, write a tutorial, ask a question (as an issue on github),
         or simply enjoy your new unix coding shell kits!
+
