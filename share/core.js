@@ -311,14 +311,14 @@ Object.defineProperties(SharedLibrary.prototype, {
 });
 
 SharedFunction.create = function(){
-
 	var lib, name, type, pointer, arguments;
 
 	if (arguments[0].constructor === MachineType) {
 		lib = this.lib,
 		type = arguments[0],
 		name = arguments[1],
-		arguments = Array.apply(Array, arguments).slice(2);
+	/* it is unsaid in this code, that remaining arguments is an array of types */
+	arguments = Array.apply(Array, arguments).slice(2);
 		pointer = this.library[name];
 	} else if (arguments[0].constructor === SharedLibrary) {
 		lib = arguments[0],
