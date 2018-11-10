@@ -1,21 +1,20 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 var line = 0;
 
+function prompt() {
+	return '{' + Environment.USER + '@' + Environment.PWD.split("/").pop() + "} ";
+}
+
 rel: while (++line) {
-	if (script = readline('{' + Environment.USER + '@' + Environment.PWD.split("/").pop() + "} ")) {
+	if (script = readline(prompt())) {
 		while (1) {
 			script += '\n';
 			try {
-				checkSyntax(script, argv[0], line);
+				checkSyntax(script, parameter[0], line);
 			} catch (exception) {
 				if (exception.message === "Unexpected end of script") {
 					script += readline("> ");
-					continue;					
+					continue;
 				} else {
 					printErrorLine(exception);
 					continue rel;

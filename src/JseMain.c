@@ -29,7 +29,7 @@ void JSInitScriptArguments(JSContext ctx, int argc, char ** argv)
 	for (i; i < argc; i++) array[i] = JSValueFromUtf8(ctx, argv[i]);
 	JSObject arrayObject = JSObjectMakeArray(ctx, argc, array, NULL);
 	JSObjectSetUtf8Property(
-		ctx, JSContextGetGlobalObject(ctx), "argv", (JSValue) arrayObject,
+		ctx, JSContextGetGlobalObject(ctx), "parameters", (JSValue) arrayObject,
 		kJSPropertyAttributeDontDelete
 	);
 }
