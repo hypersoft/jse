@@ -5,6 +5,8 @@
 #include <string.h>
 #include <webkit2/webkit2.h>
 
+#include <inttypes.h>
+
 #define GHTML_ERROR (ghtmlErrorQuark())
 
 static const gchar * file = NULL;
@@ -243,7 +245,7 @@ int main(int argc, char *argv[])
 	char buffer[64];
 	sprintf(buffer, "%i", argc);
 	g_setenv("GHTML_ARGC", buffer, true);
-	sprintf(buffer, "%u", (unsigned)argv);
+	sprintf(buffer, "%u", (uintptr_t)argv);
 	g_setenv("GHTML_ARGV", buffer, true);
 
 /*
