@@ -1,0 +1,20 @@
+An Involved Affair
+
+Scripting Environment Provisions to the JavascriptCore Standard Global Environment
+
+Function: run(String, ...)
+
+  Run the command given with the parameters given, capturing standard io and status to
+  a new prototype of the run function.
+
+  Prototype: run.prototype
+    
+    stdout: The String output of the command.
+
+    stderr: The String error of the command.
+
+    status: The Number status fo the command. 0 indicates success, and others are error
+            codes as defined by the command being called.
+
+    valueOf: returns status
+    toString: returns (status || stderr || status) in resolve order.
