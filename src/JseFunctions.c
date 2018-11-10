@@ -206,7 +206,6 @@ JSValue run(JSContext ctx, JSObject function, JSObject this, size_t argc, const 
 	if (g_spawn_sync(NULL, argument, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &exec_child_out, &exec_child_err, &exec_child_status, NULL)) {
 		exec_child_status = WEXITSTATUS(exec_child_status);
 		exec = JSValueToObject(ctx,JSInlineEval(ctx, "Object.create(this.prototype)", this, NULL), NULL);
-		//exec = J //JSValueToObject(ctx, JSValueFromUtf8(ctx, exec_child_out), NULL);
 		JSObjectSetUtf8Property(ctx, exec, "stdout", JSValueFromUtf8(ctx, exec_child_err), 0);
 		g_free(exec_child_out);
 		JSObjectSetUtf8Property(ctx, exec, "stderr", JSValueFromUtf8(ctx, exec_child_err), 0);
