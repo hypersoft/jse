@@ -5,15 +5,17 @@
 static char * JSE_ERROR_CTOR = "Error";
 static char * JSE_SINGLE_ARGUMENT = "%s expected 1 parameter, have: %zd";
 static char * JSE_MULTI_ARGUMENTS = "%s expected %i parameters, have: %zd";
+static char * JSE_RANGE_ARGUMENTS = "%s expected %i-%i parameters, have: %zd";
 static char * JSE_AT_LEAST_ARGUMENTS = "%s requires at least %i parameters, have: %zd";
 static char * JSE_AT_LEAST_ONE_ARGUMENT = "%s requires at least 1 parameter, have: %zd";
 
 #define NULL_VALUE JSValueMakeNull(ctx)
 #define THROWING_EXCEPTION(E) (((exception)?*exception = E:0), NULL_VALUE)
 
-#define WANT_NO_PARAMETERS() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, 0, __FUNCTION__, argc)
-#define WANT_EXACT_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, COUNT, __FUNCTION__, argc)
-#define WANT_AT_LEAST_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ARGUMENTS, COUNT, __FUNCTION__, argc)
+#define WANT_NO_PARAMETERS() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, __FUNCTION__, 0, argc)
+#define WANT_RANGE_PARAMETERS(MIN, MAX) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_RANGE_ARGUMENTS, __FUNCTION__, MIN, MAX, argc)
+#define WANT_EXACT_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, __FUNCTION__, COUNT, argc)
+#define WANT_AT_LEAST_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ARGUMENTS, __FUNCTION__, COUNT, argc)
 #define WANT_AT_LEAST_ONE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ONE_ARGUMENT, __FUNCTION__, argc)
 #define WANT_SINGLE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc)
 
