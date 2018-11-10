@@ -317,3 +317,11 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 		return JSValueMakeUndefined(ctx);
 	}
 }
+
+JSValue jsChDir(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	char * val; JSValueRef
+	val = JSValueToUtf8(ctx, argv[0]);
+	int result = chdir(val);
+	return JSValueMakeNumber(result);
+}

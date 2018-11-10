@@ -29,7 +29,7 @@ void JSInitScriptArguments(JSContext ctx, int argc, char ** argv)
 	for (i; i < argc; i++) array[i] = JSValueFromUtf8(ctx, argv[i]);
 	JSObject arrayObject = JSObjectMakeArray(ctx, argc, array, NULL);
 	JSObjectSetUtf8Property(
-		ctx, JSContextGetGlobalObject(ctx), "parameters", (JSValue) arrayObject,
+		ctx, JSContextGetGlobalObject(ctx), "parameter", (JSValue) arrayObject,
 		kJSPropertyAttributeDontDelete
 	);
 }
@@ -142,6 +142,7 @@ void JSInit(char * command, JSContext ctx) {
 	JSObjectCreateFunction(jse.ctx, global, "run", run);
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
 	JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
+	JSObjectCreateFunction(jse.ctx, global, "chdir", jsChDir);
 
 	JSLoadPlugin(jse.ctx, "GNUReadLine.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
