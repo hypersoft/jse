@@ -99,7 +99,7 @@ Object.defineProperties(this, {
 	Void: {value: new MachineType({width:0})},
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
-	Pointer: {value: new MachineType({width:4, pointer:true})},
+	Pointer: {value: new MachineType({width:MachineType.uintptr_t, pointer:true})},
 	VarArg:{value: new MachineType({vararg:true})}
 
 });

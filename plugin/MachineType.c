@@ -51,6 +51,9 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 		)), 0
 	);
 
+	// make it easy to define the platform pointer type with this [hidden] static ref.
+	JSObjectSetUtf8Property(ctx, MachineType, "uintptr_t", JSValueFromNumber(sizeof(uintptr_t)), 0);
+
 	loadCount++;
 	return (JSValue) object;
 
