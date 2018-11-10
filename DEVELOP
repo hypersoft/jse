@@ -59,7 +59,7 @@ To Do:
         You might see strange array syntax. Its not strange just unfamiliar usage.
         For example to create a buffer:
         
-          var a = [1, 2, 3, 4].toBufer(TYPE[, MAX]);
+          var a = [1, 2, 3, 4].toBufer(TYPE[, MAX]); // not working ATM see footer.
         
         creates a buffer of TYPE with MAX or ([? ... ?]).length whichever is smallest.
 
@@ -79,3 +79,6 @@ To Do:
           // now call that bad baby:
 
           puts("Wow dude!");
+
+          and... it crashes... expected eta on fix: 2-3 days from
+          (this commit)
