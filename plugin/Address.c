@@ -14,6 +14,7 @@
  */
 
 #include <jse.h>
+#include <ctype.h>
 
 static int loadCount = 0;
 
@@ -28,7 +29,7 @@ JSString AddressPropertyUnits;
 JSString AddressPropertyWritable;
 
 #define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
-#define AddressFromValue(ctx, value, exception) (void*)(unsigned)JSValueToNumber(ctx, (JSValue) value, exception)
+#define AddressFromValue(ctx, value, exception) (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) value, exception)
 
 static void AddressObjectInitialize(JSContext ctx, JSObject object)
 {
@@ -54,7 +55,7 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 			else if (!isdigit(name[i])) goto notAnIndex;
 		}
 
-		void * address = (void*)(unsigned)JSValueToNumber(ctx, (JSValue) object, NULL);
+		void * address = (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) object, NULL);
 		long long element; sscanf(name, "%lld", &element);
 		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
 
@@ -123,7 +124,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			if (i == 0 && name[i] == '-') continue;
 			else if (!isdigit(name[i])) goto notAnIndex;
 		}
-		void * address = (void*)(unsigned)JSValueToNumber(ctx, (JSValue) object, NULL);
+		void * address = (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) object, NULL);
 		long long element; sscanf(name, "%lld", &element);
 		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
 
@@ -180,14 +181,14 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			unsigned length = JSValueToNumber(ctx, data, exception);
 			if (length == 0) {
 				g_free(address); JSObjectSetPrivate(object, NULL);
-				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (unsigned) address), 0, NULL);
+				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (uintptr_t) address), 0, NULL);
 				return true;
 			}
 			unsigned current = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
 			address = realloc(address, length * width);
 			if (address) {
 				JSObjectSetPrivate(object, address);
-				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (unsigned) address), 0, NULL);
+				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (uintptr_t) address), 0, NULL);
 				if (length > current) {
 					int overage = length - current, bytes = overage * width;
 					memset(address + (current * width), 0, bytes);
