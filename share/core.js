@@ -1,3 +1,8 @@
+run.prototype = {
+	toString:function(){return this.stdout || this.stderr || this.status},
+	valueOf:function(){return this.status}
+};
+
 loadPlugin("MachineType.jso");
 
 MachineType.create = function(representation){
@@ -336,6 +341,8 @@ SharedFunction.create = function(){
 
 	return this;
 };
+
+MachineType.value = SharedFunction;
 
 Object.defineProperties(SharedFunction.prototype, {
 	constructor:{value:SharedFunction},
