@@ -1,4 +1,4 @@
-DEBUG =
+DEBUG = -g3
 
 HERE != pwd
 CURL_PROGRAM != bash -c 'type -p curl || echo curl'
@@ -50,7 +50,7 @@ JSE_OBJS = obj/JseMain.o obj/JseString.o obj/JseValue.o obj/JseObject.o obj/JseE
 JSE_LIBS = $(shell pkg-config --libs javascriptcoregtk-4.0) $(shell echo -ldl lib/*.a)
 bin/jse: ${JSE_OBJS} JseExports.map
 	gcc ${JSE_OBJS} -o $@ ${JSE_LIBS} -Wl,--export-dynamic -Wl,--version-script=JseExports.map
-	@strip -x $@
+	@#strip -x $@
 
 GHTML_SOURCES != echo ghtml/*.c
 GHTML_CONFIG != pkg-config --cflags --libs webkit2gtk-4.0
