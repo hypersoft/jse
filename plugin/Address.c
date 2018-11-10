@@ -55,7 +55,7 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		}
 
 		void * address = (void*)(unsigned)JSValueToNumber(ctx, (JSValue) object, NULL);
-		long long element; sscanf(name, "%lld", &element);
+		long long element; sscanf(name, "%lld", &name);
 		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
 
 		if (length == 0) length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
@@ -238,8 +238,11 @@ AddressObjectConstructor(JSContext ctx,
 	JSValue * exception)
 {
 	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
-	return JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+	JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+	return this;
 }
+
+#include <inttypes.h>
 
 static JSValue
 AddressConstructorMove(JSContext ctx,
@@ -249,11 +252,23 @@ AddressConstructorMove(JSContext ctx,
 	const JSValue argv[],
 	JSValue * exception)
 {
-	void * dest = (void*)(unsigned)JSValueToNumber(ctx, argv[0], exception);
-	void * source = (void*)(unsigned)JSValueToNumber(ctx, argv[1], exception);
+	void * dest = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], exception);
+	void * source = (void*)(uintptr_t)JSValueToNumber(ctx, argv[1], exception);
 	unsigned bytes = JSValueToNumber(ctx, argv[2], exception);
 	void * result = memmove(dest, source, bytes);
-	return JSValueFromNumber(ctx, (unsigned)result);
+	return JSValueFromNumber(ctx, (uintptr_t)result);
+}
+
+static JSValue
+AddressMalloc(JSContext ctx,
+	JSObject function,
+	JSObject this,
+	size_t argc,
+	const JSValue argv[],
+	JSValue * exception)
+{
+	long bytes = JSValueToNumber(ctx, argv[0], NULL);
+	return JSValueFromNumber(ctx, (uintptr_t)malloc(bytes));
 }
 
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
@@ -276,6 +291,8 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	);
 
 	JSObjectCreateFunction(ctx, constructor, "move", AddressConstructorMove);
+	JSObjectCreateFunction(ctx, constructor, "malloc", AddressMalloc);
+	
 	loadCount++;
 	return (JSValue) object;
 
