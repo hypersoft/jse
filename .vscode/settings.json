@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.jsh": "javascript",
+		"jse.h": "c"
+	}
+}
