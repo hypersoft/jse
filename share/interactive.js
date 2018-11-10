@@ -2,7 +2,7 @@
 var line = 0;
 
 function prompt() {
-	return '{' + Environment.USER + '@' + Environment.PWD.split("/").pop() + "} ";
+	return '{' + Environment.USER + ': ' + Environment.PWD.split("/").pop() + "} ";
 }
 
 rel: while (++line) {
