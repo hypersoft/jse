@@ -1,0 +1,57 @@
+A Simple Affair
+
+You shall require:
+
+C programming environment: GNU: GCC, Make and [BSD] pkgconf (or handhacking:upstream-welcome)
+
+Bash Shell - because sh gives birth to all shells.
+
+curl - Web Download utility for access to DynCall.org FFI Archive (if this
+       package is not local).
+
+Git - Revision Control System (if this package file is not local)
+
+WebKitGTK 4.0 - JavascriptCore and WebKit HTML Engine (for html ui development).
+
+tar/gzip - archiving utilities
+
+To Begin:
+
+navigate to your c project directory and type:
+
+git clone https://github.com/hypersoft/jse.git
+cd jse;
+make;
+sudo make install;
+
+And you should be up and running. You must always sudo make install your changes to 
+the software, to make updates available to the operating system.
+
+To Do:
+
+  Read) plugin/*.c, share/core.js, share/template/classPlugin.c share/doc/dyncal-0.8.pdf,
+	      src/JseFunctions.c
+
+				knowledge of the dyncall call format symbols will help you decipher some of the
+				internal call API.
+
+				share/core.js contains the implementation of the MachineType interface and the 
+				plugin/* classes provide library access to the scripts. This is the recommended
+				engineering method for production-level library-interfacing, but there is no 
+				requirement that you cannot call a function, create buffers from arrays,
+				transform buffers to JavaScript arrays and other memory operations,
+				with a variable typing system which provides declare once type definition for
+				c library interfacing.
+
+        plugins will be made available to GHTML once installed to a plugin path.
+				there are several default plugin paths defined within the code, for global,
+				and user scope plugins. all jse features are available in ghtml. you can
+				use ghtml to create beautiful apps based on web technology, at the same time,
+				have full forward function call acces to your system libraries.
+
+				the webkit platorm has a built in script debugger. the web inspector can be
+				used to debug shell scripts, web scripts, and design html pages with wysiwyg
+				support.
+
+				Hack on something, write a tutorial, ask a question (as an issue on github),
+				or simply enjoy your new unix coding shell kits!
