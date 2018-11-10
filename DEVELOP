@@ -4,7 +4,7 @@ You shall require:
 
 C programming environment: GNU: GCC, Make and [BSD] pkgconf (or handhacking:upstream-welcome)
 
-Bash Shell - because sh gives birth to all shells.
+Bash Shell - because sh gives birth to all shells. [or every shell is bourne in sh ;) ]
 
 curl - Web Download utility for access to DynCall.org FFI Archive (if this
        package is not local).
@@ -56,3 +56,26 @@ To Do:
         Hack on something, write a tutorial, ask a question (as an issue on github),
         or simply enjoy your new unix coding shell kits!
 
+        You might see strange array syntax. Its not strange just unfamiliar usage.
+        For example to create a buffer:
+        
+          var a = [1, 2, 3, 4].toBufer(TYPE[, MAX]);
+        
+        creates a buffer of TYPE with MAX or ([? ... ?]).length whichever is smallest.
+
+        to cast a value:
+
+          Int8.value(a[2]); 
+          
+        returns the value of (a[2]) cast as an Int8, suitable for
+        passing as a parameter to a shared function requiring the Int8 type as a parameter.
+        This casting can be performed on any number or character value, with any type.
+
+        Declaring functions is a snap:
+
+          libc = new SharedLibrary("libc.so.6") // get lib
+          puts = new SharedFunction(libc, "puts", Int32, Pointer);
+
+          // now call that bad baby:
+
+          puts("Wow dude!");
