@@ -18,4 +18,4 @@ Function: run(String, ...)
 
     valueOf: returns status
 
-    toString: returns (status || stderr || status) in resolve order.
+    toString: returns (stdout || stderr || status) in resolve order.
