@@ -22,7 +22,7 @@ static char * JSE_AT_LEAST_ONE_ARGUMENT = "%s requires at least 1 parameter, hav
 JSValue terminate(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc > 1) {
-		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
+		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(0, 1));
 	}
 	int status = (argc)?JSValueToNumber(ctx, argv[0], exception):0;
 	if (*exception) return NULL_VALUE;
@@ -231,6 +231,10 @@ JSValue run(JSContext ctx, JSObject function, JSObject this, size_t argc, const 
 JSValue machineTypeRead(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	// address, element?
+	if (argc < 1 || argc > 2) {
+		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(1, 2));
+	}
+
 	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
 	long long element = (argc > 1)?JSValueToNumber(ctx, argv[1], NULL):0;
 
@@ -276,6 +280,10 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 {
 	// address, value
 	// address, element, value
+	if (argc < 1 || argc > 3) {
+		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(1, 3));
+	}
+
 	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
 	double value = 0; long long element = 0;
 	if (argc == 2) value = JSValueToNumber(ctx, argv[1], NULL);
