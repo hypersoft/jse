@@ -7,7 +7,7 @@
 var line = 0;
 
 rel: while (++line) {
-	if (script = readline('{' + Environment.USER + '@' + Environment.PWD + "} ")) {
+	if (script = readline('{' + Environment.USER + '@' + Environment.PWD.split("/").pop() + "} ")) {
 		while (1) {
 			script += '\n';
 			try {
