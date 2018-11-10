@@ -42,7 +42,7 @@ static JSValue LibraryObjectGetProperty(JSContext ctx, JSObject object, JSString
 	void * pSymbol = dlFindSymbol(p->handle, buffer);
 	if (!pSymbol) return JSValueMakeUndefined(ctx);
 
-	return JSValueFromNumber(ctx, (unsigned)pSymbol);
+	return JSValueFromNumber(ctx, (uintptr_t)pSymbol);
 
 }
 
@@ -52,7 +52,7 @@ static JSValue LibraryObjectConvertToType(JSContext ctx, JSObject object, JSType
 	if (type == kJSTypeString) {
 		return JSValueFromUtf8(ctx, p->path);
 	} else if (type == kJSTypeNumber) {
-		return JSValueFromNumber(ctx, (unsigned)p->handle);
+		return JSValueFromNumber(ctx, (uintptr_t)p->handle);
 	}
 	g_assert_not_reached();
 }
@@ -116,7 +116,7 @@ static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signatur
 			argument = JSInlineEval(ctx, "[this, 0].toBuffer(this.type || UInt8)", (JSObject) argument, NULL);
 		}
 		number = JSValueToNumber(ctx, argument, exception);
-		dcArgPointer(vm, (void*) (unsigned) number);
+		dcArgPointer(vm, (void*) (uintptr_t) number);
 	} else if (signature == 'c' || signature == 's' || signature == 'i') {
 		number = JSValueToNumber(ctx, argument, exception);
 		dcArgInt(vm, number);
@@ -189,7 +189,7 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 	JSValue result = JSValueMakeUndefined(ctx);
 	char * returns = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "returns"));
 	char signature = returns[0];
-	void * handle = (void*)(unsigned)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
+	void * handle = (void*)(uintptr_t)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
 
 	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'p') {
 		result = JSValueFromNumber(ctx, (unsigned)dcCallInt(vm, handle));
