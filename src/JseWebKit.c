@@ -9,7 +9,7 @@ window_object_cleared_callback (WebKitScriptWorld *world,
                                 gpointer           value)
 {
 	if (! g_str_has_prefix(webkit_web_page_get_uri(web_page), "file")) return;
-    JSContext   ctx = webkit_frame_get_javascript_context_for_script_world (frame, world);
+    JSContext   ctx = (JSContext) webkit_frame_get_js_context_for_script_world (frame, world);
 
 	JSInit("jseWebKit", ctx);
 
