@@ -43,7 +43,7 @@ To Do:
         with a variable typing system which provides declare once type definition for
         c library interfacing.
 
-        plugins will be made available to GHTML once installed to a plugin path.
+        plugins will be made available to GHTML and JSE once installed to a plugin path.
         there are several default plugin paths defined within the code, for global,
         and user scope plugins. all jse features are available in ghtml. you can
         use ghtml to create beautiful apps based on web technology, at the same time,
