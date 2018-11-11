@@ -110,7 +110,7 @@ Object.defineProperties(this, {
 
 });
 
-Array.prototype.toSerial = function toSerial(max){
+Object.defineProperty(Array.prototype, "toSerial", {value: function toSerial(max){
 	if (this.serialized) return this;
 	if (this.length === 1 && this[0].toSerial) return this[0].toSerial(max);
 	var o = [];
@@ -119,7 +119,7 @@ Array.prototype.toSerial = function toSerial(max){
 	delete o.max;
 	o.serialized = true;
 	return o;
-};
+}, enumerable: false});
 
 Array.prototype.toSerial.parse = function parse(value, index){
 	var host = typeof value, max = this.max;
@@ -261,17 +261,21 @@ Address.prototype = Object.defineProperties({}, {
 	}}
 });
 
-Array.prototype.toBuffer = function toBuffer(type, max){
-	var i, o = this.toSerial(max),
-		a = new Address(type, o.length),
-		l = (a.length = o.length);
-	for (i = 0; i < l; i++) a[i] = o[i];
-	return a;
-};
+Object.defineProperty(Array.prototype, "toBuffer", {value:function toBuffer(type, max){
+		var i, o = this.toSerial(max),
+			a = new Address(type, o.length),
+			l = (a.length = o.length);
+		for (i = 0; i < l; i++) a[i] = o[i];
+		return a;
+	},
+	enumerable: false
+});
 
-String.prototype.toBuffer = function toBuffer(type, max){
-	return this.toSerial(max).toBuffer(type);
-};
+Object.defineProperty(String.prototype, "toBuffer", {
+	value: function toBuffer(type, max){
+		return this.toSerial(max).toBuffer(type);
+	}, enumerable: false
+});
 
 loadPlugin("DynCall.jso");
 
