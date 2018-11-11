@@ -121,7 +121,7 @@ Prototype: MachineType.prototype
 
   Function: Number unitsOf(Number bytes)
 
-    Returns the maximum number units that will fit within bytes.
+    Returns the maximum number of elements that will fit within bytes.
 
   Property: Number bits (read-only)
 
