@@ -156,13 +156,13 @@ Array.prototype.toSerial.parse = function parse(value, index){
 	throw new TypeError("unhandled type : " + host + " at serial index " + index);
 };
 
-String.prototype.toSerial = function toSerial(max) {
+Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(max) {
 	var data = this.slice(0, max), i = 0, o = new Array(data.length);
 	for (i; i < data.length; i++) o[i] = data.charCodeAt(i);
 	o.type = UInt16;
 	o.serialized = true;
 	return o;
-};
+} , enumerable:false});
 
 (function StringFromCharCodePatch(FromCharCode){
 	String.fromCharCode = function fromCharCode() {
