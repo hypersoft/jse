@@ -145,17 +145,22 @@ gnu_readline(JSContext ctx,
   buf = JSValueToUtf8(ctx, arguments[0]);
 
   str = readline(buf);
+		g_free(buf);
+
+	if (str == NULL) {
+		putc('\n', stderr);
+		return JSValueMakeNumber(ctx, -1);
+	}
+
   if (str && *str)
     {
       add_history(str);
       valstr = JSValueFromUtf8(ctx, str);
       g_free(str);
+			write_history(path);
+			history_truncate_file(path, 1000);
     }
 
-  write_history(path);
-  history_truncate_file(path, 1000);
-
-  g_free(buf);
   g_free(path);
 
   if (valstr == 0)
