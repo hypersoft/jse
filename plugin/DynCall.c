@@ -186,7 +186,8 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 	}
 
 	JSValue result = JSValueMakeUndefined(ctx);
-	char * returns = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "returns"));
+	JSValue returnType = JSObjectGetUtf8Property(ctx, function, "returns");
+	char * returns = JSValueToUtf8(ctx, returnType);
 	char signature = returns[0];
 	void * handle = (void*)(uintptr_t)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
 
@@ -229,10 +230,14 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 		g_assert_not_reached();
 	}
 
+	result = JSValueToObject(ctx, result, NULL);
+	JSObjectSetUtf8Property(ctx, (JSObject) result, "type", returnType, 0);
+
 	dcFree(vm);
 	g_free(protocol); g_free(returns);
 
 	return result;
+
 }
 
 static JSClassDefinition FunctionClassDefinition = {
