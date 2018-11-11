@@ -227,7 +227,7 @@ Constructor: Address Address(MachineType type, Number length)
   your engine is the most likely outcome of incorrect addressing and or calling. MachineType interfacing,
   must be tested and sanely error checked according to specification of api. So it is best to create
   scripts in the form of libraries and or shell scripts which perorm certain complex tasks very well,
-  and as simly as possible.
+  and as simply as possible.
 
 Constructor: Address Address(MachineType, Number length, Number vector)
 
