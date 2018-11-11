@@ -118,7 +118,7 @@ static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signatur
 		dcArgPointer(vm, (void*) (uintptr_t) number);
 	} else if (signature == 'c' || signature == 's' || signature == 'i') {
 		number = JSValueToNumber(ctx, argument, exception);
-		dcArgInt(vm, number);
+		dcArgPointer(vm, (void*)(uintptr_t)number);
 	} else if (signature == 'C' || signature == 'S' || signature == 'I') {
 		number = JSValueToNumber(ctx, argument, exception);
 		dcArgInt(vm, number);
@@ -179,7 +179,7 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 				dcArgInt(vm, (unsigned) 0);
 			} else {
 				number = JSValueToNumber(ctx, argument, exception);
-				dcArgInt(vm, (unsigned) number);
+				dcArgPointer(vm, (void*)(uintptr_t) number);
 			}
 		}
 
@@ -212,7 +212,7 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 
 */
 	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'j' || signature == 'p') {
-		result = JSValueFromNumber(ctx, (uintptr_t)dcCallInt(vm, handle));
+		result = JSValueFromNumber(ctx, (uintptr_t)dcCallPointer(vm, handle));
 	} else if (signature == 'C' || signature == 'S' || signature == 'I' || signature == 'J') {
 		result = JSValueFromNumber(ctx, (signed long) dcCallLong(vm, handle));
 	} else if (signature == 'l') {
