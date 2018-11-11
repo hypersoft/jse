@@ -188,7 +188,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			);
 			return true;
 		}
-		if (address == 0 && addressContainer-> data != 0) {
+		if (address == 0 && addressContainer-> data != 0 && addressContainer->allocated) {
 			free(addressContainer->data);
 			addressContainer->length = 0;
 			addressContainer->allocated = false;
