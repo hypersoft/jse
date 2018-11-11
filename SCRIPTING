@@ -8,6 +8,10 @@ Note: Within this documentation, Void, String, Number, Object, Any, Undefined, B
       are generic type terms, whenever such terms are mentioned within a: Constructor, Function,
       Property, Wanted or Prototype heading with an opening full-colon (:).
 
+Note: This documentation is in beta-stage, so technical correctness is questionable. If in doubt,
+      see the corresponding source code. Some changes will not be reflected in documentation, during
+      development. See this documentation as a set of general guidelines in the now-time.
+
 Function: echo(String, ...)
 
   Echo (0) through (N) strings separated by space on the standard output,
