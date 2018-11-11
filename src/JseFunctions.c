@@ -321,13 +321,18 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 JSValue jsLocalPath(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc == 0) {
-	char buffer[8192]; getcwd(buffer, sizeof(buffer));
-	return JSValueFromUtf8(ctx, buffer);
+		char buffer[8192]; getcwd(buffer, sizeof(buffer));
+		return JSValueFromUtf8(ctx, buffer);
 	} else if (argc == 1) {
 		char * txt = JSValueToUtf8(ctx, argv[0]);
+		if (!g_file_test(txt, G_FILE_TEST_IS_DIR)) {
+			*exception = JSExceptionFromUtf8(ctx, "ReferenceError", "localPath: `%s' is not a directory", txt);
+			g_free(txt);
+			return JSValueMakeNull (ctx);
+		}
 		int result = chdir(txt);
 		g_free(txt);
-		return JSValueMakeNumber(ctx, result);
+		return JSValueMakeBoolean(ctx, result != -1);
 	} else {
 		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(0, 1));
 	}
