@@ -13,7 +13,8 @@
                 "/usr/include/cairo",
                 "/usr/include/gdk-pixbuf-2.0",
                 "/usr/include/atk-1.0",
-                "/usr/include/libsoup-2.4"
+                "/usr/include/libsoup-2.4",
+                "/usr/lib/libffi-3.2.1/include"
             ],
             "defines": [],
             "cStandard": "c11",
