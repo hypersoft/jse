@@ -92,10 +92,10 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 		return JSExceptionThrowUtf8(ctx, "ReferenceError", exception, "Library: Can't find library `%s'", libPath);
 	}
 
-	unsigned bytes = strlen(libPath) + 1;
+	unsigned bytes = ((libPath)?strlen(libPath):0) + 1;
 	SharedLibraryData * p = g_malloc0(sizeof(SharedLibraryData)+bytes);
 	p->handle = libHandle;
-	memcpy(p->path, libPath, bytes);
+	if (libHandle) memcpy(p->path, libPath, bytes);
 	JSObjectSetPrivate(this, p);
 
 	return this;
