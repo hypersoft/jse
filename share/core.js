@@ -285,20 +285,16 @@ Object.defineProperties(SharedLibrary.prototype, {
 
 SharedFunction.create = function(){
 	var lib, name, type, pointer, arguments;
-
 	if (arguments[0].constructor === SharedLibrary) {
 		lib = arguments[0],
 		type = arguments[1],
 		name = arguments[2],
-	/* same [not]ation and different parameters */
 		arguments = Array.apply(Array, arguments).slice(3);
 		pointer = lib[name];
 	}
-
 	this.lib = lib;
 	this.name = name, this.returns = type, this.pointer = pointer;
 	this.arguments = arguments;
-
 	return this;
 };
 
