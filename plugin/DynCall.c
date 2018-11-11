@@ -50,7 +50,9 @@ static JSValue LibraryObjectConvertToType(JSContext ctx, JSObject object, JSType
 {
 	SharedLibraryData * p = JSObjectGetPrivate(object);
 	if (type == kJSTypeString) {
-		return JSValueFromUtf8(ctx, p->path);
+		char buffer[1024];
+		sprintf(buffer, "[SharedLibrary %s]", p->path);
+		return JSValueFromUtf8(ctx, buffer);
 	} else if (type == kJSTypeNumber) {
 		return JSValueFromNumber(ctx, (uintptr_t)p->handle);
 	}
