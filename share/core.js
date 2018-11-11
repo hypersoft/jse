@@ -241,11 +241,6 @@ Address.prototype = Object.defineProperties({}, {
 		if (value.length > 1) throw new RangeError("too many values");
 		return Array.prototype.lastIndexOf.call(this, value[0], start);
 	}},
-	splice: {value: undefined},
-	unshift: {value: function unshift(){
-		if (! this.vector || ! this.length) return 0;
-		return this.length = this.write(arguments, this);
-	}},
 	toBuffer: {value: function toBuffer(type, max){
 		if (max === undefined) max = this.length;
 		var a = this.addressOf(0);
