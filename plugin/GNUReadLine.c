@@ -6,6 +6,76 @@
 #include <ffi.h>
 #include <sys/mman.h>
 
+/*-------------------------------------------------------------------------*//**
+ * @brief      Set if the inputs must be displayed or not.
+ *
+ * @param[in]  display  True for display, false for no display
+ */
+void displayInputs(bool display);
+
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
+
+#include <windows.h>
+
+void displayInputs(bool display) {
+    HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+    if(hStdIn == INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "GetStdHandle failed (error %iu)\n", GetLastError());
+        return;
+    }
+
+    /* Get console mode */
+    DWORD mode;
+    if(!GetConsoleMode(hStdIn, &mode)) {
+        fprintf(stderr, "GetConsoleMode failed (error %iu)\n", GetLastError());
+        return;
+    }
+
+    if(display) {
+        /* Add echo input to the mode */
+        if(!SetConsoleMode(hStdIn, mode | ENABLE_ECHO_INPUT)) {
+            fprintf(stderr, "SetConsoleMode failed (error %iu)\n", GetLastError());
+            return;
+        }
+    }
+    else {
+        /* Remove echo input to the mode */
+        if(!SetConsoleMode(hStdIn, mode & ~((DWORD) ENABLE_ECHO_INPUT))) {
+            fprintf(stderr, "SetConsoleMode failed (error %iu)\n", GetLastError());
+            return;
+        }
+    }
+}
+
+#else
+
+#include <termios.h>
+
+void displayInputs(bool display) {
+    struct termios t;
+
+    /* Get console mode */
+    errno = 0;
+    if (tcgetattr(STDIN_FILENO, &t)) {
+        fprintf(stderr, "tcgetattr failed (%s)\n", strerror(errno));
+        return;
+    }
+
+    /* Set console mode to echo or no echo */
+    if (display) {
+        t.c_lflag |= ECHO;
+    } else {
+        t.c_lflag &= ~((tcflag_t) ECHO);
+    }
+    errno = 0;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &t)) {
+        fprintf(stderr, "tcsetattr failed (%s)\n", strerror(errno));
+        return;
+    }
+}
+
+#endif
+
 JSClass ReadLine = NULL;
 JSUniverse universe = NULL;
 gboolean readline_has_initialized = FALSE;
@@ -129,7 +199,9 @@ gnu_readline(JSContext ctx,
   gchar *str = NULL;
   gchar *buf;
   const gchar *histfname = g_get_home_dir();
-  gchar *path = g_build_filename(histfname, "history.jse", NULL);
+  gchar *path = (JSObjectHasUtf8Property(ctx, function, "historyFile"))?
+		JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "historyFile")):
+		g_build_filename(histfname, "history.jse", NULL);
 
   if (!readline_has_initialized)
     {
@@ -138,7 +210,7 @@ gnu_readline(JSContext ctx,
     }
 
  	if (argc != 1) {
-		*exception = JSExceptionFromUtf8(ctx, "Error", "readline expected 1 argument, got %zd", argc);
+		*exception = JSExceptionFromUtf8(ctx, "Error", "readLine expected 1 argument, got %zd", argc);
 		return JSValueMakeNull (ctx);
 	}
 
@@ -157,6 +229,42 @@ gnu_readline(JSContext ctx,
 
   g_free(buf);
   g_free(path);
+
+  if (valstr == 0)
+    valstr = JSValueMakeNull(ctx);
+
+  return valstr;
+}
+
+static JSValue
+gnu_readline_secure(JSContext ctx,
+	      JSObject function,
+	      JSObject this_object,
+	      size_t argc,
+	      const JSValue arguments[], JSValue * exception)
+{
+  JSValue valstr = 0;
+  gchar *str = NULL;
+  gchar *buf;
+
+ 	if (argc != 1) {
+		*exception = JSExceptionFromUtf8(ctx, "Error", "readLine.secure expected 1 argument, got %zd", argc);
+		return JSValueMakeNull (ctx);
+	}
+
+  buf = JSValueToUtf8(ctx, arguments[0]);
+
+	displayInputs(false);
+  str = readline(buf);
+	displayInputs(true);
+	putc('\n', stderr);
+  if (str && *str)
+    {
+      valstr = JSValueFromUtf8(ctx, str);
+      g_free(str);
+    }
+
+  g_free(buf);
 
   if (valstr == 0)
     valstr = JSValueMakeNull(ctx);
@@ -184,8 +292,10 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	}
 
 	JSObject ReadLineObject = JSObjectMake(ctx, ReadLine, 0);
+	JSObjectCreateFunction(ctx, ReadLineObject, "secure", gnu_readline_secure);
 
-	JSObjectSetUtf8Property(ctx, object, "readline", (JSValue) ReadLineObject, 0);
+	JSObjectSetUtf8Property(ctx, object, "readLine", (JSValue) ReadLineObject, 0);
+
 	return (JSValue) object;
 
 }
