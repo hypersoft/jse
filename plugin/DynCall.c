@@ -95,7 +95,8 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 	unsigned bytes = ((libPath)?strlen(libPath):0) + 1;
 	SharedLibraryData * p = g_malloc0(sizeof(SharedLibraryData)+bytes);
 	p->handle = libHandle;
-	if (libHandle) memcpy(p->path, libPath, bytes);
+	if (libPath) memcpy(p->path, libPath, bytes);
+	else memcpy(p->path, "jse", 3);
 	JSObjectSetPrivate(this, p);
 
 	return this;
