@@ -4,6 +4,11 @@ Scripting Environment Provisions to the JavascriptCore Standard Global Environme
 
 ** FEATURES NOT LISTED HERE ARE NOT CONSIDERED STABLE **
 
+Function: echo(String, ...)
+
+  Echo (0) through (N) strings separated by space on the standard output,
+  and terminate the sequence with a new-line character.
+
 Function: run(String command, ...)
 
   Run the command given with the remaining parameters given, capturing standard io and status to
