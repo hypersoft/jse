@@ -59,7 +59,7 @@ To Do:
         You might see strange array syntax. Its not strange just unfamiliar usage.
         For example to create a buffer:
         
-          var a = [1, 2, 3, 4].toBufer(TYPE[, MAX]); // not working ATM see footer.
+          var a = [1, 2, 3, 4].toBufer(TYPE[, MAX]);
         
         creates a buffer of TYPE with MAX or ([? ... ?]).length whichever is smallest.
 
@@ -69,7 +69,8 @@ To Do:
           
         returns the value of (a[2]) cast as an Int8, suitable for
         passing as a parameter to a shared function requiring the Int8 type as a parameter.
-        This casting can be performed on any number or character value, with any type.
+        This casting can be performed on any number, string or character value, with any type.
+        For example you may want to specify the width of string conversion.
 
         Declaring functions is a snap:
 
@@ -80,5 +81,4 @@ To Do:
 
           puts("Wow dude!");
 
-          and... it crashes... expected eta on fix: 2-3 days from
-          (this commit)
+          see: SCRIPTING for more on SCRIPTING.
