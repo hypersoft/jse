@@ -25,7 +25,6 @@ JSClass Address = NULL;
 JSString AddressPropertyVector;
 JSString AddressPropertyType;
 JSString AddressPropertyLength;
-JSString AddressPropertyUnits;
 JSString AddressPropertyWritable;
 
 #define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
