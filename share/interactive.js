@@ -2,7 +2,7 @@
 var line = 0;
 
 function prompt() {
-	return '{' + Environment.USER + ': ' + localPath().split("/").pop() + "} ";
+	return '{ ' + Environment.USER + ': ' + localPath().split("/").pop() + " } ";
 }
 
 rel: while (++line) {
