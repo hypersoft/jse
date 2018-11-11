@@ -2,6 +2,8 @@ An Involved Affair
 
 Scripting Environment Provisions to the JavascriptCore Standard Global Environment
 
+** FEATURES NOT LISTED HERE ARE NOT CONSIDERED STABLE **
+
 Function: run(String command, ...)
 
   Run the command given with the remaining parameters given, capturing standard io and status to
