@@ -13,7 +13,7 @@ Function: echo(String, ...)
   Echo (0) through (N) strings separated by space on the standard output,
   and terminate the sequence with a new-line character.
 
-Function: run(String command, ...)
+Function: run.prototype run(String command, ...)
 
   Run the command given with the remaining parameters given, capturing standard io and status to
   a new prototype of the run function.
@@ -163,4 +163,4 @@ Prototype: MachineType.prototype
   Function: Any value(Object object)
 
     Coerces object to a Number Object, and marks the new Number Object as a member of this type, returning
-    the new Number Object. The type of the new Number Object can be accessed via Object[type].
+    the new Number Object. The type of the new Number Object can be accessed via object[type].
