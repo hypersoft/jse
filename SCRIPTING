@@ -32,4 +32,4 @@ Object: Environment
 
   A JavaScript implementation of environment where Envronment[K], represents the value
   of an environment key by the name K. Use standard JavaScript set/get/delete to manage
-  environment.
+  environment. This environment object uses thread locks to ensure thread safety.
