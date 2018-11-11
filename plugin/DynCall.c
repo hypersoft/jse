@@ -286,7 +286,7 @@ JSClass VarArgsClass = NULL;
 
 /* it is dissappointing that we do not have struct and union classes,
    however, the core has data alignment and casting facitilities, built-in.
-	 so, one can construct and kind of struct they wish with address binding,
+	 so, one can construct any kind of struct they wish with address binding,
 	 and whatever else they can come up with.
 */
 
