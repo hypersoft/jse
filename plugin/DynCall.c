@@ -86,10 +86,6 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 	}
 
 	char * libPath = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
-	if (JSExceptionCaught(exception)) return NULL;
-	else if (! libPath ) {
-		return JSExceptionThrowUtf8(ctx, "ReferenceError", exception, "Library: expected path argument");
-	}
 
 	void * libHandle = dlLoadLibrary(libPath);
 	if (! libHandle) {
