@@ -49,8 +49,7 @@ JSE_OBJS = obj/JseMain.o obj/JseString.o obj/JseValue.o obj/JseObject.o obj/JseE
 
 JSE_LIBS = $(shell pkg-config --libs javascriptcoregtk-4.0) $(shell echo -ldl lib/*.a)
 bin/jse: ${JSE_OBJS} JseExports.map
-	gcc ${JSE_OBJS} -o $@ ${JSE_LIBS} -Wl,--export-dynamic -Wl,--version-script=JseExports.map
-	@#strip -x $@
+	gcc ${JSE_OBJS} -o $@ ${JSE_LIBS} -Wl,--export-dynamic 
 
 GHTML_SOURCES != echo ghtml/*.c
 GHTML_CONFIG != pkg-config --cflags --libs webkit2gtk-4.0
@@ -78,7 +77,7 @@ share/plugin/%.jso: obj/plugin/%.o
 
 JSE_WEBKIT_FLAGS != pkg-config --cflags --libs webkit2gtk-web-extension-4.0
 share/plugin/JseWebKit.so: ${JSE_OBJS} src/JseWebKit.c
-	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -Wl,--version-script=JseExports.map -shared -ldl -fPIC
+	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -shared -ldl -fPIC
 
 GNU_READLINE_FLAGS != pkg-config --cflags libffi javascriptcoregtk-4.0
 obj/plugin/GNUReadLine.o: plugin/GNUReadLine.c
