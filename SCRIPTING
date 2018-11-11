@@ -171,3 +171,17 @@ Prototype: MachineType.prototype
 
     Coerces object to a Number Object, and marks the new Number Object as a member of this type, returning
     the new Number Object. The type of the new Number Object can be accessed via the return[type] member.
+
+Constructor: SharedLibrary SharedLibrary(String path)
+
+  Loads the named shared library by path, or by the defined system library paths.
+
+Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType returnType, String symbolName, ...)
+
+  Locates symbolName within library, and creates a type definition for the library-procedure, using the
+  given return type and remaining MachineType parameters (...) as the procedure execution protocol. The
+  new SharedFunction definition may be called according to the protocol specified. Javascript Objects,
+  Strings, Addresses and values may be coerced to some types for the call, but no pointer types will be
+  automatically coerced from a return call. Type coercion has not yet found a standard free of gotchas,
+  and all current auto-type-conversions are experimental. Numbers convert safely to their defined
+  MachineTypes.
