@@ -75,7 +75,7 @@ To Do:
         Declaring functions is a snap:
 
           libc = new SharedLibrary("libc.so.6") // get lib
-          puts = new SharedFunction(libc, "puts", Int32, Pointer);
+          puts = new SharedFunction(libc, Int32, "puts", Pointer);
 
           // now call that bad baby:
 
