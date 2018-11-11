@@ -38,6 +38,7 @@ src/data/%.c: data/%
 	bin/bin2inc `basename $<` < $< > $@
 
 bin/bin2inc: bin2inc/bin2inc.c
+	@mkdir -p `dirname $@`
 	gcc $< -o $@
 
 obj/%.o: src/%.c
