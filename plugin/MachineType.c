@@ -3,12 +3,6 @@
 static int loadCount = 0;
 JSClass MachineTypeClass = NULL;
 
-static JSValue MachineTypeExec (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	JSObject valueObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "value");
-	return JSObjectCallAsFunction(ctx, valueObject, function, argc, argv, exception);
-}
-
 static JSClassDefinition MachineTypeClassDefinition = {
 	0,										/* Version, always 0 */
 											/* ClassAttributes */
@@ -24,7 +18,7 @@ static JSClassDefinition MachineTypeClassDefinition = {
 	NULL,									/* Object Set Property */
 	NULL,									/* Object Delete Property */
 	NULL,									/* Object Get Property Names */
-	(void*) MachineTypeExec,				/* new Object Call As Function */
+	NULL,									/* new Object Call As Function */
 	NULL,									/* new Object Call As Constructor */
 	NULL,									/* Has Instance */
 	NULL									/* Object Convert To Type */

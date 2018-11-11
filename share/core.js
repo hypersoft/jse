@@ -281,15 +281,7 @@ Object.defineProperties(SharedLibrary.prototype, {
 SharedFunction.create = function(){
 	var lib, name, type, pointer, arguments;
 
-	if (arguments[0].constructor === MachineType) {
-		lib = this.lib,
-		type = arguments[0],
-		name = arguments[1],
-	/* it is unsaid in this code, that remaining arguments is an array of types */
-	arguments = Array.apply(Array, arguments).slice(2);
-		pointer = this.library[name]; // pointer to jse: itself; which is a library; having includable headers
-		                              // and system pkgconf.
-	} else if (arguments[0].constructor === SharedLibrary) {
+	if (arguments[0].constructor === SharedLibrary) {
 		lib = arguments[0],
 		type = arguments[1],
 		name = arguments[2],
