@@ -27,3 +27,9 @@ Function: localPath()
 Function: localPath(String path)
 
   Set the current directory to path.
+
+Object: Environment
+
+  A JavaScript implementation of environment where Envronment[K], represents the value
+  of an environment key by the name K. Use standard JavaScript set/get/delete to manage
+  environment.
