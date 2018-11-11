@@ -63,14 +63,12 @@ To Do:
         
         creates a buffer of TYPE with MAX or ([? ... ?]).length whichever is smallest.
 
-        to cast a value:
+        to cast a value (or Address instance):
 
           Int8.value(a[2]); 
           
         returns the value of (a[2]) cast as an Int8, suitable for
         passing as a parameter to a shared function requiring the Int8 type as a parameter.
-        This casting can be performed on any number, string or character value, with any type.
-        For example you may want to specify the width of string conversion.
 
         Declaring functions is a snap:
 
