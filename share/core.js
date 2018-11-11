@@ -205,11 +205,10 @@ Address.prototype = Object.defineProperties({}, {
 	offsetOf: {value: function(element){
 		return this.type.offsetOf(element);
 	}},
-	addressOf: {value: function(element, length){
+	addressOf: {value: function(element){
 		if (element === undefined) element = 0;
-		if (length === undefined) length = this.length;
 		var bytes = this.offsetOf(element), o = new Address(
-			this.type, length, this.vector + bytes
+			this.type, this.length - element, this.vector + bytes
 		);
 		return o;
 	}},
