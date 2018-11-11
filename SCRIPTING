@@ -26,7 +26,8 @@ Function: localPath()
 
 Function: localPath(String path)
 
-  Set the current directory to path.
+  Set the current directory to path. Throws ReferenceError if path is not a directory.
+  Returns true if the operation is succesful.
 
 Object: Environment
 
