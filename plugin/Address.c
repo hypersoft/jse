@@ -48,7 +48,6 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 	JSStringGetUTF8CString (id, name, sizeof(name));
 	//g_print("get %s\n", name);
 
-
 	{
 		int i; for (i = 0; name[i]; i++) {
 			if (i == 0 && name[i] == '-') continue;
@@ -106,6 +105,8 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 	if (!g_strcmp0(name, "allocated")) {
 		void * p = AddressFromValue(ctx, object, NULL);
 		return JSValueMakeBoolean(ctx, p && p == JSObjectGetPrivate(object));
+	} else if (!g_strcmp0(name, "vector")) {
+		return JSValueFromNumber(ctx, (uintptr_t) JSObjectGetPrivate(object));
 	}
 
 	return NULL;
@@ -164,45 +165,28 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 	if (!g_strcmp0(name, "vector")) {
 		void * address = AddressFromValue(ctx, object, NULL), * currentAddress = JSObjectGetPrivate(object);
 		if (currentAddress && address != currentAddress ) {
-			if (exception) *exception = JSExceptionFromUtf8 (
-				ctx,
+			if (exception) *exception = JSExceptionFromUtf8 (ctx,
 				"ReferenceError",
 				"attempting to change the vector property of an internal pointer"
 			);
 			return true;
 		}
 	} else if (!g_strcmp0(name, "units")) {
-		void * address = AddressFromValue(ctx, object, NULL);
-		//if (exception && *exception) return NULL;
-		if (address == 0) {
-			int code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL);
-			if (code == 0) return true;
-			int width = code & (1|2|4|8);
-			unsigned length = JSValueToNumber(ctx, data, exception);
-			if (length == 0) {
-				g_free(address); JSObjectSetPrivate(object, NULL);
-				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (uintptr_t) address), 0, NULL);
-				return true;
-			}
-			unsigned current = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
-			address = realloc(address, length * width);
-			if (address) {
-				JSObjectSetPrivate(object, address);
-				JSObjectSetProperty(ctx, object, AddressPropertyVector, JSValueFromNumber(ctx, (uintptr_t) address), 0, NULL);
-				if (length > current) {
-					int overage = length - current, bytes = overage * width;
-					memset(address + (current * width), 0, bytes);
-				}
-			} else {
-				JSObjectSetPrivate(object, address);
-			}
-		} else {
-			if (exception) *exception = JSExceptionFromUtf8 (
-				ctx,
-				"TypeError",
-				"attempting to set the units property of an external pointer"
-			);
-			return true;
+		void * address = JSObjectGetPrivate(object);
+		int code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL);
+		if (code == 0) return true;
+		int width = code & (1|2|4|8);
+		unsigned length = JSValueToNumber(ctx, data, exception);
+		unsigned current = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
+		unsigned bytes = length * width;
+		if (bytes) address = realloc(address, length * width);
+		else if (address) {
+			free(address);
+		}
+		JSObjectSetPrivate(object, address);
+		if (length > current && address) {
+			int overage = length - current, bytes = overage * width;
+			memset(address + (current * width), 0, bytes);
 		}
 	}
 
