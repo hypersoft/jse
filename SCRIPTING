@@ -233,6 +233,6 @@ Constructor: Address Address(MachineType type, Number length)
           even if it is an error. The script engine is designed to: "Do what the fuck you said",
           IN THEORY.
 
-Constructor: Address Address(MachineType, Number length, Number vector)
+Constructor: Address Address(MachineType type, Number length, Number vector)
 
-  Creates a new address with the given vector. No allocation is performed.
+  Creates a new address with the given type, length and vector. No allocation is performed.
