@@ -143,6 +143,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		long long element; sscanf(name, "%lld", &element);
 		long long length = addressContainer->length;
 
+		// notice the silent fails. we should be throwing, but technically that's not valid javascript,
+		// within a property accessor.
 		if (length == 0) return true;
 		if (element < 0) element = length + element;
 		if (element < 0) return true;
@@ -179,6 +181,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 	if (!g_strcmp0(name, "vector")) {
 		void * address = AddressFromValue(ctx, data, NULL);
 		if (addressContainer->data && address != addressContainer->data && address != 0) {
+			// access violation of the memory integrity.
 			if (exception) *exception = JSExceptionFromUtf8 (ctx,
 				"ReferenceError",
 				"attempting to change the vector property of an internal pointer"
