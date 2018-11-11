@@ -4,9 +4,9 @@ Scripting Environment Provisions to the JavascriptCore Standard Global Environme
 
 ** FEATURES NOT LISTED HERE ARE NOT CONSIDERED STABLE **
 
-Note: Within this documentation, Void, String, Number, Object, Any, Undefined, Boolean,
-      and Constructor; are generic type terms, whenever such terms are mentioned within a:
-      Function, Property, or Prototype heading with an opening full-colon (:).
+Note: Within this documentation, Void, String, Number, Object, Any, Undefined, and Boolean;
+      are generic type terms, whenever such terms are mentioned within a: Constructor, Function,
+      Property, or Prototype heading with an opening full-colon (:).
 
 Function: echo(String, ...)
 
