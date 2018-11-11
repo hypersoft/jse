@@ -205,14 +205,15 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
   given return type and remaining MachineType parameters (...) as the procedure execution protocol; and
   returning the protype of that procedure as the new (callable) SharedFunction.
   
-  Javascript Objects, Strings, Addresses and values may be coerced to some types for the call to a
-  SharedFunction, but no pointer types will be automatically coerced from a return call. Type coercion
-  has not yet found a standard free of gotchas, and all current auto-type-conversions are experimental.
-  Numbers convert safely to their defined MachineTypes.
+  No pointer types will be automatically coerced from a return call, however all types returned from a call
+  are marked. Automatic pseudo MachineType coercion has not yet found a standard free of gotchas, and all
+  current auto-type-conversions are experimental. Numbers convert safely to their defined MachineTypes, where
+  the function specifies, and if not specified on the number or by the function, the default size is int.
 
   If you want a VarArg call use the VarArg type as the last parameter of the specification, which will
-  activate, parameter parsing. IN THEORY, within a vararg call, parameters should be parsed according to
-  their type member specification. [ object[type] ]
+  activate, parameter parsing. Within a vararg call, parameters will be parsed according to
+  their type member specification, however Strings are auto converted to zero terminated Int8 buffer.
+  Simply call MachineType.valueOf(NUMBER), to cast a number type for varargs.
 
   ** IF YOU FIND AN ERROR IN A FLOATING OR SIGNEDNESS CONVERSION, PLEASE FILE AN ISSUE **
 
