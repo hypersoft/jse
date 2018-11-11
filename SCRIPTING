@@ -46,17 +46,18 @@ Property: Object Environment
   of an environment key by the name K. Use standard JavaScript set/get/delete to manage
   environment. This environment object uses thread locks to ensure thread safety.
 
-Function: addPluginPath(String path)
+Function: String addPluginPath(String path)
 
   Adds the given path to the plugin search path. Throws an error if the path is not an existing
-  directory.
+  directory. Returns path if succesful.
 
-Function: loadPlugin(String path)
+Function: Any loadPlugin(String path)
 
   Loads the given plugin if it is found in the current directory, by the path given, or within the
-  plugin search path (in that order). Throws an error if path is not found.
+  plugin search path (in that order). Throws an error if path is not found. Returns whatever the,
+  plugin loader returns from the load call.
 
-Constructor: MachineType(Object representation)
+Constructor: MachineType MachineType(Object representation)
 
   Creates and returns a MachineType.prototype with the representation given. This is an adanced function,
   which most users do not need to worry about. There are only a few MachineTypes. This constructor,
