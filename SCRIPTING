@@ -51,3 +51,32 @@ Function: loadPlugin(String path)
 
   Loads the given plugin if it is found in the current directory, by the path given, or within the
   plugin search path (in that order). Throws an error if path is not found.
+
+Constructor: MachineType(Object representation)
+
+  Creates and returns a MachineType.prototype with the representation given. This is an adanced function,
+  which most users do not need to worry about. There are only a few MachineTypes. This constructor,
+  provides each type with a unified prototype backing hosted by this constructor. The standard types are,
+  predefined within the JavaScript Global Environment. This allows types to be used as parameters to,
+  functions, and for values which are not MachineType natives to be marked for a specific conversion.
+
+Global MachineTypes:
+
+  Int8: {value: new MachineType({width:1, signed:true})},
+  Int16: {value: new MachineType({width:2, signed:true})},
+  Int32: {value: new MachineType({width:4, signed:true})},
+  Int64: {value: new MachineType({width:8, signed:true})},
+
+  UInt8: {value: new MachineType({width:1})},
+  UInt16: {value: new MachineType({width:2})},
+  UInt32: {value: new MachineType({width:4})},
+  UInt64: {value: new MachineType({width:8})},
+
+  Void: {value: new MachineType({width:0})},
+  Float: {value: new MachineType({width:4, floating:true})},
+  Double: {value: new MachineType({width:8, floating:true})},
+  Pointer: {value: new MachineType({width:MachineType.width, pointer:true})},
+  VarArg:{value: new MachineType({vararg:true})}
+
+  * MachineType.width is the size of an unsigned pointer values as defined by the C compiler, which
+    compiled the MachineTypes library.
