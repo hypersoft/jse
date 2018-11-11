@@ -108,8 +108,8 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 #define FNCLASS "SharedFunction"
 JSClass SharedFunctionClass = NULL;
 
-static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signature, JSValue argument, bool ellipsisMode, JSValue * exception){
-	double number;
+static void SharedFunctionWriteSignature(register JSContext ctx, void * vm, register char signature, JSValue argument, bool ellipsisMode, JSValue * exception){
+	register double number;
 	if (signature == 'p') {
 		if (JSValueIsString(ctx, argument)) {
 			argument = JSInlineEval(ctx, "[this, 0].toBuffer(this.type || UInt8)", (JSObject) argument, NULL);
@@ -135,7 +135,7 @@ static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signatur
 	}
 }
 
-static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	char * protocol = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "protocol"));
 	int protocolLength = strlen(protocol);
@@ -148,7 +148,7 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 		protocol[--protocolLength] = 0;
 	}
 
-	unsigned i; double number;
+	register unsigned i; register double number;
 
 	for (i = 0; i < protocolLength; i++) {
 		SharedFunctionWriteSignature(ctx, vm, protocol[i], argv[i], ellipsisMode, exception);
