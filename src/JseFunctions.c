@@ -102,7 +102,7 @@ JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc,
 	JSValue result;
 	char * file = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
 	if (*exception) goto fail;
-	result = JSLoadPlugin(ctx, file, this, exception);
+	result = JSLoadPlugin(ctx, file, ((argc > 1)?JSValueToObject(ctx, argv[1], NULL):JSContextGetGlobalObject(ctx)), exception);
 	g_free(file);
 	fail:
 	if (*exception) return NULL_VALUE;
