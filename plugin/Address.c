@@ -291,7 +291,6 @@ void unload(JSContext ctx)
 	JSStringRelease(AddressPropertyVector);
 	JSStringRelease(AddressPropertyType);
 	JSStringRelease(AddressPropertyLength);
-	JSStringRelease(AddressPropertyUnits);
 	JSStringRelease(AddressPropertyWritable);
 
 	JSClassRelease(Address);
