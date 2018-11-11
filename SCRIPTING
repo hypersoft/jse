@@ -212,8 +212,9 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
 
   If you want a VarArg call use the VarArg type as the last parameter of the specification, which will
   activate, parameter parsing. Within a vararg call, parameters will be parsed according to
-  their type member specification, however Strings are auto converted to zero terminated Int8 buffer.
-  Simply call MachineType.valueOf(NUMBER), to cast a number type for varargs.
+  their type member specification, however Strings are auto converted to zero terminated Int8 buffer, if no
+  type is defined upon the string. Calling toString on an Int8 buffer/Address creates a native JavaScript
+  string value. Future direction is to have an explicit utf flag for this behavior.
 
   ** IF YOU FIND AN ERROR IN A FLOATING OR SIGNEDNESS CONVERSION, PLEASE FILE AN ISSUE **
 
