@@ -23,11 +23,6 @@ static int loadCount = 0;
 
 JSClass Address = NULL;
 
-// JSString AddressPropertyVector;
-// JSString AddressPropertyType;
-// JSString AddressPropertyLength;
-// JSString AddressPropertyWritable;
-
 #define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
 #define AddressFromValue(ctx, value, exception) (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) value, exception)
 
@@ -57,7 +52,6 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 
 	char name[JSStringUtf8Size(id)];
 	JSStringGetUTF8CString (id, name, sizeof(name));
-	//g_print("get %s\n", name);
 
 	{
 		int i; for (i = 0; name[i]; i++) {
@@ -136,7 +130,6 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 
 	char name[JSStringUtf8Size(id)];
 	JSStringGetUTF8CString (id, name, sizeof(name));
-	//g_print("set %s\n", name);
 
 	{
 		int i; for (i = 0; name[i]; i++) {
