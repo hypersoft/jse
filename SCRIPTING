@@ -163,4 +163,4 @@ Prototype: MachineType.prototype
   Function: Any value(Object object)
 
     Coerces object to a Number Object, and marks the new Number Object as a member of this type, returning
-    the new Number Object. The type of the new Number Object can be accessed via object[type].
+    the new Number Object. The type of the new Number Object can be accessed via the return[type] member.
