@@ -203,7 +203,7 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
 
   Locates symbolName within library, and creates a type definition for the library-procedure, using the
   given return type and remaining MachineType parameters (...) as the procedure execution protocol; and
-  returning the protype of that procedure as the new (callable) SharedFunction.
+  returns the protype of that procedure as the new (callable) SharedFunction.
   
   No pointer types will be automatically coerced from a return call, however all types returned from a call
   are marked. Automatic pseudo MachineType coercion has not yet found a standard free of gotchas, and all
