@@ -2,7 +2,7 @@
 
 echo();
 
-echo("I have", parameter.length, (parameter.length !== 1)?"parameters":"parameter", '\n\n');
+echo("I have", parameter.length, (parameter.length !== 1)?"parameters":"parameter", '\n');
 
 for (i in parameter) echo("\t"+parameter[i])
 

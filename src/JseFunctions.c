@@ -122,16 +122,6 @@ JSValue printErrorLine(JSContext ctx, JSObject function, JSObject this, size_t a
 	return JSValueMakeBoolean(ctx, true);
 }
 
-bool buffer_ends_with_newline(register char * buffer, int length) {
-	if (buffer == NULL) return false;
-	if (length == 0) length = strlen(buffer);
-	if (length == 0) return false;
-	register int check = length - 1;
-	if (buffer[check] == 10) return true;
-	if (buffer[check] == 0 && buffer[check - 1] == 10) return true;
-	return false;
-}
-
 JSValue echo(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	unsigned i, argFinal = argc - 1;
@@ -141,12 +131,10 @@ JSValue echo(JSContext ctx, JSObject function, JSObject this, size_t argc, const
 		bytes = JSValueToUtf8(ctx, argv[i]);
 		if (! bytes) continue;
 		g_print("%s%s", i ? " " : "", bytes);
-		if (i == argFinal) have_newline = buffer_ends_with_newline(bytes, 0);
 		free(bytes);
 	}
 
-	if (!have_newline) putc('\n', stdout); 
-	
+	putc('\n', stdout); 
 	fflush(stdout);
 
 	return JSValueMakeBoolean(ctx, true);
