@@ -362,8 +362,8 @@ int startCommand(const char* command, char* const parameters[], char* const envr
     // child continues here
 		// replace all io channels in iov with their accompanying substitutes
 		for (int i = 0; i < ioc; i++) {
-			if (dup2(iov[i][1], iov[i][0]) == -1) {
-				g_printerr("failed to redirect child process file descriptor (%i) from parent process file descriptor (%i)\n", iov[i][0], iov[i][1]);
+			if (dup2(*iov[i][1], *iov[i][0]) == -1) {
+				g_printerr("failed to redirect child process file descriptor (%i) from parent process file descriptor (%i)\n", *iov[i][0], *iov[i][1]);
 				if (status) * status = errno;
 				exit(errno);
 			}
