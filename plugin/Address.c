@@ -15,6 +15,7 @@
 
 #include <jse.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 static int loadCount = 0;
 
@@ -22,17 +23,17 @@ static int loadCount = 0;
 
 JSClass Address = NULL;
 
-JSString AddressPropertyVector;
-JSString AddressPropertyType;
-JSString AddressPropertyLength;
-JSString AddressPropertyWritable;
+// JSString AddressPropertyVector;
+// JSString AddressPropertyType;
+// JSString AddressPropertyLength;
+// JSString AddressPropertyWritable;
 
 #define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
 #define AddressFromValue(ctx, value, exception) (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) value, exception)
 
 typedef struct AddressContainer {
 	void * data;
-	unsigned length; bool allocated;
+	unsigned length; bool allocated, readOnly;
 } AddressContainer;
 
 static void AddressObjectInitialize(JSContext ctx, JSObject object)
@@ -73,7 +74,7 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		if (element < 0) return JSValueMakeUndefined(ctx);
 		if (element >= length) return JSValueMakeUndefined(ctx);
 
-		JSObject objectType = (JSObject) JSObjectGetProperty(ctx, object, AddressPropertyType, NULL);
+		JSObject objectType = (JSObject) JSObjectGetUtf8Property(ctx, object, "type");
 		unsigned code = JSValueToNumber(ctx, (JSValue) objectType, NULL),
 				 width = (code & (1|2|4|8));
 
@@ -118,6 +119,8 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		return JSValueMakeBoolean(ctx, addressContainer->allocated);
 	} else if (!g_strcmp0(name, "length")) {
 		return JSValueFromNumber(ctx, addressContainer->length);
+	} else if (!g_strcmp0(name, "readOnly")) {
+		return JSValueMakeBoolean(ctx, addressContainer->readOnly);
 	}
 
 	return NULL;
@@ -128,6 +131,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 {
 
 	AddressContainer * addressContainer = JSObjectGetPrivate(object);
+
+	if (addressContainer->readOnly) return true;
 
 	char name[JSStringUtf8Size(id)];
 	JSStringGetUTF8CString (id, name, sizeof(name));
@@ -151,7 +156,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 
 		double value = JSValueToNumber(ctx, data, NULL);
 
-		unsigned code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL),
+		unsigned code = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, object, "type"), NULL),
 				 width = (code & (1|2|4|8));
 
 		bool sign = (code & 1024),
@@ -196,7 +201,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		return true;
 	} else if (!g_strcmp0(name, "length")) {
 		void * address = addressContainer->data;
-		int code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL);
+		int code = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, object, "type"), NULL);
 		if (code == 0) return true;
 		int width = code & (1|2|4|8);
 		unsigned current = addressContainer->length;
@@ -218,6 +223,9 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		}
 		return true;
 	} else if (!g_strcmp0(name, "allocated")) {
+		return true;
+	} else if (!g_strcmp0(name, "readOnly")) {
+		addressContainer->readOnly = JSValueToBoolean(ctx, data);
 		return true;
 	}
 
@@ -258,16 +266,10 @@ AddressObjectConstructor(JSContext ctx,
 	return this;
 }
 
-#include <inttypes.h>
-
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 {
 	if (!Address) {
 		Address = JSClassCreate(&AddressDefinition);
-		AddressPropertyVector = JSStringFromUtf8("vector");
-		AddressPropertyType = JSStringFromUtf8("type");
-		AddressPropertyLength = JSStringFromUtf8("length");
-		AddressPropertyWritable = JSStringFromUtf8("writable"); // need this working
 	}
 
 	JSClassRetain(Address);
@@ -283,15 +285,9 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 
 }
 
-void unload(JSContext ctx)
-{
+void unload(JSContext ctx) {
 
 	if (--loadCount) return;
-
-	JSStringRelease(AddressPropertyVector);
-	JSStringRelease(AddressPropertyType);
-	JSStringRelease(AddressPropertyLength);
-	JSStringRelease(AddressPropertyWritable);
-
 	JSClassRelease(Address);
+
 }
