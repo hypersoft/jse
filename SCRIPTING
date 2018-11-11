@@ -229,6 +229,10 @@ Constructor: Address Address(MachineType type, Number length)
   scripts in the form of libraries and or shell scripts which perorm certain complex tasks very well,
   and as simply as possible.
 
+  Caveat: An address can be read if it is readOnly, and a reference to it may be obtained as write,
+          even if it is an error. The script engine is designed to: "Do what the fuck you said",
+          IN THEORY.
+
 Constructor: Address Address(MachineType, Number length, Number vector)
 
   Creates a new address with the given vector. No allocation is performed.
