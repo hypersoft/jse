@@ -80,3 +80,82 @@ Global MachineTypes:
 
   * MachineType.width is the size of an unsigned pointer value as defined by the C compiler, which
     compiled the MachineTypes library.
+
+Prototype: MachineType.prototype
+
+  Property: Boolean pointer
+
+    The pointer property is true if this is a pointer to a type of this[width].
+
+  Property: Boolean constant
+
+    This property has no effect at this time.
+
+  Property: Boolean signed
+
+    True if this is a signed machine type of this[width].
+
+  Property: Boolean unsigned (read-only)
+
+    True if this[signed] is false.
+
+  Property: Boolean floating
+
+    True if this is a floating machine type of this[width].
+  
+  Property: Boolean vararg
+
+    True if this type represents the C-ellipsis-function-parameter: '...'.
+
+  Property: String name
+
+    A string name which represents this type.
+
+  Function: Number lengthOf(Number count)
+
+    Returns the number of bytes required by this type, given N count members, multiplied by this[width].
+
+  Function: Number unitsOf(Number bytes)
+
+    Returns the maximum number units that will fit within bytes.
+
+  Property: Number bits (read-only)
+
+    Returns the number of bits occupied by a single unit of this type.
+
+  Function: Number valueOf(Void)
+
+    Returns the internal type code representation of this type.
+
+  Function: String toString(Void)
+
+    Returns the internal character code representation of this type.
+
+  Function: MachineType toConst(Void)
+
+    Returns a copy of this type with the constant flag active.
+
+  Function: Number readAddress(Address address)
+
+    Returns the value of this type at the given address.
+
+  Function: Number readAddress(Address address, Number element)
+
+    Returns the value of this type at the given address[element].
+
+  Function: Undefined writeAddress(Address address, Number value)
+
+    Writes the value to the given address.
+
+  Function: Undefined writeAddress(Address address, Number element, Number value)
+
+    Writes the value to the the given address[element].
+
+  Function: Undefined bindAddress(Address address, Object object, Any propertyName)
+
+    Creates a getter and setter for this type at the given address upon object specified, using the
+    given property name for the accessor.
+
+  Function: Any value(Object object)
+
+    Coerces object to a Number Object, and marks the new Number Object as a member of this type.
