@@ -59,9 +59,13 @@ Function: Any loadPlugin(String path)
 
   Loads the given plugin if it is found in the current directory, by the path given, or within the
   plugin search path (in that order). Throws an error if path is not found. Returns whatever the,
-  plugin loader returns from the load call.
+  plugin loader returns from the load call. The plugin will be supplied with the default global object.
 
-Wanted: Function Any loadPlugin(String path, Object global)
+Function: Any loadPlugin(String path, Object global)
+
+  Loads the given plugin as in the path only form, and provides plugin with global as object.
+  The plugin may perform any validation required for its operation, and return any status or,
+  throw exceptions.
 
 Constructor: MachineType MachineType(Object representation)
 
