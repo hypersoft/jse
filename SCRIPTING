@@ -177,8 +177,8 @@ Constructor: SharedLibrary SharedLibrary(String path)
   Loads the named shared library by path, or by the defined system library paths. Symbols within the
   SharedLibrary may be accessed via normal JavaScript property lookup. All symbols are pointers,
   to the specified type within the library. So library[errno], would typically be a pointer to an int.
-  You would then use the Address constructor, or a type.bindAddress call to read or write the data.
-  For procedure calls, use the SharedFunction constructor.
+  You would then use the Address constructor, or a MachineType.bindAddress call to read or write the data.
+  For procedure calls, use the SharedFunction constructor to construct call frames automatically.
 
 Constructor: SharedLibrary SharedLibrary()
 
