@@ -268,8 +268,7 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 		AddressPropertyVector = JSStringFromUtf8("vector");
 		AddressPropertyType = JSStringFromUtf8("type");
 		AddressPropertyLength = JSStringFromUtf8("length");
-		AddressPropertyUnits = JSStringFromUtf8("units");
-		AddressPropertyWritable = JSStringFromUtf8("writable");
+		AddressPropertyWritable = JSStringFromUtf8("writable"); // need this working
 	}
 
 	JSClassRetain(Address);
@@ -279,8 +278,6 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 			ctx, CLASSNAME, Address, AddressObjectConstructor
 		)), 0
 	);
-
-	JSObjectCreateFunction(ctx, constructor, "move", AddressConstructorMove);
 	
 	loadCount++;
 	return (JSValue) object;
