@@ -116,12 +116,12 @@ static void SharedFunctionWriteSignature(JSContext ctx, void * vm, char signatur
 		}
 		number = JSValueToNumber(ctx, argument, exception);
 		dcArgPointer(vm, (void*) (uintptr_t) number);
-	} else if (signature == 'c' || signature == 's' || signature == 'i') {
+	} else if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'j') {
 		number = JSValueToNumber(ctx, argument, exception);
 		dcArgPointer(vm, (void*)(uintptr_t)number);
-	} else if (signature == 'C' || signature == 'S' || signature == 'I') {
+	} else if (signature == 'C' || signature == 'S' || signature == 'I' || signature == 'J') {
 		number = JSValueToNumber(ctx, argument, exception);
-		dcArgInt(vm, number);
+		dcArgPointer(vm, (void*)(uintptr_t)number);
 	} else if (signature == 'l' || signature == 'L') {
 		number = JSValueToNumber(ctx, argument, exception);
 		dcArgLongLong(vm, number);
