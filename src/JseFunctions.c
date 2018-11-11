@@ -343,7 +343,8 @@ JSValue jsLocalPath(JSContext ctx, JSObject function, JSObject this, size_t argc
 #include <unistd.h>
 #include <errno.h>
 extern char **environ;
-int startProcess(const char* szCommand, char* const aArguments[], char* const aEnvironment[], int ioc, int iov[][2], int *status) {
+
+int startCommand(const char* command, char* const parameters[], char* const envrionment[], int ioc, int * iov[][2], int *status) {
 
   // where int iov[N] == destination, source
   // where int ioc == iov[MAX]
@@ -353,27 +354,29 @@ int startProcess(const char* szCommand, char* const aArguments[], char* const aE
   int nChild;
   int nResult;
 
-	if (aEnvironment == NULL) aEnvironment = environ;
+	if (envrionment == NULL) envrionment = environ;
 
   nChild = fork();
+
   if (0 == nChild) {
     // child continues here
 		// replace all io channels in iov with their accompanying substitutes
 		for (int i = 0; i < ioc; i++) {
 			if (dup2(iov[i][1], iov[i][0]) == -1) {
+				g_printerr("failed to redirect child process file descriptor (%i) from parent process file descriptor (%i)\n", iov[i][0], iov[i][1]);
+				if (status) * status = errno;
 				exit(errno);
 			}
 		}
     // run child process image
     // replace this with any exec* function find easier to use ("man exec")
-    * status = execve(szCommand, aArguments, aEnvironment);
-    exit(status);
+		nResult = execve(command, parameters, envrionment);
+		if (status) * status = nResult;
 
-  } else if (nChild > 0) {
-		return nChild;
-  } else {
-    // failed to create child
+    exit(nResult);
+
   }
-  g_assert_not_reached();
+
+	return nChild;
 
 }
