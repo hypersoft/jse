@@ -87,12 +87,14 @@ JSValue JSLoadPlugin(JSContext ctx, char * plugin, JSObject object, JSValue * er
 		if (pLib = dlLoadLibrary(path)) break;
 	}
 	if (! pLib ) {
-		g_printerr("ReferenceError: Couldn't load plugin %s\n", path);
+		if (error) *error = JSExceptionFromUtf8(ctx, "ReferenceError", "Couldn't locate plugin initialize function `%s' in `%s'", "load", plugin);
+		else g_printerr("ReferenceError: Couldn't load plugin %s\n", path);
 		return JSValueMakeNull(ctx);
 	}
 	JSValue (*load)(JSContext, char *, JSObject, JSValue *) = dlFindSymbol(pLib, "load");
 	if (! load ) {
 		if (error) *error = JSExceptionFromUtf8(ctx, "ReferenceError", "Couldn't locate plugin initialize function `%s' in `%s'", "load", plugin);
+		else g_printerr("ReferenceError: Couldn't locate plugin initialize function `%s' in `%s'", "load", plugin);
 		return JSValueMakeNull(ctx);
 	}
 	g_ptr_array_add(jse.dlLib, pLib);
