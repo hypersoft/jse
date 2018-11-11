@@ -261,33 +261,6 @@ AddressObjectConstructor(JSContext ctx,
 
 #include <inttypes.h>
 
-static JSValue
-AddressConstructorMove(JSContext ctx,
-	JSObject function,
-	JSObject this,
-	size_t argc,
-	const JSValue argv[],
-	JSValue * exception)
-{
-	void * dest = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], exception);
-	void * source = (void*)(uintptr_t)JSValueToNumber(ctx, argv[1], exception);
-	unsigned bytes = JSValueToNumber(ctx, argv[2], exception);
-	void * result = memmove(dest, source, bytes);
-	return JSValueFromNumber(ctx, (uintptr_t)result);
-}
-
-static JSValue
-AddressMalloc(JSContext ctx,
-	JSObject function,
-	JSObject this,
-	size_t argc,
-	const JSValue argv[],
-	JSValue * exception)
-{
-	long bytes = JSValueToNumber(ctx, argv[0], NULL);
-	return JSValueFromNumber(ctx, (uintptr_t)malloc(bytes));
-}
-
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 {
 	if (!Address) {
@@ -308,7 +281,6 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	);
 
 	JSObjectCreateFunction(ctx, constructor, "move", AddressConstructorMove);
-	JSObjectCreateFunction(ctx, constructor, "malloc", AddressMalloc);
 	
 	loadCount++;
 	return (JSValue) object;
