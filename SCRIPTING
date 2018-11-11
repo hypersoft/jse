@@ -174,11 +174,18 @@ Prototype: MachineType.prototype
 
 Constructor: SharedLibrary SharedLibrary(String path)
 
-  Loads the named shared library by path, or by the defined system library paths. Symbols within the
-  SharedLibrary may be accessed via normal JavaScript property lookup. All symbols are pointers,
-  to the specified type within the library. So library[errno], would typically be a pointer to an int.
-  You would then use the Address constructor, or a MachineType.bindAddress call to read or write the data.
-  For procedure calls, use the SharedFunction constructor to construct call frames automatically.
+  Loads the named shared library by path, or by the defined system library paths. This process will throw
+  a ReferenceError if the library is not found. 
+  
+  Symbols within the SharedLibrary may be accessed via normal JavaScript property lookup. All symbols are
+  pointers, to the specified type within the library. So library[errno], would typically be a pointer to an
+  int. You would then use the Address constructor, or a MachineType.bindAddress call to read or write the
+  data. For procedure calls, use the SharedFunction constructor to construct call frames automatically.
+
+  Caveat: SharedLibrary has an internal property named path, which is a reference to the path specified,
+          for lookup. if you need to access a symbol named path, you will have to call an external library,
+          procedure to locate it. A SharedLibrary will convert to its loaded address, so any library, which,
+          can process the machine vector can be used to find the symbol.
 
 Constructor: SharedLibrary SharedLibrary()
 
