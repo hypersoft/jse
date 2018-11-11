@@ -78,5 +78,5 @@ Global MachineTypes:
   Pointer: {value: new MachineType({width:MachineType.width, pointer:true})},
   VarArg:{value: new MachineType({vararg:true})}
 
-  * MachineType.width is the size of an unsigned pointer values as defined by the C compiler, which
+  * MachineType.width is the size of an unsigned pointer value as defined by the C compiler, which
     compiled the MachineTypes library.
