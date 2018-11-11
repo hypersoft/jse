@@ -191,14 +191,34 @@ static JSValue SharedFunctionExec (JSContext ctx, JSObject function, JSObject th
 	char signature = returns[0];
 	void * handle = (void*)(uintptr_t)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
 
-	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'p') {
-		result = JSValueFromNumber(ctx, (unsigned)dcCallInt(vm, handle));
+/*
+
+’B’	Bool, bool
+’c’	char
+’C’	unsigned char
+’s’	short
+’S’	unsigned short
+’i’ int
+’I’	unsigned int
+’j’	long
+’J’	unsigned long
+’l’	long long, int64 t
+’L’	unsigned long long, uint64 t
+’f’	float
+’d’	double
+’p’	void*
+’Z’	const char* (pointing to C string)
+’v’	void
+
+*/
+	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'j' || signature == 'p') {
+		result = JSValueFromNumber(ctx, (uintptr_t)dcCallInt(vm, handle));
 	} else if (signature == 'C' || signature == 'S' || signature == 'I' || signature == 'J') {
-		result = JSValueFromNumber(ctx, (signed)dcCallInt(vm, handle));
+		result = JSValueFromNumber(ctx, (signed long) dcCallLong(vm, handle));
 	} else if (signature == 'l') {
-		result = JSValueFromNumber(ctx, (unsigned)dcCallLongLong(vm, handle));
+		result = JSValueFromNumber(ctx, (unsigned long long) dcCallLongLong(vm, handle));
 	} else if (signature == 'L') {
-		result = JSValueFromNumber(ctx, (signed)dcCallLongLong(vm, handle));
+		result = JSValueFromNumber(ctx, (signed long long) dcCallLongLong(vm, handle));
 	} else if (signature == 'f') {
 		result = JSValueFromNumber(ctx, dcCallFloat(vm, handle));
 	} else if (signature == 'd') {
