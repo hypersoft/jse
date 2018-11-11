@@ -351,6 +351,11 @@ int startCommand(const char* command, char* const parameters[], char* const envr
   // where destination == child-process-file-descriptor
   // where source == parent-process-file-descriptor
 
+  // null command is an error.
+	// negative ioc is an error.
+	// positive ioc with null iov is an error.
+	// null status is a nop, otherwise return status destination.
+
   int nChild;
   int nResult;
 
