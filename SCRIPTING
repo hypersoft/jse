@@ -167,7 +167,9 @@ Prototype: MachineType.prototype
     Creates a getter and setter for this type at the given address upon object specified, using the
     given property name for the accessor. If you bind an address, there is no guarantee on availability,
     of data if the data location is relocated during a resize. So when you bindAddress, make sure you
-    stash your tree and keep it safe for as long as you want your slice.
+    stash your tree and keep it safe for as long as you want your slice. It is perfectly valid usage,
+    to bind the entire tree space to several components, within a scope level only they can access.
+    Memory will be freed when their scope can no longer be reached and garbage collection is performed.
 
   Function: Any value(Object object)
 
