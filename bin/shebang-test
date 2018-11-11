@@ -1,0 +1,5 @@
+#!/bin/jse --shell-script
+
+echo("hello world");
+
+for (i in parameter) echo(parameter[i])

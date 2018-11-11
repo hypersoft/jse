@@ -87,7 +87,7 @@ JSValue JSLoadPlugin(JSContext ctx, char * plugin, JSObject object, JSValue * er
 		if (pLib = dlLoadLibrary(path)) break;
 	}
 	if (! pLib ) {
-		if (error) *error = JSExceptionFromUtf8(ctx, "ReferenceError", "Couldn't load plugin %s", plugin);
+		g_printerr("ReferenceError: Couldn't load plugin %s\n", path);
 		return JSValueMakeNull(ctx);
 	}
 	JSValue (*load)(JSContext, char *, JSObject, JSValue *) = dlFindSymbol(pLib, "load");
@@ -148,10 +148,23 @@ void JSInit(char * command, JSContext ctx) {
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	JSValue jsError = NULL;
-	JSInlineEval(jse.ctx, "source('/usr/share/jse/core.js')", NULL, &jsError);
+
+	JSValue result = NULL;
+	char * file = "/usr/share/jse/core.js";
+	char * contents = NULL;
+	GError * error = NULL;
+	g_file_get_contents(file, &contents, NULL, &error);
+	if (! error) {
+		JSEvaluateUtf8(ctx, contents, global, file, 1, &jsError);
+	} else {
+		jsError = JSExceptionFromGError(ctx, error);
+		g_error_free(error);
+	}
+
+	g_free(contents);
 	if (jsError) {
-		JSReportException(jse.ctx, jse.command, jsError);
-		JSTerminate(1);
+		JSReportException(ctx, jse.command, jsError);
+		exit(1);
 	}
 
 	errno = 0;
@@ -171,7 +184,7 @@ void JSTerminate(unsigned status)
 }
 
 JseOption jseOptions[] = {
-	{OPT_WORD | OPT_ARG, 0, "--init"},
+	{OPT_WORD | OPT_LONG, 0, "--shell-script"},
 	{OPT_MINUS | OPT_LONG, 's', "silent"},
 	{OPT_WORD | OPT_ARG, 0, "-L"},
 	{OPT_WORD | OPT_ARG, 0, "-l"},
@@ -180,6 +193,8 @@ JseOption jseOptions[] = {
 	{0}
 };
 
+int jse_file_mode(char *);
+
 GError * jse_parse_options (
 	JseOptionType flag,
 	JseOption * option,
@@ -187,22 +202,8 @@ GError * jse_parse_options (
 ) {
 	static int evalNumber = 0;
 	if (option == &jseOptions[0]) {
-		int argc; char ** argv;
-		char buffer[strlen(value)+7]; g_sprintf(buffer, "shell %s", value);
-		g_shell_parse_argv(buffer, &argc, &argv, NULL);
-		JseOptionParseResult * parseResult = jse_option_parse_main (
-			argc, argv, jseOptions, jse_parse_options
-		);
-		if (parseResult->error) {
-			JSReportError(jse.command, parseResult->error);
-			jse_option_parse_result_free(parseResult);
-			g_strfreev(argv);
-			JSTerminate(1);
-		} else {
-			jse_option_parse_result_free(parseResult);
-			g_strfreev(argv);
-			return NULL;
-		}
+		jse.silent = true;
+		return NULL;
 	} else if (option == &jseOptions[1]) {
 		jse.silent = TRUE;
 		return NULL;
