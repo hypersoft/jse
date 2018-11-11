@@ -69,16 +69,16 @@ Object.defineProperties(MachineType.prototype, {
 		Object.defineProperty(c, "constant", {value:true});
 		return c;
 	}},
-	addressRead:{value:machineTypeRead},
-	addressWrite:{value:machineTypeWrite},
-	addressBind:{value:function(vector, o, id){
+	readAddress:{value:machineTypeRead},
+	writeAddress:{value:machineTypeWrite},
+	bindAddress:{value:function(vector, o, id){
 		var type = this;
 		Object.defineProperty(o, id, {
 			get:function(){
-				return type.addressRead(vector);
+				return type.readAddress(vector);
 			},
 			set:function(value){
-				type.addressWrite(vector, value);
+				type.writeAddress(vector, value);
 			}
 		});
 	}},
@@ -229,7 +229,7 @@ Address.prototype = Object.defineProperties({}, {
 
 	}},
 	bind: {value: function bind(object, id){
-		return this.type.addressBind(this, object, id);
+		return this.type.bindAddress(this, object, id);
 	}},
 	indexOf: {value: function indexOf(value, start){
 		var value = [value].toSerial(2);
