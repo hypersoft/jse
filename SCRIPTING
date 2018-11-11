@@ -195,10 +195,15 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
 
   Locates symbolName within library, and creates a type definition for the library-procedure, using the
   given return type and remaining MachineType parameters (...) as the procedure execution protocol. The
-  new SharedFunction definition may be called according to the protocol specified. Javascript Objects,
-  Strings, Addresses and values may be coerced to some types for the call, but no pointer types will be
-  automatically coerced from a return call. Type coercion has not yet found a standard free of gotchas,
-  and all current auto-type-conversions are experimental. Numbers convert safely to their defined
+  new SharedFunction definition may be called according to the protocol specified.
+  
+  Javascript Objects, Strings, Addresses and values may be coerced to some types for the call, but no pointer
+  types will be automatically coerced from a return call. Type coercion has not yet found a standard free of
+  gotchas, and all current auto-type-conversions are experimental. Numbers convert safely to their defined
   MachineTypes.
+
+  If you want a VarArg call use the VarArg type as the last parameter of the specification, which will
+  activate, parameter parsing. IN THEORY, within a vararg call, parameters should be parsed according to
+  their type member specification. [ object[type] ]
 
   ** IF YOU FIND AN ERROR IN A FLOATING OR SIGNEDNESS CONVERSION, PLEASE FILE AN ISSUE **
