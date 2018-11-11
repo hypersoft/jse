@@ -207,3 +207,22 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
   their type member specification. [ object[type] ]
 
   ** IF YOU FIND AN ERROR IN A FLOATING OR SIGNEDNESS CONVERSION, PLEASE FILE AN ISSUE **
+
+Constructor: Address Address(MachineType type, Number length) 
+
+  Creates an accessible address of type with the specified length. The memory will be allocated and freed
+  as needed, or by property setting. To free by setting the vector property, set vector to 0; to free by
+  length property set length to zero. The Address must have been allocated by this constructor, to free it,
+  manually, or automatically. To check if an Address is allocated, get its allocated property. If an address,
+  is not allocated and it is zero, it can be reallocated for continuing use at any time. The length of the
+  content can be resized using the length property, if the address was created by this constructor.
+
+  If you set the readOnly property, no property set access will (actually) succeed, but no errors will be
+  thrown. No errors will be thrown for buffer over/underflow. Negative addressing calculations may be performed
+  on indices, however no calculation below zero or above allocation will be accessed for read or write.
+
+  The type of the address may be changed. For information on working with addresses see your core.js
+
+Constructor: Address Address(MachineType, Number length, Number vector)
+
+  Creates a new address with the given vector. No allocation is performed.
