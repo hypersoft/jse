@@ -1,4 +1,5 @@
 {
+
 global: JS*; window_object_cleared_callback; webkit_web_extension_initialize; webkit_web_extension_initialize_with_user_data;
 local: *;
 };
