@@ -6,7 +6,7 @@ function prompt() {
 }
 
 rel: while (++line) {
-	if ((script = readLine(prompt())) !== -1) {
+	if (script = readline(prompt())) {
 		while (1) {
 			script += '\n';
 			try {
@@ -28,7 +28,5 @@ rel: while (++line) {
 			printErrorLine(exception);
 			continue rel;
 		}
-	} else {
-		exit(0);
-	}
+	} else break;
 }
