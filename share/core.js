@@ -173,23 +173,22 @@ String.prototype.toSerial = function toSerial(max) {
 
 loadPlugin("Address.jso");
 
-Address.create = function create(type, units, vector) {
+Address.create = function create(type, length, vector) {
 	if (type !== undefined) this.type = type;
 	if (vector !== undefined) {
 		this.vector = vector;
-		if (units !== undefined) this.length = units;
+		if (length !== undefined) this.length = length;
 	} else {
-		if (units !== undefined) this.units = units;
+		if (length !== undefined) this.length = length;
 	}
 	return this;
 };
 
-Address.prototype = Object.defineProperties([], {
+Address.prototype = Object.defineProperties({}, {
 
 	constructor: {value:Address, writable:false, enumerable:false, configurable:false},
 	vector: {value: 0, writable:true},
 	length: {value: 0, writable:true},
-	units: {value: 0, writable:true},
 	type: {value: Void, writable:true},
 
 	valueOf: {value: function valueOf(){return this.vector;}},
@@ -211,15 +210,7 @@ Address.prototype = Object.defineProperties([], {
 		if (length === undefined) length = this.length;
 		var bytes = this.offsetOf(element), o = new Address(
 			this.type, length, this.vector + bytes
-		), pointer = this;
-		Object.defineProperty(o, "vector", {
-			get: function(){return pointer.vector + bytes;},
-			set: function(v){return;}
-		});
-		if (this.allocated)	Object.defineProperty(o, "units", {
-			get: function(){return pointer.units - element;},
-			set: function(v){return;}
-		});
+		);
 		return o;
 	}},
 	write: {value: function write(value, length){
@@ -249,28 +240,6 @@ Address.prototype = Object.defineProperties([], {
 		var value = [value].toSerial(2);
 		if (value.length > 1) throw new RangeError("too many values");
 		return Array.prototype.lastIndexOf.call(this, value[0], start);
-	}},
-	push: {value: function push(){
-		if (this.allocated === false) return 0;
-		var max = this.units - this.length;
-		if (max === 0) return this.length;
-		this.length += this.addressOf(this.length, max).write(arguments);
-		return this.length;
-	}},
-	pop: {value: function pop(){
-		if (this.length === 0 || this.vector === 0) return undefined;
-		var kill = this.length - 1, value = this[kill];
-		this[kill] = 0;
-		this.length--;
-		return value;
-	}},
-	shift: {value: function shift(){
-		if (this.length === 0 || this.vector === 0) return undefined;
-		var kill = this.length - 1, value = this[0], width = this.type.width;
-		Address.move(this.vector, this.vector + width, this.bytes - width);
-		this[kill] = 0;
-		this.length--;
-		return value;
 	}},
 	splice: {value: undefined},
 	unshift: {value: function unshift(){

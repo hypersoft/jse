@@ -31,18 +31,29 @@ JSString AddressPropertyWritable;
 #define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
 #define AddressFromValue(ctx, value, exception) (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) value, exception)
 
+typedef struct AddressContainer {
+	void * data;
+	unsigned length; bool allocated;
+} AddressContainer;
+
 static void AddressObjectInitialize(JSContext ctx, JSObject object)
 {
-
+	JSObjectSetPrivate(object, g_malloc0(sizeof(AddressContainer)));
 }
 
 static void AddressObjectFinalize(JSObject object)
 {
-	g_free(JSObjectGetPrivate(object));
+	AddressContainer * address = JSObjectGetPrivate(object);
+	if (address) {
+		if (address->data) free(address->data);
+		free(address);
+	}
 };
 
 static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString id, JSValue * exception)
 {
+
+	AddressContainer * addressContainer = JSObjectGetPrivate(object);
 
 	char name[JSStringUtf8Size(id)];
 	JSStringGetUTF8CString (id, name, sizeof(name));
@@ -54,11 +65,11 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 			else if (!isdigit(name[i])) goto notAnIndex;
 		}
 
-		void * address = (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) object, NULL);
+		void * address = addressContainer->data;
 		long long element; sscanf(name, "%lld", &element);
-		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
+		long long length = addressContainer->length;
 
-		if (length == 0) length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
+		if (length == 0) return JSValueMakeUndefined(ctx);
 		if (element < 0) element = length + element;
 		if (element < 0) return JSValueMakeUndefined(ctx);
 		if (element >= length) return JSValueMakeUndefined(ctx);
@@ -102,11 +113,12 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		}
 	}	notAnIndex:
 
-	if (!g_strcmp0(name, "allocated")) {
-		void * p = AddressFromValue(ctx, object, NULL);
-		return JSValueMakeBoolean(ctx, p && p == JSObjectGetPrivate(object));
-	} else if (!g_strcmp0(name, "vector")) {
-		return JSValueFromNumber(ctx, (uintptr_t) JSObjectGetPrivate(object));
+	if (!g_strcmp0(name, "vector")) {
+		return JSValueFromNumber(ctx, (uintptr_t) addressContainer->data);
+	} else if (!g_strcmp0(name, "allocated")) {
+		return JSValueMakeBoolean(ctx, addressContainer->allocated);
+	} else if (!g_strcmp0(name, "length")) {
+		return JSValueFromNumber(ctx, addressContainer->length);
 	}
 
 	return NULL;
@@ -115,6 +127,8 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 
 static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString id, JSValue data, JSValue * exception)
 {
+
+	AddressContainer * addressContainer = JSObjectGetPrivate(object);
 
 	char name[JSStringUtf8Size(id)];
 	JSStringGetUTF8CString (id, name, sizeof(name));
@@ -125,11 +139,11 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			if (i == 0 && name[i] == '-') continue;
 			else if (!isdigit(name[i])) goto notAnIndex;
 		}
-		void * address = (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) object, NULL);
+		void * address = addressContainer->data;
 		long long element; sscanf(name, "%lld", &element);
-		long long length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyLength, NULL), NULL);
+		long long length = addressContainer->length;
 
-		if (length == 0) length = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
+		if (length == 0) return true;
 		if (element < 0) element = length + element;
 		if (element < 0) return true;
 		if (element >= length) return true;
@@ -163,31 +177,46 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 	}	notAnIndex:
 
 	if (!g_strcmp0(name, "vector")) {
-		void * address = AddressFromValue(ctx, object, NULL), * currentAddress = JSObjectGetPrivate(object);
-		if (currentAddress && address != currentAddress ) {
+		void * address = AddressFromValue(ctx, data, NULL);
+		if (addressContainer->data && address != addressContainer->data && address != 0) {
 			if (exception) *exception = JSExceptionFromUtf8 (ctx,
 				"ReferenceError",
 				"attempting to change the vector property of an internal pointer"
 			);
 			return true;
 		}
-	} else if (!g_strcmp0(name, "units")) {
-		void * address = JSObjectGetPrivate(object);
+		if (address == 0 && addressContainer-> data != 0) {
+			free(addressContainer->data);
+			addressContainer->length = 0;
+			addressContainer->allocated = false;
+		}
+		addressContainer->data = address;
+		return true;
+	} else if (!g_strcmp0(name, "length")) {
+		void * address = addressContainer->data;
 		int code = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyType, NULL), NULL);
 		if (code == 0) return true;
 		int width = code & (1|2|4|8);
+		unsigned current = addressContainer->length;
 		unsigned length = JSValueToNumber(ctx, data, exception);
-		unsigned current = JSValueToNumber(ctx, JSObjectGetProperty(ctx, object, AddressPropertyUnits, NULL), NULL);
+		addressContainer->length = length;
 		unsigned bytes = length * width;
-		if (bytes) address = realloc(address, length * width);
-		else if (address) {
+		if (bytes) {
+			if (address == 0) { addressContainer->allocated = true; }
+			if (addressContainer->allocated) address = realloc(address, length * width);
+			if (address == 0) { addressContainer->allocated = false; }
+		} else if (address) {
 			free(address);
+			address = 0;
 		}
-		JSObjectSetPrivate(object, address);
+		addressContainer->data = address;
 		if (length > current && address) {
 			int overage = length - current, bytes = overage * width;
 			memset(address + (current * width), 0, bytes);
 		}
+		return true;
+	} else if (!g_strcmp0(name, "allocated")) {
+		return true;
 	}
 
 	return false;
