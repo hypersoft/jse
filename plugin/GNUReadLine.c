@@ -198,16 +198,11 @@ gnu_readline(JSContext ctx,
   JSValue valstr = 0;
   gchar *str = NULL;
   gchar *buf;
-  const gchar *histfname = g_get_home_dir();
   gchar *path = (JSObjectHasUtf8Property(ctx, function, "historyFile"))?
 		JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, function, "historyFile")):
-		g_build_filename(histfname, "history.jse", NULL);
+		g_build_filename(g_get_home_dir(), "history.jse", NULL);
 
-  if (!readline_has_initialized)
-    {
-      read_history(path);
-      readline_has_initialized = TRUE;
-    }
+  read_history(path);
 
  	if (argc != 1) {
 		*exception = JSExceptionFromUtf8(ctx, "Error", "readLine expected 1 argument, got %zd", argc);
@@ -217,17 +212,22 @@ gnu_readline(JSContext ctx,
   buf = JSValueToUtf8(ctx, arguments[0]);
 
   str = readline(buf);
+	g_free(buf);
+
+	if (str == NULL) {
+		putc('\n', stderr);
+		return JSValueMakeNumber(ctx, -1);
+	}
+
   if (str && *str)
     {
       add_history(str);
       valstr = JSValueFromUtf8(ctx, str);
       g_free(str);
+			write_history(path);
+			history_truncate_file(path, 1000);
     }
 
-  write_history(path);
-  history_truncate_file(path, 1000);
-
-  g_free(buf);
   g_free(path);
 
   if (valstr == 0)
@@ -254,17 +254,17 @@ gnu_readline_secure(JSContext ctx,
 
   buf = JSValueToUtf8(ctx, arguments[0]);
 
-	displayInputs(false);
-  str = readline(buf);
-	displayInputs(true);
+	displayInputs(false); str = readline(buf);
+	g_free(buf); displayInputs(true);
 	putc('\n', stderr);
+
+	if (str == NULL) return JSValueMakeNumber(ctx, -1);
+
   if (str && *str)
     {
       valstr = JSValueFromUtf8(ctx, str);
       g_free(str);
     }
-
-  g_free(buf);
 
   if (valstr == 0)
     valstr = JSValueMakeNull(ctx);
