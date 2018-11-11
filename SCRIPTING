@@ -4,6 +4,10 @@ Scripting Environment Provisions to the JavascriptCore Standard Global Environme
 
 ** FEATURES NOT LISTED HERE ARE NOT CONSIDERED STABLE **
 
+Note: Within this documentation, Void, String, Number, Object, Any, Undefined, Boolean,
+      and Constructor; are generic type terms, whenever such terms are mentioned within a:
+      Function, Property, or Prototype heading with an opening full-colon (:).
+
 Function: echo(String, ...)
 
   Echo (0) through (N) strings separated by space on the standard output,
@@ -27,16 +31,16 @@ Function: run(String command, ...)
 
     toString: returns (stdout || stderr || status) in resolve order.
 
-Function: localPath()
+Function: String localPath(Void)
 
   Retrieve the current directory as a String.
 
-Function: localPath(String path)
+Function: Boolean localPath(String path)
 
   Set the current directory to path. Throws ReferenceError if path is not a directory.
   Returns true if the operation is succesful.
 
-Object: Environment
+Property: Object Environment
 
   A JavaScript implementation of environment where Envronment[K], represents the value
   of an environment key by the name K. Use standard JavaScript set/get/delete to manage
