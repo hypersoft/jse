@@ -41,3 +41,13 @@ Object: Environment
   A JavaScript implementation of environment where Envronment[K], represents the value
   of an environment key by the name K. Use standard JavaScript set/get/delete to manage
   environment. This environment object uses thread locks to ensure thread safety.
+
+Function: addPluginPath(String path)
+
+  Adds the given path to the plugin search path. Throws an error if the path is not an existing
+  directory.
+
+Function: loadPlugin(String path)
+
+  Loads the given plugin if it is found in the current directory, by the path given, or within the
+  plugin search path (in that order). Throws an error if path is not found.
