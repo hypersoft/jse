@@ -165,7 +165,9 @@ Prototype: MachineType.prototype
   Function: Undefined bindAddress(Address address, Object object, Any propertyName)
 
     Creates a getter and setter for this type at the given address upon object specified, using the
-    given property name for the accessor.
+    given property name for the accessor. If you bind an address, there is no guarantee on availability,
+    of data if the data location is relocated during a resize. So when you bindAddress, make sure you
+    stash your tree and keep it safe for as long as you want your slice.
 
   Function: Any value(Object object)
 
