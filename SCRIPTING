@@ -63,9 +63,9 @@ Function: Any loadPlugin(String path)
 
 Function: Any loadPlugin(String path, Object global)
 
-  Loads the given plugin as in the path only form, and provides plugin with global as object.
-  The plugin may perform any validation required for its operation, and return any status or,
-  throw exceptions.
+  Loads the given plugin as in the path only form, and provides plugin with global for it's global-object
+  (also-known-as: scope). The plugin may perform any validation required for its operation, and return
+  any status or, throw exceptions.
 
 Constructor: MachineType MachineType(Object representation)
 
