@@ -157,15 +157,15 @@ void JSInit(char * command, JSContext ctx) {
 	GError * error = NULL;
 	g_file_get_contents(file, &contents, NULL, &error);
 	if (! error) {
-		JSEvaluateUtf8(ctx, contents, global, file, 1, &jsError);
+		JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
 	} else {
-		jsError = JSExceptionFromGError(ctx, error);
+		jsError = JSExceptionFromGError(jse.ctx, error);
 		g_error_free(error);
 	}
 
 	g_free(contents);
 	if (jsError) {
-		JSReportException(ctx, jse.command, jsError);
+		JSReportException(jse.ctx, jse.command, jsError);
 		exit(1);
 	}
 

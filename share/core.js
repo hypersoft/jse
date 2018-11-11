@@ -1,3 +1,4 @@
+
 run.prototype = {
 	toString:function(){return this.stdout || this.stderr || this.status},
 	valueOf:function(){return this.status}
@@ -307,3 +308,4 @@ Object.defineProperties(SharedFunction.prototype, {
 		return this.arguments.join('');
 	}}
 });
+
