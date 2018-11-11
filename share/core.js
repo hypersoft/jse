@@ -297,8 +297,6 @@ SharedFunction.create = function(){
 	return this;
 };
 
-MachineType.value = SharedFunction;
-
 Object.defineProperties(SharedFunction.prototype, {
 	constructor:{value:SharedFunction},
 	library:{value:new SharedLibrary(""), writable:true},
