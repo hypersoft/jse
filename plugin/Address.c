@@ -203,7 +203,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		unsigned bytes = length * width;
 		if (bytes) {
 			if (address == 0) { addressContainer->allocated = true; }
-			if (addressContainer->allocated) address = realloc(address, length * width);
+			if (addressContainer->allocated) address = realloc(address, bytes);
 			if (address == 0) { addressContainer->allocated = false; }
 		} else if (address) {
 			free(address);
