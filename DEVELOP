@@ -51,7 +51,9 @@ To Do:
 
         the webkit platorm has a built in script debugger. the web inspector can be
         used to debug shell scripts, web scripts, and design html pages with wysiwyg
-        support.
+        support. But keep in mind, doing advanced things as mentioned here depends on your,
+        level of knowledge and ingenuity. If you know of something you should be able to do,
+        but it can't be done for some reason, please file that as an issue!
 
         Hack on something, write a tutorial, ask a question (as an issue on github),
         or simply enjoy your new unix coding shell kits!
