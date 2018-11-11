@@ -95,8 +95,8 @@ JSValue addPluginPath(JSContext ctx, JSObject function, JSObject this, size_t ar
 
 JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
-	if (argc != 1) {
-		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
+	if (argc != 1 && argc != 2) {
+		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(1, 2));
 	}
 
 	JSValue result;
