@@ -185,3 +185,5 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
   automatically coerced from a return call. Type coercion has not yet found a standard free of gotchas,
   and all current auto-type-conversions are experimental. Numbers convert safely to their defined
   MachineTypes.
+
+  ** IF YOU FIND AN ERROR IN A FLOATING OR SIGNEDNESS CONVERSION, PLEASE FILE AN ISSUE **
