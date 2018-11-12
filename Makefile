@@ -32,6 +32,7 @@ share/license/dyncall.txt: data/${DYNCALL_PKG}
 	@rm -vrf ${DYNCALL_VER}
 
 JSE_CFLAGS != pkg-config --cflags javascriptcoregtk-4.0
+JSE_CFLAGS := $(DEBUG) $(JSE_CFLAGS)
 
 src/data/%.c: data/%
 	@mkdir -p src/data;
@@ -42,20 +43,20 @@ bin/bin2inc: bin2inc/bin2inc.c
 	gcc $< -o $@
 
 obj/%.o: src/%.c
-	gcc ${DEBUG} -fPIC -I include -c $< -o $@ ${JSE_CFLAGS}
+	gcc ${JSE_CFLAGS} -fPIC -I include -c $< -o $@
 
 obj/JseMain.o: src/JseMain.c src/JseFunctions.c
 
 JSE_OBJS = obj/JseMain.o obj/JseString.o obj/JseValue.o obj/JseObject.o obj/JseException.o obj/JseConstructor.o obj/JseOptionParser.o
 
 JSE_LIBS = $(shell pkg-config --libs javascriptcoregtk-4.0) $(shell echo -ldl lib/*.a)
-bin/jse: ${JSE_OBJS} JseExports.map
+bin/jse: ${JSE_OBJS}
 	gcc ${JSE_OBJS} -o $@ ${JSE_LIBS} -Wl,--export-dynamic 
 
 GHTML_SOURCES != echo ghtml/*.c
 GHTML_CONFIG != pkg-config --cflags --libs webkit2gtk-4.0
 bin/ghtml: ${GHTML_SOURCES}
-	gcc ${GHTML_SOURCES} -o bin/ghtml ${GHTML_CONFIG}
+	gcc ${JSE_CFLAGS} ${GHTML_SOURCES} ${JSE_LIBS} -o bin/ghtml ${GHTML_CONFIG}
 
 plugins: share/plugin/JseWebKit.so share/plugin/GNUReadLine.jso \
 	 share/plugin/Environment.jso share/plugin/Address.jso \

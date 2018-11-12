@@ -1,6 +1,16 @@
 #include "GhtmlWindow.h"
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
+#include <stdarg.h>
+
+#define DEBUGGING 1
+#if DEBUGGING == 1
+#define DEBUGMSG(ENABLED, ...) if (ENABLED) {g_printerr(__VA_ARGS__);}
+#else
+#define DEBUGMSG(...)
+#endif
+#define DEBUG_WEBVIEW_READY 1
+#define DEBUG_WEBVIEW_RESIZE 1
 
 enum {
     PROP_0,
@@ -86,6 +96,17 @@ static void webViewClose(WebKitWebView *webView, GhtmlWindow *window)
     gtk_widget_destroy(GTK_WIDGET(window));
 }
 
+static void window_geometry_changed(WebKitWindowProperties *windowProperties, GhtmlWindow *window)
+{
+    DEBUGMSG(DEBUG_WEBVIEW_RESIZE, "ghtml: window-geometry-changed\n");
+    GdkRectangle geometry;
+    gtk_window_set_resizable (GTK_WINDOW (window),
+                                webkit_window_properties_get_resizable (windowProperties));
+    webkit_window_properties_get_geometry (windowProperties, &geometry);
+    gtk_window_move (GTK_WINDOW (window), geometry.x, geometry.y);
+    gtk_window_resize (GTK_WINDOW (window), geometry.width, geometry.height);
+}
+
 static void webViewRunAsModal(WebKitWebView *webView, GhtmlWindow *window)
 {
     gtk_window_set_modal(GTK_WINDOW(window), TRUE);
@@ -94,19 +115,22 @@ static void webViewRunAsModal(WebKitWebView *webView, GhtmlWindow *window)
 
 static void webViewReadyToShow(WebKitWebView *webView, GhtmlWindow *window)
 {
+
+DEBUGMSG(DEBUG_WEBVIEW_READY, "ghtml: ready-to-show\n");
+
     WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(webView);
+    g_signal_connect (windowProperties, "notify::geometry",
+                      G_CALLBACK (window_geometry_changed), window);
 
-    GdkRectangle geometry;
-    webkit_window_properties_get_geometry(windowProperties, &geometry);
-    if (geometry.x >= 0 && geometry.y >= 0)
-        gtk_window_move(GTK_WINDOW(window), geometry.x, geometry.y);
-    if (geometry.width > 0 && geometry.height > 0)
-        gtk_window_resize(GTK_WINDOW(window), geometry.width, geometry.height);
+     if (webkit_window_properties_get_fullscreen (windowProperties)) {
+        gtk_window_fullscreen (GTK_WINDOW (window));
+    } else {
+        //g_printerr("setting ghtml window geometry\n");
+        window_geometry_changed(windowProperties, window);
+    }
 
-    if (!webkit_window_properties_get_resizable(windowProperties))
-        gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+    gtk_widget_show_all(GTK_WIDGET(window));
 
-    gtk_widget_show(GTK_WIDGET(window));
 }
 
 static GtkWidget *webViewCreate(WebKitWebView *webView, WebKitNavigationAction *navigation, GhtmlWindow *window)
@@ -117,6 +141,7 @@ static GtkWidget *webViewCreate(WebKitWebView *webView, WebKitNavigationAction *
     g_signal_connect(newWebView, "ready-to-show", G_CALLBACK(webViewReadyToShow), newWindow);
     g_signal_connect(newWebView, "run-as-modal", G_CALLBACK(webViewRunAsModal), newWindow);
     g_signal_connect(newWebView, "close", G_CALLBACK(webViewClose), newWindow);
+    DEBUGMSG(1, "ghtml-debug: webview created\n");
     return GTK_WIDGET(newWebView);
 }
 
@@ -274,39 +299,8 @@ static void ghtml_window_init(GhtmlWindow *window)
 
 static void ghtmlWindowConstructed(GObject *gObject)
 {
+    DEBUGMSG(1, "ghtml-debug: window-constructed\n");
     GhtmlWindow *window = GHTML_WINDOW(gObject);
-	GdkScreen *screen = gtk_widget_get_screen (GTK_WIDGET (window));
-	GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
-
-	if (visual == NULL)
-	visual = gdk_screen_get_system_visual (screen);
-
-	gtk_widget_set_visual (GTK_WIDGET (window), visual);
-
-    g_signal_connect(window->webView, "notify::title", G_CALLBACK(webViewTitleChanged), window);
-    g_signal_connect(window->webView, "create", G_CALLBACK(webViewCreate), window);
-    g_signal_connect(window->webView, "decide-policy", G_CALLBACK(webViewDecidePolicy), window);
-    g_signal_connect(window->webView, "permission-request", G_CALLBACK(webViewDecidePermissionRequest), window);
-    g_signal_connect(window->webView, "mouse-target-changed", G_CALLBACK(webViewMouseTargetChanged), window);
-    g_signal_connect(window->webView, "notify::favicon", G_CALLBACK(faviconChanged), window);
-    g_signal_connect(window->webView, "close", G_CALLBACK(webViewClose), window);
-
-    GtkWidget *overlay = gtk_overlay_new();
-    gtk_box_pack_start(GTK_BOX(window->mainBox), overlay, TRUE, TRUE, 0);
-    gtk_widget_show(overlay);
-
-    window->statusLabel = gtk_label_new(NULL);
-    gtk_widget_set_halign(window->statusLabel, GTK_ALIGN_START);
-    gtk_widget_set_valign(window->statusLabel, GTK_ALIGN_END);
-    gtk_widget_set_margin_start(window->statusLabel, 1);
-    gtk_widget_set_margin_end(window->statusLabel, 1);
-    gtk_widget_set_margin_top(window->statusLabel, 1);
-    gtk_widget_set_margin_bottom(window->statusLabel, 1);
-//    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), window->statusLabel);
-
-    gtk_container_add(GTK_CONTAINER(overlay), GTK_WIDGET(window->webView));
-
-    gtk_widget_show(GTK_WIDGET(window->webView));
 }
 
 static void ghtml_window_class_init(GhtmlWindowClass *klass)
@@ -335,10 +329,46 @@ GtkWidget *ghtml_window_new(WebKitWebView *view, GtkWindow *parent)
     GhtmlWindow *window = GHTML_WINDOW(g_object_new(GHTML_TYPE_WINDOW,
         "type", GTK_WINDOW_TOPLEVEL, "view", view, NULL));
 
+    window->webView = view;
+    
     if (parent) {
         window->parentWindow = parent;
         g_object_add_weak_pointer(G_OBJECT(parent), (gpointer *)&window->parentWindow);
     }
+
+	GdkScreen *screen = gtk_widget_get_screen (GTK_WIDGET (window));
+	GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
+
+	if (visual == NULL)
+	visual = gdk_screen_get_system_visual (screen);
+
+	gtk_widget_set_visual (GTK_WIDGET (window), visual);
+
+    g_signal_connect(window->webView, "ready-to-show", G_CALLBACK(webViewReadyToShow), window);
+    g_signal_connect(window->webView, "notify::title", G_CALLBACK(webViewTitleChanged), window);
+    g_signal_connect(window->webView, "create", G_CALLBACK(webViewCreate), window);
+    g_signal_connect(window->webView, "decide-policy", G_CALLBACK(webViewDecidePolicy), window);
+    g_signal_connect(window->webView, "permission-request", G_CALLBACK(webViewDecidePermissionRequest), window);
+    g_signal_connect(window->webView, "mouse-target-changed", G_CALLBACK(webViewMouseTargetChanged), window);
+    g_signal_connect(window->webView, "notify::favicon", G_CALLBACK(faviconChanged), window);
+    g_signal_connect(window->webView, "close", G_CALLBACK(webViewClose), window);
+
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_box_pack_start(GTK_BOX(window->mainBox), overlay, TRUE, TRUE, 0);
+    gtk_widget_show(overlay);
+
+    window->statusLabel = gtk_label_new(NULL);
+    gtk_widget_set_halign(window->statusLabel, GTK_ALIGN_START);
+    gtk_widget_set_valign(window->statusLabel, GTK_ALIGN_END);
+    gtk_widget_set_margin_start(window->statusLabel, 1);
+    gtk_widget_set_margin_end(window->statusLabel, 1);
+    gtk_widget_set_margin_top(window->statusLabel, 1);
+    gtk_widget_set_margin_bottom(window->statusLabel, 1);
+//    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), window->statusLabel);
+
+    gtk_container_add(GTK_CONTAINER(overlay), GTK_WIDGET(window->webView));
+
+    gtk_widget_show(GTK_WIDGET(window->webView));
 
     return GTK_WIDGET(window);
 }

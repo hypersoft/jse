@@ -13,9 +13,12 @@ textarea {
 </style>
 <script>
 
+
 function bodyOnLoad() {
-	//window.resizeTo(window.width * .5, window.height * .5);
-	//input.focus();
+	var nWidth = screen.width * .5, nHeight = screen.height * .5;
+	window.moveTo(nWidth / 2, nHeight / 2);
+	window.resizeTo(nWidth, nHeight);
+	input.focus();
 }
 
 function eOnClick(){
@@ -27,20 +30,16 @@ function eOnClick(){
 </script>
 </head>
 <body onload=bodyOnLoad()>
-<div>
+	<p>Right click within this page to activate extended inspection facilities.</p>
+	<div>
 <p><b>Javascript:</b></p>
-<p><textarea id="input"></textarea></p>
-<table width=100%><tr>
-<td width=90%>
-<b>Result:&nbsp;</b><input id=result type="text" style="width:90%;">
-</td>
-<td align=right>
+<p><textarea id="input" style="height:30%"></textarea>
+</p>
+<p align=right>
 <button onclick="result.value = eOnClick();">Evaluate</button>
-</td>
-</tr></table>
+</p>
 
+<p><b>Result:</b></p>
+<p><textarea name="result" id="result" style="height:30%"></textarea></p>
 </div>
-<p>Right click within this page to activate extended inspection facilities.</p>
-
-
 </body></html>
