@@ -113,7 +113,6 @@ static GtkWidget *webViewCreate(WebKitWebView *webView, WebKitNavigationAction *
 {
     WebKitWebView *newWebView = WEBKIT_WEB_VIEW(webkit_web_view_new_with_related_view(webView));
     webkit_web_view_set_settings(newWebView, webkit_web_view_get_settings(webView));
-
     GtkWidget *newWindow = ghtml_window_new(newWebView, GTK_WINDOW(window));
     g_signal_connect(newWebView, "ready-to-show", G_CALLBACK(webViewReadyToShow), newWindow);
     g_signal_connect(newWebView, "run-as-modal", G_CALLBACK(webViewRunAsModal), newWindow);
@@ -290,6 +289,7 @@ static void ghtmlWindowConstructed(GObject *gObject)
     g_signal_connect(window->webView, "permission-request", G_CALLBACK(webViewDecidePermissionRequest), window);
     g_signal_connect(window->webView, "mouse-target-changed", G_CALLBACK(webViewMouseTargetChanged), window);
     g_signal_connect(window->webView, "notify::favicon", G_CALLBACK(faviconChanged), window);
+    g_signal_connect(window->webView, "close", G_CALLBACK(webViewClose), window);
 
     GtkWidget *overlay = gtk_overlay_new();
     gtk_box_pack_start(GTK_BOX(window->mainBox), overlay, TRUE, TRUE, 0);
