@@ -215,6 +215,7 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
+        gtk_window_get_destroy_with_parent(Ghtml.window);
     }
 
     gtk_window_set_modal(Ghtml.window, Ghtml.modal);
