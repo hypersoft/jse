@@ -9,6 +9,7 @@ typedef struct sGhtmlConfiguration {
     const char * name;
     gboolean 
         modal,
+        auto_hide_titlebar,
         stay_hidden,
         force_focus,
         center,
@@ -124,6 +125,10 @@ int ghtml_parse_option(char * opt) {
         Ghtml.transparent = true;
         return 1;
     }
+    if (STREQUAL(opt, "--auto-hide-titlebar")) {
+        Ghtml.auto_hide_titlebar= true;
+        return 1;
+    }
 
     if (STREQUAL(opt, "--desktop-widget")) {
         Ghtml.no_pager = true;
@@ -220,6 +225,8 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     if (Ghtml.disable_decorations) {
         gtk_window_set_decorated(Ghtml.window, false);
+    } else if (Ghtml.auto_hide_titlebar) {
+        gtk_window_set_hide_titlebar_when_maximized(Ghtml.window, true);
     }
 
     if (Ghtml.no_pager) {
