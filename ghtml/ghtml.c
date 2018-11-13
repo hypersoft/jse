@@ -12,7 +12,6 @@ typedef struct sGhtmlConfiguration {
         center_on_parent,
         disable_decorations, 
         transparent, 
-        desktop_widget, 
         stay_on_top, 
         stay_on_bottom, 
         no_pager, 
@@ -22,6 +21,7 @@ typedef struct sGhtmlConfiguration {
     WebKitWebView * view;
     const char * file;
     GdkRectangle geometry;
+    int type_hint;
 } GhtmlConfiguration;
 
 GhtmlConfiguration Ghtml;
@@ -95,6 +95,10 @@ int ghtml_parse_option_with_value(char * opt, char * val) {
         sscanf(val, "%p", &Ghtml.parent);
         return 2;
     }
+    if (STREQUAL(opt, "--type-hint")) {
+        sscanf(val, "%i", &Ghtml.type_hint);
+        return 2;
+    }
     return 0;
 }
 
@@ -123,7 +127,7 @@ int ghtml_parse_option(char * opt) {
         Ghtml.no_taskbar = true;
         Ghtml.stay_on_bottom = true;
         Ghtml.disable_decorations = true;
-        Ghtml.desktop_widget = true;
+        Ghtml.type_hint = GDK_WINDOW_TYPE_HINT_DOCK || GDK_WINDOW_TYPE_HINT_UTILITY;
         return 1;
     }
 
@@ -214,13 +218,15 @@ void ghtml_start_application(int argc, char * argv[]) {
         gtk_window_set_keep_above(Ghtml.window, true);
     }
 
-    if (Ghtml.desktop_widget) {
-        gtk_window_set_type_hint(Ghtml.window, GDK_WINDOW_TYPE_HINT_DOCK || GDK_WINDOW_TYPE_HINT_UTILITY);
-    } 
+    if (Ghtml.type_hint) {
+        gtk_window_set_type_hint(Ghtml.window, Ghtml.type_hint);    
+    }
     
     if (Ghtml.center) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER);
-    } else if (Ghtml.parent && Ghtml.center_on_parent) {
+    }
+    
+    if (Ghtml.center_on_parent) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER_ON_PARENT);
     }
     
@@ -270,7 +276,7 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     // Make sure that when the browser area becomes visible, it will get mouse
     // and keyboard events
-    if (!Ghtml.desktop_widget) {
+    if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK)) {
         gtk_widget_grab_focus(GTK_WIDGET(webView));
     }
 
