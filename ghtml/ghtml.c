@@ -15,6 +15,7 @@ typedef struct sGhtmlConfiguration {
         force_focus,
         center,
         center_on_parent,
+        center_on_mouse,
         disable_decorations, 
         transparent, 
         stay_on_top, 
@@ -202,6 +203,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--center-on-mouse")) {
+        Ghtml.center_on_mouse = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--with-inspector")) {
         Ghtml.with_inspector = true;
         return 1;
@@ -278,7 +284,7 @@ void ghtml_start_application(int argc, char * argv[]) {
         gtk_window_set_type_hint(Ghtml.window, Ghtml.type_hint);    
     }
     
-    gtk_window_set_position(Ghtml.window, GTK_WIN_POS_MOUSE);
+    if (Ghtml.center_on_mouse) gtk_window_set_position(Ghtml.window, GTK_WIN_POS_MOUSE);
 
     if (Ghtml.center) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER);
