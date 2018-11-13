@@ -29,6 +29,7 @@ static void destroyWindowCb(GtkWidget* widget, GtkWidget* window);
 static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
 static void window_geometry_changed(WebKitWindowProperties *windowProperties, GtkWindow *window);
 static void webViewTitleChanged(WebKitWebView *webView, GParamSpec *pspec, GtkWindow *window);
+static void faviconChanged(GObject *object, GParamSpec *paramSpec, gpointer *window);
 
 int ghtml_parse_option_with_value(char * opt, char * val);
 
@@ -82,7 +83,7 @@ load_changed (WebKitWebView  *web_view,
 {
     if (load_event == WEBKIT_LOAD_COMMITTED) {
 //        g_printerr("load finished\n");
-        webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
+        //webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
     }
 }
 
@@ -223,6 +224,7 @@ void ghtml_start_application(int argc, char * argv[]) {
                       G_CALLBACK (window_geometry_changed), window);
 
     g_signal_connect(webView, "notify::title", G_CALLBACK(webViewTitleChanged), window);
+    g_signal_connect(webView, "notify::favicon", G_CALLBACK(faviconChanged), window);
 
     // Set up callbacks so that if either the main window or the browser instance is
     // closed, the program will exit
@@ -323,6 +325,7 @@ static void destroyWindowCb(GtkWidget* widget, GtkWidget* window)
 static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window)
 {
     gtk_widget_destroy(window);
+    ghtml_die(0);
     return TRUE;
 }
 
@@ -364,3 +367,16 @@ static void webViewTitleChanged(WebKitWebView *webView, GParamSpec *pspec, GtkWi
 
 }
 
+static void faviconChanged(GObject *object, GParamSpec *paramSpec, gpointer *window)
+{
+    GdkPixbuf *favicon = NULL;
+    cairo_surface_t *surface = webkit_web_view_get_favicon(Ghtml.view);
+
+    if (surface) {
+        int width = cairo_image_surface_get_width(surface);
+        int height = cairo_image_surface_get_height(surface);
+        favicon = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+        gtk_window_set_icon(Ghtml.window, favicon);
+    }
+
+}
