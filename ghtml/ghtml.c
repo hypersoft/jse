@@ -90,21 +90,19 @@ load_changed (WebKitWebView  *web_view,
                WebKitLoadEvent load_event,
                gpointer        user_data)
 {
+    if (load_event == WEBKIT_LOAD_STARTED) {
+        if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK))  gtk_widget_grab_focus(GTK_WIDGET(Ghtml.view));
+    }
+    
     if (load_event == WEBKIT_LOAD_COMMITTED) {
-            // Make sure that when the browser area becomes visible, it will get mouse
-    // and keyboard events
-    if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK)) {
-        gtk_widget_grab_focus(GTK_WIDGET(Ghtml.view));
+        if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
     }
 
-    // Make sure the main window and all its contents are visible
-    if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
-
-    if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
-
-//        g_printerr("load finished\n");
-        //webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
+    if (load_event == WEBKIT_LOAD_FINISHED) {
+        if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
     }
+
+//webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
 }
 
 #define STREQUAL(A, B) ((strcmp(A, B)) == 0)
