@@ -88,6 +88,17 @@ load_changed (WebKitWebView  *web_view,
                gpointer        user_data)
 {
     if (load_event == WEBKIT_LOAD_COMMITTED) {
+            // Make sure that when the browser area becomes visible, it will get mouse
+    // and keyboard events
+    if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK)) {
+        gtk_widget_grab_focus(Ghtml.view);
+    }
+
+    // Make sure the main window and all its contents are visible
+    if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
+
+    if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
+
 //        g_printerr("load finished\n");
         //webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
     }
@@ -226,6 +237,9 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     Ghtml.window = GTK_WINDOW(window);
 
+    gtk_window_set_default_size(Ghtml.window, 0, 0);
+    gtk_window_move(Ghtml.window, 0, 0);
+
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
         gtk_window_set_destroy_with_parent(Ghtml.window, true);
@@ -264,6 +278,8 @@ void ghtml_start_application(int argc, char * argv[]) {
         gtk_window_set_type_hint(Ghtml.window, Ghtml.type_hint);    
     }
     
+    gtk_window_set_position(Ghtml.window, GTK_WIN_POS_MOUSE);
+
     if (Ghtml.center) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER);
     }
@@ -322,17 +338,6 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(webView));
-
-    // Make sure that when the browser area becomes visible, it will get mouse
-    // and keyboard events
-    if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK)) {
-        gtk_widget_grab_focus(GTK_WIDGET(webView));
-    }
-
-    // Make sure the main window and all its contents are visible
-    if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
-
-    if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
 
     char * fileCap = get_file_name_as_file_uri(Ghtml.file);
     webkit_web_view_load_uri(webView, fileCap);
