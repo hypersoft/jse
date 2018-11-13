@@ -9,6 +9,7 @@ typedef struct sGhtmlConfiguration {
     const char * name;
     gboolean 
         modal,
+        maximize,
         auto_hide_titlebar,
         stay_hidden,
         force_focus,
@@ -160,6 +161,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--maximize")) {
+        Ghtml.maximize = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--force-focus")) {
         Ghtml.force_focus = true;
         return 1;
@@ -222,11 +228,12 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
-        gtk_window_get_destroy_with_parent(Ghtml.window);
+        gtk_window_set_destroy_with_parent(Ghtml.window, true);
     }
 
     if (Ghtml.attachment) {
         gtk_window_set_attached_to(Ghtml.window, GTK_WIDGET(Ghtml.attachment));
+        gtk_window_set_destroy_with_parent(Ghtml.window, true);
     }
 
     gtk_window_set_modal(Ghtml.window, Ghtml.modal);
@@ -292,10 +299,16 @@ void ghtml_start_application(int argc, char * argv[]) {
     g_signal_connect(webView, "load-changed", G_CALLBACK(load_changed), window);
     
     webkit_settings_set_enable_javascript(webkitSettings, TRUE);
+    webkit_settings_get_javascript_can_access_clipboard(webkitSettings, true);
+    
     webkit_settings_set_enable_java(webkitSettings, TRUE);
 
     if (Ghtml.with_inspector) {
         webkit_settings_set_enable_developer_extras(webkitSettings, TRUE);
+    }
+
+    if (Ghtml.maximize) {
+        gtk_window_maximize(Ghtml.window);
     }
 
     if (Ghtml.transparent) {
