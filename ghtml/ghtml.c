@@ -9,6 +9,7 @@ typedef struct sGhtmlConfiguration {
     const char * name;
     gboolean 
         center,
+        center_on_parent,
         disable_decorations, 
         transparent, 
         desktop_widget, 
@@ -148,6 +149,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--center-on-parent")) {
+        Ghtml.center_on_parent = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--with-inspector")) {
         Ghtml.with_inspector = true;
         return 1;
@@ -214,6 +220,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     
     if (Ghtml.center) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER);
+    } else if (Ghtml.parent && Ghtml.center_on_parent) {
+        gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER_ON_PARENT);
     }
     
     webkit_web_context_set_web_extensions_directory(
