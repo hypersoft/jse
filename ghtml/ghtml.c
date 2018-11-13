@@ -10,11 +10,10 @@ typedef struct sGhtmlConfiguration {
     gboolean 
         modal,
         maximize,
+        execute,
         auto_hide_titlebar,
         stay_hidden,
         force_focus,
-        untrusted,
-        no_javascript,
         center,
         center_on_parent,
         center_on_mouse,
@@ -24,7 +23,8 @@ typedef struct sGhtmlConfiguration {
         stay_on_bottom, 
         no_pager, 
         no_taskbar,
-        with_inspector;
+        with_inspector,
+        with_javascript;
     GtkWindow * window, * parent, * attachment;
     WebKitWebView * view;
     const char * file;
@@ -175,11 +175,6 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
-    if (STREQUAL(opt, "--no-javascript")) {
-        Ghtml.no_javascript = true;
-        return 1;
-    }
-
     if (STREQUAL(opt, "--maximize")) {
         Ghtml.maximize = true;
         return 1;
@@ -220,8 +215,8 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
-    if (STREQUAL(opt, "--untrusted")) {
-        Ghtml.untrusted = true;
+    if (STREQUAL(opt, "--with-javascript")) {
+        Ghtml.with_javascript = true;
         return 1;
     }
 
@@ -254,6 +249,7 @@ void ghtml_start_application(int argc, char * argv[]) {
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     Ghtml.window = GTK_WINDOW(window);
+    Ghtml.execute = g_file_test(Ghtml.file, G_FILE_TEST_IS_EXECUTABLE);
 
     gtk_window_set_default_size(Ghtml.window, 0, 0);
     gtk_window_move(Ghtml.window, 0, 0);
@@ -305,7 +301,13 @@ void ghtml_start_application(int argc, char * argv[]) {
     if (Ghtml.center_on_parent) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER_ON_PARENT);
     }
-    
+
+    if (Ghtml.execute) { // ONLY LOAD PLUGINS IF THE FILE IS EXECUTABLE
+        webkit_web_context_set_web_extensions_directory(
+            webkit_web_context_get_default(),
+                "/usr/share/jse/plugin");
+    }
+
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
@@ -326,20 +328,19 @@ void ghtml_start_application(int argc, char * argv[]) {
     g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), window);
     g_signal_connect(webView, "load-changed", G_CALLBACK(load_changed), window);
     
-    if (! Ghtml.no_javascript) webkit_settings_set_enable_javascript(webkitSettings, TRUE);
+    // allow this to be turned on for basic web functionality.
+    if (Ghtml.with_javascript) webkit_settings_set_enable_javascript(webkitSettings, TRUE);
 
-    if (! Ghtml.untrusted) {
+    if (Ghtml.execute) { // ONLY ENABLE SECURE FEATURES IF THE FILE IS EXECUTABLE
 
-        webkit_web_context_set_web_extensions_directory(
-            webkit_web_context_get_default(),
-                "/usr/share/jse/plugin");
-
+        webkit_settings_set_enable_javascript(webkitSettings, TRUE);
         webkit_settings_set_enable_plugins(webkitSettings, TRUE);
 
         webkit_settings_set_javascript_can_access_clipboard(webkitSettings, true);
         webkit_settings_set_allow_file_access_from_file_urls(webkitSettings, true);
         webkit_settings_set_allow_universal_access_from_file_urls(webkitSettings, true);
         webkit_settings_set_enable_java(webkitSettings, TRUE);
+
     }
 
     if (Ghtml.with_inspector) {
