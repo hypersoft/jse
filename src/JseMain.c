@@ -217,8 +217,8 @@ GError * jse_parse_options (
 		return NULL;
 	} else if (option == &jseOptions[3]) {
 		JSValue result, jsError = NULL;
-		(void) JSLoadPlugin(jse.ctx, (char*)value, NULL, &jsError);
-		if (jsError) return JSExceptionToGError(jse.ctx, jsError);
+		//(void) JSLoadPlugin(jse.ctx, (char*)value, NULL, &jsError);
+		//if (jsError) return JSExceptionToGError(jse.ctx, jsError);
 		return NULL;
 	} else if (option == &jseOptions[4]) {
 		char evalNo[512]; sprintf(evalNo, "eval[%d]", evalNumber++);
