@@ -1,7 +1,15 @@
 <html><head><title>JavaScript ScratchPad - Ghtml</title>
 <style>
+
 * {
 	font-size: 10pt;
+}
+
+textarea {
+	width: 99%;
+	height: 30%;
+	font-family: monospace;
+	resize:none;
 }
 
 </style>
@@ -16,13 +24,11 @@ function bodyOnLoad() {
 }
 
 function eOnClick(){
-	result.value = "";
 	try {
-		var value = String(eval(input.value))
+		return String(eval(input.value))
 	} catch(nope) {
-		value = "script error: " + nope.message + ";\n\n" + nope.stack.toString();
+		return "script error: " + nope.message + ";\n\n" + nope.stack.toString();
 	}
-	return value;
 }
 
 </script>
@@ -31,9 +37,9 @@ function eOnClick(){
 	<p>Right click within this page to activate extended inspection facilities.</p>
 	<div>
 		<p><b>Result:</b></p>
-		<p><textarea name="result" id="result" style="width:99%;height:30%"></textarea></p>
+		<p><textarea id="result" readonly></textarea></p>
 		<p><b>Javascript:</b></p>
-<p><textarea id="input" style="width:99%;height:30%"></textarea>
+<p><textarea id="input"></textarea>
 </p>
 <p align=right style="width:99%">
 <button onclick="result.value = eOnClick();">Evaluate</button>
