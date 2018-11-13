@@ -191,7 +191,7 @@ JseOption jseOptions[] = {
 	{OPT_WORD | OPT_LONG, 0, "--shell-script"},
 	{OPT_MINUS | OPT_LONG, 's', "silent"},
 	{OPT_WORD | OPT_ARG, 0, "-L"},
-	{OPT_WORD | OPT_ARG, 0, "-l"},
+	{OPT_WORD | OPT_ARG, 0, "-l"},  // NOP
 	{OPT_UNIFIED | OPT_ARG, 'e', "eval"},
 	{OPT_UNIFIED | OPT_ARG, 'c', "command"},
 	{0}
@@ -216,7 +216,7 @@ GError * jse_parse_options (
 		g_ptr_array_insert(jse.dlPath, 0, g_strdup(value));
 		return NULL;
 	} else if (option == &jseOptions[3]) {
-		JSValue result, jsError = NULL;
+		//JSValue result, jsError = NULL;
 		//(void) JSLoadPlugin(jse.ctx, (char*)value, NULL, &jsError);
 		//if (jsError) return JSExceptionToGError(jse.ctx, jsError);
 		return NULL;
