@@ -1,4 +1,4 @@
 #!/bin/sh
 
-ghtml -f `dirname $0`/testbed.html
+ghtml --with-inspector -f `dirname $0`/testbed.html
 
