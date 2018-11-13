@@ -8,6 +8,8 @@ typedef struct sGhtmlConfiguration {
     const char * path;
     const char * name;
     gboolean 
+        stay_hidden,
+        force_focus,
         center,
         center_on_parent,
         disable_decorations, 
@@ -91,7 +93,7 @@ load_changed (WebKitWebView  *web_view,
 #define STREQUAL(A, B) ((strcmp(A, B)) == 0)
 
 int ghtml_parse_option_with_value(char * opt, char * val) {
-    if (val[0] =='0' && val[1] == 'x' && STREQUAL(opt, "--parent-window")) {
+    if (STREQUAL(opt, "--parent-window")) {
         sscanf(val, "%p", &Ghtml.parent);
         return 2;
     }
@@ -148,6 +150,16 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--force-focus")) {
+        Ghtml.force_focus = true;
+        return 1;
+    }
+
+    if (STREQUAL(opt, "--stay-hidden")) {
+        Ghtml.stay_hidden = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--center")) {
         Ghtml.center = true;
         return 1;
@@ -190,6 +202,7 @@ screen_changed (GtkWidget *window,
 void ghtml_start_application(int argc, char * argv[]) {
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    
     //gtk_window_set_default_geometry(GTK_WINDOW(window),)
 
     Ghtml.window = GTK_WINDOW(window);
@@ -241,6 +254,8 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     WebKitSettings * webkitSettings = webkit_web_view_get_settings(webView);
 
+    webkit_settings_set_enable_plugins(webkitSettings, TRUE);
+
     WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(webView);
     g_signal_connect (windowProperties, "notify::geometry",
                       G_CALLBACK (window_geometry_changed), window);
@@ -261,8 +276,6 @@ void ghtml_start_application(int argc, char * argv[]) {
         webkit_settings_set_enable_developer_extras(webkitSettings, TRUE);
     }
 
-    webkit_settings_set_enable_plugins(webkitSettings, TRUE);
-
     if (Ghtml.transparent) {
         gtk_widget_set_app_paintable(window, TRUE);
         g_signal_connect(G_OBJECT(window), "screen-changed", G_CALLBACK(screen_changed), NULL);
@@ -281,7 +294,9 @@ void ghtml_start_application(int argc, char * argv[]) {
     }
 
     // Make sure the main window and all its contents are visible
-    gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
+    if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
+
+    if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
 
     char * fileCap = get_file_name_as_file_uri(Ghtml.file);
     webkit_web_view_load_uri(webView, fileCap);
