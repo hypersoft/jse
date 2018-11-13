@@ -58,10 +58,10 @@ GHTML_CONFIG != pkg-config --cflags --libs webkit2gtk-4.0
 bin/ghtml: ${GHTML_SOURCES}
 	gcc ${JSE_CFLAGS} ${GHTML_SOURCES} ${JSE_LIBS} -o bin/ghtml ${GHTML_CONFIG}
 
-plugins: share/plugin/JseWebKit.so share/plugin/GNUReadLine.jso \
+plugins: share/plugin/JseWebKit.so share/plugin/Ghtml.jso \
 	 share/plugin/Environment.jso share/plugin/Address.jso \
 	 share/plugin/DynCall.jso \
-	 share/plugin/MachineType.jso
+	 share/plugin/MachineType.jso share/plugin/Shell.jso
 
 obj/* obj/plugin/*: include/jse.h
 
@@ -82,11 +82,11 @@ share/plugin/JseWebKit.so: ${JSE_OBJS} src/JseWebKit.c
 	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -shared -ldl -fPIC
 
 GNU_READLINE_FLAGS != pkg-config --cflags javascriptcoregtk-4.0
-obj/plugin/GNUReadLine.o: plugin/GNUReadLine.c
+obj/plugin/Shell.o: plugin/Shell.c
 	@mkdir -p obj/plugin;
 	gcc ${GNU_READLINE_FLAGS} -fPIC -I include -c $< -o $@ ${JSE_CFLAGS}
 
-share/plugin/GNUReadLine.jso: obj/plugin/GNUReadLine.o
+share/plugin/Shell.jso: obj/plugin/Shell.o
 	@mkdir -p share/plugin;
 	gcc $< -fPIC -shared -o $@ $(shell pkg-config --libs javascriptcoregtk-4.0) -lreadline
 

@@ -2,22 +2,12 @@
 #include <bits/stat.h>
 #include <time.h>
 
-static char * JSE_ERROR_CTOR = "Error";
-static char * JSE_SINGLE_ARGUMENT = "%s expected 1 parameter, have: %zd";
-static char * JSE_MULTI_ARGUMENTS = "%s expected %i parameters, have: %zd";
-static char * JSE_RANGE_ARGUMENTS = "%s expected %i-%i parameters, have: %zd";
-static char * JSE_AT_LEAST_ARGUMENTS = "%s requires at least %i parameters, have: %zd";
-static char * JSE_AT_LEAST_ONE_ARGUMENT = "%s requires at least 1 parameter, have: %zd";
-
-#define NULL_VALUE JSValueMakeNull(ctx)
-#define THROWING_EXCEPTION(E) (((exception)?*exception = E:0), NULL_VALUE)
-
-#define WANT_NO_PARAMETERS() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, __FUNCTION__, 0, argc)
-#define WANT_RANGE_PARAMETERS(MIN, MAX) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_RANGE_ARGUMENTS, __FUNCTION__, MIN, MAX, argc)
-#define WANT_EXACT_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_MULTI_ARGUMENTS, __FUNCTION__, COUNT, argc)
-#define WANT_AT_LEAST_PARAMETERS(COUNT) JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ARGUMENTS, __FUNCTION__, COUNT, argc)
-#define WANT_AT_LEAST_ONE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_AT_LEAST_ONE_ARGUMENT, __FUNCTION__, argc)
-#define WANT_SINGLE_PARAMETER() JSExceptionFromUtf8(ctx, JSE_ERROR_CTOR, JSE_SINGLE_ARGUMENT, __FUNCTION__, argc)
+char * JSE_ERROR_CTOR = "Error";
+char * JSE_SINGLE_ARGUMENT = "%s expected 1 parameter, have: %zd";
+char * JSE_MULTI_ARGUMENTS = "%s expected %i parameters, have: %zd";
+char * JSE_RANGE_ARGUMENTS = "%s expected %i-%i parameters, have: %zd";
+char * JSE_AT_LEAST_ARGUMENTS = "%s requires at least %i parameters, have: %zd";
+char * JSE_AT_LEAST_ONE_ARGUMENT = "%s requires at least 1 parameter, have: %zd";
 
 JSValue terminate(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
@@ -30,37 +20,6 @@ JSValue terminate(JSContext ctx, JSObject function, JSObject this, size_t argc, 
 
 }
 
-JSValue source(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-
-	if (argc != 1) {
-		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
-	}
-
-	JSValue result = NULL;
-	char * file = JSValueToUtf8(ctx, argv[0]);
-	char * contents = NULL;
-	GError * error = NULL;
-	g_file_get_contents(file, &contents, NULL, &error);
-
-	if (! error) {
-		char * data = contents;
-		if (g_str_has_prefix(data, "#!")) {
-			int c; while (c = data[0]) if (c != '\n') data++; else break;
-		}
-		JSString source = JSStringFromUtf8(data), url = JSStringFromUtf8(file);
-		JSValue result = JSEvaluateScript(ctx, source, this, url, 1, exception);
-		JSStringRelease(source); JSStringRelease(url);
-		if (*exception) goto fail;
-	} else {
-		*exception = JSExceptionFromGError(ctx, error);
-		g_error_free(error);
-	}
-	fail:
-	free(file);	g_free(contents);
-	return (*exception)?NULL_VALUE:result;
-
-}
 
 JSValue lastError(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
@@ -109,112 +68,6 @@ JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc,
 	else return result;
 }
 
-JSValue printErrorLine(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	if (argc != 1) {
-		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
-	}
-
-	JSValue result;
-	char * file = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
-	g_printerr("%s\n", file);
-	g_free(file);
-	return JSValueMakeBoolean(ctx, true);
-}
-
-JSValue echo(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	unsigned i, argFinal = argc - 1;
-	char *bytes;
-	bool have_newline = false;
-	for (i = 0; i < argc; i++) {
-		bytes = JSValueToUtf8(ctx, argv[i]);
-		if (! bytes) continue;
-		g_print("%s%s", i ? " " : "", bytes);
-		free(bytes);
-	}
-
-	putc('\n', stdout); 
-	fflush(stdout);
-
-	return JSValueMakeBoolean(ctx, true);
-
-}
-
-JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-
-	if (argc == 0) {
-		return THROWING_EXCEPTION(WANT_AT_LEAST_ONE_PARAMETER());
-	}
-
-	JSObject parameters = (JSObject)JSObjectGetUtf8Property(ctx, JSContextGetGlobalObject(ctx), "argv");
-	JSString script, source;
-	script = JSValueToString(ctx, argv[0], exception);
-	int line = 1;
-	if (exception && *exception) return NULL;
-	if (argc > 1) {
-		source = JSValueToStringCopy(ctx, argv[1], exception);
-		if (exception && *exception) {
-			JSStringRelease(script);
-			return NULL;
-		}
-		if (argc > 2) line = JSValueToNumber(ctx, argv[2], exception);
-		if (exception && *exception) {
-			JSStringRelease(script);
-			return NULL;
-		}
-	} else {
-		JSValue v = JSObjectGetPropertyAtIndex(ctx, parameters, 0, exception);
-		if (exception && *exception) {
-			JSStringRelease(script);
-			return NULL;
-		}
-		source = JSValueToStringCopy(ctx, v, exception);
-		if (exception && *exception) {
-			JSStringRelease(script);
-			return NULL;
-		}
-	}
-
-	bool value = JSCheckScriptSyntax(ctx, script, source, line, exception);
-	JSStringRelease(script); JSStringRelease(source);
-	return JSValueMakeBoolean(ctx, value);
-}
-
-JSValue run(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-
-	if (argc < 1) {
-		return THROWING_EXCEPTION(WANT_AT_LEAST_ONE_PARAMETER());
-	}
-
-	int allocated = 0, deallocated = 0;
-	gchar *exec_child_out = NULL, *exec_child_err = NULL; gint exec_child_status = 0;
-
-	JSObject exec = NULL;
-
-	char * argument[argc + 1];
-	int index = 0;
-	while (index < argc) {
-		argument[index] = JSValueToUtf8(ctx, argv[index]);
-		index++;
-	}
-	argument[index] = NULL;
-	if (g_spawn_sync(NULL, argument, NULL, G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &exec_child_out, &exec_child_err, &exec_child_status, NULL)) {
-		exec_child_status = WEXITSTATUS(exec_child_status);
-		exec = JSValueToObject(ctx,JSInlineEval(ctx, "Object.create(this.prototype)", this, NULL), NULL);
-		JSObjectSetUtf8Property(ctx, exec, "stdout", JSValueFromUtf8(ctx, exec_child_err), 0);
-		g_free(exec_child_out);
-		JSObjectSetUtf8Property(ctx, exec, "stderr", JSValueFromUtf8(ctx, exec_child_err), 0);
-		g_free(exec_child_err);
-		JSObjectSetUtf8Property(ctx, exec, "status", JSValueFromNumber(ctx, exec_child_status), 0);
-	}
-
-	while (index) g_free(argument[--index]);
-
-	return (JSValue) exec;
-}
 
 JSValue machineTypeRead(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
@@ -303,26 +156,6 @@ JSValue machineTypeWrite(JSContext ctx, JSObject function, JSObject this, size_t
 		return argv[1];
 	} else {
 		return JSValueMakeUndefined(ctx);
-	}
-}
-
-JSValue jsLocalPath(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	if (argc == 0) {
-		char buffer[8192]; getcwd(buffer, sizeof(buffer));
-		return JSValueFromUtf8(ctx, buffer);
-	} else if (argc == 1) {
-		char * txt = JSValueToUtf8(ctx, argv[0]);
-		if (!g_file_test(txt, G_FILE_TEST_IS_DIR)) {
-			*exception = JSExceptionFromUtf8(ctx, "ReferenceError", "localPath: `%s' is not a directory", txt);
-			g_free(txt);
-			return JSValueMakeNull (ctx);
-		}
-		int result = chdir(txt);
-		g_free(txt);
-		return JSValueMakeBoolean(ctx, result != -1);
-	} else {
-		return THROWING_EXCEPTION(WANT_RANGE_PARAMETERS(0, 1));
 	}
 }
 

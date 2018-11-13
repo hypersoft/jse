@@ -132,15 +132,9 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
 
-	JSObjectCreateFunction(jse.ctx, global, "source", source);
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
-	JSObjectCreateFunction(jse.ctx, global, "printErrorLine", printErrorLine);
-	JSObjectCreateFunction(jse.ctx, global, "echo", echo);
-	JSObjectCreateFunction(jse.ctx, global, "checkSyntax", checkSyntax);
-	JSObjectCreateFunction(jse.ctx, global, "run", run);
-	JSObjectCreateFunction(jse.ctx, global, "localPath", jsLocalPath);
-	JSLoadPlugin(jse.ctx, "GNUReadLine.jso", global, NULL);
+	JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	JSValue jsError = NULL;
