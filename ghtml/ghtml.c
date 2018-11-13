@@ -208,8 +208,6 @@ screen_changed (GtkWidget *window,
 void ghtml_start_application(int argc, char * argv[]) {
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    
-    //gtk_window_set_default_geometry(GTK_WINDOW(window),)
 
     Ghtml.window = GTK_WINDOW(window);
 
