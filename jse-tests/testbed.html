@@ -1,49 +1,52 @@
-<html><head><title>JavaScript ScratchPad - Ghtml</title>
-<style>
+<html>
 
-* {
-	font-size: 10pt;
-}
+<head>
+	<title>JavaScript ScratchPad - Ghtml</title>
+	<style>
+		* {
+			font-size: 10pt;
+		}
 
-textarea {
-	width: 99%;
-	height: 30%;
-	font-family: monospace;
-	resize:none;
-}
+		textarea {
+			width: 99%;
+			height: 30%;
+			font-family: monospace;
+			resize: none;
+		}
+	</style>
+	<script>
 
-</style>
-<script>
+		function bodyOnLoad() {
+			var nWidth = screen.width * .5, nHeight = screen.height * .5;
+			window.moveTo(0, 0); // move to 0, 0 so the rendering engine can perform correct caluclations.
+			window.moveTo(nWidth / 2, nHeight / 2); // now move to where we want X, Y,
+			window.resizeTo(nWidth, nHeight); // now set dimensions.
+			input.focus(); // fire 'em eup
+		}
 
-function bodyOnLoad() {
-	var nWidth = screen.width * .5, nHeight = screen.height * .5;
-	window.moveTo(0, 0); // move to 0, 0 so the rendering engine can perform correct caluclations.
-	window.moveTo(nWidth / 2, nHeight / 2); // now move to where we want X, Y,
-	window.resizeTo(nWidth, nHeight); // now set dimensions.
-	input.focus(); // fire 'em eup
-}
+		function eOnClick() {
+			try {
+				return String(eval(input.value))
+			} catch (nope) {
+				return "script error: " + nope.message + ";\n\n" + nope.stack.toString();
+			}
+		}
 
-function eOnClick(){
-	try {
-		return String(eval(input.value))
-	} catch(nope) {
-		return "script error: " + nope.message + ";\n\n" + nope.stack.toString();
-	}
-}
-
-</script>
+	</script>
 </head>
+
 <body onload=bodyOnLoad()>
 	<p>Right click within this page to activate extended inspection facilities.</p>
 	<div>
 		<p><b>Result:</b></p>
 		<p><textarea id="result" readonly></textarea></p>
 		<p><b>Javascript:</b></p>
-<p><textarea id="input"></textarea>
-</p>
-<p align=right style="width:99%">
-<button onclick="result.value = eOnClick();">Evaluate</button>
-</p>
+		<p><textarea id="input"></textarea>
+		</p>
+		<p align=right style="width:99%">
+			<button onclick="result.value = eOnClick();">Evaluate</button>
+		</p>
+	</div>
+</body>
 
-</div>
-</body></html>
+</html>
