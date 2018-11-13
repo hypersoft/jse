@@ -146,6 +146,7 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	JSValue jsError = NULL;
 
 	JSValue result = NULL;
+
 	if (secureMode) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
@@ -167,6 +168,7 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 			JSReportException(jse.ctx, jse.command, jsError);
 			exit(1);
 		}
+
 	}
 
 	errno = 0;
@@ -256,8 +258,33 @@ int jse_file_mode(char * file)
 			JSTerminate(final);
 		}
 	}
-
 	JSValue jsError = NULL, result = NULL;
+	JSObject global = JSContextGetGlobalObject(jse.ctx);
+
+	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
+		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
+		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
+		JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
+		JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
+		char * file = "/usr/share/jse/core.js";
+		char * contents = NULL;
+		GError * error = NULL;
+		g_file_get_contents(file, &contents, NULL, &error);
+		if (! error) {
+			JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
+		} else {
+			jsError = JSExceptionFromGError(jse.ctx, error);
+			g_error_free(error);
+		}
+
+		g_free(contents);
+		if (jsError) {
+			JSReportException(jse.ctx, jse.command, jsError);
+			exit(1);
+		}
+
+	}
+
 
 	// skip any shebang line..
 	fileData = fileContents;
@@ -335,7 +362,7 @@ int main(int argc, char** argv)
 
 	file = argv[0];
 
-	JSInit(path, NULL, g_file_test(file, G_FILE_TEST_IS_EXECUTABLE));
+	JSInit(path, NULL, false);
 	/*
 		Initialize script arguments
 	*/
