@@ -8,6 +8,7 @@ typedef struct sGhtmlConfiguration {
     const char * path;
     const char * name;
     gboolean 
+        modal,
         stay_hidden,
         force_focus,
         center,
@@ -160,6 +161,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--modal")) {
+        Ghtml.modal = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--center")) {
         Ghtml.center = true;
         return 1;
@@ -210,6 +216,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
     }
+
+    gtk_window_set_modal(Ghtml.window, Ghtml.modal);
 
     if (Ghtml.disable_decorations) {
         gtk_window_set_decorated(Ghtml.window, false);
