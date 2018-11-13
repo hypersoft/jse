@@ -11,7 +11,7 @@ window_object_cleared_callback (WebKitScriptWorld *world,
 	if (! g_str_has_prefix(webkit_web_page_get_uri(web_page), "file")) return;
     JSContext   ctx = webkit_frame_get_javascript_context_for_script_world (frame, world);
 
-	JSInit("jseWebKit", ctx);
+	JSInit("jseWebKit", ctx, true);
 
 	//JSInitScriptArguments(ctx, argc, argv);
 

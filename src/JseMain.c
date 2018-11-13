@@ -106,7 +106,7 @@ void JSAddPluginPath(char * path) /* adds a copy of path to the search path */
 	g_ptr_array_insert(jse.dlPath, 0, g_strdup(path));
 }
 
-void JSInit(char * command, JSContext ctx) {
+void JSInit(char * command, JSContext ctx, bool secureMode) {
 
 	atexit(jse_at_exit);
 	JSErrorQuark = g_quark_from_static_string ("Error");
@@ -126,7 +126,6 @@ void JSInit(char * command, JSContext ctx) {
 
 	jse.dlPath = g_ptr_array_new_with_free_func (g_free);
 	jse.dlLib = g_ptr_array_new_with_free_func ((GDestroyNotify)dlFreeLibrary);
-
 	g_ptr_array_add(jse.dlPath, g_strdup("share/plugin"));
 	g_ptr_array_add(jse.dlPath, g_strdup("~/.local/jse/plugin"));
 	g_ptr_array_add(jse.dlPath, g_strdup("/usr/share/jse/plugin"));
@@ -138,35 +137,36 @@ void JSInit(char * command, JSContext ctx) {
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
 	JSObjectCreateFunction(jse.ctx, global, "printErrorLine", printErrorLine);
 	JSObjectCreateFunction(jse.ctx, global, "echo", echo);
-	JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
-	JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
 	JSObjectCreateFunction(jse.ctx, global, "checkSyntax", checkSyntax);
 	JSObjectCreateFunction(jse.ctx, global, "run", run);
-	JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
-	JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
 	JSObjectCreateFunction(jse.ctx, global, "localPath", jsLocalPath);
-
 	JSLoadPlugin(jse.ctx, "GNUReadLine.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	JSValue jsError = NULL;
 
 	JSValue result = NULL;
-	char * file = "/usr/share/jse/core.js";
-	char * contents = NULL;
-	GError * error = NULL;
-	g_file_get_contents(file, &contents, NULL, &error);
-	if (! error) {
-		JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
-	} else {
-		jsError = JSExceptionFromGError(jse.ctx, error);
-		g_error_free(error);
-	}
+	if (secureMode) {
+		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
+		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
+		JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
+		JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
+		char * file = "/usr/share/jse/core.js";
+		char * contents = NULL;
+		GError * error = NULL;
+		g_file_get_contents(file, &contents, NULL, &error);
+		if (! error) {
+			JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
+		} else {
+			jsError = JSExceptionFromGError(jse.ctx, error);
+			g_error_free(error);
+		}
 
-	g_free(contents);
-	if (jsError) {
-		JSReportException(jse.ctx, jse.command, jsError);
-		exit(1);
+		g_free(contents);
+		if (jsError) {
+			JSReportException(jse.ctx, jse.command, jsError);
+			exit(1);
+		}
 	}
 
 	errno = 0;
@@ -296,7 +296,7 @@ void jse_tty_mode()
 
 int main(int argc, char** argv)
 {
-	JSInit(argv[0], NULL);
+	char * path = argv[0];
 
 	// parse arguments...
 	if (argc > 1) {
@@ -335,6 +335,7 @@ int main(int argc, char** argv)
 
 	file = argv[0];
 
+	JSInit(path, NULL, g_file_test(file, G_FILE_TEST_IS_EXECUTABLE));
 	/*
 		Initialize script arguments
 	*/

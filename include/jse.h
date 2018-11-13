@@ -120,7 +120,7 @@ GError * JSExceptionToGError(JSContext ctx, JSValue exception);
 void JSReportException(JSContext ctx, char * command, JSValue exception);
 void JSReportError(char * command, GError * error);
 
-void JSInit(char * command, JSContext ctx);
+void JSInit(char * command, JSContext ctx, bool secureMode);
 void JSInitScriptArguments(JSContext ctx, int argc, char ** argv);
 void JSAddPluginPath(char * path);
 JSValue JSLoadPlugin(JSContext ctx, char * plugin, JSObject object, JSValue * error);
