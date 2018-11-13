@@ -21,7 +21,7 @@ typedef struct sGhtmlConfiguration {
         no_pager, 
         no_taskbar,
         with_inspector;
-    GtkWindow * window, * parent;
+    GtkWindow * window, * parent, * attachment;
     WebKitWebView * view;
     const char * file;
     GdkRectangle geometry;
@@ -97,6 +97,10 @@ load_changed (WebKitWebView  *web_view,
 int ghtml_parse_option_with_value(char * opt, char * val) {
     if (STREQUAL(opt, "--parent-window")) {
         sscanf(val, "%p", &Ghtml.parent);
+        return 2;
+    }
+    if (STREQUAL(opt, "--attached-to")) {
+        sscanf(val, "%p", &Ghtml.attachment);
         return 2;
     }
     if (STREQUAL(opt, "--type-hint")) {
@@ -219,6 +223,10 @@ void ghtml_start_application(int argc, char * argv[]) {
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
         gtk_window_get_destroy_with_parent(Ghtml.window);
+    }
+
+    if (Ghtml.attachment) {
+        gtk_window_set_attached_to(Ghtml.window, GTK_WIDGET(Ghtml.attachment));
     }
 
     gtk_window_set_modal(Ghtml.window, Ghtml.modal);
