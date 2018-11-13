@@ -8,6 +8,7 @@ typedef struct sGhtmlConfiguration {
     const char * path;
     const char * name;
     gboolean 
+        center,
         disable_decorations, 
         transparent, 
         desktop_widget, 
@@ -26,7 +27,6 @@ GhtmlConfiguration Ghtml;
 
 static void destroyWindowCb(GtkWidget* widget, GtkWidget* window);
 static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
-static void webViewReadyToShow(WebKitWebView *webView, GtkWindow *window);
 static void window_geometry_changed(WebKitWindowProperties *windowProperties, GtkWindow *window);
 static void webViewTitleChanged(WebKitWebView *webView, GParamSpec *pspec, GtkWindow *window);
 
@@ -80,10 +80,9 @@ load_changed (WebKitWebView  *web_view,
                WebKitLoadEvent load_event,
                gpointer        user_data)
 {
-    if (load_event == WEBKIT_LOAD_FINISHED) {
+    if (load_event == WEBKIT_LOAD_COMMITTED) {
 //        g_printerr("load finished\n");
-
-
+        webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
     }
 }
 
@@ -139,6 +138,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--center")) {
+        Ghtml.center = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--with-inspector")) {
         Ghtml.with_inspector = true;
         return 1;
@@ -161,6 +165,7 @@ screen_changed (GtkWidget *window,
 {
 
   GdkScreen *screen = gtk_widget_get_screen (GTK_WIDGET (window));
+
   GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
   if (visual == NULL) visual = gdk_screen_get_system_visual (screen);
   gtk_widget_set_visual (window, visual);
@@ -170,7 +175,7 @@ screen_changed (GtkWidget *window,
 void ghtml_start_application(int argc, char * argv[]) {
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+    //gtk_window_set_default_geometry(GTK_WINDOW(window),)
 
     Ghtml.window = GTK_WINDOW(window);
 
@@ -196,8 +201,12 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     if (Ghtml.desktop_widget) {
         gtk_window_set_type_hint(Ghtml.window, GDK_WINDOW_TYPE_HINT_DOCK || GDK_WINDOW_TYPE_HINT_UTILITY);
+    } 
+    
+    if (Ghtml.center) {
+        gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER);
     }
-
+    
     webkit_web_context_set_web_extensions_directory(
         webkit_web_context_get_default(),
             "/usr/share/jse/plugin");
@@ -219,7 +228,6 @@ void ghtml_start_application(int argc, char * argv[]) {
     // closed, the program will exit
     g_signal_connect(window, "destroy", G_CALLBACK(destroyWindowCb), NULL);
     g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), window);
-    g_signal_connect(webView, "ready-to-show", G_CALLBACK(webViewReadyToShow), window);
     g_signal_connect(webView, "load-changed", G_CALLBACK(load_changed), window);
     
     webkit_settings_set_enable_javascript(webkitSettings, TRUE);
@@ -346,23 +354,6 @@ static void window_geometry_changed(WebKitWindowProperties *windowProperties, Gt
     }
 
     Ghtml.geometry = geometry;
-
-}
-
-static void webViewReadyToShow(WebKitWebView *webView, GtkWindow *window)
-{
-    g_printerr("signal: ready-to-show\n");
-    WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(webView);
-    g_signal_connect (windowProperties, "notify::geometry",
-                      G_CALLBACK (window_geometry_changed), window);
-
-     if (webkit_window_properties_get_fullscreen (windowProperties)) {
-        gtk_window_fullscreen (GTK_WINDOW (window));
-    } else {
-        window_geometry_changed(windowProperties, window);
-    }
-
-    gtk_widget_show_all(GTK_WIDGET(window));
 
 }
 

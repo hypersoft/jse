@@ -7,17 +7,21 @@
 </style>
 <script>
 
-
 function bodyOnLoad() {
 	var nWidth = screen.width * .5, nHeight = screen.height * .5;
-	window.moveTo(nWidth / 2, nHeight / 2);
-	window.resizeTo(nWidth, nHeight);
-	input.focus();
+	window.moveTo(0, 0); // move to 0, 0 so the rendering engine can perform correct caluclations.
+	window.moveTo(nWidth / 2, nHeight / 2); // now move to where we want X, Y,
+	window.resizeTo(nWidth, nHeight); // now set dimensions.
+	input.focus(); // fire 'em eup
 }
 
 function eOnClick(){
 	result.value = "";
-	var value = String(eval(input.value))
+	try {
+		var value = String(eval(input.value))
+	} catch(nope) {
+		value = "script error: " + nope.message + ";\n\n" + nope.stack.toString();
+	}
 	return value;
 }
 
@@ -26,14 +30,14 @@ function eOnClick(){
 <body onload=bodyOnLoad()>
 	<p>Right click within this page to activate extended inspection facilities.</p>
 	<div>
-<p><b>Javascript:</b></p>
+		<p><b>Result:</b></p>
+		<p><textarea name="result" id="result" style="width:99%;height:30%"></textarea></p>
+		<p><b>Javascript:</b></p>
 <p><textarea id="input" style="width:99%;height:30%"></textarea>
 </p>
 <p align=right style="width:99%">
 <button onclick="result.value = eOnClick();">Evaluate</button>
 </p>
 
-<p><b>Result:</b></p>
-<p><textarea name="result" id="result" style="width:99%;height:30%"></textarea></p>
 </div>
 </body></html>
