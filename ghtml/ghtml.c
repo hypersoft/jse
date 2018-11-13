@@ -17,7 +17,7 @@ typedef struct sGhtmlConfiguration {
         no_pager, 
         no_taskbar,
         with_inspector;
-    GtkWindow * window;
+    GtkWindow * window, * parent;
     WebKitWebView * view;
     const char * file;
     GdkRectangle geometry;
@@ -90,6 +90,10 @@ load_changed (WebKitWebView  *web_view,
 #define STREQUAL(A, B) ((strcmp(A, B)) == 0)
 
 int ghtml_parse_option_with_value(char * opt, char * val) {
+    if (val[0] =='0' && val[1] == 'x' && STREQUAL(opt, "--parent-window")) {
+        sscanf(val, "%p", &Ghtml.parent);
+        return 2;
+    }
     return 0;
 }
 
@@ -179,6 +183,10 @@ void ghtml_start_application(int argc, char * argv[]) {
     //gtk_window_set_default_geometry(GTK_WINDOW(window),)
 
     Ghtml.window = GTK_WINDOW(window);
+
+    if (Ghtml.parent) {
+        gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
+    }
 
     if (Ghtml.disable_decorations) {
         gtk_window_set_decorated(Ghtml.window, false);
