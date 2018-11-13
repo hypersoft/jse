@@ -372,12 +372,12 @@ void ghtml_start_application(int argc, char * argv[]) {
 
 }
 
-#define shift(C) argc -= C; argv+= C
+#define shift(C) argc -= C; argv+= C; argno += C
 
 int main(int argc, char* argv[])
 {
     memset(&Ghtml, 0, sizeof(GhtmlConfiguration));
-
+    int argno = 0;
     Ghtml.name = "ghtml";
     Ghtml.path = argv[0];
     Ghtml.file = NULL;
@@ -410,7 +410,12 @@ int main(int argc, char* argv[])
 
     }
 
-    g_printerr("%s: error: no action was specified\n", Ghtml.name);
+    if (argc) {
+        g_printerr("%s: error: foreign command parameter at position %i: %s\n", Ghtml.name, argno, argv[0]);
+
+    } else {
+        g_printerr("%s: error: no action was specified\n", Ghtml.name);
+    }
 
     return 1;
 
