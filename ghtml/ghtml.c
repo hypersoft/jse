@@ -300,7 +300,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     
     webkit_settings_set_enable_javascript(webkitSettings, TRUE);
     webkit_settings_set_javascript_can_access_clipboard(webkitSettings, true);
-
+    webkit_settings_set_allow_file_access_from_file_urls(webkitSettings, true);
+    webkit_settings_set_allow_universal_access_from_file_urls(webkitSettings, true);
     webkit_settings_set_enable_java(webkitSettings, TRUE);
 
     if (Ghtml.with_inspector) {
