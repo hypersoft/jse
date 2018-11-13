@@ -299,8 +299,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     g_signal_connect(webView, "load-changed", G_CALLBACK(load_changed), window);
     
     webkit_settings_set_enable_javascript(webkitSettings, TRUE);
-    webkit_settings_get_javascript_can_access_clipboard(webkitSettings, true);
-    
+    webkit_settings_set_javascript_can_access_clipboard(webkitSettings, true);
+
     webkit_settings_set_enable_java(webkitSettings, TRUE);
 
     if (Ghtml.with_inspector) {
