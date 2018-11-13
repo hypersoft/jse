@@ -13,6 +13,8 @@ typedef struct sGhtmlConfiguration {
         auto_hide_titlebar,
         stay_hidden,
         force_focus,
+        untrusted,
+        no_javascript,
         center,
         center_on_parent,
         center_on_mouse,
@@ -92,7 +94,7 @@ load_changed (WebKitWebView  *web_view,
             // Make sure that when the browser area becomes visible, it will get mouse
     // and keyboard events
     if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK)) {
-        gtk_widget_grab_focus(Ghtml.view);
+        gtk_widget_grab_focus(GTK_WIDGET(Ghtml.view));
     }
 
     // Make sure the main window and all its contents are visible
@@ -173,6 +175,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--no-javascript")) {
+        Ghtml.no_javascript = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--maximize")) {
         Ghtml.maximize = true;
         return 1;
@@ -210,6 +217,11 @@ int ghtml_parse_option(char * opt) {
 
     if (STREQUAL(opt, "--with-inspector")) {
         Ghtml.with_inspector = true;
+        return 1;
+    }
+
+    if (STREQUAL(opt, "--untrusted")) {
+        Ghtml.untrusted = true;
         return 1;
     }
 
@@ -294,18 +306,12 @@ void ghtml_start_application(int argc, char * argv[]) {
         gtk_window_set_position(Ghtml.window, GTK_WIN_POS_CENTER_ON_PARENT);
     }
     
-    webkit_web_context_set_web_extensions_directory(
-        webkit_web_context_get_default(),
-            "/usr/share/jse/plugin");
-
     // Create a browser instance
     WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
     Ghtml.view = webView;
 
     WebKitSettings * webkitSettings = webkit_web_view_get_settings(webView);
-
-    webkit_settings_set_enable_plugins(webkitSettings, TRUE);
 
     WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(webView);
     g_signal_connect (windowProperties, "notify::geometry",
@@ -320,11 +326,21 @@ void ghtml_start_application(int argc, char * argv[]) {
     g_signal_connect(webView, "close", G_CALLBACK(closeWebViewCb), window);
     g_signal_connect(webView, "load-changed", G_CALLBACK(load_changed), window);
     
-    webkit_settings_set_enable_javascript(webkitSettings, TRUE);
-    webkit_settings_set_javascript_can_access_clipboard(webkitSettings, true);
-    webkit_settings_set_allow_file_access_from_file_urls(webkitSettings, true);
-    webkit_settings_set_allow_universal_access_from_file_urls(webkitSettings, true);
-    webkit_settings_set_enable_java(webkitSettings, TRUE);
+    if (! Ghtml.no_javascript) webkit_settings_set_enable_javascript(webkitSettings, TRUE);
+
+    if (! Ghtml.untrusted) {
+
+        webkit_web_context_set_web_extensions_directory(
+            webkit_web_context_get_default(),
+                "/usr/share/jse/plugin");
+
+        webkit_settings_set_enable_plugins(webkitSettings, TRUE);
+
+        webkit_settings_set_javascript_can_access_clipboard(webkitSettings, true);
+        webkit_settings_set_allow_file_access_from_file_urls(webkitSettings, true);
+        webkit_settings_set_allow_universal_access_from_file_urls(webkitSettings, true);
+        webkit_settings_set_enable_java(webkitSettings, TRUE);
+    }
 
     if (Ghtml.with_inspector) {
         webkit_settings_set_enable_developer_extras(webkitSettings, TRUE);
