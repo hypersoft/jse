@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE tuxcards_data_file>
+<InformationCollection>
+ <LastActiveElement>Ghtml//Security</LastActiveElement>
+ <InformationElement isOpen="true" informationFormat="RTF" expiryDate="Wed Nov 14 2018" iconFileName="none" isEncrypted="false" expires="false">
+  <Description>Ghtml</Description>
+  <Information><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:600;">What is Ghtml?</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt;">Ghtml is a Graphical-Hyper-Text-Markup-Langauge programming environment for creating HTML Applications. The 'G' part of the name 'Ghtml' specifically denotes that the project (application) is for viewing HTML documents, rather than editing, transforming or preprocessing them. Ghtml allows users to create dynamic applications from local content, with a privileged javascript environment.</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:600;">Privileged Execution</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt; font-weight:600;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt;">The privileged JavaScript environment allows access to the local operating system commands, files, and programming libraries. Shell Script writers, C coders, and system maintainers familiar with JavaScript and HTML can easily create GUI applications to maximize the computing power and efficiency of their own systems.</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p></body></html>]]></Information>
+  <InformationElement isOpen="true" informationFormat="RTF" expiryDate="Wed Nov 14 2018" iconFileName="none" isEncrypted="false" expires="false">
+   <Description>Technology</Description>
+   <Information><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:600;">Technology</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt;">Ghtml uses WebKitGtk, and JavascriptCoreGtk (4.0) to render pages and execute JavaScript within the browser. Ghtml enables extended scripting by interfacing with the JSE library through a JSE plugin. This plugin provides the same scripting environment within Ghtml, that users have access to within a privileged JSE Script. See the documentation provided with JSE for more information about scripting within a JSE enabled environment.</span></p></body></html>]]></Information>
+  </InformationElement>
+  <InformationElement isOpen="true" informationFormat="RTF" expiryDate="Wed Nov 14 2018" iconFileName="none" isEncrypted="false" expires="false">
+   <Description>Security</Description>
+   <Information><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:600;">Security</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt;">Privileged JavaScript execution can be dangerous, but it is no more dangerous than executing a shell script. Using this logic, the security of the Ghtml application framework, is filesystem security based. Enabling privileged JavaScript execution is as simple as setting the execute permissions on the HTML content being loaded.</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt; font-weight:600;">Caveat</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt; font-weight:600;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Lucida Grande'; font-size:13pt;">Using filesystem security means that Ghtml cannot render piped content with privileged JavaScript execution; this is not a huge limitation, but it can be inconvenient for some desireable use cases. Enabling piped rendering with privileged execution could for example, allow a sandboxed application to elevate the privileges of its execution environment, if such an application were allowed to run system commands with piped input.</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Lucida Grande'; font-size:13pt;"><br /></p></body></html>]]></Information>
+  </InformationElement>
+ </InformationElement>
+</InformationCollection>
