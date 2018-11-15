@@ -101,7 +101,7 @@ load_changed (WebKitWebView  *web_view,
     
     if (load_event == WEBKIT_LOAD_COMMITTED) {
         char buf[8192];
-        sprintf(buf, "Ghtml.window = %p; Ghtml.view = %p;", Ghtml.window, Ghtml.view);
+        sprintf(buf, "Ghtml.window = %p; Ghtml.view = %p; Ghtml.parent = %p; Ghtml.attachment = %p; Ghtml.typeHint = %i;", Ghtml.window, Ghtml.view, Ghtml.parent, Ghtml.attachment, Ghtml.type_hint);
         webkit_web_view_run_javascript(web_view, buf, NULL, NULL, NULL);
         if (Ghtml.transparent) {
             gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
