@@ -9,6 +9,62 @@ extern char * JSE_RANGE_ARGUMENTS;
 extern char * JSE_AT_LEAST_ARGUMENTS;
 extern char * JSE_AT_LEAST_ONE_ARGUMENT;
 
+#ifdef WIN32
+#include <windows.h>
+#elif _POSIX_C_SOURCE >= 199309L
+#include <time.h>   // for nanosleep
+#else
+#include <unistd.h> // for usleep
+#endif
+
+void sleep_ms(int milliseconds) // cross-platform sleep function
+{
+#ifdef WIN32
+    Sleep(milliseconds);
+#elif _POSIX_C_SOURCE >= 199309L
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#else
+    usleep(milliseconds * 1000);
+#endif
+}
+
+JSValue jsSleep(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	if (argc == 1) {
+		int ms = JSValueToNumber(ctx, argv[0], exception);
+		sleep_ms(ms);
+		return JSValueMakeUndefined(ctx);
+	} 
+}
+
+JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	if (argc != 1) {
+		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
+	}
+	int pid = JSValueToNumber(ctx, argv[0], exception);
+	return JSValueFromNumber(ctx, waitpid(pid));
+}
+
+JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	JSObject scope = JSValueToObject(ctx, argv[0], NULL);
+	JSObject func = JSValueToObject(ctx, argv[1], NULL);
+	int child = fork();
+	JSValue args[argc - 2];
+	for (int i = 2; i < argc; i++) args[i - 2] = argv[i];
+	if (child == 0) {
+		JSValue forkException = NULL;
+		JSObjectCallAsFunction(ctx, func, scope, sizeof(args), args, &forkException);
+		if (forkException) JSReportException(ctx, "fork", forkException);
+		exit(child);
+	}
+	return JSValueFromNumber(ctx, child);
+}
+
 JSValue source(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 
@@ -225,6 +281,10 @@ gnu_readline(JSContext ctx,
 
 JSValue load(JSContext ctx, char * path, JSObject global, JSValue * exception)
 {
+
+	JSObjectCreateFunction(ctx, global, "fork", jsFork);	
+	JSObjectCreateFunction(ctx, global, "wait", jsWait);
+	JSObjectCreateFunction(ctx, global, "sleep", jsSleep);
 
 	JSObjectCreateFunction(ctx, global, "source", source);
 	JSObjectCreateFunction(ctx, global, "printErrorLine", printErrorLine);

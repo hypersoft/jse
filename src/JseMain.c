@@ -279,7 +279,6 @@ int jse_file_mode(char * file)
 
 	}
 
-
 	// skip any shebang line..
 	fileData = fileContents;
 	if (g_str_has_prefix(fileData, "#!")) {
@@ -299,25 +298,19 @@ int jse_file_mode(char * file)
 		JSTerminate(1);
 	}
 
-	if (! jse.silent ) {
-		char * value = JSValueToUtf8(jse.ctx, result);
-		g_print("%s\n", value);
-		g_free(value);
-	}
-
 	JSTerminate(0);
 
 }
 
 void jse_tty_mode()
 {
-	jse.silent = true;
 	jse_file_mode("/usr/share/jse/interactive.js");
 }
 
 int main(int argc, char** argv)
 {
 	char * path = argv[0];
+	jse.silent = true;
 
 	// parse arguments...
 	if (argc > 1) {

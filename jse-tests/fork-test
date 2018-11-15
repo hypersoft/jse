@@ -1,0 +1,13 @@
+#!/bin/jse --shell-script
+
+var c = fork({}, function(){
+	printErrorLine("child: going to sleep for 10 seconds.")
+	sleep(10000);
+	return printErrorLine("child: woke-up; task-complete");
+});
+
+printErrorLine("parent: waiting for child to finish...");
+
+wait(c);
+
+printErrorLine("parent: child has finished");
