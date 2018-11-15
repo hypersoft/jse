@@ -28,6 +28,7 @@ typedef struct sGhtmlConfiguration {
     GtkWindow * window, * parent, * attachment;
     WebKitWebView * view;
     const char * file;
+    GdkPixbuf * icon;
     GdkRectangle geometry;
     int type_hint;
 } GhtmlConfiguration;
@@ -118,6 +119,10 @@ int ghtml_parse_option_with_value(char * opt, char * val) {
     }
     if (STREQUAL(opt, "--type-hint")) {
         sscanf(val, "%i", &Ghtml.type_hint);
+        return 2;
+    }
+    if (STREQUAL(opt, "--icon")) {
+        Ghtml.icon = gdk_pixbuf_new_from_file(val, NULL);
         return 2;
     }
     return 0;
@@ -251,6 +256,10 @@ void ghtml_start_application(int argc, char * argv[]) {
 
     gtk_window_set_default_size(Ghtml.window, 0, 0);
     gtk_window_move(Ghtml.window, 0, 0);
+
+    if (Ghtml.icon) {
+        gtk_window_set_icon(Ghtml.window, Ghtml.icon);
+    }
 
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
