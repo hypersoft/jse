@@ -2,6 +2,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <sys/wait.h>
+#include <signal.h>
+
 extern char * JSE_ERROR_CTOR;
 extern char * JSE_SINGLE_ARGUMENT;
 extern char * JSE_MULTI_ARGUMENTS;
@@ -31,6 +34,15 @@ void sleep_ms(int milliseconds) // cross-platform sleep function
 #endif
 }
 
+JSValue jsKill(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	if (argc == 2) {
+		int pid = JSValueToNumber(ctx, argv[0], exception);
+		int sig = JSValueToNumber(ctx, argv[1], exception);
+		return JSValueMakeNumber(ctx, kill(pid, sig));
+	} 
+}
+
 JSValue jsSleep(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc == 1) {
@@ -46,7 +58,7 @@ JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
 	int pid = JSValueToNumber(ctx, argv[0], exception);
-	return JSValueFromNumber(ctx, waitpid(pid));
+	return JSValueFromNumber(ctx, wait(pid));
 }
 
 JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
@@ -285,6 +297,7 @@ JSValue load(JSContext ctx, char * path, JSObject global, JSValue * exception)
 	JSObjectCreateFunction(ctx, global, "fork", jsFork);	
 	JSObjectCreateFunction(ctx, global, "wait", jsWait);
 	JSObjectCreateFunction(ctx, global, "sleep", jsSleep);
+	JSObjectCreateFunction(ctx, global, "kill", jsKill);
 
 	JSObjectCreateFunction(ctx, global, "source", source);
 	JSObjectCreateFunction(ctx, global, "printErrorLine", printErrorLine);
