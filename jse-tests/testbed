@@ -1,4 +1,6 @@
 #!/bin/sh
 
-ghtml --with-inspector -f `dirname $0`/testbed.html
+BASEDIR=`dirname $0`;
+
+ghtml --icon ${BASEDIR}/resource/javascript-type.png --with-inspector -f ${BASEDIR}/testbed.html
 
