@@ -69,6 +69,10 @@ obj/plugin/%.o: plugin/%.c
 	@mkdir -p obj/plugin;
 	gcc ${DEBUG} -fPIC -I include -c $< -o $@ ${JSE_CFLAGS}
 
+obj/plugin/Ghtml.o: plugin/Ghtml.c
+	@mkdir -p obj/plugin;
+	@gcc ${DEBUG} -fPIC -I include -I ghtml ${GHTML_CONFIG} -c $< -o $@ ${JSE_CFLAGS}
+
 plugin/data/%.h: plugin/%.js
 	@mkdir -p plugin/data;
 	bin/bin2inc `basename $<` < $< > $@
