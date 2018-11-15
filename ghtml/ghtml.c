@@ -100,18 +100,17 @@ load_changed (WebKitWebView  *web_view,
     }
     
     if (load_event == WEBKIT_LOAD_COMMITTED) {
+        if (Ghtml.transparent) {
+            gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
+            g_signal_connect(G_OBJECT(Ghtml.window), "screen-changed", G_CALLBACK(screen_changed), NULL);
+            screen_changed(GTK_WIDGET(Ghtml.window), NULL, NULL);
+            const GdkRGBA color = {.0, .0, .0, .0};
+            webkit_web_view_set_background_color(Ghtml.view, &color);
+        }
         if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
     }
 
     if (load_event == WEBKIT_LOAD_FINISHED) {
-            if (Ghtml.transparent) {
-        gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
-        g_signal_connect(G_OBJECT(Ghtml.window), "screen-changed", G_CALLBACK(screen_changed), NULL);
-        screen_changed(GTK_WIDGET(Ghtml.window), NULL, NULL);
-        const GdkRGBA color = {.0, .0, .0, .0};
-        webkit_web_view_set_background_color(Ghtml.view, &color);
-    }
-
         if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
     }
 
