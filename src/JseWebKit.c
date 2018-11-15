@@ -13,7 +13,7 @@ window_object_cleared_callback (WebKitScriptWorld *world,
     JSContext   ctx = webkit_frame_get_javascript_context_for_script_world (frame, world);
 
     JSInit("jseWebKit", ctx, true);
-    JSInlineEval(ctx, "loadPlugin('Ghtml.jso');", JSContextGetGlobalObject(ctx), NULL);
+    JSInlineEval(ctx, "loadPlugin('Ghtml.jso');", NULL, NULL);
 
 }
 
