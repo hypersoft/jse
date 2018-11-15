@@ -161,6 +161,14 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--dialog")) {
+        Ghtml.no_pager = true;
+        Ghtml.no_taskbar = true;
+        Ghtml.stay_on_top = true;
+        Ghtml.type_hint = GDK_WINDOW_TYPE_HINT_DIALOG;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--stay-on-top")) {
         Ghtml.stay_on_top = true;
         Ghtml.stay_on_bottom = false;
