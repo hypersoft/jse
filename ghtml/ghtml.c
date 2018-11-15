@@ -11,6 +11,7 @@ typedef struct sGhtmlConfiguration {
         modal,
         maximize,
         execute,
+        resizable,
         auto_hide_titlebar,
         stay_hidden,
         force_focus,
@@ -40,6 +41,9 @@ static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
 static void window_geometry_changed(WebKitWindowProperties *windowProperties, GtkWindow *window);
 static void webViewTitleChanged(WebKitWebView *webView, GParamSpec *pspec, GtkWindow *window);
 static void faviconChanged(GObject *object, GParamSpec *paramSpec, gpointer *window);
+static void screen_changed (GtkWidget *window,
+                         GdkScreen *old_screen,
+                         GtkWidget *label);
 
 int ghtml_parse_option_with_value(char * opt, char * val);
 
@@ -100,6 +104,14 @@ load_changed (WebKitWebView  *web_view,
     }
 
     if (load_event == WEBKIT_LOAD_FINISHED) {
+            if (Ghtml.transparent) {
+        gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
+        g_signal_connect(G_OBJECT(Ghtml.window), "screen-changed", G_CALLBACK(screen_changed), NULL);
+        screen_changed(GTK_WIDGET(Ghtml.window), NULL, NULL);
+        const GdkRGBA color = {.0, .0, .0, .0};
+        webkit_web_view_set_background_color(Ghtml.view, &color);
+    }
+
         if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
     }
 
@@ -191,6 +203,11 @@ int ghtml_parse_option(char * opt) {
         return 1;
     }
 
+    if (STREQUAL(opt, "--resizeable")) {
+        Ghtml.resizable = true;
+        return 1;
+    }
+
     if (STREQUAL(opt, "--force-focus")) {
         Ghtml.force_focus = true;
         return 1;
@@ -268,6 +285,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     if (Ghtml.icon) {
         gtk_window_set_icon(Ghtml.window, Ghtml.icon);
     }
+
+    gtk_window_set_resizable(Ghtml.window, Ghtml.resizable);
 
     if (Ghtml.parent) {
         gtk_window_set_transient_for(Ghtml.window, Ghtml.parent);
@@ -366,13 +385,6 @@ void ghtml_start_application(int argc, char * argv[]) {
         gtk_window_maximize(Ghtml.window);
     }
 
-    if (Ghtml.transparent) {
-        gtk_widget_set_app_paintable(window, TRUE);
-        g_signal_connect(G_OBJECT(window), "screen-changed", G_CALLBACK(screen_changed), NULL);
-        screen_changed(GTK_WIDGET(Ghtml.window), NULL, NULL);
-        const GdkRGBA color = {.0, .0, .0, .0};
-        webkit_web_view_set_background_color(webView, &color);
-    }
 
     // Put the browser area into the main window
     gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(webView));
@@ -460,9 +472,12 @@ void ghtml_die(int code) {
 static void window_geometry_changed(WebKitWindowProperties *windowProperties, GtkWindow *window)
 {
 
-    gtk_window_set_resizable(GTK_WINDOW
-        (Ghtml.window),
-            webkit_window_properties_get_resizable (windowProperties));
+    /* I'm not sure how this is supposed to work-out, never found a javascript method for
+        "make window [not ]resizable"
+    */
+    //gtk_window_set_resizable(GTK_WINDOW
+    //    (Ghtml.window),
+    //        webkit_window_properties_get_resizable (windowProperties));
 
     GdkRectangle geometry;
     webkit_window_properties_get_geometry (windowProperties, &geometry);
