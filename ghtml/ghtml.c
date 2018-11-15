@@ -100,6 +100,9 @@ load_changed (WebKitWebView  *web_view,
     }
     
     if (load_event == WEBKIT_LOAD_COMMITTED) {
+        char buf[8192];
+        sprintf(buf, "Ghtml.window = %p; Ghtml.view = %p;", Ghtml.window, Ghtml.view);
+        webkit_web_view_run_javascript(web_view, buf, NULL, NULL, NULL);
         if (Ghtml.transparent) {
             gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
             g_signal_connect(G_OBJECT(Ghtml.window), "screen-changed", G_CALLBACK(screen_changed), NULL);
@@ -114,7 +117,6 @@ load_changed (WebKitWebView  *web_view,
         if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
     }
 
-//webkit_web_view_run_javascript(web_view, ";", NULL, NULL, NULL);
 }
 
 #define STREQUAL(A, B) ((strcmp(A, B)) == 0)
