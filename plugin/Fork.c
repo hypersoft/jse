@@ -153,7 +153,7 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 	ProcessFork * pf = JSObjectGetPrivate(self);
 
 	JSObject scope = JSValueToObject(ctx, argv[0], NULL);
-	JSObject func = JSValueToObject(pf->ownContext, argv[1], NULL);
+	JSObject func = JSValueToObject(ctx, argv[1], NULL);
 
 	JSValue args[argc - 2];
 	for (int i = 2; i < argc; i++) args[i - 2] = argv[i];
@@ -163,7 +163,10 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 	int c = fork();
 
 	if (c == 0) {
-		pf->result = JSObjectCallAsFunction(pf->ownContext, func, scope, sizeof(args), args, &pf->exception);
+		pf->result = JSObjectCallAsFunction(pf->ownContext, func, scope, argc - 2, args, &pf->exception);
+		/* this doesn't work but we want it so do it anyway */
+		JSObjectSetUtf8Property(pf->ownContext, self, "result", pf->result, 0);
+		JSObjectSetUtf8Property(pf->ownContext, self, "exception", pf->exception, 0);
 		exit((pf->exception != 0)?1:0);
 	} else {
 		pf->pid = c;

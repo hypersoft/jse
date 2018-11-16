@@ -8,17 +8,28 @@
 
 loadPlugin("Fork.jso");
 
-var k = new Fork({/* the global in child */}, function main(){
+var data = [1,2,3].toBuffer(Int8);
+
+var k = new Fork(this, function main(mem){
 	/* the function of child */
+	mem[0] = 25;
 	printErrorLine("child: going to sleep for 5 seconds.")
 	sleep(5000);
 	printErrorLine("child: woke-up; task-complete");
-	return true
-}/* optional child function main parameters may follow ...*/);
+	return "this should be void";
+}, data /* optional child function main parameters may follow ...*/);
 
 printErrorLine("parent: waiting for child to finish...");
 
 // loadPlugin('Fork.jso') provides this function
 wait(k);
 
-printErrorLine("parent: child has finished");
+printErrorLine("parent: child has finished"); // EVIL!!! DATA WAS NOT MODIFIED
+
+if (data[0] !== 25) {
+	printErrorLine("Evil JavaScript Context mode is active; test memory address was not succesfully written.");
+}
+
+if (k.result !== undefined) {
+	printErrorLine("parent: got a child result: "+k.result);
+}

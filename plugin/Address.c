@@ -100,8 +100,9 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 					else g_assert_not_reached();
 				}
 			}
-			JSValue nargv[] = {JSValueFromNumber(ctx, value), 0};
-			return JSObjectCallAsFunction(ctx, objectType, objectType, 1, nargv, exception);
+			return JSValueFromNumber(ctx, value);
+//			JSValue nargv[] = {JSValueFromNumber(ctx, value), 0};
+//			return JSObjectCallAsFunction(ctx, objectType, objectType, 1, nargv, exception);
 		} else {
 			return JSValueMakeUndefined(ctx);
 		}
