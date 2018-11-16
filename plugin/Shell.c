@@ -70,8 +70,14 @@ JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 	for (int i = 2; i < argc; i++) args[i - 2] = argv[i];
 	if (child == 0) {
 		JSValue forkException = NULL;
-		JSObjectCallAsFunction(ctx, func, scope, sizeof(args), args, &forkException);
-		if (forkException) JSReportException(ctx, "fork", forkException);
+		JSContextGroupRef cgrp = JSContextGetUniverse();
+		JSContextGroupRetain(cgrp);
+		JSContextRef x = JSGlobalContextCreateInGroup(cgrp, NULL);
+		JSGlobalContextRetain(x);
+		JSObjectCallAsFunction(x, func, scope, sizeof(args), args, &forkException);
+		if (forkException) JSReportException(x, "fork", forkException);
+		JSGlobalContextRelease(x);
+		JSContextGroupRelease(cgrp);
 		exit(child);
 	}
 	return JSValueFromNumber(ctx, child);
