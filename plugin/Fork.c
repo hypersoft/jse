@@ -11,8 +11,8 @@ JSClass JSForkClass;
 
 typedef struct js_fork_data {
 	JSContextGroupRef contextGroup;
-	JSContextRef parentContext;
-	JSContextRef ownContext;
+	JSGlobalContextRef parentContext;
+	JSGlobalContextRef ownContext;
 	int pid;
 	JSValue result, exception;
 } ProcessFork;
@@ -46,7 +46,7 @@ static JSValue ForkObjectGetProperty(JSContext ctx, JSObject object, JSString id
 	char name[JSStringUtf8Size(id)]; JSStringGetUTF8CString (id, name, sizeof(name));
 	if (!g_strcmp0(name, "pid")) {
 		return JSValueFromNumber(ctx, pf->pid);
-	}else if (!g_strcmp0(name, "exception")) {
+	} else if (!g_strcmp0(name, "exception")) {
 		if (pf->exception) return pf->exception;
 		else return JSValueMakeUndefined(ctx);
 	}
@@ -100,8 +100,12 @@ static void ForkObjectGetPropertyNames (JSContext ctx, JSObject object, JSProper
 }
 
 static JSValue ForkObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
-{	g_print("Called Plugin ForkObject Convert to Type\n");
-/*
+{
+	if (type == kJSTypeNumber) {
+		ProcessFork * pf = JSObjectGetPrivate(object);
+		return JSValueFromNumber(ctx, pf->pid);
+	}
+	/*
 	If this function returns NULL, the conversion request forwards to
 	object's parent class chain (which includes the default object class).
 
@@ -112,13 +116,13 @@ static JSValue ForkObjectConvertToType(JSContext ctx, JSObject object, JSType ty
 	return NULL;
 }
 
-JSValue ForkObjectWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	ProcessFork * pf = JSObjectGetPrivate(argv[0]);
-	JSValue r;
-	JSObjectSetUtf8Property(ctx, argv[0], "status", r = JSValueFromNumber(ctx, wait(&pf->pid)), 0);
-	return r;
-}
+// JSValue ForkObjectWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+// {
+// 	ProcessFork * pf = JSObjectGetPrivate(argv[0]);
+// 	JSValue r;
+// 	JSObjectSetUtf8Property(ctx, argv[0], "status", r = JSValueFromNumber(ctx, wait(&pf->pid)), 0);
+// 	return r;
+// }
 
 static JSClassDefinition ForkObjectDefinition = {
 	0,										/* Version, always 0 */
@@ -168,6 +172,13 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 
 }
 
+JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	int pid = JSValueToNumber(ctx, argv[0], exception);
+	return JSValueFromNumber(ctx, wait(&pid));
+}
+
+
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 {
 
@@ -178,7 +189,8 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 		ctx, JSForkClass, ForkObjectConstructor
 	);
 
-	JSObjectCreateFunction(ctx, constructor, "wait", ForkObjectWait);
+	//JSObjectCreateFunction(ctx, constructor, "wait", ForkObjectWait);
+	JSObjectCreateFunction(ctx, object, "wait", jsWait);
 
 	JSObjectSetUtf8Property(ctx, object, CLASSNAME, (JSValue) constructor, 0);
 

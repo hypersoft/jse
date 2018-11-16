@@ -18,6 +18,7 @@ var k = new Fork({/* the global in child */}, function main(){
 
 printErrorLine("parent: waiting for child to finish...");
 
-Fork.wait(k);
+// loadPlugin('Fork.jso') provides this function
+wait(k);
 
 printErrorLine("parent: child has finished");

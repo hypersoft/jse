@@ -52,37 +52,6 @@ JSValue jsSleep(JSContext ctx, JSObject function, JSObject this, size_t argc, co
 	} 
 }
 
-JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	if (argc != 1) {
-		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
-	}
-	int pid = JSValueToNumber(ctx, argv[0], exception);
-	return JSValueFromNumber(ctx, wait(pid));
-}
-
-JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	JSObject scope = JSValueToObject(ctx, argv[0], NULL);
-	JSObject func = JSValueToObject(ctx, argv[1], NULL);
-	int child = fork();
-	JSValue args[argc - 2];
-	for (int i = 2; i < argc; i++) args[i - 2] = argv[i];
-	if (child == 0) {
-		JSValue forkException = NULL;
-		JSContextGroupRef cgrp = JSContextGetUniverse();
-		JSContextGroupRetain(cgrp);
-		JSContextRef x = JSGlobalContextCreateInGroup(cgrp, NULL);
-		JSGlobalContextRetain(x);
-		JSObjectCallAsFunction(x, func, scope, sizeof(args), args, &forkException);
-		if (forkException) JSReportException(x, "fork", forkException);
-		JSGlobalContextRelease(x);
-		JSContextGroupRelease(cgrp);
-		exit(child);
-	}
-	return JSValueFromNumber(ctx, child);
-}
-
 JSValue source(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 
@@ -300,8 +269,6 @@ gnu_readline(JSContext ctx,
 JSValue load(JSContext ctx, char * path, JSObject global, JSValue * exception)
 {
 
-	JSObjectCreateFunction(ctx, global, "fork", jsFork);	
-	JSObjectCreateFunction(ctx, global, "wait", jsWait);
 	JSObjectCreateFunction(ctx, global, "sleep", jsSleep);
 	JSObjectCreateFunction(ctx, global, "kill", jsKill);
 
