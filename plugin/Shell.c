@@ -43,6 +43,42 @@ JSValue jsKill(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 	} 
 }
 
+typedef struct sig_trap {
+	JSContext * ctx;
+	JSObject *object, *function;
+	DCCallback * self;
+	int sig;
+} SigTrap;
+
+char jsTrapHandler(DCCallback* cb, 
+               DCArgs*     args, 
+               DCValue*    result, 
+               SigTrap*       trap) {
+int sig = dcbArgUInt(args);
+JSValue argv[] = {JSValueFromNumber(trap->ctx, sig), NULL};
+JSObjectCallAsFunction(trap->ctx, trap->object, trap->function, 1, argv, NULL);
+return 'v';
+}
+
+JSValue jsTrap(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	SigTrap * x = g_malloc0(sizeof(SigTrap));
+	x->sig = JSValueToNumber(ctx, argv[0], NULL);
+	x->object = JSValueToObject(ctx, argv[1], NULL);
+	x->function = JSValueToObject(ctx, argv[2], NULL);
+	x->self = dcbNewCallback("j", jsTrapHandler, x);
+	signal(x->sig, x->self);
+	return JSValueFromNumber(ctx, (uintptr_t)x);
+}
+
+JSValue jsUnTrap(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	SigTrap * trap = (SigTrap *) (uintptr_t) JSValueToNumber(ctx, argv[0], NULL);
+	signal(trap->sig, SIG_DFL);
+	dcbFreeCallback(trap->self);
+	g_free(trap);
+}
+
 JSValue jsSleep(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	if (argc == 1) {
@@ -58,7 +94,7 @@ JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
 	int pid = JSValueToNumber(ctx, argv[0], exception);
-	return JSValueFromNumber(ctx, wait(pid));
+	return JSValueFromNumber(ctx, waitpid(pid, &pid, 0));
 }
 
 JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
@@ -298,6 +334,8 @@ JSValue load(JSContext ctx, char * path, JSObject global, JSValue * exception)
 	JSObjectCreateFunction(ctx, global, "wait", jsWait);
 	JSObjectCreateFunction(ctx, global, "sleep", jsSleep);
 	JSObjectCreateFunction(ctx, global, "kill", jsKill);
+	JSObjectCreateFunction(ctx, global, "trap", jsTrap);
+	JSObjectCreateFunction(ctx, global, "untrap", jsUnTrap);
 
 	JSObjectCreateFunction(ctx, global, "source", source);
 	JSObjectCreateFunction(ctx, global, "printErrorLine", printErrorLine);
