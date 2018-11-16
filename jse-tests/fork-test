@@ -1,14 +1,23 @@
 #!/bin/jse --shell-script
 
-var c = fork({/* the global in child */}, function main(){
+/**
+ * Its possible to fork with jse, but you cannot get any data out of the fork using normal
+ * Javascript methods. You will need some form of IPC synchronization if your child processes,
+ * need to report back to the main.
+ */
+
+loadPlugin("Fork.jso");
+
+var k = new Fork({/* the global in child */}, function main(){
 	/* the function of child */
 	printErrorLine("child: going to sleep for 5 seconds.")
 	sleep(5000);
-	return printErrorLine("child: woke-up; task-complete");
+	printErrorLine("child: woke-up; task-complete");
+	return true
 }/* optional child function main parameters may follow ...*/);
 
 printErrorLine("parent: waiting for child to finish...");
 
-wait(c);
+Fork.wait(k);
 
 printErrorLine("parent: child has finished");

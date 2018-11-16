@@ -60,7 +60,7 @@ bin/ghtml: ${GHTML_SOURCES}
 
 plugins: share/plugin/JseWebKit.so share/plugin/Ghtml.jso \
 	 share/plugin/Environment.jso share/plugin/Address.jso \
-	 share/plugin/DynCall.jso \
+	 share/plugin/DynCall.jso share/plugin/Fork.jso \
 	 share/plugin/MachineType.jso share/plugin/Shell.jso
 
 obj/* obj/plugin/*: include/jse.h
@@ -79,7 +79,7 @@ plugin/data/%.h: plugin/%.js
 
 share/plugin/%.jso: obj/plugin/%.o
 	@mkdir -p share/plugin;
-	gcc $< -shared -o $@ ${JSE_LIBS}
+	gcc $< -fPIC -shared -o $@ ${JSE_LIBS}
 
 JSE_WEBKIT_FLAGS != pkg-config --cflags --libs webkit2gtk-web-extension-4.0
 share/plugin/JseWebKit.so: ${JSE_OBJS} src/JseWebKit.c
