@@ -38,68 +38,9 @@ JSValue jsKill(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 {
 	if (argc == 2) {
 		int pid = JSValueToNumber(ctx, argv[0], exception);
-		int signal = JSValueToNumber(ctx, argv[1], exception);
-		return JSValueMakeNumber(ctx, kill(pid, signal));
+		int sig = JSValueToNumber(ctx, argv[1], exception);
+		return JSValueMakeNumber(ctx, kill(pid, sig));
 	} 
-}
-
-typedef struct javascript_signal_trap_header {
-	JSContext * ctx;
-	JSValue * exception;
-	JSObject *object, *function;
-	DCCallback * self;
-	int signal;
-} SignalTrap;
-
-char jsTrapHandler(DCCallback* cb, 
-               DCArgs*     args, 
-               DCValue*    result, 
-               SignalTrap*       trap) {
-int signal = dcbArgUInt(args);
-JSValue argv[] = {JSValueFromNumber(trap->ctx, signal), NULL};
-JSObjectCallAsFunction(trap->ctx, trap->object, trap->function, 1, argv, trap->exception);
-return 'v';
-}
-
-JSValue jsTrap(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	SignalTrap * trap = g_malloc0(sizeof(SignalTrap));
-	trap->ctx = JSGlobalContextCreateInGroup(JSContextGetUniverse(), NULL);
-	trap->signal = JSValueToNumber(ctx, argv[0], NULL);
-	trap->object = JSValueToObject(ctx, argv[1], NULL);
-	trap->function = JSValueToObject(ctx, argv[2], NULL);
-	trap->self = dcbNewCallback("j", jsTrapHandler, trap);
-	signal(trap->signal, trap->self);
-	return JSValueFromNumber(ctx, (uintptr_t)trap);
-}
-
-JSValue jsHaveTrapException(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	SignalTrap * trap = (SignalTrap *) (uintptr_t) JSValueToNumber(ctx, argv[0], NULL);
-	return JSValueMakeBoolean(ctx, trap->exception != 0);
-}
-
-JSValue jsThrowTrapException(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-
-	SignalTrap * trap = (SignalTrap *) (uintptr_t) JSValueToNumber(ctx, argv[0], NULL);
-
-	if (trap->exception) {
-		JSReportException(ctx, "jse signal trap", trap->exception);
-		return JSValueMakeNull(ctx);
-	}
-
-	return JSValueMakeUndefined(ctx);
-
-}
-
-JSValue jsUnTrap(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{
-	SignalTrap * trap = (SignalTrap *) (uintptr_t) JSValueToNumber(ctx, argv[0], NULL);
-	signal(trap->signal, SIG_DFL);
-	JSGlobalContextRelease(trap->ctx);
-	dcbFreeCallback(trap->self);
-	g_free(trap);
 }
 
 JSValue jsSleep(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
@@ -117,7 +58,7 @@ JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 		return THROWING_EXCEPTION(WANT_SINGLE_PARAMETER());
 	}
 	int pid = JSValueToNumber(ctx, argv[0], exception);
-	return JSValueFromNumber(ctx, waitpid(pid, &pid, 0));
+	return JSValueFromNumber(ctx, wait(pid));
 }
 
 JSValue jsFork(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
@@ -353,23 +294,10 @@ gnu_readline(JSContext ctx,
 JSValue load(JSContext ctx, char * path, JSObject global, JSValue * exception)
 {
 
-/* these are in functional logic testing; there should be a JSObject for each these functionalities  */
-
- // ProcessChild
 	JSObjectCreateFunction(ctx, global, "fork", jsFork);	
 	JSObjectCreateFunction(ctx, global, "wait", jsWait);
 	JSObjectCreateFunction(ctx, global, "sleep", jsSleep);
 	JSObjectCreateFunction(ctx, global, "kill", jsKill);
-
- // according to my c manual, impl of trap in fork/child is undefined behavior....
-
- // ProcessTrap
-	JSObjectCreateFunction(ctx, global, "trap", jsTrap);
-	JSObjectCreateFunction(ctx, global, "untrap", jsUnTrap);
-	JSObjectCreateFunction(ctx, global, "haveTrapException", jsHaveTrapException);
-	JSObjectCreateFunction(ctx, global, "throwTrapException", jsThrowTrapException);
-
-/**/
 
 	JSObjectCreateFunction(ctx, global, "source", source);
 	JSObjectCreateFunction(ctx, global, "printErrorLine", printErrorLine);
