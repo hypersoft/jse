@@ -1,10 +1,11 @@
 #!/bin/jse --shell-script
 
-var c = fork({}, function(){
+var c = fork({/* the global in child */}, function main(){
+	/* the function of child */
 	printErrorLine("child: going to sleep for 10 seconds.")
 	sleep(10000);
 	return printErrorLine("child: woke-up; task-complete");
-});
+}/* optional child function main parameters may follow ...*/);
 
 printErrorLine("parent: waiting for child to finish...");
 
