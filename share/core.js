@@ -16,7 +16,7 @@ MachineType.format = {};
 MachineType.cache = function(type) {
 	var 
 		code = MachineType.cache.code(type), 
-		name = MachineType.cache.name(type);
+		name = MachineType.cache.typeName(type);
 	Object.defineProperties(type, {
 		code: {value:code},
 		name: {value:name},
@@ -48,7 +48,7 @@ MachineType.cache.code = function(type){
 	return x;
 }
 
-MachineType.cache.name = function(type){
+MachineType.cache.typeName = function(type){
 	if (type.vararg) return '...';
 	var n = [];
 	var code = (type.utf)?"utf":"int";
