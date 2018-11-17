@@ -16,6 +16,6 @@ var child = new Fork({/* child function scope object */}, function main(ms, info
 
 printErrorLine("parent: waiting for child to finish...");
 
-wait(child.pid);
+wait(child);
 
 printErrorLine("parent: child has finished"); 
