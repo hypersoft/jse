@@ -64,6 +64,6 @@ if (buffer[-12] != 255 || buffer[-11] != 12 || buffer[1] != 12) {
 
 buffer[2] = '\n';
 
-if (buffer[2] != 10) {
+if (buffer[2] != '\n'.charCodeAt(0)) {
 	throw new Error("failed to retrieve character value set in buffer: "+buffer[2]);
 }
