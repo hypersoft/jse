@@ -28,6 +28,8 @@ Object.defineProperties(MachineType.prototype, {
 		return this.signed === false;
 	}},
 	sizeOf: {value: function(count){
+		if (this.width === 0 && ! this.pointer && ! this.vararg)
+			throw new TypeError("unexpected type width: "+ this.width);
 		return (this.width || MachineType.ptrSize) * count;
 	}},
 	unitsOf: {value:function(bytes){
