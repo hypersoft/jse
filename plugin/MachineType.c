@@ -120,6 +120,10 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 		return JSValueMakeString(ctx, JSStringCreateWithCharacters(out, 1));
 	}
 	
+	if (! MACHINE_TYPE_IS_POINTER(code) && MACHINE_TYPE_IS_BOOL(code)) {
+		return JSValueMakeBoolean(ctx, value);
+	}
+	
 	JSValue result = JSValueFromNumber(ctx, value);
 
 	result = (JSValue) JSValueToObject(ctx, result, NULL);

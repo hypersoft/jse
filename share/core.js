@@ -43,7 +43,7 @@ Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
 	width:{value:0}, constant:{value:false},
 	signed:{value:false}, floating:{value:false}, vararg:{value:false},
-	utf:{value:false},
+	utf:{value:false}, boolean:{value:false},
 	unsigned: {get: function(){
 		return this.signed === false;
 	}},
@@ -75,6 +75,7 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.signed) x |= MachineType.SIGNED;
 		else if (this.floating) x |= MachineType.FLOAT;
 		else if (this.utf) x |= MachineType.UTF;
+		else if (this.boolean) x |= MachineType.BOOLEAN;
 		return x;
 	}},
 	toString: {value:function(){
@@ -120,12 +121,14 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.vararg) return '...';
 		var n = [];
 		var code = (this.utf)?"utf":"int";
+		if (this.boolean) code = 'bool';
 		if (this.constant) n.push('const');
 		if (this.signed) n.push('signed');
 		if (this.width === 0) {
 			n.push('void');
 		} else if (this.width === 1) {
-			n.push(code+'8');
+			if (! this.boolean) n.push(code+'8');
+			else n.push(code);
 		} else if (this.width === 2) {
 			n.push(code+'16');
 		} else if (this.width === 4) {
@@ -178,6 +181,8 @@ Object.defineProperties(this, {
 
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
+
+	Bool: {value: new MachineType({width: 1, boolean: true})}
 
 });
 
