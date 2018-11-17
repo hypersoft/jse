@@ -16,7 +16,7 @@ MachineType.format = {};
 MachineType.cache = function(type) {
 	var code = type.code;
 	var name = type.name;
-	var bits = type.bits;
+	var bits = MachineType.cache.bits(type);
 	Object.defineProperties(type, {
 		code: {value:code},
 		name: {value:name},
@@ -35,6 +35,13 @@ MachineType.cache = function(type) {
 		MachineType[name] = type;
 	}
 }
+
+MachineType.cache.bits = function(type){
+	if (type.width === 0 && ! type.pointer) return 0;
+	var width = (type.width || MachineType.ptrSize);
+	if (width & (1|2|4|8)) return width << 3;
+	return undefined;
+};
 
 MachineType.cache.max = function(obj) {
 	if (obj.floating) return undefined;
@@ -125,12 +132,6 @@ Object.defineProperties(MachineType.prototype, {
 		if (bytes < width) return 0;
 		var data = bytes / width;
 		return data;
-	}},
-	bits: {get: function(){
-		if (this.width === 0 && ! this.pointer) return 0;
-		var width = (this.width || MachineType.ptrSize);
-		if (width & (1|2|4|8)) return width << 3;
-		return undefined;
 	}},
 	code: {get(){
 		var x = this.width;
