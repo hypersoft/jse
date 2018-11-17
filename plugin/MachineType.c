@@ -304,7 +304,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		return true;
 	} else if (!g_strcmp0(name, "length")) {
 		void * address = addressContainer->data;
-		int code = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, object, "type"), NULL);
+		JSValue otype = JSObjectGetUtf8Property(ctx, object, "type");
+		unsigned code = JSValueToNumber(ctx, otype, NULL);
 		if (code == 0) return true;
 		int width = code & (1|2|4|8);
 		unsigned current = addressContainer->length;

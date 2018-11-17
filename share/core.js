@@ -50,9 +50,10 @@ Object.defineProperties(MachineType.prototype, {
 		return undefined;
 	}},
 	valueOf: {value:function(){
+		var x = this.width;
 		if (this.vararg) return 128;
 		if (this.pointer) x |= 512;
-		if (x === 0) return x;
+		//if (x === 0) return x;
 		if (this.constant) x |= 256;
 		if (this.signed) x |= 1024;
 		else if (this.floating) x |= 2048;
@@ -294,7 +295,8 @@ Address.prototype = Object.defineProperties({}, {
 		return a;
 	}},
 	toString: {value: function toString() {
-		return "((" + this.type.toString() + ' *)(' + this.pointer + "))";
+		var array = (this.length > 1)?"["+this.length+"]":' *';
+		return "((" + this.type.toString() + array + ')(' + this.pointer + "))";
 	}}
 });
 

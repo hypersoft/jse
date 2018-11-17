@@ -2,6 +2,14 @@
 
 var buffer = new Address(UInt8, 12);
 
+if (typeof buffer.pointer !== 'number') {
+	throw new Error("the type of a newly created address pointer is not a number");
+}
+
+if (buffer.pointer === 0) {
+	throw new Error("a newly allocated buffer did not recieve an address");
+}
+
 if (buffer.length !== 12) {
 	throw new Error("the length of a newly allocated address doesn't match initialization");
 }
@@ -16,14 +24,6 @@ if (buffer.allocated !== true) {
 
 if (buffer.type !== UInt8) {
 	throw new Error("the type of a newly created buffer does not match the initalization type");
-}
-
-if (typeof buffer.pointer !== 'number') {
-	throw new Error("the type of a newly created address pointer is not a number");
-}
-
-if (buffer.pointer === 0) {
-	throw new Error("a newly allocated buffer did not recieve an address");
 }
 
 if (typeof buffer[0] !== 'object') {
