@@ -176,7 +176,7 @@ Object.defineProperties(MachineType.prototype, {
 		return c;
 	}},
 	format: {get(){
-		return MachineType.format[this.valueOf()]
+		return MachineType.format[this.code]
 	}},
 	name: {get(){
 		if (this.vararg) return '...';
