@@ -1,7 +1,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-
 #include <jse.h>
 
 // this definition just makes it easy to change the class name
@@ -83,7 +82,6 @@ JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, con
 	return JSValueFromNumber(ctx, wait(&pid));
 }
 
-
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 {
 
@@ -94,7 +92,6 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 		ctx, JSForkClass, ForkObjectConstructor
 	);
 
-	//JSObjectCreateFunction(ctx, constructor, "wait", ForkObjectWait);
 	JSObjectCreateFunction(ctx, object, "wait", jsWait);
 
 	JSObjectSetUtf8Property(ctx, object, CLASSNAME, (JSValue) constructor, 0);
