@@ -203,8 +203,7 @@ Array.prototype.toSerial.parse = function parse(value, index){
 Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(max) {
 	var data = this.slice(0, max), i = 0, o = new Array(data.length);
 	for (i; i < data.length; i++) o[i] = data.charCodeAt(i);
-	o.type = UInt16;
-	o.type.utf = true;
+	o.type = UInt16.toUtf();
 	o.serialized = true;
 	return o;
 } , enumerable:false});
