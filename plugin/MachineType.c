@@ -188,7 +188,7 @@ JSValue JSMachineTypeWrite(JSContext ctx, JSObject function, JSObject this, size
 
 JSClass Address = NULL;
 
-#define AddressGetResizable(a) (gboolean)(a->vector == 0 || a->allocated)
+#define AddressGetResizable(a) (gboolean)(a->pointer == 0 || a->allocated)
 #define AddressFromValue(ctx, value, exception) (void*)(uintptr_t)JSValueToNumber(ctx, (JSValue) value, exception)
 
 typedef struct AddressContainer {
@@ -239,7 +239,7 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 
 	}	notAnIndex:
 
-	if (!g_strcmp0(name, "vector")) {
+	if (!g_strcmp0(name, "pointer")) {
 		return JSValueFromNumber(ctx, (uintptr_t) addressContainer->data);
 	} else if (!g_strcmp0(name, "allocated")) {
 		return JSValueMakeBoolean(ctx, addressContainer->allocated);
@@ -285,13 +285,13 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 
 	}	notAnIndex:
 
-	if (!g_strcmp0(name, "vector")) {
+	if (!g_strcmp0(name, "pointer")) {
 		void * address = AddressFromValue(ctx, data, NULL);
 		if (addressContainer->data && address != addressContainer->data && address != 0) {
 			// access violation of the memory integrity.
 			if (exception) *exception = JSExceptionFromUtf8 (ctx,
 				"ReferenceError",
-				"attempting to change the vector property of an internal address"
+				"attempting to change the pointer property of an internal address"
 			);
 			return true;
 		}

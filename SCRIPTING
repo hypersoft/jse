@@ -193,7 +193,7 @@ Constructor: SharedLibrary SharedLibrary(String path)
   Caveat: SharedLibrary has an internal property named path, which is a reference to the path specified,
           for lookup. if you need to access a symbol named path, you will have to call an external library,
           procedure to locate it. A SharedLibrary will convert to its loaded address, so any library, which,
-          can process the machine vector can be used to find the symbol.
+          can process the machine pointer can be used to find the symbol.
 
 Constructor: SharedLibrary SharedLibrary()
 
@@ -221,7 +221,7 @@ Constructor: SharedFunction SharedFunction(SharedLibrary library, MachineType re
 Constructor: Address Address(MachineType type, Number length) 
 
   Creates an accessible address of type with the specified length. The memory will be allocated and freed
-  as needed, or by property setting. To free by setting the vector property, set vector to 0; to free by
+  as needed, or by property setting. To free by setting the pointer property, set pointer to 0; to free by
   length property set length to zero. The Address must have been allocated by this constructor, to free it,
   manually, or automatically. To check if an Address is allocated, get its allocated property. If an address,
   is not allocated and it is zero, it can be reallocated for continuing use at any time. The length of the
@@ -243,6 +243,6 @@ Constructor: Address Address(MachineType type, Number length)
           even if it is an error. The script engine is designed to: "Do what the fuck you said",
           IN THEORY.
 
-Constructor: Address Address(MachineType type, Number length, Number vector)
+Constructor: Address Address(MachineType type, Number length, Number pointer)
 
-  Creates a new address with the given type, length and vector. No allocation is performed.
+  Creates a new address with the given type, length and pointer. No allocation is performed.

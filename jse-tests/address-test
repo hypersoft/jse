@@ -18,11 +18,11 @@ if (buffer.type !== UInt8) {
 	throw new Error("the type of a newly created buffer does not match the initalization type");
 }
 
-if (typeof buffer.vector !== 'number') {
-	throw new Error("the type of a newly created address vector is not a number");
+if (typeof buffer.pointer !== 'number') {
+	throw new Error("the type of a newly created address pointer is not a number");
 }
 
-if (buffer.vector === 0) {
+if (buffer.pointer === 0) {
 	throw new Error("a newly allocated buffer did not recieve an address");
 }
 

@@ -122,14 +122,14 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	readAddress:{value:MachineType.read},
 	writeAddress:{value:MachineType.write},
-	bindAddress:{value:function(vector, o, id){
+	bindAddress:{value:function(pointer, o, id){
 		var type = this;
 		Object.defineProperty(o, id, {
 			get:function(){
-				return type.readAddress(vector);
+				return type.readAddress(pointer);
 			},
 			set:function(value){
-				type.writeAddress(vector, value);
+				type.writeAddress(pointer, value);
 			}
 		});
 	}},
@@ -227,10 +227,10 @@ Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(ma
 	};
 })(String.fromCharCode);
 
-Address.create = function create(type, length, vector) {
+Address.create = function create(type, length, pointer) {
 	if (type !== undefined) this.type = type;
-	if (vector !== undefined) {
-		this.vector = vector;
+	if (pointer !== undefined) {
+		this.pointer = pointer;
 		if (length !== undefined) this.length = length;
 	} else {
 		if (length !== undefined) this.length = length;
@@ -241,19 +241,19 @@ Address.create = function create(type, length, vector) {
 Address.prototype = Object.defineProperties({}, {
 
 	constructor: {value:Address, writable:false, enumerable:false, configurable:false},
-	vector: {value: 0, writable:true},
+	pointer: {value: 0, writable:true},
 	length: {value: 0, writable:true},
 	type: {value: Void, writable:true},
 
-	valueOf: {value: function valueOf(){return this.vector;}},
-	resizable: {get: function(){return (this.vector === 0 || this.allocated);}},
+	valueOf: {value: function valueOf(){return this.pointer;}},
+	resizable: {get: function(){return (this.pointer === 0 || this.allocated);}},
 
 	bytes: {get: function(){return this.type.width * this.length;}},
-	misaligned: {get: function(){return this.vector % this.type.width;}},
+	misaligned: {get: function(){return this.pointer % this.type.width;}},
 	aligned: {get: function(){
 		var misaligned = this.misaligned;
 		if (misaligned === 0) return this;
-		var o = new Address(this.type, this.length, this.vector + (this.type.width - misaligned), this.writable);
+		var o = new Address(this.type, this.length, this.pointer + (this.type.width - misaligned), this.writable);
 		return o;
 	}},
 	offsetOf: {value: function(element){
@@ -262,7 +262,7 @@ Address.prototype = Object.defineProperties({}, {
 	addressOf: {value: function(element){
 		if (element === undefined) element = 0;
 		var bytes = this.type.sizeOf(element), o = new Address(
-			this.type, this.length - element, this.vector + bytes
+			this.type, this.length - element, this.pointer + bytes
 		);
 		return o;
 	}},
@@ -294,7 +294,7 @@ Address.prototype = Object.defineProperties({}, {
 		return a;
 	}},
 	toString: {value: function toString() {
-		return "((" + this.type.toString() + ' *)(' + this.vector + "))";
+		return "((" + this.type.toString() + ' *)(' + this.pointer + "))";
 	}}
 });
 
