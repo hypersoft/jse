@@ -95,6 +95,9 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 	if (exception && *exception) return JSValueMakeNull(ctx);
 
+	result = (JSValue) JSValueToObject(ctx, result, NULL);
+	JSObjectSetUtf8Property(ctx, (JSObject) result, "type", (JSValue)this, kJSPropertyAttributeDontDelete | kJSPropertyAttributeReadOnly);
+
 	return result;
 
 }
@@ -225,7 +228,6 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 		size_t length = addressContainer->length;
 
 		if (length == 0) return JSValueMakeUndefined(ctx);
-		if (element < 0) element = length + element;
 		if (element < 0) return JSValueMakeUndefined(ctx);
 		if (element >= length) return JSValueMakeUndefined(ctx);
 
@@ -274,7 +276,6 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		// notice the silent fails. we should be throwing, but technically that's not valid javascript,
 		// within a property accessor.
 		if (length == 0) return true;
-		if (element < 0) element = length + element;
 		if (element < 0) return true;
 		if (element >= length) return true;
 
