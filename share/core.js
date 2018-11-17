@@ -35,22 +35,22 @@ Object.defineProperties(MachineType.prototype, {
 	unitsOf: {value:function(bytes){
 		if (this.width === 0 && ! this.pointer)
 			throw new TypeError("unexpected type width: "+ this.width);
-		bytes -= bytes % this.width;
-		if (bytes < this.width) return 0;
-		var data = bytes / this.width;
+		var width = (this.width || MachineType.ptrSize);
+		bytes -= bytes % width ;
+		if (bytes < width) return 0;
+		var data = bytes / width;
 		return data;
 	}},
 	bits: {get: function(){
 		if (this.width === 0 && ! this.pointer)
 			throw new TypeError("unexpected type width: "+ this.width);
-		var width = this.width;
+		var width = (this.width || MachineType.ptrSize);
 		if (width & (1|2|4|8)) return width << 3;
 		return undefined;
 	}},
 	valueOf: {value:function(){
 		if (this.width === 0 && ! this.pointer)
 			throw new TypeError("unexpected type width: "+ this.width);
-		var x = this.width;
 		if (this.vararg) return 128;
 		if (this.pointer) x |= 512;
 		if (x === 0) return x;
