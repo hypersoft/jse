@@ -27,8 +27,8 @@ Object.defineProperties(MachineType.prototype, {
 	unsigned: {get: function(){
 		return this.signed === false;
 	}},
-	lengthOf: {value: function(count){
-		return this.width * count;
+	sizeOf: {value: function(count){
+		return (this.width || MachineType.ptrSize) * count;
 	}},
 	unitsOf: {value:function(bytes){
 		bytes -= bytes % this.width;
@@ -246,11 +246,11 @@ Address.prototype = Object.defineProperties({}, {
 		return o;
 	}},
 	offsetOf: {value: function(element){
-		return this.type.offsetOf(element);
+		return this.type.sizeOf(element);
 	}},
 	addressOf: {value: function(element){
 		if (element === undefined) element = 0;
-		var bytes = this.offsetOf(element), o = new Address(
+		var bytes = this.type.sizeOf(element), o = new Address(
 			this.type, this.length - element, this.vector + bytes
 		);
 		return o;
