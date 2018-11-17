@@ -53,24 +53,53 @@ Object.defineProperties(MachineType.prototype, {
 		return x;
 	}},
 	toString: {value:function(){
-		if (this.vararg) return 'e';
-		if (this.pointer) return 'p';
-		if (this.width === 1) {
-			return ((this.unsigned)?"C":"c");
-		} else if (this.width === 2) {
-			return ((this.unsigned)?"S":"s");
-		} else if (this.width === 4) {
-			if (this.floating) return "f";
-			return ((this.unsigned)?"J":"j");
-		} else if (this.width === 8) {
-			if (this.floating) return "d";
-			return ((this.unsigned)?"L":"l");
-		} else if (this.width === 0) return "v";
+		return this.name;
 	}},
 	toConst: {value:function(){
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
 		return c;
+	}},
+	toPointer: {value:function(){
+		var c = Object.create(this);
+		Object.defineProperty(c, "pointer", {value:true});
+		return c;
+	}},
+	format: {get(){
+		if (this.vararg) return 'e'.charCodeAt(0);
+		if (this.pointer) return 'p'.charCodeAt(0);
+		if (this.width === 1) {
+			return ((this.unsigned)?"C":"c").charCodeAt(0);
+		} else if (this.width === 2) {
+			return ((this.unsigned)?"S":"s").charCodeAt(0);
+		} else if (this.width === 4) {
+			if (this.floating) return "f".charCodeAt(0);
+			return ((this.unsigned)?"J":"j").charCodeAt(0);
+		} else if (this.width === 8) {
+			if (this.floating) return "d".charCodeAt(0);
+			return ((this.unsigned)?"L":"l").charCodeAt(0);
+		} else if (this.width === 0) return "v".charCodeAt(0);
+	}},
+	name: {get(){
+		if (this.vararg) return '...';
+		var n = [];
+		if (this.constant) n.push('const');
+		if (this.signed) n.push('signed');
+		if (this.width === 1) {
+			n.push('char');
+		} else if (this.width === 2) {
+			n.push('short');
+		} else if (this.width === 4) {
+			if (this.floating) n.push('float');
+			else if (this.pointer) n.push('void');
+			else n.push('int');
+		} else if (this.width === 8) {
+			if (this.floating) n.push('double');
+			else if (this.pointer) n.push('void');
+			else n.push('long int');
+		}
+		if (this.pointer) n.push('*');
+		return n.join(' ');
 	}},
 	readAddress:{value:machineTypeRead},
 	writeAddress:{value:machineTypeWrite},
@@ -311,7 +340,9 @@ Object.defineProperties(SharedFunction.prototype, {
 	returns:{value:Void, writable:true},
 	arguments:{value:[Void], writable:true},
 	protocol:{get:function(){
-		return this.arguments.join('');
+		var a = []; for (i = 0; i < arguments.length; i++) a.push(arguments[i].format);
+		a.push(0);
+		return String.fromCharCode.apply(String, a);
 	}}
 });
 
