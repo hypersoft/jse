@@ -97,6 +97,7 @@ Object.defineProperties(MachineType.prototype, {
 	toUtf: {value:function(){
 		if (this.width === 0 && ! this.pointer)
 			throw new TypeError(MachineType.unexpectedTypeWidth + this.width);
+		if (this.utf) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
 		Object.defineProperty(c, "signed", {value:false});
