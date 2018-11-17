@@ -165,8 +165,9 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		if (JSValueIsNumber(ctx, data)) {
 			value = JSValueToNumber(ctx, data, exception);
 		} else if (JSValueIsString(ctx, data)) {
-			short * str = (void*) JSValueToString(ctx, data, exception);
-			int len = JSStringGetLength((JSStringRef)str);
+			JSStringRef jsStr = JSValueToString(ctx, data, exception);
+			short * str = (void*) JSStringGetCharactersPtr(jsStr);
+			int len = JSStringGetLength(jsStr);
 			if (len == 1) {
 				value = str[0];
 			} else {
