@@ -84,20 +84,21 @@ Object.defineProperties(MachineType.prototype, {
 	name: {get(){
 		if (this.vararg) return '...';
 		var n = [];
+		var code = (this.utf)?"utf":"int";
 		if (this.constant) n.push('const');
 		if (this.signed) n.push('signed');
 		if (this.width === 0) {
 			n.push('void');
 		} else if (this.width === 1) {
-			n.push('int8');
+			n.push(code+'8');
 		} else if (this.width === 2) {
-			n.push('int16');
+			n.push(code+'16');
 		} else if (this.width === 4) {
 			if (this.floating) n.push('float');
-			else n.push('int32');
+			else n.push(code+'32');
 		} else if (this.width === 8) {
 			if (this.floating) n.push('double');
-			else n.push('int64');
+			else n.push(code+'64');
 		}
 		if (this.pointer) n.push('*');
 		return n.join(' ');
