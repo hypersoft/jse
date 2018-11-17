@@ -74,8 +74,6 @@ MachineType.rightShift = function (num, bits) {
 }
 
 MachineType.flag = function(N) {
-	//if (N > ) throw new TypeError("too many bits for size type: "+N);
-	//else if (N < 1) throw new TypeError("too few bits for size type: "+N);
 	return MachineType.leftShift(1, (N - 1));
 }
 
