@@ -291,7 +291,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			// access violation of the memory integrity.
 			if (exception) *exception = JSExceptionFromUtf8 (ctx,
 				"ReferenceError",
-				"attempting to change the vector property of an internal pointer"
+				"attempting to change the vector property of an internal address"
 			);
 			return true;
 		}
