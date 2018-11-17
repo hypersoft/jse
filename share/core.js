@@ -14,13 +14,11 @@ MachineType.min = {};
 MachineType.format = {};
 
 MachineType.cache = function(type) {
-	var code = type.code;
-	var name = type.name;
-	var bits = MachineType.cache.bits(type);
+	var code = type.code, name = type.name;
 	Object.defineProperties(type, {
 		code: {value:code},
 		name: {value:name},
-		bits: {value:bits}
+		bits: {value:MachineType.cache.bits(type)}
 	});
 	if (MachineType.max[code] === undefined) {
 		MachineType.max[code] = MachineType.cache.max(type);
