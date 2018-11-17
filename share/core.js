@@ -16,11 +16,11 @@ MachineType.format = {};
 MachineType.cache = function(type) {
 	var code = type.code;
 	var name = type.name;
-	Object.defineProperty(type, "code", {
-		value: code
-	});
-	Object.defineProperty(type, "name", {
-		value: name
+	var bits = type.bits;
+	Object.defineProperties(type, {
+		code: {value:code},
+		name: {value:name},
+		bits: {value:bits}
 	});
 	if (MachineType.max[code] === undefined) {
 		MachineType.max[code] = MachineType.cache.max(type);
