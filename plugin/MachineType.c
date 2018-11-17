@@ -144,6 +144,12 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	JSObjectSetUtf8Property(ctx, MachineType, "ptrSize", JSValueFromNumber(ctx, sizeof(uintptr_t)), 0);
 	JSObjectSetUtf8Property(ctx, MachineType, "intSize", JSValueFromNumber(ctx, sizeof(size_t)), 0);
 
+#if (BYTE_ORDER == LITTLE_ENDIAN)
+	JSObjectSetUtf8Property(ctx, MachineType, "littleEndian", JSValueMakeBoolean(ctx, true), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
+#elif (BYTE_ORDER == BIG_ENDIAN)
+	JSObjectSetUtf8Property(ctx, MachineType, "littleEndian", JSValueMakeBoolean(ctx, false), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
+#endif
+
 	loadCount++;
 	return (JSValue) object;
 
