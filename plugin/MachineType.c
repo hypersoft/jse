@@ -4,16 +4,27 @@
 
 #define MTCLASS "MachineType"
 
+#define FLAG(N) (1 << (N - 1))
+
 #define FLAGGED(X, F) ((X & F) == F)
 
-#define MT_WIDTH(C) (C & (1|2|4|8))
-#define MT_VARARG(C) FLAGGED(C, 128)
-#define MT_CONST(C) FLAGGED(C, 256)
-#define MT_POINTER(C) FLAGGED(C, 512)
-#define MT_SIGNED(C) FLAGGED(C, 1024)
-#define MT_FLOAT(C) FLAGGED(C, 2048)
-#define MT_UTF(C) FLAGGED(C, 4096)
-#define MT_BOOL(C) FLAGGED(C, 8192)
+const unsigned
+	MACHINE_TYPE_VARARG = FLAG(8),
+	MACHINE_TYPE_CONST = FLAG(9),
+	MACHINE_TYPE_POINTER = FLAG(10),
+	MACHINE_TYPE_SIGNED = FLAG(11),
+	MACHINE_TYPE_FLOAT = FLAG(12),
+	MACHINE_TYPE_UTF = FLAG(13),
+	MACHINE_TYPE_BOOL = FLAG(14);
+
+#define MACHINE_TYPE_WIDTH(C) (C & (1|2|4|8))
+#define MACHINE_TYPE_IS_VARARG(C) FLAGGED(C, MACHINE_TYPE_VARARG)
+#define MACHINE_TYPE_IS_CONST(C) FLAGGED(C, MACHINE_TYPE_CONST)
+#define MACHINE_TYPE_IS_POINTER(C) FLAGGED(C, MACHINE_TYPE_POINTER)
+#define MACHINE_TYPE_IS_SIGNED(C) FLAGGED(C, MACHINE_TYPE_SIGNED)
+#define MACHINE_TYPE_IS_FLOAT(C) FLAGGED(C, MACHINE_TYPE_FLOAT)
+#define MACHINE_TYPE_IS_UTF(C) FLAGGED(C, MACHINE_TYPE_UTF)
+#define MACHINE_TYPE_IS_BOOL(C) FLAGGED(C, MACHINE_TYPE_BOOL)
 
 static int loadCount = 0;
 
@@ -49,11 +60,11 @@ static JSValue JSMachineTypeConstructor (JSContext ctx, JSObject function, JSObj
 
 double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned code, JSValue * exception) {
 
-	unsigned width = MT_WIDTH(code);
+	unsigned width = MACHINE_TYPE_WIDTH(code);
 	bool 
-		sign = MT_SIGNED(code),
-			floating = MT_FLOAT(code),
-				pointer = MT_POINTER(code);
+		sign = MACHINE_TYPE_IS_SIGNED(code),
+			floating = MACHINE_TYPE_IS_FLOAT(code),
+				pointer = MACHINE_TYPE_IS_POINTER(code);
 
 	if (pointer) {
 		return ((uintptr_t *)address)[element];
@@ -104,7 +115,7 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 	if (exception && *exception) return JSValueMakeNull(ctx);
 
-	if (! MT_POINTER(code) && MT_UTF(code) ) {
+	if (! MACHINE_TYPE_IS_POINTER(code) && MACHINE_TYPE_IS_UTF(code) ) {
 		short out[] = {value};
 		return JSValueMakeString(ctx, JSStringCreateWithCharacters(out, 1));
 	}
@@ -120,13 +131,13 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 bool MachineTypeWrite(JSContext ctx, void * address, size_t element, JSValue data, unsigned code, JSValue * exception) {
 
-	unsigned width = MT_WIDTH(code);
+	unsigned width = MACHINE_TYPE_WIDTH(code);
 	bool 
-		sign = MT_SIGNED(code),
-			floating = MT_FLOAT(code),
-				constant = MT_CONST(code),
-					pointer = MT_POINTER(code),
-						utf = MT_UTF(code);
+		sign = MACHINE_TYPE_IS_SIGNED(code),
+			floating = MACHINE_TYPE_IS_FLOAT(code),
+				constant = MACHINE_TYPE_IS_CONST(code),
+					pointer = MACHINE_TYPE_IS_POINTER(code),
+						utf = MACHINE_TYPE_IS_UTF(code);
 
 	if (constant) return true;
 
