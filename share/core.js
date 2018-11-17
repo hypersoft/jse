@@ -69,6 +69,7 @@ Object.defineProperties(MachineType.prototype, {
 	toUtf: {value:function(){
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
+		Object.defineProperty(c, "signed", {value:false});
 		return c;
 	}},
 	format: {get(){
