@@ -15,6 +15,7 @@ MachineType.format = {};
 
 MachineType.cache = function(type) {
 	var code = type.code;
+	var name = type.name;
 	Object.defineProperty(type, "code", {
 		value: code
 	});
@@ -30,7 +31,6 @@ MachineType.cache = function(type) {
 	if (MachineType.format[code] === undefined) {
 		MachineType.format[code] = MachineType.cache.format(type);
 	}
-	var name = type.name;
 	if (MachineType[name] === undefined) {
 		MachineType[name] = type;
 	}
