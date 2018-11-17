@@ -131,6 +131,9 @@ Object.defineProperties(MachineType.prototype, {
 
 Object.defineProperties(this, {
 
+	Void: {value: new MachineType({width:0})},
+	VarArg:{value: new MachineType({vararg:true})},
+
 	Int8: {value: new MachineType({width:1, signed:true})},
 	Int16: {value: new MachineType({width:2, signed:true})},
 	Int32: {value: new MachineType({width:4, signed:true})},
@@ -141,11 +144,12 @@ Object.defineProperties(this, {
 	UInt32: {value: new MachineType({width:4})},
 	UInt64: {value: new MachineType({width:8})},
 
-	Void: {value: new MachineType({width:0})},
+	UIntPtr: {value: new MachineType({width:MachineType.width})},
+
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
-	Pointer: {value: new MachineType({pointer:true})},
-	VarArg:{value: new MachineType({vararg:true})}
+
+	Pointer: {value: new MachineType({pointer:true})}
 
 });
 
