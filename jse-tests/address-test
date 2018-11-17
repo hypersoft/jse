@@ -45,3 +45,9 @@ buffer[1] = 256; // data overflow should come out as zero
 if (buffer[1] != 0) {
 	throw new Error("data overflow of address member did not write zero: "+buffer[1]);
 }
+
+buffer[-11] = 12;
+
+if (buffer[-12] != 255 || buffer[-11] != 12) {
+	throw new Error("buffer reverse index lookup failed");
+}
