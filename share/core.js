@@ -6,6 +6,8 @@ run.prototype = {
 
 loadPlugin("MachineType.jso");
 
+MachineType.unexpectedTypeWidth = "unexpected type width: ";
+
 MachineType.create = function(representation){
 	for (name in representation) {
 		if (this[name] !== undefined) {
@@ -14,7 +16,7 @@ MachineType.create = function(representation){
 	}
 	var width = this.width;
 	if (width !== 0 && width !== 1 && width !== 2 && width !== 4 && width !== 8)
-		throw new TypeError("invalid machine type width");
+		throw new TypeError(MachineType.unexpectedTypeWidth + width);
 
 	return this;
 };
@@ -29,12 +31,12 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	sizeOf: {value: function(count){
 		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
+			throw new TypeError(MachineType.unexpectedTypeWidth+ this.width);
 		return (this.width || MachineType.ptrSize) * count;
 	}},
 	unitsOf: {value:function(bytes){
 		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
+			throw new TypeError(MachineType.unexpectedTypeWidth + this.width);
 		var width = (this.width || MachineType.ptrSize);
 		bytes -= bytes % width ;
 		if (bytes < width) return 0;
@@ -62,7 +64,7 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	toConst: {value:function(){
 		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
+			throw new TypeError(MachineType.unexpectedTypeWidth + this.width);
 		if (this.constant) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
@@ -75,7 +77,7 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	toUtf: {value:function(){
 		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
+			throw new TypeError(MachineType.unexpectedTypeWidth + this.width);
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
 		Object.defineProperty(c, "signed", {value:false});
