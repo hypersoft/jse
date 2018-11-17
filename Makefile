@@ -59,7 +59,7 @@ bin/ghtml: ${GHTML_SOURCES}
 	gcc ${JSE_CFLAGS} ${GHTML_SOURCES} ${JSE_LIBS} -o bin/ghtml ${GHTML_CONFIG}
 
 plugins: share/plugin/JseWebKit.so share/plugin/Ghtml.jso \
-	 share/plugin/Environment.jso share/plugin/Address.jso \
+	 share/plugin/Environment.jso \
 	 share/plugin/DynCall.jso share/plugin/Fork.jso \
 	 share/plugin/MachineType.jso share/plugin/Shell.jso
 

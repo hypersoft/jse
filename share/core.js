@@ -217,8 +217,6 @@ Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(ma
 	};
 })(String.fromCharCode);
 
-loadPlugin("Address.jso");
-
 Address.create = function create(type, length, vector) {
 	if (type !== undefined) this.type = type;
 	if (vector !== undefined) {
