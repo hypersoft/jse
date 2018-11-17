@@ -36,35 +36,35 @@ static JSValue JSMachineTypeConstructor (JSContext ctx, JSObject function, JSObj
 
 double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned code, JSValue * exception) {
 
-		unsigned
-			width = (code & (1|2|4|8));
-		bool 
-			sign = (code & 1024),
-				floating = (code & 2048),
-					pointer = (code & 512),
-						utf = (code & 4096); // <-- this won't be used, as utfN is just an alias for get charcode
+	unsigned
+		width = (code & (1|2|4|8));
+	bool 
+		sign = (code & 1024),
+			floating = (code & 2048),
+				pointer = (code & 512),
+					utf = (code & 4096); // <-- this won't be used, as utfN is just an alias for get charcode
 
-		if (pointer) {
-			return ((uintptr_t *)address)[element];
-		} else if (floating) {
-			if (width == 4) return ((float*)address)[element];
-			else if (width == 8) return ((double*)address)[element];
-			else goto bad_float_request;
-		}
+	if (pointer) {
+		return ((uintptr_t *)address)[element];
+	} else if (floating) {
+		if (width == 4) return ((float*)address)[element];
+		else if (width == 8) return ((double*)address)[element];
+		else goto bad_float_request;
+	}
 
-		if (address && width) {
-			if (sign) {
-				if (width == 1) return ((signed char *)address)[element];
-				else if (width == 2) return ((signed short *)address)[element];
-				else if (width == 4) return ((signed long *)address)[element];
-				else if (width == 8) return ((signed long long *)address)[element];
-			} else {
-				if (width == 1) return ((unsigned char *)address)[element];
-				else if (width == 2) return ((unsigned short *)address)[element];
-				else if (width == 4) return ((unsigned long *)address)[element];
-				else if (width == 8) return ((unsigned long long *)address)[element];
-			}
+	if (address && width) {
+		if (sign) {
+			if (width == 1) return ((signed char *)address)[element];
+			else if (width == 2) return ((signed short *)address)[element];
+			else if (width == 4) return ((signed long *)address)[element];
+			else if (width == 8) return ((signed long long *)address)[element];
+		} else {
+			if (width == 1) return ((unsigned char *)address)[element];
+			else if (width == 2) return ((unsigned short *)address)[element];
+			else if (width == 4) return ((unsigned long *)address)[element];
+			else if (width == 8) return ((unsigned long long *)address)[element];
 		}
+	}
 
 bad_type_request:
 
@@ -99,53 +99,53 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 bool MachineTypeWrite(JSContext ctx, void * address, size_t element, JSValue data, unsigned code, JSValue * exception) {
 
-		unsigned
-			width = (code & (1|2|4|8));
-		bool 
-			sign = (code & 1024),
-				floating = (code & 2048),
-					constant = (code & 256),
-						pointer = (code & 512),
-							utf = (code & 4096);
+	unsigned
+		width = (code & (1|2|4|8));
+	bool 
+		sign = (code & 1024),
+			floating = (code & 2048),
+				constant = (code & 256),
+					pointer = (code & 512),
+						utf = (code & 4096);
 
-		if (constant) return true;
+	if (constant) return true;
 
-		double value = 0;
+	double value = 0;
 
-		if (JSValueIsNumber(ctx, data)) {
-			value = JSValueToNumber(ctx, data, exception);
-		} else if (JSValueIsString(ctx, data)) {
-			JSStringRef jsStr = JSValueToString(ctx, data, exception);
-			short * str = (void*) JSStringGetCharactersPtr(jsStr);
-			int len = JSStringGetLength(jsStr);
-			if (len == 1) {
-				value = str[0];
-			} else {
-				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %i to a multi-character-string", element);
-			}
+	if (JSValueIsNumber(ctx, data)) {
+		value = JSValueToNumber(ctx, data, exception);
+	} else if (JSValueIsString(ctx, data)) {
+		JSStringRef jsStr = JSValueToString(ctx, data, exception);
+		short * str = (void*) JSStringGetCharactersPtr(jsStr);
+		int len = JSStringGetLength(jsStr);
+		if (len == 1) {
+			value = str[0];
 		} else {
-			value = JSValueToNumber(ctx, data, exception);
+			JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %i to a multi-character-string", element);
 		}
+	} else {
+		value = JSValueToNumber(ctx, data, exception);
+	}
 
-		if (exception && *exception) return true;
+	if (exception && *exception) return true;
 
-		if (pointer) sign = floating = 0, width = sizeof(void*);
+	if (pointer) sign = floating = 0, width = sizeof(void*);
 
-		if (address && width && constant == 0) {
-			if (floating) {
-				if (width == 4) ((float *)address)[element] = value;
-				else if (width == 8) ((double *)address)[element] = value;
-				else goto oops;
-			} else {
-				if (width == 1) ((unsigned char *)address)[element] = value;
-				else if (width == 2) ((unsigned short *)address)[element] = value;
-				else if (width == 4) ((unsigned long *)address)[element] = value;
-				else if (width == 8) ((unsigned long long *)address)[element] = value;
-				else goto oops;
-			}
+	if (address && width && constant == 0) {
+		if (floating) {
+			if (width == 4) ((float *)address)[element] = value;
+			else if (width == 8) ((double *)address)[element] = value;
+			else goto oops;
+		} else {
+			if (width == 1) ((unsigned char *)address)[element] = value;
+			else if (width == 2) ((unsigned short *)address)[element] = value;
+			else if (width == 4) ((unsigned long *)address)[element] = value;
+			else if (width == 8) ((unsigned long long *)address)[element] = value;
+			else goto oops;
 		}
+	}
 
-		return true;
+	return true;
 
 oops:
 
