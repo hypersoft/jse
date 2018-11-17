@@ -34,7 +34,7 @@ static JSValue JSMachineTypeConstructor (JSContext ctx, JSObject function, JSObj
 	return this;
 }
 
-double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned code, JSValue exception) {
+double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned code, JSValue * exception) {
 
 		unsigned
 			width = (code & (1|2|4|8));
@@ -59,7 +59,7 @@ double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned c
 				else if (width == 4) return ((signed long *)address)[element];
 				else if (width == 8) return ((signed long long *)address)[element];
 			} else {
-				if (width == 1) value = ((unsigned char *)address)[element];
+				if (width == 1) return ((unsigned char *)address)[element];
 				else if (width == 2) return ((unsigned short *)address)[element];
 				else if (width == 4) return ((unsigned long *)address)[element];
 				else if (width == 8) return ((unsigned long long *)address)[element];
@@ -97,7 +97,7 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 }
 
-bool MachineTypeWrite(JSContext ctx, void * address, size_t element, double value, unsigned code, JSValue exception) {
+bool MachineTypeWrite(JSContext ctx, void * address, size_t element, JSValue data, unsigned code, JSValue * exception) {
 
 		unsigned
 			width = (code & (1|2|4|8));
@@ -121,7 +121,7 @@ bool MachineTypeWrite(JSContext ctx, void * address, size_t element, double valu
 			if (len == 1) {
 				value = str[0];
 			} else {
-				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %s to a multi-character-string", name);
+				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %i to a multi-character-string", element);
 			}
 		} else {
 			value = JSValueToNumber(ctx, data, exception);
@@ -163,19 +163,20 @@ JSValue JSMachineTypeWrite(JSContext ctx, JSObject function, JSObject this, size
 	}
 
 	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
-	double value = 0; long long element = 0;
-	if (argc == 2) value = JSValueToNumber(ctx, argv[1], NULL);
+	long long element = 0;
+	JSValue data;
+	if (argc == 2) data = argv[1];
 	else if (argc > 2)
 		element = JSValueToNumber(ctx, argv[1], NULL),
-			value = JSValueToNumber(ctx, argv[2], NULL);
+			data = argv[2];
 	unsigned code = JSValueToNumber(ctx, (JSValue) this, NULL);
 	
-	if (MachineTypeWrite(ctx, address, element, value, code, exception)) {
-		return JSValueFromNumber(ctx, value);
+	if (MachineTypeWrite(ctx, address, element, data, code, exception)) {
+		return data;
 	}
 
 	return JSValueMakeUndefined(ctx);
-	,
+	
 }
 
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
