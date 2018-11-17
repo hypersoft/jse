@@ -51,13 +51,13 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	valueOf: {value:function(){
 		var x = this.width;
-		if (this.vararg) return 128;
-		if (this.pointer) x |= 512;
+		if (this.vararg) return MachineType.VARARG;
+		if (this.pointer) x |= MachineType.POINTER;
 		//if (x === 0) return x;
-		if (this.constant) x |= 256;
-		if (this.signed) x |= 1024;
-		else if (this.floating) x |= 2048;
-		else if (this.utf) x |= 4096;
+		if (this.constant) x |= MachineType.CONSTANT;
+		if (this.signed) x |= MachineType.SIGNED;
+		else if (this.floating) x |= MachineType.FLOAT;
+		else if (this.utf) x |= MachineType.UTF;
 		return x;
 	}},
 	toString: {value:function(){
