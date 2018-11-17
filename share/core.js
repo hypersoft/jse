@@ -14,7 +14,10 @@ MachineType.min = {};
 MachineType.format = {};
 
 MachineType.cache = function(type) {
-	var code = type.valueOf();
+	var code = type.code;
+	Object.defineProperty(type, "code", {
+		value: code
+	});
 	if (MachineType.max[code] === undefined) {
 		MachineType.max[code] = MachineType.cache.max(type);
 	}
@@ -103,10 +106,10 @@ Object.defineProperties(MachineType.prototype, {
 		return this.signed === false;
 	}},
 	max: {get(){
-		return MachineType.max[this.valueOf()];
+		return MachineType.max[this.code];
 	}},
 	min: {get(){
-		return MachineType.min[this.valueOf()];
+		return MachineType.min[this.code];
 	}},
 	sizeOf: {value: function(count){
 		if (this.width === 0 && ! this.pointer)
@@ -128,7 +131,7 @@ Object.defineProperties(MachineType.prototype, {
 		if (width & (1|2|4|8)) return width << 3;
 		return undefined;
 	}},
-	valueOf: {value:function(){
+	code: {get(){
 		var x = this.width;
 		if (this.vararg) return MachineType.VARARG;
 		if (this.pointer) x |= MachineType.POINTER;
@@ -138,6 +141,9 @@ Object.defineProperties(MachineType.prototype, {
 		else if (this.utf) x |= MachineType.UTF;
 		else if (this.boolean) x |= MachineType.BOOLEAN;
 		return x;
+	}},
+	valueOf: {value:function(){
+		return this.code;
 	}},
 	toString: {value:function(){
 		return this.name;
