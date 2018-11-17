@@ -121,14 +121,13 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.vararg) return '...';
 		var n = [];
 		var code = (this.utf)?"utf":"int";
-		if (this.boolean) code = 'bool';
 		if (this.constant) n.push('const');
 		if (this.signed) n.push('signed');
 		if (this.width === 0) {
 			n.push('void');
 		} else if (this.width === 1) {
 			if (! this.boolean) n.push(code+'8');
-			else n.push(code);
+			else n.push('bool');
 		} else if (this.width === 2) {
 			n.push(code+'16');
 		} else if (this.width === 4) {
