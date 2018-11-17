@@ -150,9 +150,9 @@ Object.defineProperties(this, {
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
 
-	Pointer: {value: new MachineType({pointer:true})}
-
 });
+
+Pointer = Void.toPointer();
 
 Object.defineProperty(Array.prototype, "toSerial", {value: function toSerial(max){
 	if (this.serialized) return this;
