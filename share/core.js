@@ -14,7 +14,9 @@ MachineType.min = {};
 MachineType.format = {};
 
 MachineType.cache = function(type) {
-	var code = type.code, name = type.name;
+	var 
+		code = MachineType.cache.code(type), 
+		name = MachineType.cache.name(type);
 	Object.defineProperties(type, {
 		code: {value:code},
 		name: {value:name},
@@ -32,6 +34,42 @@ MachineType.cache = function(type) {
 	if (MachineType[name] === undefined) {
 		MachineType[name] = type;
 	}
+}
+
+MachineType.cache.code = function(type){
+	var x = type.width;
+	if (type.vararg) return MachineType.VARARG;
+	if (type.pointer) x |= MachineType.POINTER;
+	if (type.constant) x |= MachineType.CONSTANT;
+	if (type.signed) x |= MachineType.SIGNED;
+	else if (type.floating) x |= MachineType.FLOAT;
+	else if (type.utf) x |= MachineType.UTF;
+	else if (type.boolean) x |= MachineType.BOOLEAN;
+	return x;
+}
+
+MachineType.cache.name = function(type){
+	if (type.vararg) return '...';
+	var n = [];
+	var code = (type.utf)?"utf":"int";
+	if (type.constant) n.push('const');
+	if (type.signed) n.push('signed');
+	if (type.width === 0) {
+		n.push('void');
+	} else if (type.width === 1) {
+		if (! type.boolean) n.push(code+'8');
+		else n.push('bool');
+	} else if (type.width === 2) {
+		n.push(code+'16');
+	} else if (type.width === 4) {
+		if (type.floating) n.push('float');
+		else n.push(code+'32');
+	} else if (type.width === 8) {
+		if (type.floating) n.push('double');
+		else n.push(code+'64');
+	}
+	if (type.pointer) n.push('*');
+	return n.join(' ');
 }
 
 MachineType.cache.bits = function(type){
@@ -131,17 +169,6 @@ Object.defineProperties(MachineType.prototype, {
 		var data = bytes / width;
 		return data;
 	}},
-	code: {get(){
-		var x = this.width;
-		if (this.vararg) return MachineType.VARARG;
-		if (this.pointer) x |= MachineType.POINTER;
-		if (this.constant) x |= MachineType.CONSTANT;
-		if (this.signed) x |= MachineType.SIGNED;
-		else if (this.floating) x |= MachineType.FLOAT;
-		else if (this.utf) x |= MachineType.UTF;
-		else if (this.boolean) x |= MachineType.BOOLEAN;
-		return x;
-	}},
 	valueOf: {value:function(){
 		return this.code;
 	}},
@@ -177,29 +204,6 @@ Object.defineProperties(MachineType.prototype, {
 	}},
 	format: {get(){
 		return MachineType.format[this.code]
-	}},
-	name: {get(){
-		if (this.vararg) return '...';
-		var n = [];
-		var code = (this.utf)?"utf":"int";
-		if (this.constant) n.push('const');
-		if (this.signed) n.push('signed');
-		if (this.width === 0) {
-			n.push('void');
-		} else if (this.width === 1) {
-			if (! this.boolean) n.push(code+'8');
-			else n.push('bool');
-		} else if (this.width === 2) {
-			n.push(code+'16');
-		} else if (this.width === 4) {
-			if (this.floating) n.push('float');
-			else n.push(code+'32');
-		} else if (this.width === 8) {
-			if (this.floating) n.push('double');
-			else n.push(code+'64');
-		}
-		if (this.pointer) n.push('*');
-		return n.join(' ');
 	}},
 	readAddress:{value:MachineType.read},
 	writeAddress:{value:MachineType.write},
