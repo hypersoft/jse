@@ -42,8 +42,7 @@ Object.defineProperties(MachineType.prototype, {
 		return data;
 	}},
 	bits: {get: function(){
-		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
+		if (this.width === 0 && ! this.pointer) return 0;
 		var width = (this.width || MachineType.ptrSize);
 		if (width & (1|2|4|8)) return width << 3;
 		return undefined;
