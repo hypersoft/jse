@@ -6,9 +6,14 @@
 
 #define FLAGGED(X, F) ((X & F) == F)
 
-#define MT_POINTER(C) FLAGGED(C, 512)
+#define MT_WIDTH(C) (C & (1|2|4|8))
+#define MT_VARARG(C) FLAGGED(C, 128)
 #define MT_CONST(C) FLAGGED(C, 256)
+#define MT_POINTER(C) FLAGGED(C, 512)
+#define MT_SIGNED(C) FLAGGED(C, 1024)
+#define MT_FLOAT(C) FLAGGED(C, 2048)
 #define MT_UTF(C) FLAGGED(C, 4096)
+#define MT_BOOL(C) FLAGGED(C, 8192)
 
 static int loadCount = 0;
 
@@ -44,13 +49,11 @@ static JSValue JSMachineTypeConstructor (JSContext ctx, JSObject function, JSObj
 
 double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned code, JSValue * exception) {
 
-	unsigned
-		width = (code & (1|2|4|8));
+	unsigned width = MT_WIDTH(code);
 	bool 
-		sign = (code & 1024),
-			floating = (code & 2048),
-				pointer = (code & 512),
-					utf = (code & 4096); // <-- this won't be used, as utfN is just an alias for get charcode
+		sign = MT_SIGNED(code),
+			floating = MT_FLOAT(code),
+				pointer = MT_POINTER(code); // <-- this won't be used, as utfN is just an alias for get charcode
 
 	if (pointer) {
 		return ((uintptr_t *)address)[element];
@@ -117,14 +120,13 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 bool MachineTypeWrite(JSContext ctx, void * address, size_t element, JSValue data, unsigned code, JSValue * exception) {
 
-	unsigned
-		width = (code & (1|2|4|8));
+	unsigned width = MT_WIDTH(code);
 	bool 
-		sign = (code & 1024),
-			floating = (code & 2048),
-				constant = (code & 256),
-					pointer = (code & 512),
-						utf = (code & 4096);
+		sign = MT_SIGNED(code),
+			floating = MT_FLOAT(code),
+				constant = MT_CONST(code),
+					pointer = MT_POINTER(code),
+						utf = MT_UTF(code);
 
 	if (constant) return true;
 
