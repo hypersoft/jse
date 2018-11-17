@@ -8,6 +8,57 @@ loadPlugin("MachineType.jso");
 
 MachineType.unexpectedTypeWidth = "unexpected type width: ";
 
+// Lookup tables. Entries stored by MachineTypeCode
+MachineType.max = {};
+MachineType.min = {};
+MachineType.format = {};
+
+MachineType.cache = function(type) {
+	var code = type.valueOf();
+	if (MachineType.max[code] === undefined) {
+		MachineType.max[code] = MachineType.cache.max(type);
+	}
+	if (MachineType.min[code] === undefined) {
+		MachineType.min[code] = MachineType.cache.min(type);
+	}
+	if (MachineType.format[code] === undefined) {
+		MachineType.format[code] = MachineType.cache.format(type);
+	}
+	var name = type.name;
+	if (MachineType[name] === undefined) {
+		MachineType[name] = type;
+	}
+}
+
+MachineType.cache.max = function(obj) {
+	if (obj.floating) return undefined;
+	var size = obj.bits;
+	if (obj.signed) size--;
+	return MachineType.flag(size + 1) - 1;
+};
+
+MachineType.cache.min = function(obj) {
+	if (obj.floating) return undefined;
+	if (obj.signed) return -(obj.max + 1);
+	return 0;
+}
+
+MachineType.cache.format = function(obj) {
+	if (obj.vararg) return 'e'.charCodeAt(0);
+	if (obj.pointer) return 'p'.charCodeAt(0);
+	if (obj.width === 1) {
+		return ((obj.unsigned)?"C":"c").charCodeAt(0);
+	} else if (obj.width === 2) {
+		return ((obj.unsigned)?"S":"s").charCodeAt(0);
+	} else if (obj.width === 4) {
+		if (obj.floating) return "f".charCodeAt(0);
+		return ((obj.unsigned)?"J":"j").charCodeAt(0);
+	} else if (obj.width === 8) {
+		if (obj.floating) return "d".charCodeAt(0);
+		return ((obj.unsigned)?"L":"l").charCodeAt(0);
+	} else if (obj.width === 0) return "v".charCodeAt(0);
+}
+
 MachineType.leftShift = function (num, bits) {
 	return num * Math.pow(2,bits);
 }
@@ -17,8 +68,8 @@ MachineType.rightShift = function (num, bits) {
 }
 
 MachineType.flag = function(N) {
-	if (N > IntSize.bits) throw new TypeError("too many bits for size type: "+N);
-	else if (N < 1) throw new TypeError("too few bits for size type: "+N);
+	//if (N > ) throw new TypeError("too many bits for size type: "+N);
+	//else if (N < 1) throw new TypeError("too few bits for size type: "+N);
 	return MachineType.leftShift(1, (N - 1));
 }
 
@@ -26,15 +77,19 @@ MachineType.flagged = function(C, F) {
 	return ((C & F) == F);
 }
 
-MachineType.create = function(representation){
+MachineType.create = function(representation) {
+
 	for (name in representation) {
 		if (this[name] !== undefined) {
 			Object.defineProperty(this, name, {value: representation[name], writable:false});
 		}
 	}
+
 	var width = this.width;
 	if (width !== 0 && width !== 1 && width !== 2 && width !== 4 && width !== 8)
 		throw new TypeError(MachineType.unexpectedTypeWidth + width);
+
+	MachineType.cache(this);
 
 	return this;
 };
@@ -48,15 +103,10 @@ Object.defineProperties(MachineType.prototype, {
 		return this.signed === false;
 	}},
 	max: {get(){
-		if (this.floating) return undefined;
-		var size = this.bits;
-		if (this.signed) size--;
-		return MachineType.flag(size + 1) - 1;
+		return MachineType.max[this.valueOf()];
 	}},
 	min: {get(){
-		if (this.floating) return undefined;
-		if (this.signed) return -(this.max + 1);
-		return 0;
+		return MachineType.min[this.valueOf()];
 	}},
 	sizeOf: {value: function(count){
 		if (this.width === 0 && ! this.pointer)
@@ -98,11 +148,13 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.constant) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
+		MachineType.cache(c);
 		return c;
 	}},
 	toPointer: {value:function(){
 		var c = Object.create(this);
 		Object.defineProperty(c, "pointer", {value:true});
+		MachineType.cache(c);
 		return c;
 	}},
 	toUtf: {value:function(){
@@ -114,22 +166,11 @@ Object.defineProperties(MachineType.prototype, {
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
 		Object.defineProperty(c, "signed", {value:false});
+		MachineType.cache(c);
 		return c;
 	}},
 	format: {get(){
-		if (this.vararg) return 'e'.charCodeAt(0);
-		if (this.pointer) return 'p'.charCodeAt(0);
-		if (this.width === 1) {
-			return ((this.unsigned)?"C":"c").charCodeAt(0);
-		} else if (this.width === 2) {
-			return ((this.unsigned)?"S":"s").charCodeAt(0);
-		} else if (this.width === 4) {
-			if (this.floating) return "f".charCodeAt(0);
-			return ((this.unsigned)?"J":"j").charCodeAt(0);
-		} else if (this.width === 8) {
-			if (this.floating) return "d".charCodeAt(0);
-			return ((this.unsigned)?"L":"l").charCodeAt(0);
-		} else if (this.width === 0) return "v".charCodeAt(0);
+		return MachineType.format[this.valueOf()]
 	}},
 	name: {get(){
 		if (this.vararg) return '...';
