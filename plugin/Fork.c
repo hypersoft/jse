@@ -69,7 +69,7 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 	if (c == 0) {
 		JSValue exn;
 		JSObjectCallAsFunction(ctx, func, scope, argc - 2, args, &exn);
-		JSReportException(ctx, "fork", exn);
+		if (exn) JSReportException(ctx, "fork", exn);
 		exit((exn != 0)?1:0);
 	} else {
 		JSObjectSetUtf8Property(ctx, self, "pid", JSValueFromNumber(ctx, c), kJSPropertyAttributeDontDelete | kJSPropertyAttributeReadOnly);
