@@ -277,6 +277,7 @@ Object.defineProperty(String.prototype, "toBuffer", {
 	}, enumerable: false
 });
 
+loadPlugin("Fork.jso");
 loadPlugin("DynCall.jso");
 
 Object.defineProperties(SharedLibrary.prototype, {

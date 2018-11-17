@@ -6,8 +6,6 @@
  * need to report back to the main.
  */
 
-loadPlugin("Fork.jso");
-
 var child = new Fork({/* child function scope object */}, function main(ms, info){
 	/* child function */
 	printErrorLine("child: going to sleep for "+info)
@@ -18,7 +16,6 @@ var child = new Fork({/* child function scope object */}, function main(ms, info
 
 printErrorLine("parent: waiting for child to finish...");
 
-// Fork.jso provides this function
 wait(child.pid);
 
 printErrorLine("parent: child has finished"); 
