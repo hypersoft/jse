@@ -49,8 +49,6 @@ Object.defineProperties(MachineType.prototype, {
 		return undefined;
 	}},
 	valueOf: {value:function(){
-		if (this.width === 0 && ! this.pointer)
-			throw new TypeError("unexpected type width: "+ this.width);
 		if (this.vararg) return 128;
 		if (this.pointer) x |= 512;
 		if (x === 0) return x;
