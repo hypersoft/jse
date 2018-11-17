@@ -435,6 +435,8 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	JSObjectSetUtf8Property(ctx, MachineType, "UTF", JSValueFromNumber(ctx, MACHINE_TYPE_UTF), 0);
 	JSObjectSetUtf8Property(ctx, MachineType, "BOOLEAN", JSValueFromNumber(ctx, MACHINE_TYPE_BOOL), 0);
 
+	JSObjectSetUtf8Property(ctx, MachineType, "byteOrder", JSValueFromNumber(ctx, BYTE_ORDER), 0);
+
 #if (BYTE_ORDER == LITTLE_ENDIAN)
 	JSObjectSetUtf8Property(ctx, MachineType, "bigEndian", JSValueMakeBoolean(ctx, false), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
 	JSObjectSetUtf8Property(ctx, MachineType, "littleEndian", JSValueMakeBoolean(ctx, true), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
