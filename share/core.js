@@ -299,11 +299,7 @@ Address.prototype = Object.defineProperties({}, {
 		return a;
 	}},
 	toString: {value: function toString() {
-		if (this.type.utf) {
-			String.fromCharCode.apply(String, this);
-		}
-		if (this.type.floating) return Array.prototype.toString.apply(this, arguments);
-		return this.vector;
+		return "((" + this.type.toString() + ' *)(' + this.vector + "))";
 	}}
 });
 
