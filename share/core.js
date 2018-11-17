@@ -101,8 +101,8 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.pointer) n.push('*');
 		return n.join(' ');
 	}},
-	readAddress:{value:machineTypeRead},
-	writeAddress:{value:machineTypeWrite},
+	readAddress:{value:MachineType.read},
+	writeAddress:{value:MachineType.write},
 	bindAddress:{value:function(vector, o, id){
 		var type = this;
 		Object.defineProperty(o, id, {

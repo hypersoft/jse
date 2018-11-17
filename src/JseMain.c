@@ -144,8 +144,6 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	if (secureMode) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
-		JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
-		JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
 		char * file = "/usr/share/jse/core.js";
 		char * contents = NULL;
 		GError * error = NULL;
@@ -258,8 +256,6 @@ int jse_file_mode(char * file)
 	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
-		JSObjectCreateFunction(jse.ctx, global, "machineTypeRead", machineTypeRead);
-		JSObjectCreateFunction(jse.ctx, global, "machineTypeWrite", machineTypeWrite);
 		char * file = "/usr/share/jse/core.js";
 		char * contents = NULL;
 		GError * error = NULL;
