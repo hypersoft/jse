@@ -95,6 +95,10 @@ load_changed (WebKitWebView  *web_view,
                WebKitLoadEvent load_event,
                gpointer        user_data)
 {
+
+    WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(web_view);
+    window_geometry_changed(windowProperties, Ghtml.window);
+
     if (load_event == WEBKIT_LOAD_STARTED) {
         if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK))  gtk_widget_grab_focus(GTK_WIDGET(Ghtml.view));
     }
