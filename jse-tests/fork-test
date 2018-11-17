@@ -8,24 +8,17 @@
 
 loadPlugin("Fork.jso");
 
-var data = [1,2,3].toBuffer(Int8);
-
-var k = new Fork(this, function main(mem){
-	/* the function of child */
-	mem[0] = 25;
+var k = new Fork({/* child function scope object */}, function main(){
+	/* child function */
 	printErrorLine("child: going to sleep for 5 seconds.")
 	sleep(5000);
-	printErrorLine("child: woke-up; task-complete: "+mem[0]);
-	return "this should be void";
-}, data /* optional child function main parameters may follow ...*/);
+	printErrorLine("child: woke-up; task-complete");
+	return;
+} /* optional child function main parameters may follow ...*/);
 
 printErrorLine("parent: waiting for child to finish...");
 
 // loadPlugin('Fork.jso') provides this function
-wait(k);
+wait(k.pid);
 
 printErrorLine("parent: child has finished"); // EVIL!!! DATA WAS NOT MODIFIED
-
-if (k.result !== undefined) {
-	printErrorLine("parent: got a child result: "+k.result);
-}

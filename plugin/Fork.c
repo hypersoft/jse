@@ -9,101 +9,10 @@
 
 JSClass JSForkClass;
 
-typedef struct js_fork_data {
-	JSContextGroupRef contextGroup;
-	JSGlobalContextRef parentContext;
-	JSGlobalContextRef ownContext;
-	int pid;
-	JSValue result, exception;
-} ProcessFork;
-
-static void ForkObjectInitialize(JSContext ctx, JSObject object)
-{
-	ProcessFork * pf = g_malloc0(sizeof(ProcessFork));
-	pf->parentContext = ctx;
-	pf->contextGroup = JSContextGetUniverse();
-	pf->ownContext = JSGlobalContextCreateInGroup(pf->contextGroup, NULL);
-	JSContextGroupRetain(pf->contextGroup);
-	JSGlobalContextRetain(pf->parentContext);
-	JSGlobalContextRetain(pf->ownContext);
-	JSObjectSetPrivate(object, pf);
-}
-
-static void ForkObjectFinalize(JSObject object)
-{
-	ProcessFork * pf = JSObjectGetPrivate(object);
-	JSGlobalContextRelease(pf->ownContext);
-	JSGlobalContextRelease(pf->parentContext);
-	JSContextGroupRelease(pf->contextGroup);
-	g_free(pf);
-	JSObjectSetPrivate(object, NULL);
-}
-
-static JSValue ForkObjectGetProperty(JSContext ctx, JSObject object, JSString id, JSValue * exception)
-{	
-
-	ProcessFork * pf = JSObjectGetPrivate(object);
-	char name[JSStringUtf8Size(id)]; JSStringGetUTF8CString (id, name, sizeof(name));
-	if (!g_strcmp0(name, "pid")) {
-		return JSValueFromNumber(ctx, pf->pid);
-	} else if (!g_strcmp0(name, "exception")) {
-		if (pf->exception) return pf->exception;
-		else return JSValueMakeUndefined(ctx);
-	}
-
-   /*
-	If this function returns NULL, the get request forwards to object's
-	statically declared properties, then its parent class chain (which
-	includes the default object class), then its prototype chain.
-    */
-	return NULL;
-}
-
-static bool ForkObjectSetProperty (JSContext ctx, JSObject object, JSString id, JSValue value, JSValue * exception)
-{
-		ProcessFork * pf = JSObjectGetPrivate(object);
-		char name[JSStringUtf8Size(id)]; JSStringGetUTF8CString (id, name, sizeof(name));
-		if (!g_strcmp0(name, "pid") || !g_strcmp0(name, "exception")) {
-			return true;
-		}
-	
-	/*
-	If this function returns false, the set request forwards to object's
-	statically declared properties, then its parent class chain (which
-	includes the default object class).
-    */
-	return false;
-}
-
-static bool ForkObjectDeleteProperty (JSContext ctx, JSObject object, JSString id, JSValue * exception)
-{
-	  /*
-	If this function returns false, the delete request forwards to object's
-	statically declared properties, then its parent class chain (which
-	includes the default object class).
-    */
-	return false;
-}
-
-static void ForkObjectGetPropertyNames (JSContext ctx, JSObject object, JSPropertyNameAccumulator names)
-{
-	  /*
-	Use JSPropertyNameAccumulatorAddName to add property names to accumulator.
-	A class's getPropertyNames callback only needs to provide the names of
-	properties that the class offers through a custom getProperty or
-	setProperty callback. Other properties, including statically declared
-	properties, properties offered by other classes, and properties belonging
-	to object's prototype, are added independently.
-    */
-	 JSPropertyNameAccumulatorAddName(names, JSStringFromUtf8("pid"));
-	 JSPropertyNameAccumulatorAddName(names, JSStringFromUtf8("exception"));
-}
-
 static JSValue ForkObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
 {
 	if (type == kJSTypeNumber) {
-		ProcessFork * pf = JSObjectGetPrivate(object);
-		return JSValueFromNumber(ctx, pf->pid);
+		return JSObjectGetUtf8Property(ctx, object, "pid");
 	}
 	/*
 	If this function returns NULL, the conversion request forwards to
@@ -132,13 +41,13 @@ static JSClassDefinition ForkObjectDefinition = {
 	NULL,									/* Parent Class */
 	NULL,									/* Static Values */
 	NULL,								/* Static Functions */
-	(void*) ForkObjectInitialize,						/* ForkObject Initializer */
-	(void*) ForkObjectFinalize,						/* ForkObject Finalizer */
+	(void*) NULL,						/* ForkObject Initializer */
+	(void*) NULL,						/* ForkObject Finalizer */
 	(void*) NULL,					/* ForkObject Has Property */
-	(void*) ForkObjectGetProperty,					/* ForkObject Get Property */
-	(void*) ForkObjectSetProperty,					/* ForkObject Set Property */
-	(void*) ForkObjectDeleteProperty,					/* ForkObject Delete Property */
-	(void*) ForkObjectGetPropertyNames,				/* ForkObject Get Property Names */
+	(void*) NULL,					/* ForkObject Get Property */
+	(void*) NULL,					/* ForkObject Set Property */
+	(void*) NULL,					/* ForkObject Delete Property */
+	(void*) NULL,				/* ForkObject Get Property Names */
 	(void*) NULL,					/* new ForkObject Call As Function */
 	(void*) NULL,				/* new ForkObject Call As Constructor */
 	(void*) NULL,					/* Has Instance */
@@ -149,30 +58,23 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 {
 	
 	JSObject self = JSObjectMake(ctx, JSForkClass, NULL);
-
-	ProcessFork * pf = JSObjectGetPrivate(self);
-
 	JSObject scope = JSValueToObject(ctx, argv[0], NULL);
 	JSObject func = JSValueToObject(ctx, argv[1], NULL);
 
 	JSValue args[argc - 2];
 	for (int i = 2; i < argc; i++) args[i - 2] = argv[i];
-
-	//JSObjectSetUtf8Property(ctx, self, "scope", scope, 0);
 	
 	int c = fork();
 
 	if (c == 0) {
-		pf->result = JSObjectCallAsFunction(pf->ownContext, func, scope, argc - 2, args, &pf->exception);
-		/* this doesn't work but we want it so do it anyway */
-		JSObjectSetUtf8Property(pf->ownContext, self, "result", pf->result, 0);
-		JSObjectSetUtf8Property(pf->ownContext, self, "exception", pf->exception, 0);
-		exit((pf->exception != 0)?1:0);
+		JSValue exn;
+		JSObjectCallAsFunction(ctx, func, scope, argc - 2, args, &exn);
+		JSReportException(ctx, "fork", exn);
+		exit((exn != 0)?1:0);
 	} else {
-		pf->pid = c;
+		JSObjectSetUtf8Property(ctx, self, "pid", JSValueFromNumber(ctx, c), kJSPropertyAttributeDontDelete | kJSPropertyAttributeReadOnly);
 	}
 	return self;
-
 }
 
 JSValue jsWait(JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
