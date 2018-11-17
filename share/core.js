@@ -28,22 +28,28 @@ Object.defineProperties(MachineType.prototype, {
 		return this.signed === false;
 	}},
 	sizeOf: {value: function(count){
-		if (this.width === 0 && ! this.pointer && ! this.vararg)
+		if (this.width === 0 && ! this.pointer)
 			throw new TypeError("unexpected type width: "+ this.width);
 		return (this.width || MachineType.ptrSize) * count;
 	}},
 	unitsOf: {value:function(bytes){
+		if (this.width === 0 && ! this.pointer)
+			throw new TypeError("unexpected type width: "+ this.width);
 		bytes -= bytes % this.width;
 		if (bytes < this.width) return 0;
 		var data = bytes / this.width;
 		return data;
 	}},
 	bits: {get: function(){
+		if (this.width === 0 && ! this.pointer)
+			throw new TypeError("unexpected type width: "+ this.width);
 		var width = this.width;
 		if (width & (1|2|4|8)) return width << 3;
 		return undefined;
 	}},
 	valueOf: {value:function(){
+		if (this.width === 0 && ! this.pointer)
+			throw new TypeError("unexpected type width: "+ this.width);
 		var x = this.width;
 		if (this.vararg) return 128;
 		if (this.pointer) x |= 512;
@@ -58,6 +64,8 @@ Object.defineProperties(MachineType.prototype, {
 		return this.name;
 	}},
 	toConst: {value:function(){
+		if (this.width === 0 && ! this.pointer)
+			throw new TypeError("unexpected type width: "+ this.width);
 		if (this.constant) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
@@ -69,6 +77,8 @@ Object.defineProperties(MachineType.prototype, {
 		return c;
 	}},
 	toUtf: {value:function(){
+		if (this.width === 0 && ! this.pointer)
+			throw new TypeError("unexpected type width: "+ this.width);
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
 		Object.defineProperty(c, "signed", {value:false});
