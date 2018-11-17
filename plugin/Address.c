@@ -171,7 +171,7 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			if (len == 1) {
 				value = str[0];
 			} else {
-				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %s to a multi-length-string", name);
+				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %s to a multi-character-string", name);
 			}
 		} else {
 			value = JSValueToNumber(ctx, data, exception);
