@@ -23,6 +23,7 @@ Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
 	name:{value:"void"}, width:{value:0}, constant:{value:false},
 	signed:{value:false}, floating:{value:false}, vararg:{value:false},
+	utf:{value:false},
 	unsigned: {get: function(){
 		return this.signed === false;
 	}},
@@ -45,9 +46,10 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.vararg) return 128;
 		if (x === 0) return x;
 		if (this.constant) x |= 256;
-		if (this.pointer) return x | 512;
+		if (this.pointer) x |= 512;
 		else if (this.signed) x |= 1024;
 		else if (this.floating) x |= 2048;
+		else if (this.utf) x |= 4096;
 		return x;
 	}},
 	toString: {value:function(){
@@ -160,6 +162,7 @@ Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(ma
 	var data = this.slice(0, max), i = 0, o = new Array(data.length);
 	for (i; i < data.length; i++) o[i] = data.charCodeAt(i);
 	o.type = UInt16;
+	o.type.utf = true;
 	o.serialized = true;
 	return o;
 } , enumerable:false});
@@ -256,8 +259,11 @@ Address.prototype = Object.defineProperties({}, {
 		return a;
 	}},
 	toString: {value: function toString() {
+		if (this.type.utf) {
+			String.fromCharCode.apply(String, this);
+		}
 		if (this.type.floating) return Array.prototype.toString.apply(this, arguments);
-		return String.fromCharCode.apply(String, this);
+		return this.vector;
 	}}
 });
 

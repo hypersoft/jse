@@ -74,7 +74,8 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 
 		bool sign = (code & 1024),
 			floating = (code & 2048),
-			pointer = (code & 512);
+			pointer = (code & 512),
+			utf = (code & 4096);
 
 		if (pointer) sign = floating = 0, width = sizeof(void*);
 
@@ -150,15 +151,32 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		if (element < 0) return true;
 		if (element >= length) return true;
 
-		double value = JSValueToNumber(ctx, data, NULL);
-
 		unsigned code = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, object, "type"), NULL),
 				 width = (code & (1|2|4|8));
 
 		bool sign = (code & 1024),
 			floating = (code & 2048),
 			constant = (code & 256),
-			pointer = (code & 512);
+			pointer = (code & 512),
+			utf = (code & 4096);
+
+		double value = 0;
+
+		if (JSValueIsNumber(ctx, data)) {
+			value = JSValueToNumber(ctx, data, exception);
+		} else if (JSValueIsString(ctx, data)) {
+			short * str = (void*) JSValueToString(ctx, data, exception);
+			int len = JSStringGetLength((JSStringRef)str);
+			if (len == 1) {
+				value = str[0];
+			} else {
+				JSExceptionThrowUtf8(ctx, "TypeError", exception, "trying to set address member %s to a multi-length-string", name);
+			}
+		} else {
+			value = JSValueToNumber(ctx, data, exception);
+		}
+
+		if (exception && *exception) return true;
 
 		if (pointer) sign = floating = 0, width = sizeof(void*);
 

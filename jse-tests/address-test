@@ -1,0 +1,47 @@
+#!/bin/jse --shell-script
+
+var buffer = new Address(UInt8, 12);
+
+if (buffer.length !== 12) {
+	throw new Error("the length of a newly allocated address doesn't match initialization");
+}
+
+if (buffer.allocated !== true) {
+	throw new Error("a newly allocated address is not marked as allocated");
+}
+
+if (buffer.type !== UInt8) {
+	throw new Error("the type of a newly created buffer does not match the initalization type");
+}
+
+if (typeof buffer.vector !== 'number') {
+	throw new Error("the type of a newly created address vector is not a number");
+}
+
+if (typeof buffer[0] !== 'object') {
+	throw new Error("the type of a buffer member is not an object with a type signature");
+}
+
+if (Number(buffer[0]) !== 0) {
+	throw new Error("buffer data did not initialize to zero");
+}
+
+if (buffer[-13] !== undefined) {
+	throw new Error("buffer read underflow was not safely ignored");
+}
+
+if (buffer[12] !== undefined) {
+	throw new Error("buffer read overflow was not safely ignored");
+}
+
+buffer[0] = 255; // this should come out verbatim.
+
+if (buffer[0] != 255) {
+	throw new Error("failed to set buffer member data to 255; value is: "+buffer[0]);
+}
+
+buffer[1] = 256; // data overflow should come out as zero
+
+if (buffer[1] != 0) {
+	throw new Error("data overflow of address member did not write zero: "+buffer[1]);
+}
