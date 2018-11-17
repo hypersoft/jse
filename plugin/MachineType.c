@@ -175,7 +175,7 @@ JSValue JSMachineTypeWrite(JSContext ctx, JSObject function, JSObject this, size
 	}
 
 	void * address = (void*)(uintptr_t)JSValueToNumber(ctx, argv[0], NULL);
-	long long element = 0;
+	size_t element = 0;
 	JSValue data;
 	if (argc == 2) data = argv[1];
 	else if (argc > 2)
