@@ -59,3 +59,11 @@ buffer[-11] = 12;
 if (buffer[-12] != 255 || buffer[-11] != 12 || buffer[1] != 12) {
 	throw new Error("buffer reverse index lookup failed");
 }
+
+// try to write a newline symbol
+
+buffer[2] = '\n';
+
+if (buffer[2] != 10) {
+	throw new Error("failed to retrieve character value set in buffer: "+buffer[2]);
+}
