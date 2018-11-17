@@ -6,6 +6,10 @@ if (buffer.length !== 12) {
 	throw new Error("the length of a newly allocated address doesn't match initialization");
 }
 
+if (buffer.bytes !== 12) {
+	throw new Error("the number of bytes allocated for the new address does not match initialization");
+}
+
 if (buffer.allocated !== true) {
 	throw new Error("a newly allocated address is not marked as allocated");
 }
