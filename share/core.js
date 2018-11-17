@@ -97,6 +97,8 @@ Object.defineProperties(MachineType.prototype, {
 	toUtf: {value:function(){
 		if (this.width === 0 && ! this.pointer)
 			throw new TypeError(MachineType.unexpectedTypeWidth + this.width);
+		if (this.boolean)
+			throw new TypeError("cannot convert boolean type to utf type");
 		if (this.utf) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
