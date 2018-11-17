@@ -66,6 +66,11 @@ Object.defineProperties(MachineType.prototype, {
 		Object.defineProperty(c, "pointer", {value:true});
 		return c;
 	}},
+	toUtf: {value:function(){
+		var c = Object.create(this);
+		Object.defineProperty(c, "utf", {value:true});
+		return c;
+	}},
 	format: {get(){
 		if (this.vararg) return 'e'.charCodeAt(0);
 		if (this.pointer) return 'p'.charCodeAt(0);
