@@ -21,7 +21,7 @@ MachineType.create = function(representation){
 
 Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
-	name:{value:"void"}, width:{value:0}, constant:{value:false},
+	width:{value:0}, constant:{value:false},
 	signed:{value:false}, floating:{value:false}, vararg:{value:false},
 	utf:{value:false},
 	unsigned: {get: function(){
