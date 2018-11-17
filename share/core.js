@@ -8,6 +8,14 @@ loadPlugin("MachineType.jso");
 
 MachineType.unexpectedTypeWidth = "unexpected type width: ";
 
+MachineType.flag = function(N) {
+	return (1 << (N - 1));
+}
+
+MachineType.flagged = function(C, F) {
+	return ((C & F) == F);
+}
+
 MachineType.create = function(representation){
 	for (name in representation) {
 		if (this[name] !== undefined) {
