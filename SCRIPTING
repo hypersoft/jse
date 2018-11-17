@@ -75,27 +75,6 @@ Constructor: MachineType MachineType(Object representation)
   predefined within the JavaScript Global Environment. This allows types to be used as parameters to,
   functions, and for values which are not MachineType natives to be marked for a specific conversion.
 
-Global MachineTypes:
-
-  Int8: {value: new MachineType({width:1, signed:true})},
-  Int16: {value: new MachineType({width:2, signed:true})},
-  Int32: {value: new MachineType({width:4, signed:true})},
-  Int64: {value: new MachineType({width:8, signed:true})},
-
-  UInt8: {value: new MachineType({width:1})},
-  UInt16: {value: new MachineType({width:2})},
-  UInt32: {value: new MachineType({width:4})},
-  UInt64: {value: new MachineType({width:8})},
-
-  Void: {value: new MachineType({width:0})},
-  Float: {value: new MachineType({width:4, floating:true})},
-  Double: {value: new MachineType({width:8, floating:true})},
-  Pointer: {value: new MachineType({width:MachineType.width, pointer:true})},
-  VarArg:{value: new MachineType({vararg:true})}
-
-  * MachineType.ptrWidth is the size of an unsigned pointer value as defined by the C compiler, which
-    compiled the MachineTypes library.
-
 Prototype: MachineType.prototype
 
   Property: Boolean pointer
