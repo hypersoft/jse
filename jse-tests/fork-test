@@ -8,13 +8,13 @@
 
 loadPlugin("Fork.jso");
 
-var child = new Fork({/* child function scope object */}, function main(){
+var child = new Fork({/* child function scope object */}, function main(ms, info){
 	/* child function */
-	printErrorLine("child: going to sleep for 5 seconds.")
-	sleep(5000);
+	printErrorLine("child: going to sleep for "+info)
+	sleep(ms);
 	printErrorLine("child: woke-up; task-complete");
 	return;
-} /* optional child function main parameters may follow ...*/);
+} /* optional child function main parameters may follow ...*/, 5000, "5 seconds");
 
 printErrorLine("parent: waiting for child to finish...");
 
