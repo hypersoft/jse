@@ -255,21 +255,21 @@ Address.prototype = Object.defineProperties({}, {
 		);
 		return o;
 	}},
-	write: {value: function write(value, length){
+	// write: {value: function write(value, length){
 
-		var lengthOf = (length === undefined)?this.length:length;
-		if (lengthOf === 0) return 0;
-		else if (lengthOf > this.length) lengthOf = this.length;
+	// 	var lengthOf = (length === undefined)?this.length:length;
+	// 	if (lengthOf === 0) return 0;
+	// 	else if (lengthOf > this.length) lengthOf = this.length;
 
-		if (value.toSerial === undefined) value = [value];
-		value = value.toSerial(lengthOf);
-		if (lengthOf > value.length) lengthOf = value.length;
+	// 	if (value.toSerial === undefined) value = [value];
+	// 	value = value.toSerial(lengthOf);
+	// 	if (lengthOf > value.length) lengthOf = value.length;
 
-		var index = 0;
-		for (index; index < lengthOf; index++) this[index] = value[index];
-		return index;
+	// 	var index = 0;
+	// 	for (index; index < lengthOf; index++) this[index] = value[index];
+	// 	return index;
 
-	}},
+	// }},
 	bind: {value: function bind(object, id){
 		return this.type.bindAddress(this, object, id);
 	}},
