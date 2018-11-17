@@ -134,7 +134,7 @@ Object.defineProperties(MachineType.prototype, {
 Object.defineProperties(this, {
 
 	Void: {value: new MachineType({width:0})},
-	VarArg:{value: new MachineType({vararg:true})},
+	VarArg:{value: new MachineType({width:MachineType.ptrSize, vararg:true})},
 
 	Int8: {value: new MachineType({width:1, signed:true})},
 	Int16: {value: new MachineType({width:2, signed:true})},
