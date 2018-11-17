@@ -4,6 +4,12 @@
 
 #define MTCLASS "MachineType"
 
+#define FLAGGED(X, F) ((X & F) == F)
+
+#define MT_POINTER(C) FLAGGED(C, 512)
+#define MT_CONST(C) FLAGGED(C, 256)
+#define MT_UTF(C) FLAGGED(C, 4096)
+
 static int loadCount = 0;
 
 static JSClass MachineTypeClass = NULL;
@@ -93,7 +99,7 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 	double value = MachineTypeRead(ctx, address, element, code, exception);
 
-	if (code & 4096) {
+	if (! MT_POINTER(code) && MT_UTF(code) ) {
 		short out[] = {value};
 		return JSValueMakeString(ctx, JSStringCreateWithCharacters(out, 1));
 	}
