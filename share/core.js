@@ -6,35 +6,72 @@ run.prototype = {
 
 loadPlugin("MachineType.jso");
 
-MachineType.unexpectedTypeWidth = "unexpected type width: ";
+Object.defineProperties(MachineType, {
 
-// Lookup tables. Entries stored by MachineTypeCode
-MachineType.max = {};
-MachineType.min = {};
-MachineType.format = {};
+	unexpectedTypeWidth: {value:"unexpected type width: ", enumerable:false, writable: false},
 
-MachineType.cache = function(type) {
-	var 
-		code = MachineType.cache.code(type), 
-		name = MachineType.cache.typeName(type);
-	Object.defineProperties(type, {
-		code: {value:code},
-		name: {value:name},
-		bits: {value:MachineType.cache.bits(type)}
-	});
-	if (MachineType.max[code] === undefined) {
-		MachineType.max[code] = MachineType.cache.max(type);
-	}
-	if (MachineType.min[code] === undefined) {
-		MachineType.min[code] = MachineType.cache.min(type);
-	}
-	if (MachineType.format[code] === undefined) {
-		MachineType.format[code] = MachineType.cache.format(type);
-	}
-	if (MachineType[name] === undefined) {
-		MachineType[name] = type;
-	}
-}
+	// Lookup tables. Entries stored by MachineTypeCode
+	max: {value:{}, enumerable:false, writable: false},
+	min: {value:{}, enumerable:false, writable: false},
+	format: {value:{}, enumerable:false, writable: false},
+
+	cache: {value: function cache(type) {
+		var 
+			code = MachineType.cache.code(type), 
+			name = MachineType.cache.typeName(type);
+		Object.defineProperties(type, {
+			code: {value:code},
+			name: {value:name},
+			bits: {value:MachineType.cache.bits(type)}
+		});
+		if (MachineType.max[code] === undefined) {
+			MachineType.max[code] = MachineType.cache.max(type);
+		}
+		if (MachineType.min[code] === undefined) {
+			MachineType.min[code] = MachineType.cache.min(type);
+		}
+		if (MachineType.format[code] === undefined) {
+			MachineType.format[code] = MachineType.cache.format(type);
+		}
+		if (MachineType[name] === undefined) {
+			MachineType[name] = type;
+		}
+	}, enumerable:false, writable: false},
+
+	leftShift: {value: function leftShift(num, bits) {
+		return num * Math.pow(2,bits);
+	}, enumerable:false, writable: false},
+
+	rightShift: {value: function rightShift(num, bits) {
+		return num / Math.pow(2,bits);
+	}, enumerable:false, writable: false},
+
+	flag: {value: function flag(N) {
+		return MachineType.leftShift(1, (N - 1));
+	}, enumerable:false, writable: false},
+
+	flagged: {value: function flagged(C, F) {
+		return ((C & F) == F);
+	}, enumerable:false, writable: false},
+
+	create: {value: function create(representation) {
+
+		for (name in representation) {
+			if (this[name] !== undefined) {
+				Object.defineProperty(this, name, {value: representation[name], writable:false});
+			}
+		}
+	
+		var width = this.width;
+		if (width !== 0 && width !== 1 && width !== 2 && width !== 4 && width !== 8)
+			throw new TypeError(MachineType.unexpectedTypeWidth + width);
+	
+		MachineType.cache(this);
+	
+		return this;
+	}, enumerable:false, writable: false}
+	
+});
 
 MachineType.cache.code = function(type){
 	var x = type.width;
@@ -108,38 +145,6 @@ MachineType.cache.format = function(obj) {
 	} else if (obj.width === 0) return "v".charCodeAt(0);
 }
 
-MachineType.leftShift = function (num, bits) {
-	return num * Math.pow(2,bits);
-}
-
-MachineType.rightShift = function (num, bits) {
-	return num / Math.pow(2,bits);
-}
-
-MachineType.flag = function(N) {
-	return MachineType.leftShift(1, (N - 1));
-}
-
-MachineType.flagged = function(C, F) {
-	return ((C & F) == F);
-}
-
-MachineType.create = function(representation) {
-
-	for (name in representation) {
-		if (this[name] !== undefined) {
-			Object.defineProperty(this, name, {value: representation[name], writable:false});
-		}
-	}
-
-	var width = this.width;
-	if (width !== 0 && width !== 1 && width !== 2 && width !== 4 && width !== 8)
-		throw new TypeError(MachineType.unexpectedTypeWidth + width);
-
-	MachineType.cache(this);
-
-	return this;
-};
 //
 Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
