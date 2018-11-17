@@ -44,9 +44,9 @@ Object.defineProperties(MachineType.prototype, {
 	valueOf: {value:function(){
 		var x = this.width;
 		if (this.vararg) return 128;
+		if (this.pointer) x |= 512;
 		if (x === 0) return x;
 		if (this.constant) x |= 256;
-		if (this.pointer) x |= 512;
 		else if (this.signed) x |= 1024;
 		else if (this.floating) x |= 2048;
 		else if (this.utf) x |= 4096;
