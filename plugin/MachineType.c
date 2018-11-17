@@ -427,6 +427,14 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	JSObjectSetUtf8Property(ctx, MachineType, "ptrSize", JSValueFromNumber(ctx, sizeof(uintptr_t)), 0);
 	JSObjectSetUtf8Property(ctx, MachineType, "intSize", JSValueFromNumber(ctx, sizeof(size_t)), 0);
 
+	JSObjectSetUtf8Property(ctx, MachineType, "VARARG", JSValueFromNumber(ctx, MACHINE_TYPE_VARARG), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "CONST", JSValueFromNumber(ctx, MACHINE_TYPE_CONST), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "POINTER", JSValueFromNumber(ctx, MACHINE_TYPE_CONST), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "SIGNED", JSValueFromNumber(ctx, MACHINE_TYPE_SIGNED), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "FLOAT", JSValueFromNumber(ctx, MACHINE_TYPE_FLOAT), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "UTF", JSValueFromNumber(ctx, MACHINE_TYPE_UTF), 0);
+	JSObjectSetUtf8Property(ctx, MachineType, "BOOL", JSValueFromNumber(ctx, MACHINE_TYPE_BOOL), 0);
+
 #if (BYTE_ORDER == LITTLE_ENDIAN)
 	JSObjectSetUtf8Property(ctx, MachineType, "bigEndian", JSValueMakeBoolean(ctx, false), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
 #elif (BYTE_ORDER == BIG_ENDIAN)
