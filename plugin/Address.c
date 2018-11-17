@@ -100,7 +100,9 @@ static JSValue AddressObjectGetProperty(JSContext ctx, JSObject object, JSString
 					else g_assert_not_reached();
 				}
 			}
-			return JSValueFromNumber(ctx, value);
+			JSObject out = JSValueToObject(ctx, JSValueFromNumber(ctx, value), NULL);
+			JSObjectSetUtf8Property(ctx, out, "type", (JSValue)objectType, kJSPropertyAttributeDontEnum | kJSPropertyAttributeDontDelete);
+			return (JSValue) out;
 //			JSValue nargv[] = {JSValueFromNumber(ctx, value), 0};
 //			return JSObjectCallAsFunction(ctx, objectType, objectType, 1, nargv, exception);
 		} else {
