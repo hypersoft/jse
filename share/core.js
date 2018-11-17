@@ -14,6 +14,7 @@ Object.defineProperties(MachineType, {
 	max: {value:{}, enumerable:false, writable: false},
 	min: {value:{}, enumerable:false, writable: false},
 	format: {value:{}, enumerable:false, writable: false},
+	ofString: {value:{}, enumerable:false, writable: false},
 
 	cache: {value: function cache(type) {
 		var 
@@ -33,8 +34,8 @@ Object.defineProperties(MachineType, {
 		if (MachineType.format[code] === undefined) {
 			MachineType.format[code] = MachineType.cache.format(type);
 		}
-		if (MachineType[name] === undefined) {
-			MachineType[name] = type;
+		if (MachineType.ofString[name] === undefined) {
+			MachineType.ofString[name] = type;
 		}
 	}, enumerable:false, writable: false},
 
