@@ -111,7 +111,6 @@ load_changed (WebKitWebView  *web_view,
             const GdkRGBA color = {.0, .0, .0, .0};
             webkit_web_view_set_background_color(Ghtml.view, &color);
         }
-        g_usleep(1000 * 75);
         gtk_main_iteration_do(true);
         if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
         gtk_main_iteration_do(true);
