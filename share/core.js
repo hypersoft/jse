@@ -272,15 +272,9 @@ Array.prototype.toSerial.parse = function parse(value, index){
 	var host = typeof value, max = this.max;
 	if (index === undefined) index = 0;
 	if ((max > 0)?index >= max:0) return 0;
-	if (value === null) {
-		this[index] = 0;
-		return 1;
-	} else if (value === undefined) {
-		this[index] = value;
-		return 1;
-	} else if (host === 'number') {
-		this[index] = value;
-		return 1;
+	if (value === null) { this[index] = 0; return 1;
+	} else if (value === undefined) { this[index] = value; return 1;
+	} else if (host === 'number') { this[index] = value; return 1;
 	} else if (host === 'string') {
 		var element = 0, length = value.length;
 		for (index; ((max > 0)?index < max:1) && element < length;)
