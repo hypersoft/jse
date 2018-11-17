@@ -96,9 +96,6 @@ load_changed (WebKitWebView  *web_view,
                gpointer        user_data)
 {
 
-    WebKitWindowProperties *windowProperties = webkit_web_view_get_window_properties(web_view);
-    window_geometry_changed(windowProperties, Ghtml.window);
-
     if (load_event == WEBKIT_LOAD_STARTED) {
         if (!(Ghtml.type_hint & GDK_WINDOW_TYPE_HINT_DOCK))  gtk_widget_grab_focus(GTK_WIDGET(Ghtml.view));
     }
@@ -114,7 +111,10 @@ load_changed (WebKitWebView  *web_view,
             const GdkRGBA color = {.0, .0, .0, .0};
             webkit_web_view_set_background_color(Ghtml.view, &color);
         }
+        g_usleep(1000 * 75);
+        gtk_main_iteration_do(true);
         if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
+        gtk_main_iteration_do(true);
     }
 
     if (load_event == WEBKIT_LOAD_FINISHED) {
