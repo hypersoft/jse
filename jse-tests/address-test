@@ -59,3 +59,12 @@ buffer[2] = '\n'; // try to write a newline symbol
 if (buffer[2] != '\n'.charCodeAt(0)) {
 	throw new Error("failed to retrieve character value set in buffer: "+buffer[2]);
 }
+
+// now see if we can direct read a char value;
+buffer = new Address(UInt8.toUtf(), 12);
+
+buffer[0] = '\n';
+
+if (buffer[0] !== '\n') {
+	throw new Error("failed to retrieve character value set in buffer: "+buffer[0]);
+}

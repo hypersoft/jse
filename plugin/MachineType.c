@@ -91,7 +91,14 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 	size_t element = (argc > 1)?JSValueToNumber(ctx, argv[1], NULL):0;
 	unsigned code = JSValueToNumber(ctx, (JSValue) this, NULL);
 
-	JSValue result = JSValueFromNumber(ctx, MachineTypeRead(ctx, address, element, code, exception));
+	double value = MachineTypeRead(ctx, address, element, code, exception);
+
+	if (code & 4096) {
+		short out[] = {value};
+		return JSValueMakeString(ctx, JSStringCreateWithCharacters(out, 1));
+	}
+	
+	JSValue result = JSValueFromNumber(ctx, value);
 
 	if (exception && *exception) return JSValueMakeNull(ctx);
 
