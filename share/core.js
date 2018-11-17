@@ -61,7 +61,6 @@ Object.defineProperties(MachineType.prototype, {
 		var x = this.width;
 		if (this.vararg) return MachineType.VARARG;
 		if (this.pointer) x |= MachineType.POINTER;
-		//if (x === 0) return x;
 		if (this.constant) x |= MachineType.CONSTANT;
 		if (this.signed) x |= MachineType.SIGNED;
 		else if (this.floating) x |= MachineType.FLOAT;
