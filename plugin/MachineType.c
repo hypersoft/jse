@@ -99,14 +99,14 @@ static JSValue JSMachineTypeRead(JSContext ctx, JSObject function, JSObject this
 
 	double value = MachineTypeRead(ctx, address, element, code, exception);
 
+	if (exception && *exception) return JSValueMakeNull(ctx);
+
 	if (! MT_POINTER(code) && MT_UTF(code) ) {
 		short out[] = {value};
 		return JSValueMakeString(ctx, JSStringCreateWithCharacters(out, 1));
 	}
 	
 	JSValue result = JSValueFromNumber(ctx, value);
-
-	if (exception && *exception) return JSValueMakeNull(ctx);
 
 	result = (JSValue) JSValueToObject(ctx, result, NULL);
 	JSObjectSetUtf8Property(ctx, (JSObject) result, "type", (JSValue)this, kJSPropertyAttributeDontDelete | kJSPropertyAttributeReadOnly);
