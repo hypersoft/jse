@@ -66,7 +66,7 @@ JSObject ForkObjectConstructor (JSContext ctx, JSObject constructor, size_t argc
 	int c = fork();
 
 	if (c == 0) {
-		JSValue exn;
+		JSValue exn = 0;
 		JSObjectCallAsFunction(ctx, func, scope, argc - 2, args, &exn);
 		if (exn) JSReportException(ctx, "fork", exn);
 		exit((exn != 0)?1:0);
