@@ -20,7 +20,7 @@ MachineType.cache = function(type) {
 		value: code
 	});
 	Object.defineProperty(type, "name", {
-		value: type.name
+		value: name
 	});
 	if (MachineType.max[code] === undefined) {
 		MachineType.max[code] = MachineType.cache.max(type);
