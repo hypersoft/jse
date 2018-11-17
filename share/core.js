@@ -38,7 +38,7 @@ MachineType.create = function(representation){
 
 	return this;
 };
-
+//
 Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
 	width:{value:0}, constant:{value:false},
@@ -46,6 +46,17 @@ Object.defineProperties(MachineType.prototype, {
 	utf:{value:false}, boolean:{value:false},
 	unsigned: {get: function(){
 		return this.signed === false;
+	}},
+	max: {value: function(count){
+		if (this.floating) return undefined;
+		var size = this.bits;
+		if (this.signed) size--;
+		return MachineType.flag(size + 1) - 1;
+	}},
+	min: {value: function(count){
+		if (this.floating) return undefined;
+		if (this.signed) return -(this.max() + 1);
+		return 0;
 	}},
 	sizeOf: {value: function(count){
 		if (this.width === 0 && ! this.pointer)
