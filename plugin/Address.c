@@ -160,6 +160,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 			pointer = (code & 512),
 			utf = (code & 4096);
 
+		if (pointer) sign = floating = 0, width = sizeof(void*);
+
 		double value = 0;
 
 		if (JSValueIsNumber(ctx, data)) {

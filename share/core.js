@@ -85,18 +85,18 @@ Object.defineProperties(MachineType.prototype, {
 		var n = [];
 		if (this.constant) n.push('const');
 		if (this.signed) n.push('signed');
-		if (this.width === 1) {
-			n.push('char');
+		if (this.width === 0) {
+			n.push('void');
+		} else if (this.width === 1) {
+			n.push('int8');
 		} else if (this.width === 2) {
-			n.push('short');
+			n.push('int16');
 		} else if (this.width === 4) {
 			if (this.floating) n.push('float');
-			else if (this.pointer) n.push('void');
-			else n.push('int');
+			else n.push('int32');
 		} else if (this.width === 8) {
 			if (this.floating) n.push('double');
-			else if (this.pointer) n.push('void');
-			else n.push('long int');
+			else n.push('int64');
 		}
 		if (this.pointer) n.push('*');
 		return n.join(' ');
@@ -136,7 +136,7 @@ Object.defineProperties(this, {
 	Void: {value: new MachineType({width:0})},
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
-	Pointer: {value: new MachineType({width:MachineType.width, pointer:true})},
+	Pointer: {value: new MachineType({pointer:true})},
 	VarArg:{value: new MachineType({vararg:true})}
 
 });
