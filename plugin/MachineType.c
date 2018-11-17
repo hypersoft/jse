@@ -53,7 +53,7 @@ double MachineTypeRead(JSContext ctx, void * address, size_t element, unsigned c
 	bool 
 		sign = MT_SIGNED(code),
 			floating = MT_FLOAT(code),
-				pointer = MT_POINTER(code); // <-- this won't be used, as utfN is just an alias for get charcode
+				pointer = MT_POINTER(code);
 
 	if (pointer) {
 		return ((uintptr_t *)address)[element];
