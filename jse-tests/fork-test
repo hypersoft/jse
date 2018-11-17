@@ -18,7 +18,7 @@ var child = new Fork({/* child function scope object */}, function main(){
 
 printErrorLine("parent: waiting for child to finish...");
 
-// loadPlugin('Fork.jso') provides this function
+// Fork.jso provides this function
 wait(child.pid);
 
 printErrorLine("parent: child has finished"); 
