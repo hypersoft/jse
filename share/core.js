@@ -47,15 +47,15 @@ Object.defineProperties(MachineType.prototype, {
 	unsigned: {get: function(){
 		return this.signed === false;
 	}},
-	max: {value: function(count){
+	max: {get(count){
 		if (this.floating) return undefined;
 		var size = this.bits;
 		if (this.signed) size--;
 		return MachineType.flag(size + 1) - 1;
 	}},
-	min: {value: function(count){
+	min: {get(count){
 		if (this.floating) return undefined;
-		if (this.signed) return -(this.max() + 1);
+		if (this.signed) return -(this.max + 1);
 		return 0;
 	}},
 	sizeOf: {value: function(count){
