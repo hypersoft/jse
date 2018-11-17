@@ -21,4 +21,4 @@ printErrorLine("parent: waiting for child to finish...");
 // loadPlugin('Fork.jso') provides this function
 wait(k.pid);
 
-printErrorLine("parent: child has finished"); // EVIL!!! DATA WAS NOT MODIFIED
+printErrorLine("parent: child has finished"); 
