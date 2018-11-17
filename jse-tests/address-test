@@ -22,6 +22,10 @@ if (typeof buffer.vector !== 'number') {
 	throw new Error("the type of a newly created address vector is not a number");
 }
 
+if (buffer.vector === 0) {
+	throw new Error("a newly allocated buffer did not recieve an address");
+}
+
 if (typeof buffer[0] !== 'object') {
 	throw new Error("the type of a buffer member is not an object with a type signature");
 }
