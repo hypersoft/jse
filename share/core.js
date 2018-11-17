@@ -145,6 +145,7 @@ Object.defineProperties(this, {
 	UInt64: {value: new MachineType({width:8})},
 
 	UIntPtr: {value: new MachineType({width:MachineType.width})},
+	IntSize: {value: new MachineType({width:MachineType.width})},
 
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
