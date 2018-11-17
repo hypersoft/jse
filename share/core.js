@@ -8,8 +8,18 @@ loadPlugin("MachineType.jso");
 
 MachineType.unexpectedTypeWidth = "unexpected type width: ";
 
+MachineType.leftShift = function (num, bits) {
+	return num * Math.pow(2,bits);
+}
+
+MachineType.rightShift = function (num, bits) {
+	return num / Math.pow(2,bits);
+}
+
 MachineType.flag = function(N) {
-	return (1 << (N - 1));
+	if (N > IntSize.bits) throw new TypeError("too many bits for size type: "+N);
+	else if (N < 1) throw new TypeError("too few bits for size type: "+N);
+	return MachineType.leftShift(1, (N - 1));
 }
 
 MachineType.flagged = function(C, F) {
