@@ -56,6 +56,7 @@ Object.defineProperties(MachineType.prototype, {
 		return this.name;
 	}},
 	toConst: {value:function(){
+		if (this.constant) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
 		return c;
