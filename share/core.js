@@ -88,24 +88,15 @@ MachineType.compile.code = function(type){
 
 MachineType.compile.typeName = function(type){
 	if (type.vararg) return '...';
-	var n = [];
-	var code = (type.utf)?"utf":"int";
+	var n = [],
+				code = (type.utf)?"utf":"int";
 	if (type.constant) n.push('const');
-	if (type.signed) n.push('signed');
-	if (type.width === 0) {
-		n.push('void');
-	} else if (type.width === 1) {
-		if (! type.boolean) n.push(code+'8');
-		else n.push('bool');
-	} else if (type.width === 2) {
-		n.push(code+'16');
-	} else if (type.width === 4) {
-		if (type.floating) n.push('float');
-		else n.push(code+'32');
-	} else if (type.width === 8) {
-		if (type.floating) n.push('double');
-		else n.push(code+'64');
-	}
+	if (type.signed)   n.push('signed');
+	if      (type.width === 0) { n.push('void');} 
+	else if (type.width === 2) { n.push(code+'16'); }
+	else if (type.width === 1) { if (!type.boolean) n.push(code+'8'); else n.push('bool'); }
+	else if (type.width === 4) { if (type.floating) n.push('float');  else n.push(code+'32'); }
+	else if (type.width === 8) { if (type.floating) n.push('double'); else n.push(code+'64'); }
 	if (type.pointer) n.push('*');
 	return n.join(' ');
 }
