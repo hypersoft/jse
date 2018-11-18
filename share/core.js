@@ -16,23 +16,23 @@ Object.defineProperties(MachineType, {
 	format: {value:{}, enumerable:false, writable: false},
 	ofString: {value:{}, enumerable:false, writable: false},
 
-	cache: {value: function cache(type) {
+	compile: {value: function compile(type) {
 		var 
-			code = MachineType.cache.code(type), 
-			name = MachineType.cache.typeName(type);
+			code = MachineType.compile.code(type), 
+			name = MachineType.compile.typeName(type);
 		Object.defineProperties(type, {
 			code: {value:code},
 			name: {value:name},
-			bits: {value:MachineType.cache.bits(type)}
+			bits: {value:MachineType.compile.bits(type)}
 		});
 		if (MachineType.max[code] === undefined) {
-			MachineType.max[code] = MachineType.cache.max(type);
+			MachineType.max[code] = MachineType.compile.max(type);
 		}
 		if (MachineType.min[code] === undefined) {
-			MachineType.min[code] = MachineType.cache.min(type);
+			MachineType.min[code] = MachineType.compile.min(type);
 		}
 		if (MachineType.format[code] === undefined) {
-			MachineType.format[code] = MachineType.cache.format(type);
+			MachineType.format[code] = MachineType.compile.format(type);
 		}
 		if (MachineType.ofString[name] === undefined) {
 			MachineType.ofString[name] = type;
@@ -67,14 +67,14 @@ Object.defineProperties(MachineType, {
 		if (width !== 0 && width !== 1 && width !== 2 && width !== 4 && width !== 8)
 			throw new TypeError(MachineType.unexpectedTypeWidth + width);
 	
-		MachineType.cache(this);
+		MachineType.compile(this);
 	
 		return this;
 	}, enumerable:false, writable: false}
 	
 });
 
-MachineType.cache.code = function(type){
+MachineType.compile.code = function(type){
 	var x = type.width;
 	if (type.vararg) return MachineType.VARARG;
 	if (type.pointer) x |= MachineType.POINTER;
@@ -86,7 +86,7 @@ MachineType.cache.code = function(type){
 	return x;
 }
 
-MachineType.cache.typeName = function(type){
+MachineType.compile.typeName = function(type){
 	if (type.vararg) return '...';
 	var n = [];
 	var code = (type.utf)?"utf":"int";
@@ -110,27 +110,27 @@ MachineType.cache.typeName = function(type){
 	return n.join(' ');
 }
 
-MachineType.cache.bits = function(type){
+MachineType.compile.bits = function(type){
 	if (type.width === 0 && ! type.pointer) return 0;
 	var width = (type.width || MachineType.ptrSize);
 	if (width & (1|2|4|8)) return width << 3;
 	return undefined;
 };
 
-MachineType.cache.max = function(obj) {
+MachineType.compile.max = function(obj) {
 	if (obj.floating) return undefined;
 	var size = obj.bits;
 	if (obj.signed) size--;
 	return MachineType.flag(size + 1) - 1;
 };
 
-MachineType.cache.min = function(obj) {
+MachineType.compile.min = function(obj) {
 	if (obj.floating) return undefined;
 	if (obj.signed) return -(obj.max + 1);
 	return 0;
 }
 
-MachineType.cache.format = function(obj) {
+MachineType.compile.format = function(obj) {
 	if (obj.vararg) return 'e'.charCodeAt(0);
 	if (obj.pointer) return 'p'.charCodeAt(0);
 	if (obj.width === 1) {
@@ -187,13 +187,13 @@ Object.defineProperties(MachineType.prototype, {
 		if (this.constant) return this;
 		var c = Object.create(this);
 		Object.defineProperty(c, "constant", {value:true});
-		MachineType.cache(c);
+		MachineType.compile(c);
 		return c;
 	}},
 	toPointer: {value:function(){
 		var c = Object.create(this);
 		Object.defineProperty(c, "pointer", {value:true});
-		MachineType.cache(c);
+		MachineType.compile(c);
 		return c;
 	}},
 	toUtf: {value:function(){
@@ -205,7 +205,7 @@ Object.defineProperties(MachineType.prototype, {
 		var c = Object.create(this);
 		Object.defineProperty(c, "utf", {value:true});
 		Object.defineProperty(c, "signed", {value:false});
-		MachineType.cache(c);
+		MachineType.compile(c);
 		return c;
 	}},
 	format: {get(){
