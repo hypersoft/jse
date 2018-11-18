@@ -6,7 +6,7 @@ function prompt() {
 	return '[' + Environment.USER + ': ' + localPath().split("/").pop() + "] ";
 }
 
-rel: while (++interactiveLineNumber) {
+readEvalLoop: while (++interactiveLineNumber) {
 	if ((script = readLine(prompt())) !== -1) {
 		while (1) {
 			script += '\n';
@@ -18,7 +18,7 @@ rel: while (++interactiveLineNumber) {
 					continue;
 				} else {
 					printErrorLine(exception);
-					continue rel;
+					continue readEvalLoop;
 				}
 			}
 			break;
@@ -28,7 +28,7 @@ rel: while (++interactiveLineNumber) {
 			if (interactiveReporting) printErrorLine(String(r).chomp());
 		} catch (exception) {
 			printErrorLine(exception + ": " + exception.stack.toString());
-			continue rel;
+			continue readEvalLoop;
 		}
 	} else exit(0);
 }
