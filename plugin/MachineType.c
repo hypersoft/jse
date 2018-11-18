@@ -449,22 +449,7 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 	JSObjectSetUtf8Property(ctx, MachineType, "littleEndian", JSValueMakeBoolean(ctx, false), kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete);
 #endif
 
-	JSValue jsError = 0;
-	char * file = "/usr/share/jse/MachineType.js";
-	char * contents = NULL;
-	GError * error = NULL;
-	g_file_get_contents(file, &contents, NULL, &error);
-	if (! error) {
-		JSEvaluateUtf8(ctx, contents, object, file, 1, &jsError);
-	} else {
-		jsError = JSExceptionFromGError(ctx, error);
-		g_error_free(error);
-	}
-	g_free(contents);
-	if (jsError) {
-		JSReportException(ctx, jse.command, jsError);
-		exit(1);
-	}
+	JSInlineEval(ctx, "source('/usr/share/jse/MachineType.js');", object, exception);
 
 	loadCount++;
 	return (JSValue) object;

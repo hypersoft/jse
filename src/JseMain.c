@@ -124,39 +124,29 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	g_ptr_array_add(jse.dlPath, g_strdup("~/.local/jse/plugin"));
 	g_ptr_array_add(jse.dlPath, g_strdup("/usr/share/jse/plugin"));
 
+	JSValue jsError = NULL, result = NULL;
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
-
+	
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
+
 	JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
-	JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
-	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
-	JSValue jsError = NULL;
+	JSInlineEval(jse.ctx, "source('/usr/share/jse/core.js');", global, &jsError);
 
-	char * file = "/usr/share/jse/core.js";
-	char * contents = NULL;
-	GError * error = NULL;
-	g_file_get_contents(file, &contents, NULL, &error);
-	if (! error) {
-		JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
-	} else {
-		jsError = JSExceptionFromGError(jse.ctx, error);
-		g_error_free(error);
-	}
-
-	g_free(contents);
 	if (jsError) {
 		JSReportException(jse.ctx, jse.command, jsError);
 		exit(1);
 	}
-	
-	JSValue result = NULL;
+
+	JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
+	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
+
 
 	if (secureMode) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
-		JSLoadPlugin(jse.ctx, "MachineTypes.jso", global, NULL);
+		JSLoadPlugin(jse.ctx, "MachineType.jso", global, NULL);
 	}
 
 	errno = 0;
@@ -246,8 +236,18 @@ int jse_file_mode(char * file)
 			JSTerminate(final);
 		}
 	}
+
 	JSValue jsError = NULL, result = NULL;
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
+
+	// JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
+	// JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
+
+	// JSInlineEval(jse.ctx, "source('/usr/share/jse/core.js');", global, &jsError);
+
+	// JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
+	// JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
+	// JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
