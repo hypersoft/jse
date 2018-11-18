@@ -305,7 +305,7 @@ void jse_tty_mode()
 
 int main(int argc, char** argv)
 {
-	char * path = argv[0];
+	jse.command = argv[0];
 	jse.silent = true;
 
 	// parse arguments...
@@ -345,7 +345,7 @@ int main(int argc, char** argv)
 
 	file = argv[0];
 
-	JSInit(path, NULL, false);
+	JSInit(jse.command, NULL, false);
 	/*
 		Initialize script arguments
 	*/

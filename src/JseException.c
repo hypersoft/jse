@@ -61,13 +61,16 @@ gchar * JSExceptionToUtf8 (JSContext ctx, JSValue e)
 	JSValue stackObject = JSObjectGetUtf8Property(ctx, (JSObject)e, "stack");
 	message = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, (JSObject)e, "message"));
 	name = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, (JSObject)e, "name"));
+	int line = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, (JSObject)e, "line"), NULL);
+	char * sourceUrl = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, (JSObject)e, "sourceURL"));
 	stack = (JSValueIsUndefined(ctx, stackObject))?NULL:JSValueToUtf8(ctx, stackObject);
 
 	value = (stack)?
 		g_strdup_printf ("%s: %s\nstack: %s", name, message, stack)
-	:	g_strdup_printf ("%s: %s", name, message);
+	:	g_strdup_printf ("%s:%i: %s: %s", sourceUrl, line, name, message);
 
 	g_free (message);
+	g_free (sourceUrl);
 	g_free (name);
 	g_free (stack);
 

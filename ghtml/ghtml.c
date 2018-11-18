@@ -102,7 +102,7 @@ load_changed (WebKitWebView  *web_view,
     
     if (load_event == WEBKIT_LOAD_COMMITTED) {
         char buf[8192];
-        sprintf(buf, "Ghtml.window = %p; Ghtml.view = %p; Ghtml.parent = %p; Ghtml.attachment = %p; Ghtml.typeHint = %i;", Ghtml.window, Ghtml.view, Ghtml.parent, Ghtml.attachment, Ghtml.type_hint);
+        sprintf(buf, "nil = null; Ghtml.window = %p; Ghtml.view = %p; Ghtml.parent = %p; Ghtml.attachment = %p; Ghtml.typeHint = %i;", Ghtml.window, Ghtml.view, Ghtml.parent, Ghtml.attachment, Ghtml.type_hint);
         webkit_web_view_run_javascript(web_view, buf, NULL, NULL, NULL);
         if (Ghtml.transparent) {
             gtk_widget_set_app_paintable(GTK_WIDGET(Ghtml.window), TRUE);
@@ -111,13 +111,17 @@ load_changed (WebKitWebView  *web_view,
             const GdkRGBA color = {.0, .0, .0, .0};
             webkit_web_view_set_background_color(Ghtml.view, &color);
         }
-        gtk_main_iteration_do(true);
-        if (!Ghtml.stay_hidden) gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
-        gtk_main_iteration_do(true);
+        if (!Ghtml.stay_hidden) {
+            gtk_widget_show_all(GTK_WIDGET(Ghtml.window));
+            gtk_main_iteration_do(true);
+        }
     }
 
     if (load_event == WEBKIT_LOAD_FINISHED) {
-        if (Ghtml.force_focus) gtk_window_present(Ghtml.window);
+        if (Ghtml.force_focus) {
+            gtk_window_present(Ghtml.window);
+            gtk_main_iteration_do(true);
+        }
     }
 
 }
@@ -141,6 +145,25 @@ int ghtml_parse_option_with_value(char * opt, char * val) {
         Ghtml.icon = gdk_pixbuf_new_from_file(val, NULL);
         return 2;
     }
+
+    // TODO: possible use of screen percentages should be implemented here
+    if (STREQUAL(opt, "--width")) {
+        sscanf(val, "%i", &Ghtml.geometry.width);
+        return 2;
+    }
+    if (STREQUAL(opt, "--height")) {
+        sscanf(val, "%i", &Ghtml.geometry.height);
+        return 2;
+    }
+    if (STREQUAL(opt, "--left")) {
+        sscanf(val, "%i", &Ghtml.geometry.x);
+        return 2;
+    }
+    if (STREQUAL(opt, "--top")) {
+        sscanf(val, "%i", &Ghtml.geometry.y);
+        return 2;
+    }
+
     return 0;
 }
 
@@ -283,8 +306,8 @@ void ghtml_start_application(int argc, char * argv[]) {
     Ghtml.window = GTK_WINDOW(window);
     Ghtml.execute = g_file_test(Ghtml.file, G_FILE_TEST_IS_EXECUTABLE);
 
-    gtk_window_set_default_size(Ghtml.window, 0, 0);
-    gtk_window_move(Ghtml.window, 0, 0);
+    gtk_window_set_default_size(Ghtml.window, Ghtml.geometry.width, Ghtml.geometry.height);
+    gtk_window_move(Ghtml.window, Ghtml.geometry.x, Ghtml.geometry.y);
 
     if (Ghtml.icon) {
         gtk_window_set_icon(Ghtml.window, Ghtml.icon);
@@ -494,6 +517,9 @@ static void window_geometry_changed(WebKitWindowProperties *windowProperties, Gt
 
     if (Ghtml.geometry.width != geometry.width || Ghtml.geometry.height != geometry.height) {
         gtk_window_resize (GTK_WINDOW (Ghtml.window), geometry.width, geometry.height);
+        gtk_main_iteration_do(true); // make sure that all gets processed before we return from this call.
+    } else {
+        gtk_main_iteration_do(true); // make sure that all gets processed before we return from this call.
     }
 
     Ghtml.geometry = geometry;
