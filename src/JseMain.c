@@ -16,7 +16,7 @@ JSUniverse JSContextGetUniverse()
 	return jse.universe;
 }
 
-void JSInitScriptArguments(JSContext ctx, int argc, char ** argv)
+void JSInitScriptParameters(JSContext ctx, int argc, char ** argv)
 {
 	unsigned i = 0;
 	JSValue array[argc];
@@ -126,7 +126,7 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 
 	JSValue jsError = NULL, result = NULL;
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
-	
+
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
 
@@ -240,15 +240,6 @@ int jse_file_mode(char * file)
 	JSValue jsError = NULL, result = NULL;
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
 
-	// JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
-	// JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
-
-	// JSInlineEval(jse.ctx, "source('/usr/share/jse/core.js');", global, &jsError);
-
-	// JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
-	// JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
-	// JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
-
 	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
@@ -260,6 +251,7 @@ int jse_file_mode(char * file)
 	if (g_str_has_prefix(fileData, "#!")) {
 		int c; while (c = fileData[0]) if (c != '\n') fileData++; else break;
 	}
+
 	JSString
 		script = JSStringFromUtf8(fileData),
 		url = JSStringFromUtf8(file);
@@ -285,6 +277,7 @@ void jse_tty_mode()
 
 int main(int argc, char** argv)
 {
+
 	jse.command = argv[0];
 	jse.silent = true;
 
@@ -330,7 +323,7 @@ int main(int argc, char** argv)
 		Initialize script arguments
 	*/
 
-	JSInitScriptArguments(jse.ctx, argc, argv);
+	JSInitScriptParameters(jse.ctx, argc, argv);
 
 	if (file == devStdin && isatty(0) ) jse_tty_mode();
 	else jse_file_mode(file);
