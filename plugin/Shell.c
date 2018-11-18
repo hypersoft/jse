@@ -124,7 +124,7 @@ JSValue checkSyntax(JSContext ctx, JSObject function, JSObject this, size_t argc
 		return THROWING_EXCEPTION(WANT_AT_LEAST_ONE_PARAMETER());
 	}
 
-	JSObject parameters = (JSObject)JSObjectGetUtf8Property(ctx, JSContextGetGlobalObject(ctx), "argv");
+	JSObject parameters = (JSObject)JSObjectGetUtf8Property(ctx, JSContextGetGlobalObject(ctx), "parameter");
 	JSString script, source;
 	script = JSValueToString(ctx, argv[0], exception);
 	int line = 1;
