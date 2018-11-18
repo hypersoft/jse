@@ -2,7 +2,8 @@
 	"files.associations": {
 		"*.jsh": "javascript",
 		"jse.h": "c",
-		"*.inc": "c"
+		"*.inc": "c",
+		"machinetype.h": "c"
 	},
 	"C_Cpp.intelliSenseEngineFallback": "Disabled"
 }

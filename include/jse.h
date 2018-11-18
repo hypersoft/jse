@@ -144,7 +144,24 @@ extern char
 	* JSE_AT_LEAST_ARGUMENTS,
 	* JSE_AT_LEAST_ONE_ARGUMENT,
 	* JSE_SINGLE_ARGUMENT;
-	
+
+#ifndef JSE_MAIN_C
+extern struct jse_s {
+	char * command;
+	JSUniverse universe;
+	JSContext ctx;
+	gboolean unloading, silent;
+	GPtrArray * dlPath, * dlLib;
+} jse;
+#else 
+struct jse_s {
+	char * command;
+	JSUniverse universe;
+	JSContext ctx;
+	gboolean unloading, silent;
+	GPtrArray * dlPath, * dlLib;
+} jse;
+#endif
 #ifdef	__cplusplus
 }
 #endif

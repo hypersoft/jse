@@ -5,15 +5,9 @@
  * Created on December 26, 2014, 5:06 AM
  */
 
-#include "jse.h"
+#define JSE_MAIN_C
 
-struct jse_s {
-	char * command;
-	JSUniverse universe;
-	JSContext ctx;
-	gboolean unloading, silent;
-	GPtrArray * dlPath, * dlLib;
-} jse;
+#include "jse.h"
 
 #include "JseFunctions.c"
 
@@ -135,32 +129,34 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
 	JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
+	JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
 	JSValue jsError = NULL;
 
+	char * file = "/usr/share/jse/core.js";
+	char * contents = NULL;
+	GError * error = NULL;
+	g_file_get_contents(file, &contents, NULL, &error);
+	if (! error) {
+		JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
+	} else {
+		jsError = JSExceptionFromGError(jse.ctx, error);
+		g_error_free(error);
+	}
+
+	g_free(contents);
+	if (jsError) {
+		JSReportException(jse.ctx, jse.command, jsError);
+		exit(1);
+	}
+	
 	JSValue result = NULL;
 
 	if (secureMode) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
-		char * file = "/usr/share/jse/core.js";
-		char * contents = NULL;
-		GError * error = NULL;
-		g_file_get_contents(file, &contents, NULL, &error);
-		if (! error) {
-			JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
-		} else {
-			jsError = JSExceptionFromGError(jse.ctx, error);
-			g_error_free(error);
-		}
-
-		g_free(contents);
-		if (jsError) {
-			JSReportException(jse.ctx, jse.command, jsError);
-			exit(1);
-		}
-
+		JSLoadPlugin(jse.ctx, "MachineTypes.jso", global, NULL);
 	}
 
 	errno = 0;
@@ -256,23 +252,7 @@ int jse_file_mode(char * file)
 	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
-		char * file = "/usr/share/jse/core.js";
-		char * contents = NULL;
-		GError * error = NULL;
-		g_file_get_contents(file, &contents, NULL, &error);
-		if (! error) {
-			JSEvaluateUtf8(jse.ctx, contents, global, file, 1, &jsError);
-		} else {
-			jsError = JSExceptionFromGError(jse.ctx, error);
-			g_error_free(error);
-		}
-
-		g_free(contents);
-		if (jsError) {
-			JSReportException(jse.ctx, jse.command, jsError);
-			exit(1);
-		}
-
+		JSLoadPlugin(jse.ctx, "MachineType.jso", global, NULL);
 	}
 
 	// skip any shebang line..
