@@ -75,8 +75,8 @@ Object.defineProperties(MachineType, {
 });
 
 MachineType.compile.code = function(type){
+	if (type.vararg) return type.width | MachineType.VARARG;
 	var x = type.width;
-	if (type.vararg) return MachineType.VARARG;
 	if (type.pointer) x |= MachineType.POINTER;
 	if (type.constant) x |= MachineType.CONSTANT;
 	if (type.signed) x |= MachineType.SIGNED;
