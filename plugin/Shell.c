@@ -234,7 +234,7 @@ gnu_readline(JSContext ctx,
     }
 
  	if (argc != 1) {
-		*exception = JSExceptionFromUtf8(ctx, "Error", "readline expected 1 argument, got %zd", argc);
+		*exception = JSExceptionFromUtf8(ctx, "Error", "readline expected 1 parameter, got %zd", argc);
 		return JSValueMakeNull (ctx);
 	}
 
