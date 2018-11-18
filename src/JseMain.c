@@ -127,7 +127,6 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	JSValue jsError = NULL, result = NULL;
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
 
-	JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 	JSObjectCreateFunction(jse.ctx, global, "exit", terminate);
 
 	JSLoadPlugin(jse.ctx, "Shell.jso", global, NULL);
@@ -142,8 +141,8 @@ void JSInit(char * command, JSContext ctx, bool secureMode) {
 	JSLoadPlugin(jse.ctx, "Fork.jso", global, NULL);
 	JSLoadPlugin(jse.ctx, "Environment.jso", global, NULL);
 
-
 	if (secureMode) {
+		JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
 		JSLoadPlugin(jse.ctx, "MachineType.jso", global, NULL);
@@ -241,6 +240,7 @@ int jse_file_mode(char * file)
 	JSObject global = JSContextGetGlobalObject(jse.ctx);
 
 	if (g_file_test(file, G_FILE_TEST_IS_EXECUTABLE)) {
+		JSObjectCreateFunction(jse.ctx, global, "lastError", lastError);
 		JSObjectCreateFunction(jse.ctx, global, "loadPlugin", loadPlugin);
 		JSObjectCreateFunction(jse.ctx, global, "addPluginPath", addPluginPath);
 		JSLoadPlugin(jse.ctx, "MachineType.jso", global, NULL);
