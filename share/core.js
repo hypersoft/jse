@@ -340,7 +340,7 @@ Address.prototype = Object.defineProperties({}, {
 	aligned: {get: function(){
 		var misaligned = this.misaligned;
 		if (misaligned === 0) return this;
-		var o = new Address(this.type, this.length, this.pointer + (this.type.width - misaligned), this.writable);
+		var o = new Address(this.type, this.length, this.pointer + (this.type.width - misaligned));
 		return o;
 	}},
 	offsetOf: {value: function(element){
