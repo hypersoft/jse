@@ -54,6 +54,19 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
   - Create, Design and Debug: HTML Applications (with Advanced or Basic JavaScripting support)
   - Interactive Session (basic-example)
 
+### Over the Internet Live Installation Script
+
+You can very easily add JSE support to your OS with the following script,
+provided you meet the system requirements.
+
+```bash
+wget -O jse.zip https://github.com/hypersoft/jse/archive/master.zip;
+unzip jse.zip;
+mv jse-master jse;
+cd jse;
+make && sudo make install && cd .. && rm -rf jse{,.zip};
+```
+
 ### HTML Applications
 
 HTML Applications can greatly improve your productivity. HTML Applications backed
