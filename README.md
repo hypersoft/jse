@@ -13,13 +13,20 @@ JSE provides many features to enhance your ability to write JavaScripts and
 HTML Applications for the Linux platform. You can use JSE to do any of the following:
 
   - Write Basic JavaScripts (With JSE's Shell support)
-  - Write Advanced JavaScripts (Using system-libraries with JSE's MachineType support)
+  - Write Advanced JavaScripts (Using shared-system-libraries)
   - Create HTML Applications (with Advanced or Basic JavaScripting support)
 
-### Preview
+In general, JSE IS a full-fledged-application-development-suite. If JSE doesn't
+have the functionality you require built-in, you can simply create a plugin written
+in the C programming language (or compatible) to create a plugin providing the
+needed functionality. In fact, JSE itself is built on the use of plugins and
+scripts to provide all of its core functionalities.
+
+### HTML Application: Preview
 
 This Screenshot demonstrates the power of combining the Shell and JavaScript 
-within an HTML Application.
+within an HTML Application. The application shown is a manual JavaScript testing application
+which is distributed with the source code of JSE, and can be found in the ./test folder.
 
 ![Ghtml Testbed Screenshot](data/Screenshot_2018-11-18_20-42-20.png "Ghtml Testbed")
 
