@@ -1,12 +1,39 @@
 ### About JSE
-[JSE](https://github.com/hypersoft/jse/wiki/About-JSE) is a free (as in cost of 
+Hypersoft-Systems: U.-S.-A.: [JSE](https://github.com/hypersoft/jse/wiki/About-JSE) (Java-Script-Engine) is a free (as in cost of 
 purchase) and open-source computer software project for executing shell-scripts 
-written in JavaScript within a Linux Operating System environment.
+written in JavaScript as full-fledged-software-programs within a Linux Operating System environment.
 
-The JSE project is conceptualized and maintained by
-[Hypersoft-Systems: U.-S.-A.](https://github.com/hypersoft/)
-[(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com). [Donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DG3H6F8DSG4BC)
+JSE is conceptualized and maintained by [Hypersoft-Systems: U.-S.-A.](https://github.com/hypersoft/) [(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com).
+
+[Donations](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DG3H6F8DSG4BC)
 in support of this project are welcome and are processed via pay-pal.
+
+In general, JSE IS a full-fledged-application-development-suite. If JSE does not
+have the functionality you require built-in, you can simply create a plugin written
+in the C programming language (or compatible) to provide the needed 
+functionality. In fact, JSE itself is built on the use of plugins and scripts 
+to provide all of its core functionalities.
+
+### Design Methodology
+
+  - Let JavaScript do Unix things, in The [Unix Way](http://en.wikipedia.org/wiki/Unix_philosophy)
+  - JavaScript interpretation as a System Level coding package
+  - HTML Browsing as a System Level application package
+  - Zero external runtime environment support requirements (package tools, script-libraries, etc.)
+
+### Technology
+
+JSE itself, depends upon several technologies to achieve its design goals.
+
+  - WebKitGTK+ 4.0
+  - DynCall 0.8 \[built-in]
+
+JSE's build environment adds a few requirements:
+
+  - Bash Shell 4.0+
+  - curl \[to download the DynCall library package and documentation]
+  - Git \[if you use software revision control]
+  - Tar and Zip support \[for unpacking the DynCall archive and creating archives]
 
 ### Features
 JSE provides many features to enhance your ability to write JavaScript based shell-scripts and
@@ -16,17 +43,15 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
   - Write Advanced JavaScripts (Using shared-system-libraries and JSE Plugins)
   - Create, Design and Debug: HTML Applications (with Advanced or Basic JavaScripting support)
 
-In general, JSE IS a full-fledged-application-development-suite. If JSE does not
-have the functionality you require built-in, you can simply create a plugin written
-in the C programming language (or compatible) to provide the needed 
-functionality. In fact, JSE itself is built on the use of plugins and scripts 
-to provide all of its core functionalities.
+### HTML Applications
 
-### HTML Application: Preview
+HTML Applications can greatly improve your productivity. HTML Applications backed
+by JSE have truly unlimited power and flexibility.
 
-This Screenshot demonstrates the power of combining the Shell and JavaScript 
-within an HTML Application. The application shown is a manual JavaScript testing application
-which is distributed with the source code of JSE, and can be found in the ./test folder.
+This Screenshot demonstrates the Awesomeness of JSE and its Ghtml counter-part.
+The application shown within Ghtml is a manual JavaScript testing application
+which is distributed with the source code of JSE, and can be found in the ./test
+folder.
 
 ![Ghtml Testbed Screenshot](data/Screenshot_2018-11-18_20-42-20.png "Ghtml Testbed")
 
@@ -44,4 +69,3 @@ installing the project.
 * [Wikipedia: JavaScript](http://en.wikipedia.org/wiki/JavaScript)
 * [MDN: JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 * [JavaScript: The Definitive Guide](http://www.amazon.com/JavaScript-Definitive-Guide-David-Flanagan/dp/0596000480)
-* [Unix Philosophy](http://en.wikipedia.org/wiki/Unix_philosophy)
