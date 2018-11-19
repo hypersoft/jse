@@ -34,7 +34,7 @@ typedef struct sGhtmlConfiguration {
     int type_hint;
 } GhtmlConfiguration;
 
-GhtmlConfiguration Ghtml;
+static GhtmlConfiguration Ghtml;
 
 static void destroyWindowCb(GtkWidget* widget, GtkWidget* window);
 static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window);
@@ -45,11 +45,11 @@ static void screen_changed (GtkWidget *window,
                          GdkScreen *old_screen,
                          GtkWidget *label);
 
-int ghtml_parse_option_with_value(char * opt, char * val);
+static int ghtml_parse_option_with_value(char * opt, char * val);
 
-void ghtml_die(int);
+static void ghtml_die(int);
 
-void ghtml_check_required_file(char *type, char *file, bool checkExec) {
+static void ghtml_check_required_file(char *type, char *file, bool checkExec) {
 
 	/* Test if file is null */
 	if (! file || ! *file) {
@@ -83,14 +83,14 @@ void ghtml_check_required_file(char *type, char *file, bool checkExec) {
 
 }
 
-char * get_file_name_as_file_uri(register const char * file) {
+static char * get_file_name_as_file_uri(register const char * file) {
     char buffer1[16384], buffer2[16384];
     file = realpath(file, buffer1);
     sprintf(buffer2, "%s%s", "file://", file);
     return g_strdup(buffer2);
 }
 
-void
+static void
 load_changed (WebKitWebView  *web_view,
                WebKitLoadEvent load_event,
                gpointer        user_data)
@@ -128,7 +128,7 @@ load_changed (WebKitWebView  *web_view,
 
 #define STREQUAL(A, B) ((strcmp(A, B)) == 0)
 
-int ghtml_parse_option_with_value(char * opt, char * val) {
+static int ghtml_parse_option_with_value(char * opt, char * val) {
     if (STREQUAL(opt, "--parent-window")) {
         sscanf(val, "%p", &Ghtml.parent);
         return 2;
@@ -167,7 +167,7 @@ int ghtml_parse_option_with_value(char * opt, char * val) {
     return 0;
 }
 
-int ghtml_parse_file_option(char * opt, char * val) {
+static int ghtml_parse_file_option(char * opt, char * val) {
     if (STREQUAL(opt, "--html-application") || STREQUAL(opt, "-f")) {
         ghtml_check_required_file("GHTML Application File", val, false);
         Ghtml.file = val;
@@ -176,7 +176,7 @@ int ghtml_parse_file_option(char * opt, char * val) {
     return 0;
 }
 
-int ghtml_parse_option(char * opt) {
+static int ghtml_parse_option(char * opt) {
 
     if (STREQUAL(opt, "--no-decor")) {
         Ghtml.disable_decorations = true;
@@ -283,7 +283,7 @@ int ghtml_parse_option(char * opt) {
     return 0;
 }
 
-gboolean supports_alpha = TRUE;
+static gboolean supports_alpha = TRUE;
 
 static void
 screen_changed (GtkWidget *window,
@@ -299,7 +299,7 @@ screen_changed (GtkWidget *window,
 
 }
 
-void ghtml_start_application(int argc, char * argv[]) {
+static void ghtml_start_application(int argc, char * argv[]) {
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -429,7 +429,7 @@ void ghtml_start_application(int argc, char * argv[]) {
 
 #define shift(C) argc -= C; argv+= C; argno += C
 
-int main(int argc, char* argv[])
+static int main(int argc, char* argv[])
 {
     memset(&Ghtml, 0, sizeof(GhtmlConfiguration));
     int argno = 0;
@@ -489,7 +489,7 @@ static gboolean closeWebViewCb(WebKitWebView* webView, GtkWidget* window)
     return TRUE;
 }
 
-void ghtml_die(int code) {
+static void ghtml_die(int code) {
 
     gtk_main_quit();
 	exit(code);

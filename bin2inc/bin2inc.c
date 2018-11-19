@@ -33,7 +33,7 @@ DAMAGE.
 #include <ctype.h>
 
 /* Just turns byte streams into hex encoded char arrays over stdio is all */
-size_t encode(char * name) {
+static size_t encode(char * name) {
 
 	int nc, x = 0, nl = strlen(name);
 	for(x; x < nl; x++) {
@@ -62,6 +62,6 @@ size_t encode(char * name) {
 
 }
 
-int main(int argc, char ** argv) {
+static int main(int argc, char ** argv) {
 	return encode((argc > 1)?argv[1]:"stdin"), 0;
 }
