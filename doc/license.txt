@@ -1,4 +1,5 @@
-Hypersoft Systems JST AND Hypersoft Systems JSE
+Hypersoft Systems JSE
+
 Copyright (c) 2014, Triston J. Taylor
 
 All rights reserved.
