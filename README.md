@@ -1,8 +1,11 @@
 ### About JSE
 
-<img width=128 src="data/rank-00-platinum-javascript.png" style="float:left">Hypersoft-Systems: U.-S.-A.: [JSE](https://github.com/hypersoft/jse/wiki/About-JSE) (Java-Script-Engine) is a free (as in cost of 
+<table width="100%"><tr><td>
+<img width=128 src="data/rank-00-platinum-javascript.png" style="float:left"></td>
+<td>Hypersoft-Systems: U.-S.-A.: JSE (Java-Script-Engine) is a free (as in cost of 
 purchase) and open-source computer software project for executing shell-scripts 
-written in JavaScript as full-fledged-software-programs within a Linux Operating System environment.
+written in JavaScript as full-fledged-software-programs within a Linux Operating System environment.</td>
+</tr></table>
 
 JSE is conceptualized and maintained by [Hypersoft-Systems: U.-S.-A.](https://github.com/hypersoft/) [(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com).
 
