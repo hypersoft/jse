@@ -1,9 +1,9 @@
 bin/
-data/
+data/*.gz
 include/dyncall/
 lib/
 obj/
 share/plugin/
 share/doc/dyncall-0.8.pdf
-ghtml/doc.tux~
+src/ghtml/doc.tux~
 /nbproject/private/
