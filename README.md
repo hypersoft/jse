@@ -1,4 +1,7 @@
 ### About JSE
+
+<img width=128 src="data/rank-00-platinum-javascript.png" style="float:left">
+
 Hypersoft-Systems: U.-S.-A.: [JSE](https://github.com/hypersoft/jse/wiki/About-JSE) (Java-Script-Engine) is a free (as in cost of 
 purchase) and open-source computer software project for executing shell-scripts 
 written in JavaScript as full-fledged-software-programs within a Linux Operating System environment.
@@ -68,7 +71,7 @@ folder.
 Powerful applications can easily be written in no-time-at-all using JSE and Ghtml.
 To execute the application shown in the Screenshot yourself, simply run:
 
-    $ ./test/testbed
+    $ demo/testbed
 
 from a terminal session within the project's root directory after compiling and
 installing the project.
