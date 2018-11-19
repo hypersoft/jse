@@ -34,26 +34,23 @@ share/license/dyncall.txt: data/${DYNCALL_PKG}
 JSE_CFLAGS != pkg-config --cflags javascriptcoregtk-4.0
 JSE_CFLAGS := $(DEBUG) $(JSE_CFLAGS)
 
-src/data/%.c: data/%
-	@mkdir -p src/data;
-	bin/bin2inc `basename $<` < $< > $@
-
-bin/bin2inc: bin2inc/bin2inc.c
+bin/bin2inc: src/bin2inc/bin2inc.c
 	@mkdir -p `dirname $@`
 	gcc $< -o $@
 
-obj/%.o: src/%.c
+obj/main/%.o: src/main/%.c
+	@mkdir -p `dirname $@`
 	gcc ${JSE_CFLAGS} -fPIC -I include -c $< -o $@
 
-obj/JseMain.o: src/JseMain.c src/JseFunctions.c
+obj/main/JseMain.o: src/main/JseMain.c src/main/JseFunctions.c
 
-JSE_OBJS = obj/JseMain.o obj/JseString.o obj/JseValue.o obj/JseObject.o obj/JseException.o obj/JseConstructor.o obj/JseOptionParser.o
+JSE_OBJS = obj/main/JseMain.o obj/main/JseString.o obj/main/JseValue.o obj/main/JseObject.o obj/main/JseException.o obj/main/JseConstructor.o obj/main/JseOptionParser.o
 
 JSE_LIBS = $(shell pkg-config --libs javascriptcoregtk-4.0) $(shell echo -ldl lib/*.a)
 bin/jse: ${JSE_OBJS}
 	gcc ${JSE_OBJS} -o $@ ${JSE_LIBS} -Wl,--export-dynamic 
 
-GHTML_SOURCES != echo ghtml/*.c
+GHTML_SOURCES != echo src/ghtml/*.c
 GHTML_CONFIG != pkg-config --cflags --libs webkit2gtk-4.0
 bin/ghtml: ${GHTML_SOURCES}
 	gcc ${JSE_CFLAGS} ${GHTML_SOURCES} ${JSE_LIBS} -o bin/ghtml ${GHTML_CONFIG}
@@ -63,47 +60,43 @@ plugins: share/plugin/JseWebKit.so share/plugin/Ghtml.jso \
 	 share/plugin/DynCall.jso share/plugin/Fork.jso \
 	 share/plugin/MachineType.jso share/plugin/Shell.jso
 
-obj/* obj/plugin/*: include/jse.h
-
-obj/plugin/%.o: plugin/%.c
-	@mkdir -p obj/plugin;
+obj/main/plugin/%.o: src/main/plugin/%.c
+	@mkdir -p obj/main/plugin;
 	gcc ${DEBUG} -fPIC -I include -c $< -o $@ ${JSE_CFLAGS}
 
-obj/plugin/Ghtml.o: plugin/Ghtml.c
-	@mkdir -p obj/plugin;
+obj/main/plugin/Ghtml.o: src/main/plugin/Ghtml.c
+	@mkdir -p obj/main/plugin;
 	@gcc ${DEBUG} -fPIC -I include -I ghtml ${GHTML_CONFIG} -c $< -o $@ ${JSE_CFLAGS}
 
-plugin/data/%.h: plugin/%.js
-	@mkdir -p plugin/data;
-	bin/bin2inc `basename $<` < $< > $@
-
-share/plugin/%.jso: obj/plugin/%.o
+share/plugin/%.jso: obj/main/plugin/%.o
 	@mkdir -p share/plugin;
 	gcc $< -fPIC -shared -o $@ ${JSE_LIBS}
 
 JSE_WEBKIT_FLAGS != pkg-config --cflags --libs webkit2gtk-web-extension-4.0
-share/plugin/JseWebKit.so: ${JSE_OBJS} src/JseWebKit.c
-	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -shared -ldl -fPIC
+share/plugin/JseWebKit.so: ${JSE_OBJS} src/main/JseWebKit.c
+	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/main/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -shared -ldl -fPIC
 
 GNU_READLINE_FLAGS != pkg-config --cflags javascriptcoregtk-4.0
-obj/plugin/Shell.o: plugin/Shell.c
-	@mkdir -p obj/plugin;
+obj/plugin/Shell.o: src/main/plugin/Shell.c
+	@mkdir -p obj/main/plugin;
 	gcc ${GNU_READLINE_FLAGS} -fPIC -I include -c $< -o $@ ${JSE_CFLAGS}
 
-share/plugin/Shell.jso: obj/plugin/Shell.o
+share/plugin/Shell.jso: obj/main/plugin/Shell.o
 	@mkdir -p share/plugin;
 	gcc $< -fPIC -shared -o $@ $(shell pkg-config --libs javascriptcoregtk-4.0) -lreadline
 
 clean:
-	@rm -vf obj/*.o bin/* share/plugin/* obj/plugin/*.o
+	@rm -vf bin/* share/plugin/*
+	@rm -vrf obj
 
 scrub:
-	@rm -vf lib/* share/doc/dyn*pdf data/dyncall*gz share/license/dyncall.txt
+	@rm -vf share/doc/dyn*pdf data/dyncall*gz share/license/dyncall.txt
+	@rm -vrf lib
 
 ARCHIVE != date +archive/jse-%b-%d-%Y.tar.gz | tr [:upper:] [:lower:]
 package:
 	@mkdir -p archive
-	@tar -C .. -czf ${ARCHIVE} jse --exclude='dyncall*.pdf' --exclude='dyncall.txt' --exclude='lib/*' --exclude='obj/*' --exclude='bin/*' --exclude='share/plugin/*' --exclude='data/*' --exclude='*dep.inc' --exclude='include/dyncall' --exclude='archive' --exclude='nbproject/private'
+	@tar -C .. -czf ${ARCHIVE} jse --exclude='dyncall*.pdf' --exclude='dyncall.txt' --exclude='lib/*' --exclude='obj/*' --exclude='bin/*' --exclude='share/plugin/*' --exclude='data/*' --exclude='*dep.inc' --exclude='include/dyncall' --exclude='archive' --exclude .vscode --exclude='nbproject/private'
 	@echo ${ARCHIVE}
 	
 PKG_CONFIG_PATH != pkg-config --variable pc_path pkg-config | cut -d : -f1
