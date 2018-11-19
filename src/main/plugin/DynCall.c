@@ -426,10 +426,10 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 		)), 0
 	);
 
-  int DATA_FLAGS = kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete;
+  uint DATA_FLAGS = kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete;
   
   JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_DEFAULT", JSValueFromNumber(ctx, DC_CALL_C_DEFAULT), DATA_FLAGS);
-  JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_VARARGS", JSValueFromNumber(ctx, DC_CALL_C_VARARGS), DATA_FLAGS);
+  JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_VARARGS", JSValueFromNumber(ctx, DC_CALL_C_ELLIPSIS_VARARGS), DATA_FLAGS);
   JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_SYSTEM", JSValueFromNumber(ctx, DC_CALL_SYS_DEFAULT), DATA_FLAGS);
 
 	JSObject FunctionCallback;
