@@ -190,8 +190,6 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 
 	}
   
-  g_free(protocol);
-
 	JSValue result = JSValueMakeUndefined(ctx);
 	JSValue returnType = JSObjectGetUtf8Property(ctx, function, "returns");
 	char signature = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, (JSObjectRef) returnType, "format"), NULL);
