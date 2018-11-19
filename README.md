@@ -18,7 +18,7 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
 
 ### Preview
 
-This Screenshot demonstrates the power of combining the shell with JavaScript 
+This Screenshot demonstrates the power of combining the Shell and JavaScript 
 within an HTML Application.
 
 ![Ghtml Testbed Screenshot](data/Screenshot_2018-11-18_20-42-20.png "Ghtml Testbed")
