@@ -30,14 +30,13 @@ which is distributed with the source code of JSE, and can be found in the ./test
 
 ![Ghtml Testbed Screenshot](data/Screenshot_2018-11-18_20-42-20.png "Ghtml Testbed")
 
-To execute this application yourself, simply run:
+Powerful applications can easily be written in no-time-at-all using JSE and Ghtml.
+To execute the application shown in the Screenshot yourself, simply run:
 
     $ ./test/testbed
 
 from a terminal session within the project's root directory after compiling and
 installing the project.
-
-Powerful applications can easily be written in no-time-at-all using JSE and Ghtml.
 
 <hr>
 
