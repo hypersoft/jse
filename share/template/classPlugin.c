@@ -16,11 +16,11 @@
 #include <jse.h>
 
 // this definition just makes it easy to change the class name
-#define CLASSNAME "Plugin"
+#define PLUGIN_CLASS_NAME "Plugin"
 
 JSClass PluginClass;
 
-static void ObjectInitialize(JSContext ctx, JSObject object)
+static void PluginObjectInitialize(JSContext ctx, JSObject object)
 {
    /*
 	Unlike the other object call backs, the initialize callback is called on
@@ -30,8 +30,9 @@ static void ObjectInitialize(JSContext ctx, JSObject object)
 	g_print("Called Plugin Object Initialize\n");
 }
 
-static void ObjectFinalize(JSObject object)
-{	g_print("Called Plugin Object Finalize\n");
+static void PluginObjectFinalize(JSObject object)
+{
+	g_print("Called Plugin Object Finalize\n");
    /*
 	The finalize callback is called on the most derived class first, and the
 	least derived class (the parent class) last.
@@ -43,8 +44,9 @@ static void ObjectFinalize(JSObject object)
     */
 }
 
-static bool ObjectHasProperty (JSContext ctx, JSObject object, JSString id)
-{	g_print("Called Plugin Object Has Property\n");
+static bool PluginObjectHasProperty (JSContext ctx, JSObject object, JSString id)
+{
+	g_print("Called Plugin Object Has Property\n");
    /*
 	If this function returns false, the hasProperty request forwards to
 	object's statically declared properties, then its parent class chain
@@ -63,8 +65,9 @@ static bool ObjectHasProperty (JSContext ctx, JSObject object, JSString id)
 	return false;
 }
 
-static JSValue ObjectGetProperty(JSContext ctx, JSObject object, JSString id, JSValue * exception)
-{	g_print("Called Plugin Object Get Property\n");
+static JSValue PluginObjectGetProperty(JSContext ctx, JSObject object, JSString id, JSValue * exception)
+{
+	g_print("Called Plugin Object Get Property\n");
    /*
 	If this function returns NULL, the get request forwards to object's
 	statically declared properties, then its parent class chain (which
@@ -73,8 +76,9 @@ static JSValue ObjectGetProperty(JSContext ctx, JSObject object, JSString id, JS
 	return NULL;
 }
 
-static bool ObjectSetProperty (JSContext ctx, JSObject object, JSString id, JSValue value, JSValue * exception)
-{	g_print("Called Plugin Object Set Property\n");
+static bool PluginObjectSetProperty (JSContext ctx, JSObject object, JSString id, JSValue value, JSValue * exception)
+{
+	g_print("Called Plugin Object Set Property\n");
    /*
 	If this function returns false, the set request forwards to object's
 	statically declared properties, then its parent class chain (which
@@ -83,8 +87,9 @@ static bool ObjectSetProperty (JSContext ctx, JSObject object, JSString id, JSVa
 	return false;
 }
 
-static bool ObjectDeleteProperty (JSContext ctx, JSObject object, JSString id, JSValue * exception)
-{	g_print("Called Plugin Object Delete Property\n");
+static bool PluginObjectDeleteProperty (JSContext ctx, JSObject object, JSString id, JSValue * exception)
+{
+	g_print("Called Plugin Object Delete Property\n");
    /*
 	If this function returns false, the delete request forwards to object's
 	statically declared properties, then its parent class chain (which
@@ -93,8 +98,9 @@ static bool ObjectDeleteProperty (JSContext ctx, JSObject object, JSString id, J
 	return false;
 }
 
-static void ObjectGetPropertyNames (JSContext ctx, JSObject object, JSPropertyNameAccumulator names)
-{	g_print("Called Plugin Object Get Property Names\n");
+static void PluginObjectGetPropertyNames (JSContext ctx, JSObject object, JSPropertyNameAccumulator names)
+{	
+	_print("Called Plugin Object Get Property Names\n");
    /*
 	Use JSPropertyNameAccumulatorAddName to add property names to accumulator.
 	A class's getPropertyNames callback only needs to provide the names of
@@ -105,8 +111,9 @@ static void ObjectGetPropertyNames (JSContext ctx, JSObject object, JSPropertyNa
     */
 }
 
-static JSValue ObjectCallAsFunction (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{	g_print("Plugin Object Called as Function\n");
+static JSValue PluginObjectCallAsFunction (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	g_print("Plugin Object Called as Function\n");
    /*
 	If your callback were invoked by the JavaScript expression
 	'myObject.myFunction()', `function' would be set to myFunction, and
@@ -118,8 +125,9 @@ static JSValue ObjectCallAsFunction (JSContext ctx, JSObject function, JSObject 
 	return NULL;
 }
 
-static JSObject ObjectCallAsConstructor (JSContext ctx, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
-{	g_print("Plugin Object Called as Constructor\n");
+static JSObject PluginObjectCallAsConstructor (JSContext ctx, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+	g_print("Plugin Object Called as Constructor\n");
    /*
 	If your callback were invoked by the JavaScript expression
 	'new myConstructor()', `this' would be set to myConstructor.
@@ -130,8 +138,9 @@ static JSObject ObjectCallAsConstructor (JSContext ctx, JSObject this, size_t ar
 	return NULL;
 }
 
-static bool ObjectHasInstance(JSContext ctx, JSObject constructor, JSValue object, JSValue * exception)
-{	g_print("Called Plugin Object Has Instance\n");
+static bool PluginObjectHasInstance(JSContext ctx, JSObject constructor, JSValue object, JSValue * exception)
+{
+	g_print("Called Plugin Object Has Instance\n");
    /*
 	If your callback were invoked by the JavaScript expression
 	'someValue instanceof myObject', `constructor' would be set to myObject
@@ -146,8 +155,9 @@ static bool ObjectHasInstance(JSContext ctx, JSObject constructor, JSValue objec
 	return false;
 }
 
-static JSValue ObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
-{	g_print("Called Plugin Object Convert to Type\n");
+static JSValue PluginObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
+{
+	g_print("Called Plugin Object Convert to Type\n");
 /*
 	If this function returns NULL, the conversion request forwards to
 	object's parent class chain (which includes the default object class).
@@ -156,10 +166,13 @@ static JSValue ObjectConvertToType(JSContext ctx, JSObject object, JSType type, 
 	a string. An object converted to boolean is 'true.' An object converted
 	to object is itself.
 */
+	if (type == kJSTypeNumber) return JSValueFromNumber(ctx, 0);
+	if (type == kJSTypeString) return JSValueFromUtf8(ctx, PLUGIN_CLASS_NAME);
+
 	return NULL;
 }
 
-static JSStaticValue ObjectValues[] = {
+static JSStaticValue PluginClassValues[] = {
 
 	/* GET follows the same prototype as getProperty */
 	/* SET follows the same prototype as setProperty */
@@ -171,12 +184,12 @@ static JSStaticValue ObjectValues[] = {
 	 out useless errors.
 	 */
 
-	{NULL, (void*) ObjectGetProperty, (void*) ObjectSetProperty, 0},	/* NAME, GET, SET, OBJECT ATTRIBUTES */
+	//{MyProp, (void*) PluginObjectGetProperty, (void*) PluginObjectSetProperty, 0},	/* NAME, GET, SET, OBJECT ATTRIBUTES */
 	{NULL, NULL, NULL, 0}	/* DO NOT MODIFY, LEAVE LAST */
 
 };
 
-static JSStaticFunction ObjectFunctions[] = {
+static JSStaticFunction PluginClassFunctions[] = {
 
 	/* these functions follow the same prototype as callAsFunction */
 
@@ -185,42 +198,48 @@ static JSStaticFunction ObjectFunctions[] = {
 
 };
 
-static JSClassDefinition ObjectDefinition = {
+static JSClassDefinition PluginClassDefinition = {
 	0,										/* Version, always 0 */
 											/* ClassAttributes */
 	kJSClassAttributeNoAutomaticPrototype,
-	CLASSNAME,								/* Class Name */
+	PLUGIN_CLASS_NAME,								/* Class Name */
 	NULL,									/* Parent Class */
-	ObjectValues,									/* Static Values */
-	ObjectFunctions,								/* Static Functions */
-	(void*) ObjectInitialize,						/* Object Initializer */
-	(void*) ObjectFinalize,						/* Object Finalizer */
-	(void*) ObjectHasProperty,					/* Object Has Property */
-	(void*) ObjectGetProperty,					/* Object Get Property */
-	(void*) ObjectSetProperty,					/* Object Set Property */
-	(void*) ObjectDeleteProperty,					/* Object Delete Property */
-	(void*) ObjectGetPropertyNames,				/* Object Get Property Names */
-	(void*) ObjectCallAsFunction,					/* new Object Call As Function */
-	(void*) ObjectCallAsConstructor,				/* new Object Call As Constructor */
-	(void*) ObjectHasInstance,					/* Has Instance */
-	(void*) ObjectConvertToType					/* Object Convert To Type */
+	PluginClassValues,									/* Static Values */
+	PluginClassFunctions,								/* Static Functions */
+	(void*) PluginObjectInitialize,						/* Object Initializer */
+	(void*) PluginObjectFinalize,						/* Object Finalizer */
+	(void*) PluginObjectHasProperty,					/* Object Has Property */
+	(void*) PluginObjectGetProperty,					/* Object Get Property */
+	(void*) PluginObjectSetProperty,					/* Object Set Property */
+	(void*) PluginObjectDeleteProperty,					/* Object Delete Property */
+	(void*) PluginObjectGetPropertyNames,				/* Object Get Property Names */
+	(void*) PluginObjectCallAsFunction,					/* new Object Call As Function */
+	(void*) PluginObjectCallAsConstructor,				/* new Object Call As Constructor */
+	(void*) PluginObjectHasInstance,					/* Has Instance */
+	(void*) PluginObjectConvertToType					/* Object Convert To Type */
 };
 
-JSObject ClassObjectConstructor (JSContext ctx, JSObject constructor, size_t argc, const JSValue argv[], JSValue* exception)
-{	g_print("Called Plugin Class Object Constructor\n");
+static JSObject PluginClassConstructor (JSContext ctx, JSObject constructor, size_t argc, const JSValue argv[], JSValue* exception)
+{
+
+	g_print("Called Plugin Class Object Constructor\n");
+
 	return JSObjectMake(ctx, PluginClass, NULL);
 }
 
 JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
-{	g_print("Called Plugin Load\n");
+{
+
+	g_print("Called Plugin Load\n");
+
 	if (!PluginClass)
-		PluginClass = JSClassCreate(&ObjectDefinition);
+		PluginClass = JSClassCreate(&PluginClassDefinition);
 
 	JSObject constructor = JSObjectCreateConstructor(
-		ctx, PluginClass, ClassObjectConstructor
+		ctx, PluginClass, PluginClassConstructor
 	);
 
-	JSObjectSetUtf8Property(ctx, object, CLASSNAME,
+	JSObjectSetUtf8Property(ctx, object, PLUGIN_CLASS_NAME,
 		(JSValue) constructor, 0
 	);
 
@@ -231,7 +250,8 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 }
 
 void unload(JSContext ctx)
-{	g_print("Called Plugin Unload\n");
+{	
+	g_print("Called Plugin Unload\n");
 	JSClassRelease(PluginClass);
 }
 
