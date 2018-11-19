@@ -67,7 +67,7 @@ wget -O jse.zip https://github.com/hypersoft/jse/archive/3.1.zip &&
 unzip jse.zip &&
 mv jse-3.1 jse &&
 cd jse &&
-make && sudo make install && cd .. && rm -rf jse{,.zip};
+make && sudo make install && demo/testbed;
 ```
 
 ### Over the Internet Live (unstable) Installation Script
@@ -80,7 +80,7 @@ wget -O jse.zip https://github.com/hypersoft/jse/archive/master.zip &&
 unzip jse.zip &&
 mv jse-master jse &&
 cd jse &&
-make && sudo make install && cd .. && rm -rf jse{,.zip};
+make && sudo make install && demo/testbed;
 ```
 
 ### HTML Applications
