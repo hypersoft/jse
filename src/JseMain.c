@@ -1,6 +1,6 @@
 /*
  * File:   JseMain.c
- * Author: triston
+ * Author: Triston
  *
  * Created on December 26, 2014, 5:06 AM
  */
