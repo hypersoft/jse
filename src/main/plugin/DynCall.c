@@ -358,13 +358,11 @@ static char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* resul
   
   switch (returnType) {
     case 'B': result->B = JSValueToBoolean(ctx, value); break;
-    case 'c': case 's': case 'i': case 'j': result->j = JSValueToNumber(ctx, value, NULL); break;
-    case 'C': case 'S': case 'I': case 'J': result->J = JSValueToNumber(ctx, value, NULL); break;
-    case 'l': result->l = JSValueToNumber(ctx, value, NULL); break;
-    case 'L': result->L = JSValueToNumber(ctx, value, NULL); break;
+    case 'c': case 's': case 'i': case 'j': case 'l': result->l = JSValueToNumber(ctx, value, NULL); break;
+    case 'C': case 'S': case 'I': case 'J': case 'L': result->L = JSValueToNumber(ctx, value, NULL); break;
+    case 'p': case 'Z': result->p = (void *)(uintptr_t)JSValueToNumber(ctx, value, NULL); break;
     case 'f': result->f = JSValueToNumber(ctx, value, NULL); break;
     case 'd': result->d = JSValueToNumber(ctx, value, NULL); break;
-    case 'p': case 'Z': result->p = (void *)(uintptr_t)JSValueToNumber(ctx, value, NULL); break;
   }
 
   return returnType;
