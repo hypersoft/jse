@@ -9,7 +9,7 @@ The JSE project is conceptualized and maintained by
 in support of this project are welcome and are processed via pay-pal.
 
 ### Features
-JSE provides many features to enhance your ability to write JavaScripts and
+JSE provides many features to enhance your ability to write JavaScript based shell-scripts and
 HTML Applications for the Linux platform. You can use JSE to do any of the following:
 
   - Write Basic JavaScripts (With JSE's Shell support)
