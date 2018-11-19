@@ -374,15 +374,14 @@ static JSValue FunctionCallbackConstructor (JSContext ctx, JSObject function, JS
 {
   
   FunctionCallbackData * data = JSObjectGetPrivate(this);
-	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
+	JSObject constructor = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
 
-  JSObject cbo = (JSObject) JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+  JSObject cbo = (JSObject) JSObjectCallAsFunction(ctx, constructor, this, argc, argv, exception);
   if (exception && *exception) return NULL;
 
   data->object = (JSObject) argv[0]; // use fastest get
   data->function = (JSObject) argv[2]; // use fastest get
   data->protocol = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, cbo, "protocol"));
-//      g_printerr("protocol: %s\n", data->protocol);
 
   data->protocolLength = (data->protocol)?strlen(data->protocol):0;
 
