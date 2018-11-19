@@ -36,7 +36,7 @@ JSE itself, depends upon several technologies to achieve its design goals.
 JSE's build environment adds a few requirements:
 
   - Bash Shell 4.0+
-  - curl \[to download the DynCall library package and documentation]
+  - wget \[to download the DynCall library package and documentation]
   - Git \[if you use software revision control]
   - Tar and Zip support \[for unpacking the DynCall archive and creating archives]
 
@@ -57,16 +57,29 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
   - Create, Design and Debug: HTML Applications (with Advanced or Basic JavaScripting support)
   - Interactive Session (basic-example)
 
-### Over the Internet Live Installation Script
+### Over the Internet Pre-release (3.1; testing) Installation Script
 
 You can very easily add JSE support to your OS with the following script,
 provided you meet the system requirements.
 
 ```bash
-wget -O jse.zip https://github.com/hypersoft/jse/archive/master.zip;
-unzip jse.zip;
-mv jse-master jse;
-cd jse;
+wget -O jse.zip https://github.com/hypersoft/jse/archive/3.1.zip &&
+unzip jse.zip &&
+mv jse-3.1 jse &&
+cd jse &&
+make && sudo make install && cd .. && rm -rf jse{,.zip};
+```
+
+### Over the Internet Live (unstable) Installation Script
+
+You can very easily add JSE support to your OS with the following script,
+provided you meet the system requirements.
+
+```bash
+wget -O jse.zip https://github.com/hypersoft/jse/archive/master.zip &&
+unzip jse.zip &&
+mv jse-master jse &&
+cd jse &&
 make && sudo make install && cd .. && rm -rf jse{,.zip};
 ```
 
