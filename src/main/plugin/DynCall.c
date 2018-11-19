@@ -144,9 +144,14 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 	void * vm = dcNewCallVM((1 + argc) * sizeof(long long));
 
 	if (ellipsisMode) {
-		dcMode(vm, DC_CALL_C_ELLIPSIS);
+		dcMode(vm, DC_CALL_C_ELLIPSIS_VARARGS);
 		protocol[--protocolLength] = 0;
-	}
+	} else {
+    if (JSObjectHasUtf8Property(ctx, this, "mode")) {
+      JSValue mode = JSObjectGetUtf8Property(ctx, this, "mode");
+      dcMode(vm, JSValueToNumber(ctx, mode, NULL));
+    }
+  }
 
 	register unsigned i; register double number;
 
@@ -184,6 +189,8 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 		}
 
 	}
+  
+  g_free(protocol);
 
 	JSValue result = JSValueMakeUndefined(ctx);
 	JSValue returnType = JSObjectGetUtf8Property(ctx, function, "returns");
@@ -420,6 +427,12 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 			ctx, SHARED_FUNCTION_CLASS_NAME, SharedFunctionClass, SharedFunctionConstructor
 		)), 0
 	);
+
+  int DATA_FLAGS = kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete;
+  
+  JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_DEFAULT", JSValueFromNumber(ctx, DC_CALL_C_DEFAULT), DATA_FLAGS);
+  JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_VARARGS", JSValueFromNumber(ctx, DC_CALL_C_VARARGS), DATA_FLAGS);
+  JSObjectSetUtf8Property(ctx, SharedFunction, "TYPE_SYSTEM", JSValueFromNumber(ctx, DC_CALL_SYS_DEFAULT), DATA_FLAGS);
 
 	JSObject FunctionCallback;
 	JSObjectSetUtf8Property(ctx, object, FUNCTION_CALLBACK_CLASS_NAME,
