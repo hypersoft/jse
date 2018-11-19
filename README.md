@@ -1,7 +1,7 @@
 [JSE](https://github.com/hypersoft/jse/wiki/About-JSE) is a free and open source
-computer software project conceptualized and maintained by
+computer software project for executing JavaScripts. JSE is conceptualized and maintained by
 [Hypersoft-Systems: U.-S.-A.](https://github.com/hypersoft/)
-[(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com)
+[(Triston J.Taylor)](mailto:pc.wiz.tt@gmail.com).
 
 Primarily, you would use JSE much the same way you would use any scripting
 interpreter; to create system specific applications written in script. You can
