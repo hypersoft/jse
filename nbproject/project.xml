@@ -30,25 +30,32 @@
             <word>DynCall</word>
             <word>errno</word>
             <word>eval</word>
+            <word>Ghtml</word>
             <word>GLibc</word>
+            <word>HTML</word>
             <word>Hypersoft</word>
             <word>JavaScript</word>
             <word>JavascriptCore</word>
+            <word>JavaScripting</word>
+            <word>JavaScripts</word>
             <word>js</word>
             <word>js'</word>
             <word>jse</word>
             <word>jso</word>
             <word>LGPL</word>
             <word>libdl</word>
+            <word>Linux</word>
             <word>loadPlugin</word>
             <word>localPath</word>
             <word>MachineType</word>
             <word>MachineTypes</word>
             <word>Philipp</word>
             <word>plugin</word>
+            <word>plugins</word>
             <word>propertyName</word>
             <word>readAddress</word>
             <word>ReferenceError</word>
+            <word>Screenshot</word>
             <word>SharedFunction</word>
             <word>SharedLibrary</word>
             <word>sizeOf</word>
