@@ -320,7 +320,7 @@ static JSClassDefinition FunctionCallbackClassDefinition = {
 	(void*) FunctionCallbackConvertToType		/* Object Convert To Type */
 };
 
-char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, FunctionCallbackData * callbackData)
+static char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, FunctionCallbackData * callbackData)
 {
 	JSContext ctx = JSGlobalContextCreateInGroup(JSContextGetUniverse(), NULL);
 	JSObject e = NULL; JSValue *exception = (void*)&e;
