@@ -4,29 +4,30 @@ Object.defineProperties(MachineType, {
 
 	unexpectedTypeWidth: {value:"unexpected type width: ", enumerable:false, writable: false},
 
-	// Lookup tables. Entries stored by MachineTypeCode
+	// Lookup tables. Entries stored by MachineType.compile
 	max: {value:{}, enumerable:false, writable: false},
 	min: {value:{}, enumerable:false, writable: false},
 	format: {value:{}, enumerable:false, writable: false},
 	ofString: {value:{}, enumerable:false, writable: false},
 
 	compile: {value: function compile(type) {
-		var 
+		var
 			code = MachineType.compile.code(type), 
-			name = MachineType.compile.typeName(type);
+			name = MachineType.compile.typeName(type),
+      format = MachineType.compile.format(type);
 		Object.defineProperties(type, {
 			code: {value:code},
 			name: {value:name},
 			bits: {value:MachineType.compile.bits(type)}
 		});
-		if (MachineType.max[code] === undefined) {
-			MachineType.max[code] = MachineType.compile.max(type);
-		}
-		if (MachineType.min[code] === undefined) {
-			MachineType.min[code] = MachineType.compile.min(type);
-		}
 		if (MachineType.format[code] === undefined) {
-			MachineType.format[code] = MachineType.compile.format(type);
+			MachineType.format[code] = format;
+		}
+		if (MachineType.max[format] === undefined) {
+			MachineType.max[format] = MachineType.compile.max(type);
+		}
+		if (MachineType.min[format] === undefined) {
+			MachineType.min[format] = MachineType.compile.min(type);
 		}
 		if (MachineType.ofString[name] === undefined) {
 			MachineType.ofString[name] = type;
@@ -103,14 +104,20 @@ MachineType.compile.bits = function(type){
 };
 
 MachineType.compile.max = function(obj) {
-	if (obj.floating) return undefined;
+	if (obj.floating) {
+    if (obj.width === 8) return Number.MAX_SAFE_INTEGER;
+    return undefined;
+  }
 	var size = obj.bits;
 	if (obj.signed) size--;
 	return MachineType.flag(size + 1) - 1;
 };
 
 MachineType.compile.min = function(obj) {
-	if (obj.floating) return undefined;
+	if (obj.floating) {
+    if (obj.width === 8) return Number.MIN_SAFE_INTEGER;
+    return;
+  }
 	if (obj.signed) return -(obj.max + 1);
 	return 0;
 };
@@ -141,10 +148,10 @@ Object.defineProperties(MachineType.prototype, {
 		return this.signed === false;
 	}},
 	max: {get(){
-		return MachineType.max[this.code];
+		return MachineType.max[this.format];
 	}},
 	min: {get(){
-		return MachineType.min[this.code];
+		return MachineType.min[this.format];
 	}},
 	sizeOf: {value: function(count){
 		if (this.width === 0 && ! this.pointer)
