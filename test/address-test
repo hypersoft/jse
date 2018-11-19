@@ -7,7 +7,7 @@ if (typeof buffer.pointer !== 'number') {
 }
 
 if (buffer.pointer === 0) {
-	throw new Error("a newly allocated buffer did not recieve an address");
+	throw new Error("a newly allocated buffer did not receive an address");
 }
 
 if (buffer.length !== 12) {
