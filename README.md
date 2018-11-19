@@ -25,8 +25,9 @@ to provide all of its core functionalities.
 
 JSE itself, depends upon several technologies to achieve its design goals.
 
-  - WebKitGTK+ 4.0
+  - WebKitGTK+ 4.0 (for JavaScript interpretation and HTML Rendering)
   - DynCall 0.8 \[built-in]
+  - GNU ReadLine (for interactive-sessions)
 
 JSE's build environment adds a few requirements:
 
@@ -34,6 +35,13 @@ JSE's build environment adds a few requirements:
   - curl \[to download the DynCall library package and documentation]
   - Git \[if you use software revision control]
   - Tar and Zip support \[for unpacking the DynCall archive and creating archives]
+
+### Licensing
+
+JSE has a host of licensing options for you to choose from. The project does not
+wish for legal issues to be the cause of not using JSE, so [the license for JSE](share/license/license.txt)
+is very loose. Please review [the licensing for all other included technologies](share/license),
+if you are experiencing a legal permissions issue.
 
 ### Features
 
@@ -43,6 +51,7 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
   - Write Basic JavaScripts (With JSE's Shell support)
   - Write Advanced JavaScripts (Using shared-system-libraries and JSE Plugins)
   - Create, Design and Debug: HTML Applications (with Advanced or Basic JavaScripting support)
+  - Interactive Session (basic-example)
 
 ### HTML Applications
 
@@ -76,7 +85,7 @@ installing the project.
 <p>Note: 
 A developer may specify that remote content be loaded, from within an executable file.
 This is an intentional security leak on behalf of the execution of the developer's implementation.
-Neither Ghtml nor JSE will attempt to prohibit execution of remote content, and no sand-boxing-implementation of mixed content is provided by this project at this time.
+Neither Ghtml nor JSE will attempt to prohibit downloading or execution of remote content, and no sand-boxing-implementation of mixed content is provided by this project at this time.
 </p>
 
 <hr>
