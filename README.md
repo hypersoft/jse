@@ -18,9 +18,9 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
 
 In general, JSE IS a full-fledged-application-development-suite. If JSE doesn't
 have the functionality you require built-in, you can simply create a plugin written
-in the C programming language (or compatible) to create a plugin providing the
-needed functionality. In fact, JSE itself is built on the use of plugins and
-scripts to provide all of its core functionalities.
+in the C programming language (or compatible) to provide the needed 
+functionality. In fact, JSE itself is built on the use of plugins and scripts 
+to provide all of its core functionalities.
 
 ### HTML Application: Preview
 
