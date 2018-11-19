@@ -1,6 +1,6 @@
 ### About JSE
 
-<table width="100%"><tr><td>
+<table width="100%" border="0"><tr><td width="128">
 <img width=128 src="data/rank-00-platinum-javascript.png" style="float:left"></td>
 <td>Hypersoft-Systems: U.-S.-A.: JSE (Java-Script-Engine) is a free (as in cost of 
 purchase) and open-source computer software project for executing shell-scripts 
