@@ -12,8 +12,8 @@ in support of this project are welcome and are processed via pay-pal.
 JSE provides many features to enhance your ability to write JavaScripts and
 HTML Applications for the Linux platform. You can use JSE to do any of the following:
 
-  - Write Basic JavaScripts
-  - Write Advanced JavaScripts
+  - Write Basic JavaScripts (With JSE's Shell support)
+  - Write Advanced JavaScripts (Using system-libraries with JSE's MachineType support)
   - Create HTML Applications (with Advanced or Basic JavaScripting support)
 
 ### Preview
