@@ -42,18 +42,18 @@ Function: String localPath(Void)
 Function: Boolean localPath(String path)
 
   Set the current directory to path. Throws ReferenceError if path is not a directory.
-  Returns true if the operation is succesful.
+  Returns true if the operation is successful.
 
 Property: Object Environment
 
-  A JavaScript implementation of environment where Envronment[K], represents the value
+  A JavaScript implementation of environment where Environment[K], represents the value
   of an environment key by the name K. Use standard JavaScript set/get/delete to manage
   environment. This environment object uses thread locks to ensure thread safety.
 
 Function: String addPluginPath(String path)
 
   Adds the given path to the plugin search path. Throws an error if the path is not an existing
-  directory. Returns path if succesful.
+  directory. Returns path if successful.
 
 Function: Any loadPlugin(String path)
 
@@ -69,7 +69,7 @@ Function: Any loadPlugin(String path, Object global)
 
 Constructor: MachineType MachineType(Object representation)
 
-  Creates and returns a MachineType.prototype with the representation given. This is an adanced function,
+  Creates and returns a MachineType.prototype with the representation given. This is an advanced function,
   which most users do not need to worry about. There are only a few MachineTypes. This constructor,
   provides each type with a unified prototype backing hosted by this constructor. The standard types are,
   predefined within the JavaScript Global Environment. This allows types to be used as parameters to,
@@ -105,7 +105,7 @@ Prototype: MachineType.prototype
 
     A string name which represents this type.
 
-  Function: Number lengthOf(Number count)
+  Function: Number sizeOf(Number count)
 
     Returns the number of bytes required by this type, given N count members, multiplied by this[width].
 
@@ -214,8 +214,8 @@ Constructor: Address Address(MachineType type, Number length)
 
   It is not generally recommended to use Addresses unless you are certain on what you are doing. Crashing,
   your engine is the most likely outcome of incorrect addressing and or calling. MachineType interfacing,
-  must be tested and sanely error checked according to specification of api. So it is best to create
-  scripts in the form of libraries and or shell scripts which perorm certain complex tasks very well,
+  must be tested and sanely error checked according to specification of API. So it is best to create
+  scripts in the form of libraries and or shell scripts which perform certain complex tasks very well,
   and as simply as possible.
 
   Caveat: An address can be read if it is readOnly, and a reference to it may be obtained as write,
