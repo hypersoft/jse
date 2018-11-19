@@ -1,3 +1,5 @@
+/* global FunctionCallback, MachineType, Void, UInt16, Address, SharedLibrary, SharedFunction */
+
 Object.defineProperties(MachineType, {
 
 	unexpectedTypeWidth: {value:"unexpected type width: ", enumerable:false, writable: false},
@@ -44,7 +46,7 @@ Object.defineProperties(MachineType, {
 	}, enumerable:false, writable: false},
 
 	flagged: {value: function flagged(C, F) {
-		return ((C & F) == F);
+		return ((C & F) === F);
 	}, enumerable:false, writable: false},
 
 	create: {value: function create(representation) {
@@ -76,7 +78,7 @@ MachineType.compile.code = function(type){
 	else if (type.utf) x |= MachineType.UTF;
 	else if (type.boolean) x |= MachineType.BOOLEAN;
 	return x;
-}
+};
 
 MachineType.compile.typeName = function(type){
 	if (type.vararg) return '...';
@@ -91,7 +93,7 @@ MachineType.compile.typeName = function(type){
 	else if (type.width === 8) { if (type.floating) n.push('double'); else n.push(code+'64'); }
 	if (type.pointer) n.push('*');
 	return n.join(' ');
-}
+};
 
 MachineType.compile.bits = function(type){
 	if (type.width === 0 && ! type.pointer) return 0;
@@ -111,7 +113,7 @@ MachineType.compile.min = function(obj) {
 	if (obj.floating) return undefined;
 	if (obj.signed) return -(obj.max + 1);
 	return 0;
-}
+};
 
 MachineType.compile.format = function(obj) {
 	if (obj.vararg) return 'e'.charCodeAt(0);
@@ -127,7 +129,7 @@ MachineType.compile.format = function(obj) {
 		if (obj.floating) return "d".charCodeAt(0);
 		return ((obj.unsigned)?"L":"l").charCodeAt(0);
 	} else if (obj.width === 0) return "v".charCodeAt(0);
-}
+};
 
 //
 Object.defineProperties(MachineType.prototype, {
@@ -192,7 +194,7 @@ Object.defineProperties(MachineType.prototype, {
 		return c;
 	}},
 	format: {get(){
-		return MachineType.format[this.code]
+		return MachineType.format[this.code];
 	}},
 	readAddress:{value:MachineType.read},
 	writeAddress:{value:MachineType.write},
@@ -416,6 +418,28 @@ Object.defineProperties(SharedFunction.prototype, {
 	parameters:{value:[Void], writable:true},
 	protocol:{get:function(){
 		var a = []; for (i = 0; i < this.parameters.length; i++) a.push(this.parameters[i].format);
+		a.push(0);
+		return String.fromCharCode.apply(String, a);
+	}}
+});
+
+FunctionCallback.create = function(object, type, _function){
+  this.object = object;
+	this.returns = type,
+	this.function = _function,
+	this.parameters = 
+    (arguments.length === 3)?[Void]:Array.apply(Array, arguments).slice(3);
+	return this;
+};
+
+Object.defineProperties(FunctionCallback.prototype, {
+	constructor:{value:FunctionCallback},
+	returns:{value:Void, writable:true},
+	parameters:{value:[Void], writable:true},
+	protocol:{get:function(){
+		var a = []; for (i = 0; i < this.parameters.length; i++) a.push(this.parameters[i].format);
+    a.push(')'.charCodeAt(0));
+    a.push(this.returns.format);
 		a.push(0);
 		return String.fromCharCode.apply(String, a);
 	}}

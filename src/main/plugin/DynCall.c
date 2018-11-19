@@ -2,7 +2,7 @@
 
 static int loadCount = 0;
 
-#define LIBCLASS "SharedLibrary"
+#define SHARED_LIBRARY_CLASS_NAME "SharedLibrary"
 JSClass SharedLibraryClass = NULL;
 
 typedef struct SharedLibraryData {
@@ -63,7 +63,7 @@ static JSClassDefinition LibraryClassDefinition = {
 	0,										/* Version, always 0 */
 											/* ClassAttributes */
 	kJSClassAttributeNoAutomaticPrototype,
-	LIBCLASS,								/* Class Name */
+	SHARED_LIBRARY_CLASS_NAME,								/* Class Name */
 	NULL,									/* Parent Class */
 	NULL,									/* Static Values */
 	NULL,									/* Static Functions */
@@ -105,7 +105,7 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 
 }
 
-#define FNCLASS "SharedFunction"
+#define SHARED_FUNCTION_CLASS_NAME "SharedFunction"
 JSClass SharedFunctionClass = NULL;
 
 static void SharedFunctionWriteSignature(register JSContext ctx, void * vm, register char signature, JSValue argument, bool ellipsisMode, JSValue * exception){
@@ -239,11 +239,11 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 
 }
 
-static JSClassDefinition FunctionClassDefinition = {
+static JSClassDefinition SharedFunctionClassDefinition = {
 	0,										/* Version, always 0 */
 											/* ClassAttributes */
 	kJSClassAttributeNoAutomaticPrototype,
-	FNCLASS,								/* Class Name */
+	SHARED_FUNCTION_CLASS_NAME,								/* Class Name */
 	NULL,									/* Parent Class */
 	NULL,									/* Static Values */
 	NULL,									/* Static Functions */
@@ -260,35 +260,140 @@ static JSClassDefinition FunctionClassDefinition = {
 	NULL									/* Object Convert To Type */
 };
 
-static JSValue FunctionObjectConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+static JSValue SharedFunctionConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
 	return JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
 }
 
-/* it is disappointing that we do not have a callback class 
-	 however, there is some logic to this. Anything that requires a callback,
-	 should have a definite native translation unit. This helps with debugging,
-	 and voids production of sloppy code that may not be accountable for execution
-	 in operative, theory.
+#define FUNCTION_CALLBACK_CLASS_NAME "FunctionCallback"
+JSClass FunctionCallbackClass;
 
-	 so this is a forced limitation, because its a simple thing to do.
-	 if you wan't call back access, you can create your own, but it would,
-	 be far easier to write a plugin, that will always work independent of your
-	 script.
+typedef struct _FunctionCallbackData {
+	DCCallback * pointer; 
+  JSContextGroupRef group;
+  JSObject object;
+  int protocolLength;
+  char * protocol;
+  JSObject function;
+} FunctionCallbackData;
 
-	 And all the Unix Gurus Say: Seperate your interface from your implementation.
-	 
-*/
+static void FunctionCallbackInitialize(JSContext ctx, JSObject object)
+{
+  JSObjectSetPrivate(object, g_malloc0(sizeof(FunctionCallbackData)));
+}
 
-#define CBCLASS "CallBack"
-JSClass CallBackClass = NULL;
+static void FunctionCallbackFinalize(JSObject object)
+{	
+  FunctionCallbackData * data = JSObjectGetPrivate(object);
+  if (data->pointer) dcbFreeCallback(data->pointer);
+  if (data->protocol) g_free(data->protocol);
+  g_free(data);
+}
 
-#define VACLASS "varargs"
-JSClass VarArgsClass = NULL;
+static JSValue FunctionCallbackConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
+{
+  if (type == kJSTypeNumber) {
+    FunctionCallbackData * data = JSObjectGetPrivate(object);
+    return JSValueFromNumber(ctx, (uintptr_t)data->pointer);
+  }
+	return NULL;
+}
 
-/* it is dissappointing that we do not have struct and union classes,
-   however, the core has data alignment and casting facitilities, built-in.
+static JSClassDefinition FunctionCallbackClassDefinition = {
+	0,                                      /* Version, always 0 */
+	kJSClassAttributeNoAutomaticPrototype,  /* ClassAttributes */
+	FUNCTION_CALLBACK_CLASS_NAME,						/* Class Name */
+	NULL,                                   /* Parent Class */
+	NULL,                                   /* Static Values */
+	NULL,                                   /* Static Functions */
+	(void*) FunctionCallbackInitialize,			/* Object Initializer */
+	(void*) FunctionCallbackFinalize,				/* Object Finalizer */
+	(void*) NULL,                           /* Object Has Property */
+	(void*) NULL,                           /* Object Get Property */
+	(void*) NULL,                           /* Object Set Property */
+	(void*) NULL,                           /* Object Delete Property */
+	(void*) NULL,                           /* Object Get Property Names */
+	(void*) NULL,                           /* new Object Call As Function */
+	(void*) NULL,                           /* new Object Call As Constructor */
+	(void*) NULL,                           /* Has Instance */
+	(void*) FunctionCallbackConvertToType		/* Object Convert To Type */
+};
+
+char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* result, FunctionCallbackData * callbackData)
+{
+	JSContext ctx = JSGlobalContextCreateInGroup(JSContextGetUniverse(), NULL);
+	JSObject e = NULL; JSValue *exception = (void*)&e;
+  int max = callbackData->protocolLength - 2;
+ 
+  char returnType = callbackData->protocol[max + 1];
+  
+  // not currently supported for callback...
+  bool ellipsisMode = (callbackData->protocol[max - 1] == 'e');
+
+  if (ellipsisMode) max -= 1;
+  
+  JSValue argv[max];
+  
+  for (int i = 0; i < max; i++) {
+    switch (callbackData->protocol[i]) {
+      case 'B': case 's': case 'i': case 'j': case 'c': { argv[i] = JSValueFromNumber(ctx, dcbArgLong(args)); break; }
+      case 'C': case 'S': case 'I': case 'J': { argv[i] = JSValueFromNumber(ctx, dcbArgULong(args)); break; }
+      case 'Z': case 'p': { argv[i] = JSValueFromNumber(ctx, (uintptr_t)dcbArgPointer(args)); break; }
+      case 'l': { argv[i] = JSValueFromNumber(ctx, dcbArgLongLong(args)); break; }
+      case 'L': { argv[i] = JSValueFromNumber(ctx, dcbArgULongLong(args)); break; }
+      case 'd': { argv[i] = JSValueFromNumber(ctx, dcbArgDouble(args)); break; }
+      case 'f': { argv[i] = JSValueFromNumber(ctx, dcbArgFloat(args)); break; }
+      case 'v': { argv[i] = JSValueMakeUndefined(ctx); break; }
+    }
+  }
+
+	JSValue value = JSObjectCallAsFunction(ctx, (JSObjectRef) callbackData->function, (JSObjectRef) callbackData->object, max, argv, exception);
+
+  if (e) {
+    JSReportException(ctx, jse.command, e);
+    return 'v';
+  }
+  
+  switch (returnType) {
+    case 'B': result->B = JSValueToBoolean(ctx, value); break;
+    case 'c': case 's': case 'i': case 'j': result->j = JSValueToNumber(ctx, value, NULL); break;
+    case 'C': case 'S': case 'I': case 'J': result->J = JSValueToNumber(ctx, value, NULL); break;
+    case 'l': result->l = JSValueToNumber(ctx, value, NULL); break;
+    case 'L': result->L = JSValueToNumber(ctx, value, NULL); break;
+    case 'f': result->f = JSValueToNumber(ctx, value, NULL); break;
+    case 'd': result->d = JSValueToNumber(ctx, value, NULL); break;
+    case 'p': case 'Z': result->p = (void *)(uintptr_t)JSValueToNumber(ctx, value, NULL); break;
+  }
+
+  return returnType;
+
+}
+
+static JSValue FunctionCallbackConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
+{
+  
+  FunctionCallbackData * data = JSObjectGetPrivate(this);
+	JSObject addressObject = (JSObject) JSObjectGetUtf8Property(ctx, function, "create");
+
+  JSObject cbo = (JSObject) JSObjectCallAsFunction(ctx, addressObject, this, argc, argv, exception);
+  if (exception && *exception) return NULL;
+
+  data->object = (JSObject) argv[0]; // use fastest get
+  data->function = (JSObject) argv[2]; // use fastest get
+  data->protocol = JSValueToUtf8(ctx, JSObjectGetUtf8Property(ctx, cbo, "protocol"));
+//      g_printerr("protocol: %s\n", data->protocol);
+
+  data->protocolLength = (data->protocol)?strlen(data->protocol):0;
+
+  data->pointer = dcbNewCallback(data->protocol, (void*) &FunctionCallbackHandler, data);
+  
+	return cbo;
+
+}
+
+/* it is disappointing that we do not have struct and union classes,
+   however, the core has data alignment and casting facilities, built-in.
 	 so, one can construct any kind of struct they wish with address binding,
 	 and whatever else they can come up with.
 */
@@ -297,22 +402,31 @@ JSValue load(JSContext ctx, char * path, JSObject object, JSValue * exception)
 {
 	if (!loadCount) {
 		SharedLibraryClass = JSClassCreate(&LibraryClassDefinition);
-		SharedFunctionClass = JSClassCreate(&FunctionClassDefinition);
 		JSClassRetain(SharedLibraryClass);
+		SharedFunctionClass = JSClassCreate(&SharedFunctionClassDefinition);
 		JSClassRetain(SharedFunctionClass);
+    FunctionCallbackClass = JSClassCreate(&FunctionCallbackClassDefinition);
+		JSClassRetain(FunctionCallbackClass);
 	}
 
 	JSObject SharedLibrary;
-	JSObjectSetUtf8Property(ctx, object, LIBCLASS,
+	JSObjectSetUtf8Property(ctx, object, SHARED_LIBRARY_CLASS_NAME,
 		(JSValue) (SharedLibrary = JSConstructorCreate(
-			ctx, LIBCLASS, SharedLibraryClass, LibraryObjectConstructor
+			ctx, SHARED_LIBRARY_CLASS_NAME, SharedLibraryClass, LibraryObjectConstructor
 		)), 0
 	);
 
 	JSObject SharedFunction;
-	JSObjectSetUtf8Property(ctx, object, FNCLASS,
+	JSObjectSetUtf8Property(ctx, object, SHARED_FUNCTION_CLASS_NAME,
 		(JSValue) (SharedFunction = JSConstructorCreate(
-			ctx, FNCLASS, SharedFunctionClass, FunctionObjectConstructor
+			ctx, SHARED_FUNCTION_CLASS_NAME, SharedFunctionClass, SharedFunctionConstructor
+		)), 0
+	);
+
+	JSObject FunctionCallback;
+	JSObjectSetUtf8Property(ctx, object, FUNCTION_CALLBACK_CLASS_NAME,
+		(JSValue) (FunctionCallback = JSConstructorCreate(
+			ctx, FUNCTION_CALLBACK_CLASS_NAME, FunctionCallbackClass, FunctionCallbackConstructor
 		)), 0
 	);
 
@@ -328,5 +442,6 @@ void unload(JSContext ctx)
 
 	JSClassRelease(SharedLibraryClass);
 	JSClassRelease(SharedFunctionClass);
+	JSClassRelease(FunctionCallbackClass);
 
 }
