@@ -1,7 +1,7 @@
 DEBUG = -g3
 
 HERE != pwd
-CURL_PROGRAM != bash -c 'type -p curl || echo curl'
+CURL_PROGRAM != bash -c 'type -p wget || echo wget'
 
 DYNCALL_VER = dyncall-0.8
 DYNCALL_PKG = ${DYNCALL_VER}.tar.gz
@@ -13,12 +13,12 @@ all: share/doc/${DYNCALL_VER}.pdf share/license/dyncall.txt bin/bin2inc plugins 
 share/doc/${DYNCALL_VER}.pdf: ${CURL_PROGRAM}
 	@echo downloading ${DYNCALL_VER}.pdf
 	@mkdir -p share/doc
-	@curl -\# -o "share/doc/${DYNCALL_VER}.pdf" "${DYNCALL_DOC_URI}"
+	@wget -O "share/doc/${DYNCALL_VER}.pdf" "${DYNCALL_DOC_URI}"
 
 data/${DYNCALL_PKG}: ${CURL_PROGRAM}
 	@mkdir -p data;
 	@echo downloading ${DYNCALL_URI}
-	@curl -\# -o "data/${DYNCALL_PKG}" "${DYNCALL_URI}"
+	@wget -O "data/${DYNCALL_PKG}" "${DYNCALL_URI}"
 
 share/license/dyncall.txt: data/${DYNCALL_PKG}
 	@tar -xf data/${DYNCALL_PKG} > /dev/null
