@@ -24,16 +24,25 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>dev</word>
+            <word>DynCall</word>
             <word>errno</word>
             <word>eval</word>
+            <word>GLibc</word>
+            <word>Hypersoft</word>
+            <word>JavascriptCore</word>
             <word>js</word>
             <word>js'</word>
             <word>jse</word>
             <word>jso</word>
+            <word>LGPL</word>
+            <word>libdl</word>
+            <word>Philipp</word>
             <word>plugin</word>
             <word>stdin</word>
+            <word>Tassilo</word>
             <word>Triston</word>
             <word>usr</word>
+            <word>WebKitGTK</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
