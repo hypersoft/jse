@@ -337,7 +337,8 @@ static char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* resul
   
   for (int i = 0; i < max; i++) {
     switch (callbackData->protocol[i]) {
-      case 'B': case 's': case 'i': case 'j': case 'c': { argv[i] = JSValueFromNumber(ctx, dcbArgLong(args)); break; }
+      case 'B': { argv[i] = JSValueMakeBoolean(ctx, dcbArgBool(args)); break; }
+      case 's': case 'i': case 'j': case 'c': { argv[i] = JSValueFromNumber(ctx, dcbArgLong(args)); break; }
       case 'C': case 'S': case 'I': case 'J': { argv[i] = JSValueFromNumber(ctx, dcbArgULong(args)); break; }
       case 'Z': case 'p': { argv[i] = JSValueFromNumber(ctx, (uintptr_t)dcbArgPointer(args)); break; }
       case 'l': { argv[i] = JSValueFromNumber(ctx, dcbArgLongLong(args)); break; }
