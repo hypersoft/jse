@@ -392,17 +392,19 @@ Object.defineProperties(SharedLibrary.prototype, {
 });
 
 SharedFunction.create = function(){
-	var lib, name, type, pointer, arguments;
+	var lib, name, type, pointer, parameters;
 	if (arguments[0].constructor === SharedLibrary) {
 		lib = arguments[0],
 		type = arguments[1],
 		name = arguments[2],
-		arguments = Array.apply(Array, arguments).slice(3);
+		parameters = Array.apply(Array, arguments).slice(3);
 		pointer = lib[name];
 	}
-	this.lib = lib;
-	this.name = name, this.returns = type, this.pointer = pointer;
-	this.arguments = arguments;
+	this.lib = lib,
+	this.name = name,
+	this.returns = type,
+	this.pointer = pointer,
+	this.parameters = parameters;
 	return this;
 };
 
@@ -411,9 +413,9 @@ Object.defineProperties(SharedFunction.prototype, {
 	library:{value:new SharedLibrary(""), writable:true},
 	pointer:{value:0, writable:true},
 	returns:{value:Void, writable:true},
-	arguments:{value:[Void], writable:true},
+	parameters:{value:[Void], writable:true},
 	protocol:{get:function(){
-		var a = []; for (i = 0; i < arguments.length; i++) a.push(arguments[i].format);
+		var a = []; for (i = 0; i < this.parameters.length; i++) a.push(this.parameters[i].format);
 		a.push(0);
 		return String.fromCharCode.apply(String, a);
 	}}
