@@ -29,6 +29,9 @@ JSE itself, depends upon several technologies to achieve its design goals.
   - WebKitGTK+ 4.0 (for JavaScript interpretation and HTML Rendering)
   - DynCall 0.8 \[built-in]
   - GNU ReadLine (for interactive-sessions)
+  - GCC (C compiler and linker suite)
+  - GNU Make
+  - BSD pkgconf (also known as pkg-config)
 
 JSE's build environment adds a few requirements:
 
