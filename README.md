@@ -14,7 +14,7 @@ HTML Applications for the Linux platform. You can use JSE to do any of the follo
 
   - Write Basic JavaScripts (With JSE's Shell support)
   - Write Advanced JavaScripts (Using shared-system-libraries)
-  - Create HTML Applications (with Advanced or Basic JavaScripting support)
+  - Create, Design and Debug HTML Applications (with Advanced or Basic JavaScripting support)
 
 In general, JSE IS a full-fledged-application-development-suite. If JSE doesn't
 have the functionality you require built-in, you can simply create a plugin written
