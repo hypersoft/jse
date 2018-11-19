@@ -74,6 +74,7 @@ share/plugin/%.jso: obj/main/plugin/%.o
 
 JSE_WEBKIT_FLAGS != pkg-config --cflags --libs webkit2gtk-web-extension-4.0
 share/plugin/JseWebKit.so: ${JSE_OBJS} src/main/JseWebKit.c
+	@mkdir -p share/plugin
 	gcc -I include ${JSE_WEBKIT_FLAGS} ${JSE_OBJS} src/main/JseWebKit.c -o $@ ${JSE_LIBS} -Wl,--export-dynamic -shared -ldl -fPIC
 
 GNU_READLINE_FLAGS != pkg-config --cflags javascriptcoregtk-4.0
