@@ -36,6 +36,7 @@ JSE's build environment adds a few requirements:
   - Tar and Zip support \[for unpacking the DynCall archive and creating archives]
 
 ### Features
+
 JSE provides many features to enhance your ability to write JavaScript based shell-scripts and
 HTML Applications for the Linux platform. You can use JSE to do any of the following:
 
@@ -62,6 +63,21 @@ To execute the application shown in the Screenshot yourself, simply run:
 
 from a terminal session within the project's root directory after compiling and
 installing the project.
+
+### Security
+
+<p>JSE is a formidable coding platform. So formidable that it could INSTANTLY be
+  as dangerous as allowing full command access to a C compiler. To protect host
+  systems, JSE employs a simple-file-system-security-contract:</p>
+
+  - Pipes will not be executed with enhanced execution features or plugins
+  - A user must have execute permission on the file being executed to enable enhanced execution features and plugins
+
+<p>Note: 
+A developer may specify that remote content be loaded, from within an executable file.
+This is an intentional security leak on behalf of the execution of the developer's implementation.
+Neither Ghtml nor JSE will attempt to prohibit execution of remote content, and no sand-boxing-implementation of mixed content is provided by this project at this time.
+</p>
 
 <hr>
 
