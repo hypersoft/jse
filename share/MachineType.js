@@ -138,7 +138,6 @@ MachineType.compile.format = function(obj) {
 	} else if (obj.width === 0) return "v".charCodeAt(0);
 };
 
-//
 Object.defineProperties(MachineType.prototype, {
 	constructor:{value: MachineType}, pointer:{value:false},
 	width:{value:0}, constant:{value:false},
@@ -400,31 +399,24 @@ Object.defineProperties(SharedLibrary.prototype, {
 	constructor:{value:SharedLibrary}
 });
 
-SharedFunction.create = function(){
-	var lib, name, type, pointer, parameters;
-	if (arguments[0].constructor === SharedLibrary) {
-		lib = arguments[0],
-		type = arguments[1],
-		name = arguments[2],
-		parameters = Array.apply(Array, arguments).slice(3);
-		pointer = lib[name];
-	}
-	this.lib = lib,
+SharedFunction.create = function(lib, name, type){
+	this.library = lib,
 	this.name = name,
 	this.returns = type,
-	this.pointer = pointer,
-	this.parameters = parameters;
+	this.pointer = lib[name],
+	this.parameter = Array.apply(Array, arguments).slice(3);
 	return this;
 };
 
 Object.defineProperties(SharedFunction.prototype, {
 	constructor:{value:SharedFunction},
-	library:{value:new SharedLibrary(""), writable:true},
-	pointer:{value:0, writable:true},
+	library:{value:null, writable:true},
+	name:{value:null, writable:true},
+	pointer:{value:null, writable:true},
 	returns:{value:Void, writable:true},
-	parameters:{value:[Void], writable:true},
+	parameter:{value:[Void], writable:true},
 	protocol:{get:function(){
-		var a = []; for (i = 0; i < this.parameters.length; i++) a.push(this.parameters[i].format);
+		var a = []; for (i = 0; i < this.parameter.length; i++) a.push(this.parameter[i].format);
 		a.push(0);
 		return String.fromCharCode.apply(String, a);
 	}}
@@ -434,17 +426,16 @@ FunctionCallback.create = function(object, type, _function){
   this.object = object;
 	this.returns = type,
 	this.function = _function,
-	this.parameters = 
-    (arguments.length === 3)?[Void]:Array.apply(Array, arguments).slice(3);
+	this.parameter = Array.apply(Array, arguments).slice(3);
 	return this;
 };
 
 Object.defineProperties(FunctionCallback.prototype, {
 	constructor:{value:FunctionCallback},
 	returns:{value:Void, writable:true},
-	parameters:{value:[Void], writable:true},
+	parameter:{value:[Void], writable:true},
 	protocol:{get:function(){
-		var a = []; for (i = 0; i < this.parameters.length; i++) a.push(this.parameters[i].format);
+		var a = []; for (i = 0; i < this.parameter.length; i++) a.push(this.parameter[i].format);
     a.push(')'.charCodeAt(0));
     a.push(this.returns.format);
 		a.push(0);
