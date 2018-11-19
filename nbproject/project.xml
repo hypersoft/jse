@@ -22,5 +22,18 @@
                 <project-formatting-style>false</project-formatting-style>
             </formatting>
         </data>
+        <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>dev</word>
+            <word>errno</word>
+            <word>eval</word>
+            <word>js</word>
+            <word>js'</word>
+            <word>jse</word>
+            <word>jso</word>
+            <word>plugin</word>
+            <word>stdin</word>
+            <word>Triston</word>
+            <word>usr</word>
+        </spellchecker-wordlist>
     </configuration>
 </project>
