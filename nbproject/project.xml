@@ -23,12 +23,16 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>addPluginPath</word>
+            <word>API</word>
+            <word>bindAddress</word>
             <word>dev</word>
             <word>DynCall</word>
             <word>errno</word>
             <word>eval</word>
             <word>GLibc</word>
             <word>Hypersoft</word>
+            <word>JavaScript</word>
             <word>JavascriptCore</word>
             <word>js</word>
             <word>js'</word>
@@ -36,13 +40,29 @@
             <word>jso</word>
             <word>LGPL</word>
             <word>libdl</word>
+            <word>loadPlugin</word>
+            <word>localPath</word>
+            <word>MachineType</word>
+            <word>MachineTypes</word>
             <word>Philipp</word>
             <word>plugin</word>
+            <word>propertyName</word>
+            <word>readAddress</word>
+            <word>ReferenceError</word>
+            <word>SharedFunction</word>
+            <word>SharedLibrary</word>
+            <word>sizeOf</word>
             <word>stdin</word>
+            <word>stdout</word>
             <word>Tassilo</word>
+            <word>toConst</word>
+            <word>toString</word>
             <word>Triston</word>
+            <word>unitsOf</word>
             <word>usr</word>
+            <word>valueOf</word>
             <word>WebKitGTK</word>
+            <word>writeAddress</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

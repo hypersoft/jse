@@ -2,21 +2,31 @@
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
-      <df name="bin2inc">
-        <in>bin2inc.c</in>
-      </df>
-      <df name="ghtml">
-        <in>ghtml.c</in>
-      </df>
-      <df name="plugin">
-        <in>DynCall.c</in>
-        <in>Environment.c</in>
-        <in>Fork.c</in>
-        <in>Ghtml.c</in>
-        <in>MachineType.c</in>
-        <in>Shell.c</in>
-      </df>
       <df name="src">
+        <df name="bin2inc">
+          <in>bin2inc.c</in>
+        </df>
+        <df name="ghtml">
+          <in>ghtml.c</in>
+        </df>
+        <df name="main">
+          <df name="plugin">
+            <in>DynCall.c</in>
+            <in>Environment.c</in>
+            <in>Fork.c</in>
+            <in>Ghtml.c</in>
+            <in>MachineType.c</in>
+            <in>Shell.c</in>
+          </df>
+          <in>JseConstructor.c</in>
+          <in>JseException.c</in>
+          <in>JseMain.c</in>
+          <in>JseObject.c</in>
+          <in>JseOptionParser.c</in>
+          <in>JseString.c</in>
+          <in>JseValue.c</in>
+          <in>JseWebKit.c</in>
+        </df>
         <in>JseConstructor.c</in>
         <in>JseException.c</in>
         <in>JseMain.c</in>
@@ -64,16 +74,14 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="bin2inc/bin2inc.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <folder path="0/bin2inc">
+      <folder path="0/src/bin2inc">
         <cTool>
           <incDir>
             <pElem>.</pElem>
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/ghtml">
+      <folder path="0/src/ghtml">
         <cTool>
           <incDir>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
@@ -105,12 +113,254 @@
           </incDir>
         </cTool>
       </folder>
-      <item path="ghtml/ghtml.c" ex="false" tool="0" flavor2="0">
+      <folder path="0/src/main/plugin">
+        <cTool>
+          <incDir>
+            <pElem>include</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <item path="src/JseConstructor.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
       </item>
-      <item path="plugin/DynCall.c" ex="false" tool="0" flavor2="0">
+      <item path="src/JseException.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseMain.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseObject.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseOptionParser.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseString.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseValue.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/JseWebKit.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
           <incDir>
             <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/include/gtk-3.0</pElem>
+            <pElem>/usr/include/pango-1.0</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>/usr/include/fribidi</pElem>
+            <pElem>/usr/include/cairo</pElem>
+            <pElem>/usr/include/pixman-1</pElem>
+            <pElem>/usr/include/freetype2</pElem>
+            <pElem>/usr/include/libpng16</pElem>
+            <pElem>/usr/include/harfbuzz</pElem>
+            <pElem>/usr/include/uuid</pElem>
+            <pElem>/usr/include/gdk-pixbuf-2.0</pElem>
+            <pElem>/usr/include/libmount</pElem>
+            <pElem>/usr/include/blkid</pElem>
+            <pElem>/usr/include/gio-unix-2.0</pElem>
+            <pElem>/usr/include/libdrm</pElem>
+            <pElem>/usr/include/atk-1.0</pElem>
+            <pElem>/usr/include/at-spi2-atk/2.0</pElem>
+            <pElem>/usr/include/at-spi-2.0</pElem>
+            <pElem>/usr/include/dbus-1.0</pElem>
+            <pElem>/usr/lib/dbus-1.0/include</pElem>
+            <pElem>/usr/include/libsoup-2.4</pElem>
+            <pElem>/usr/include/libxml2</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/bin2inc/bin2inc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/ghtml/ghtml.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/main/JseConstructor.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseException.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseMain.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseObject.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseOptionParser.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseString.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseValue.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/JseWebKit.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>include</pElem>
+            <pElem>/usr/include/webkitgtk-4.0</pElem>
+            <pElem>/usr/include/glib-2.0</pElem>
+            <pElem>/usr/lib/glib-2.0/include</pElem>
+            <pElem>/usr/include/gtk-3.0</pElem>
+            <pElem>/usr/include/pango-1.0</pElem>
+            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
+            <pElem>/usr/include/fribidi</pElem>
+            <pElem>/usr/include/cairo</pElem>
+            <pElem>/usr/include/pixman-1</pElem>
+            <pElem>/usr/include/freetype2</pElem>
+            <pElem>/usr/include/libpng16</pElem>
+            <pElem>/usr/include/harfbuzz</pElem>
+            <pElem>/usr/include/uuid</pElem>
+            <pElem>/usr/include/gdk-pixbuf-2.0</pElem>
+            <pElem>/usr/include/libmount</pElem>
+            <pElem>/usr/include/blkid</pElem>
+            <pElem>/usr/include/gio-unix-2.0</pElem>
+            <pElem>/usr/include/libdrm</pElem>
+            <pElem>/usr/include/atk-1.0</pElem>
+            <pElem>/usr/include/at-spi2-atk/2.0</pElem>
+            <pElem>/usr/include/at-spi-2.0</pElem>
+            <pElem>/usr/include/dbus-1.0</pElem>
+            <pElem>/usr/lib/dbus-1.0/include</pElem>
+            <pElem>/usr/include/libsoup-2.4</pElem>
+            <pElem>/usr/include/libxml2</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/main/plugin/DynCall.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
             <pElem>/usr/lib/glib-2.0/include</pElem>
@@ -119,10 +369,9 @@
           </incDir>
         </cTool>
       </item>
-      <item path="plugin/Environment.c" ex="false" tool="0" flavor2="0">
+      <item path="src/main/plugin/Environment.c" ex="false" tool="0" flavor2="0">
         <cTool flags="0">
           <incDir>
-            <pElem>include</pElem>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
             <pElem>/usr/lib/glib-2.0/include</pElem>
@@ -131,10 +380,9 @@
           </incDir>
         </cTool>
       </item>
-      <item path="plugin/Fork.c" ex="false" tool="0" flavor2="0">
+      <item path="src/main/plugin/Fork.c" ex="false" tool="0" flavor2="0">
         <cTool flags="0">
           <incDir>
-            <pElem>include</pElem>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
             <pElem>/usr/lib/glib-2.0/include</pElem>
@@ -143,10 +391,9 @@
           </incDir>
         </cTool>
       </item>
-      <item path="plugin/Ghtml.c" ex="false" tool="0" flavor2="0">
+      <item path="src/main/plugin/Ghtml.c" ex="false" tool="0" flavor2="0">
         <cTool flags="0">
           <incDir>
-            <pElem>include</pElem>
             <pElem>ghtml</pElem>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
@@ -177,10 +424,9 @@
           </incDir>
         </cTool>
       </item>
-      <item path="plugin/MachineType.c" ex="false" tool="0" flavor2="0">
+      <item path="src/main/plugin/MachineType.c" ex="false" tool="0" flavor2="0">
         <cTool flags="0">
           <incDir>
-            <pElem>include</pElem>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
             <pElem>/usr/lib/glib-2.0/include</pElem>
@@ -189,131 +435,13 @@
           </incDir>
         </cTool>
       </item>
-      <item path="plugin/Shell.c" ex="false" tool="0" flavor2="0">
+      <item path="src/main/plugin/Shell.c" ex="false" tool="0" flavor2="0">
         <cTool flags="0">
           <incDir>
             <pElem>/usr/include/webkitgtk-4.0</pElem>
             <pElem>/usr/include/glib-2.0</pElem>
             <pElem>/usr/lib/glib-2.0/include</pElem>
             <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseConstructor.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseException.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseMain.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseObject.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseOptionParser.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseString.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseValue.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>include</pElem>
-            <pElem>.</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/JseWebKit.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="0">
-          <incDir>
-            <pElem>include</pElem>
-            <pElem>/usr/include/webkitgtk-4.0</pElem>
-            <pElem>/usr/include/glib-2.0</pElem>
-            <pElem>/usr/lib/glib-2.0/include</pElem>
-            <pElem>/usr/include/gtk-3.0</pElem>
-            <pElem>/usr/include/pango-1.0</pElem>
-            <pElem>/usr/lib/libffi-3.2.1/include</pElem>
-            <pElem>/usr/include/fribidi</pElem>
-            <pElem>/usr/include/cairo</pElem>
-            <pElem>/usr/include/pixman-1</pElem>
-            <pElem>/usr/include/freetype2</pElem>
-            <pElem>/usr/include/libpng16</pElem>
-            <pElem>/usr/include/harfbuzz</pElem>
-            <pElem>/usr/include/uuid</pElem>
-            <pElem>/usr/include/gdk-pixbuf-2.0</pElem>
-            <pElem>/usr/include/libmount</pElem>
-            <pElem>/usr/include/blkid</pElem>
-            <pElem>/usr/include/gio-unix-2.0</pElem>
-            <pElem>/usr/include/libdrm</pElem>
-            <pElem>/usr/include/atk-1.0</pElem>
-            <pElem>/usr/include/at-spi2-atk/2.0</pElem>
-            <pElem>/usr/include/at-spi-2.0</pElem>
-            <pElem>/usr/include/dbus-1.0</pElem>
-            <pElem>/usr/lib/dbus-1.0/include</pElem>
-            <pElem>/usr/include/libsoup-2.4</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>.</pElem>
           </incDir>
         </cTool>
