@@ -14,7 +14,7 @@
 			resize: none;
 		}
 		body {
-			background-color: eeeeee;
+			background-color: #eeeeee;
 		}
 	</style>
 	<script>
@@ -29,7 +29,7 @@
 
 		function eOnClick() {
 			try {
-				return String(eval(input.value))
+				return String(eval(input.value));
 			} catch (nope) {
 				return "script error: " + nope.message + ";\n\n" + nope.stack.toString();
 			}
@@ -46,7 +46,7 @@
 		<p><b>Javascript:</b></p>
 		<p><textarea id="input"></textarea>
 		</p>
-		<p align=right style="width:99%">
+		<p style="width:99%; text-align: right">
 			<button onclick="result.value = eOnClick();">Evaluate</button>
 		</p>
 	</div>
