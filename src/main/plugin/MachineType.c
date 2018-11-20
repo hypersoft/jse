@@ -357,7 +357,8 @@ static bool AddressObjectSetProperty (JSContext ctx, JSObject object, JSString i
 		}
 		return true;
 	} else if (!g_strcmp0(name, "allocated")) {
-		return true;
+		if (addressContainer->allocated) return true;
+		else return (addressContainer->allocated = true);
 	} else if (!g_strcmp0(name, "readOnly")) {
 		addressContainer->readOnly = JSValueToBoolean(ctx, data);
 		return true;
