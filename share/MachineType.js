@@ -237,7 +237,7 @@ Object.defineProperties(this, {
 		 and it was an ascii code in those days. Historical, Logical and Factual beats novelty for the money,
 		 every-time.
 	*/
-	UChar: {value: new MachineType({width:1})},
+	UChar: {value: new MachineType({width:1})}, // think of U+CHAR as U[NICODE]+CHAR ;)
 
 	Short: {value: new MachineType({width:2, signed:true})},
 	UShort: {value: new MachineType({width:2})},
