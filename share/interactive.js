@@ -14,7 +14,7 @@ readEvalLoop: while (++interactiveLineNumber) {
 				checkSyntax(script, parameter[0], interactiveLineNumber);
 			} catch (exception) {
 				if (exception.message === "Unexpected end of script") {
-					script += readline("> ");
+					script += readLine("> ");
 					continue;
 				} else {
 					printErrorLine(exception);
