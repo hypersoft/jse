@@ -218,7 +218,7 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 
 */
 	if (signature == 'c' || signature == 's' || signature == 'i' || signature == 'j' || signature == 'p') {
-		result = JSValueFromNumber(ctx, (uintptr_t)dcCallPointer(vm, handle));
+		result = JSInlineEval(ctx, "new Address(Pointer, 0, this)", JSValueFromNumber(ctx, (uintptr_t)dcCallPointer(vm, handle)), NULL);
 	} else if (signature == 'C' || signature == 'S' || signature == 'I' || signature == 'J') {
 		result = JSValueFromNumber(ctx, (signed long) dcCallLong(vm, handle));
 	} else if (signature == 'l') {
@@ -349,7 +349,7 @@ static char FunctionCallbackHandler(DCCallback* cb, DCArgs* args, DCValue* resul
       case 'B': { argv[i] = JSValueMakeBoolean(ctx, dcbArgBool(args)); break; }
       case 's': case 'i': case 'j': case 'c': { argv[i] = JSValueFromNumber(ctx, dcbArgLong(args)); break; }
       case 'C': case 'S': case 'I': case 'J': { argv[i] = JSValueFromNumber(ctx, dcbArgULong(args)); break; }
-      case 'Z': case 'p': { argv[i] = JSValueFromNumber(ctx, (uintptr_t)dcbArgPointer(args)); break; }
+      case 'Z': case 'p': { argv[i] = JSInlineEval(ctx, "new Address(Pointer, 0, this)", JSValueFromNumber(ctx, (uintptr_t)dcbArgPointer(args)), NULL); break; }
       case 'l': { argv[i] = JSValueFromNumber(ctx, dcbArgLongLong(args)); break; }
       case 'L': { argv[i] = JSValueFromNumber(ctx, dcbArgULongLong(args)); break; }
       case 'd': { argv[i] = JSValueFromNumber(ctx, dcbArgDouble(args)); break; }
