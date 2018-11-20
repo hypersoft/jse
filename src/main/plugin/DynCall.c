@@ -35,8 +35,9 @@ static bool LibraryObjectHasProperty (JSContext ctx, JSObject object, JSString n
 static JSValue LibraryObjectGetProperty(JSContext ctx, JSObject object, JSString name, JSValue * exception)
 {
 	SharedLibraryData * p = JSObjectGetPrivate(object);
-	if (!p) return NULL;
-
+	if (!p) {
+		return JSValueMakeUndefined(ctx);
+	}
 	char buffer[JSStringUtf8Size(name)];
 	JSStringGetUTF8CString(name, buffer, sizeof(buffer));
 	void * pSymbol = dlFindSymbol(p->handle, buffer);
@@ -49,6 +50,7 @@ static JSValue LibraryObjectGetProperty(JSContext ctx, JSObject object, JSString
 static JSValue LibraryObjectConvertToType(JSContext ctx, JSObject object, JSType type, JSValue * exception)
 {
 	SharedLibraryData * p = JSObjectGetPrivate(object);
+	if (!p) return NULL;
 	if (type == kJSTypeString) {
 		char buffer[80 + strlen(p->path)];
 		sprintf(buffer, "[SharedLibrary %s]", p->path);
@@ -83,6 +85,7 @@ static JSClassDefinition LibraryClassDefinition = {
 static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObject this, size_t argc, const JSValue argv[], JSValue * exception)
 {
 
+
 	if (! JSValueIsObjectOfClass(ctx, (void *) this, SharedLibraryClass)) {
 		return JSObjectCallAsConstructor(ctx, function, argc, argv, exception);
 	}
@@ -90,9 +93,7 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 	char * libPath = (argc)?JSValueToUtf8(ctx, argv[0]):NULL;
 
 	void * libHandle = dlLoadLibrary(libPath);
-	if (! libHandle) {
-		return JSExceptionThrowUtf8(ctx, "ReferenceError", exception, "Library: Can't find library `%s'", libPath);
-	}
+	if (! libHandle) { goto escape; }
 
 	unsigned bytes = ((libPath)?strlen(libPath):0) + 1;
 	SharedLibraryData * p = g_malloc0(sizeof(SharedLibraryData)+bytes);
@@ -101,6 +102,7 @@ static JSValue LibraryObjectConstructor (JSContext ctx, JSObject function, JSObj
 	else memcpy(p->path, "jse", 3);
 	JSObjectSetPrivate(this, p);
 
+escape:
 	return this;
 
 }
