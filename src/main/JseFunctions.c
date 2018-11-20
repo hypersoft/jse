@@ -69,12 +69,20 @@ JSValue loadPlugin(JSContext ctx, JSObject function, JSObject this, size_t argc,
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+
 extern char **environ;
 
 int startCommand(const char* command, char* const parameters[], char* const envrionment[], int ioc, int * iov[][2], int *status) {
 
+    // glob_var = mmap(NULL, sizeof *glob_var, PROT_READ | PROT_WRITE, 
+    //                 MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+ 
   // where int iov[N] == destination, source
   // where int ioc == iov[MAX]
   // where destination == child-process-file-descriptor
