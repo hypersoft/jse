@@ -190,7 +190,7 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 
 	}
   
-	JSValue result = JSValueMakeUndefined(ctx);
+	JSValue result = 0;
 	JSValue returnType = JSObjectGetUtf8Property(ctx, function, "returns");
 	char signature = JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, (JSObjectRef) returnType, "format"), NULL);
 	void * handle = (void*)(uintptr_t)JSValueToNumber(ctx, JSObjectGetUtf8Property(ctx, function, "pointer"), NULL);
@@ -229,6 +229,7 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 		result = JSValueFromNumber(ctx, dcCallDouble(vm, handle));
 	} else if (signature == 'v') {
 		dcCallVoid(vm, handle);
+		goto done;
 	} else {
 		g_printerr("dyncall.vm: unknown signature: `%c' in protocol `%s'\n", signature, protocol);
 		g_assert_not_reached();
@@ -237,6 +238,7 @@ static JSValue SharedFunctionExec (register JSContext ctx, JSObject function, JS
 	result = JSValueToObject(ctx, result, NULL);
 	JSObjectSetUtf8Property(ctx, (JSObject) result, "type", returnType, 0);
 
+done:
 	dcFree(vm);
 	g_free(protocol);
 
