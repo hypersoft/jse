@@ -225,25 +225,43 @@ Object.defineProperties(MachineType.prototype, {
 Object.defineProperties(this, {
 
 	Void: {value: new MachineType({width:0})},
-	VarArg:{value: new MachineType({width:MachineType.ptrSize, vararg:true})},
 
-	Int8: {value: new MachineType({width:1, signed:true})},
-	Int16: {value: new MachineType({width:2, signed:true})},
-	Int32: {value: new MachineType({width:4, signed:true})},
-	Int64: {value: new MachineType({width:8, signed:true})},
+	Bool: {value: new MachineType({width: 1, boolean: true})},
 
-	UInt8: {value: new MachineType({width:1})},
-	UInt16: {value: new MachineType({width:2})},
-	UInt32: {value: new MachineType({width:4})},
-	UInt64: {value: new MachineType({width:8})},
+	Char: {value: new MachineType({width:1, signed:true})},
+	UChar: {value: new MachineType({width:1})},
 
-	UIntPtr: {value: new MachineType({width:MachineType.ptrSize})},
-	IntSize: {value: new MachineType({width:MachineType.intSize})},
+	Short: {value: new MachineType({width:2, signed:true})},
+	UShort: {value: new MachineType({width:2})},
+
+	Int: {value: new MachineType({width:MachineType.intSize, signed:true})}, // platform sized signed int
+	UInt: {value: new MachineType({width:MachineType.intSize})},             // platform sized int
+
+	Long: {value: new MachineType({width:4, signed:true})},
+	ULong: {value: new MachineType({width:4})},
+
+	LongLong: {value: new MachineType({width:8, signed:true})},
+	ULongLong: {value: new MachineType({width:8})},
 
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
 
-	Bool: {value: new MachineType({width: 1, boolean: true})}
+	Int8: {value: new MachineType({width:1, signed:true})},
+	UInt8: {value: new MachineType({width:1})},
+
+	Int16: {value: new MachineType({width:2, signed:true})},
+	UInt16: {value: new MachineType({width:2})},
+
+	Int32: {value: new MachineType({width:4, signed:true})},
+	UInt32: {value: new MachineType({width:4})},
+
+	Int64: {value: new MachineType({width:8, signed:true})},
+	UInt64: {value: new MachineType({width:8})},
+
+	UIntPtr: {value: new MachineType({width:MachineType.ptrSize})}, // platform sized pointer
+	IntSize: {value: new MachineType({width:MachineType.intSize})},	// analog: size_t
+
+	VarArg:{value: new MachineType({width:MachineType.ptrSize, vararg:true})}
 
 });
 
@@ -399,11 +417,9 @@ Object.defineProperties(SharedLibrary.prototype, {
 	constructor:{value:SharedLibrary}
 });
 
-SharedFunction.create = function(lib, name, type){
-	this.library = lib,
-	this.name = name,
-	this.returns = type,
-	this.pointer = lib[name],
+SharedFunction.create = function(lib, type, name){
+	this.library = lib, this.returns = type, this.name = name,
+	this.pointer = lib[name], 
 	this.parameter = Array.apply(Array, arguments).slice(3);
 	return this;
 };
@@ -423,8 +439,7 @@ Object.defineProperties(SharedFunction.prototype, {
 });
 
 FunctionCallback.create = function(object, type, _function){
-  this.object = object;
-	this.returns = type,
+  this.object = object, this.returns = type,
 	this.function = _function,
 	this.parameter = Array.apply(Array, arguments).slice(3);
 	return this;
@@ -442,3 +457,18 @@ Object.defineProperties(FunctionCallback.prototype, {
 		return String.fromCharCode.apply(String, a);
 	}}
 });
+
+var lib = {
+  glib2: new SharedLibrary('libglib-2.0.so'),
+  gtk3: new SharedLibrary('libgtk-3.so')
+};
+
+var Glib = {
+	free: new SharedFunction(lib.glib2, Void, "g_free", Pointer),
+	base64: {
+		encode: new SharedFunction(lib.glib2, Pointer, "g_base64_encode", Pointer, IntSize),
+		decode: new SharedFunction(lib.glib2, Pointer, "g_base64_decode", Pointer, IntSize.toPointer())
+	}
+};
+
+var Gtk = {};
