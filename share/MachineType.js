@@ -275,6 +275,19 @@ Object.defineProperties(this, {
 
 Pointer = Void.toPointer();
 
+Array.toString = function toString(array) {
+  return String.fromCharCode.apply(String, array);
+}
+
+Object.defineProperty(Array.prototype, "toBuffer", {value:function toBuffer(type, max){
+  var i, o = this.toSerial(max),
+    a = new Address(type, o.length),
+    l = (a.length = o.length);
+  for (i = 0; i < l; i++) a[i] = o[i];
+  return a;
+}, enumerable: false});
+
+
 Object.defineProperty(Array.prototype, "toSerial", {value: function toSerial(max){
   if (this.serialized) return this;
   if (this.length === 1 && this[0].toSerial) return this[0].toSerial(max);
@@ -315,6 +328,17 @@ Array.prototype.toSerial.parse = function parse(value, index){
   throw new TypeError("unhandled type : " + host + " at serial index " + index);
 };
 
+String.toArray = function(string) {
+  var out = new Array(string.length);
+  for (var i = 0; i < string.length; i++) out[i] = string.charCodeAt(i);
+  return out; 
+}
+
+Object.defineProperty(String.prototype, "toBuffer", {
+  value: function toBuffer(type, max){
+  return this.toSerial(max).toBuffer(type);
+}, enumerable: false});
+
 Object.defineProperty(String.prototype, "toSerial", {value: function toSerial(max) {
   var data = this.slice(0, max), i = 0, o = new Array(data.length);
   for (i; i < data.length; i++) o[i] = data.charCodeAt(i);
@@ -341,6 +365,17 @@ Address.create = function create(type, length, pointer) {
   }
   return this;
 };
+
+Address.toArray = function(address) {
+  var out = new Array(address.length);
+  for (var i = 0; i < out.length; i++) out[i] = address[i];
+  return out;
+}
+
+Address.toString = function(address) {
+  if (arguments.length === 0) return Function.prototype.toString.apply(this);
+  return Array.toString(Address.toArray(address));
+}
 
 Address.prototype = Object.defineProperties({}, {
 
@@ -401,22 +436,6 @@ Address.prototype = Object.defineProperties({}, {
     var array = (this.length > 1)?"["+this.length+"]":' *';
     return "((" + this.type.toString() + array + ')(' + this.pointer + "))";
   }}
-});
-
-Object.defineProperty(Array.prototype, "toBuffer", {value:function toBuffer(type, max){
-    var i, o = this.toSerial(max),
-      a = new Address(type, o.length),
-      l = (a.length = o.length);
-    for (i = 0; i < l; i++) a[i] = o[i];
-    return a;
-  },
-  enumerable: false
-});
-
-Object.defineProperty(String.prototype, "toBuffer", {
-  value: function toBuffer(type, max){
-    return this.toSerial(max).toBuffer(type);
-  }, enumerable: false
 });
 
 loadPlugin("DynCall.jso");
