@@ -246,6 +246,9 @@ Object.defineProperties(this, {
 	Float: {value: new MachineType({width:4, floating:true})},
 	Double: {value: new MachineType({width:8, floating:true})},
 
+	UIntPtr: {value: new MachineType({width:MachineType.ptrSize})}, // platform sized pointer
+	IntSize: {value: new MachineType({width:MachineType.intSize})},	// analog: size_t
+
 	Int8: {value: new MachineType({width:1, signed:true})},
 	UInt8: {value: new MachineType({width:1})},
 
@@ -257,9 +260,6 @@ Object.defineProperties(this, {
 
 	Int64: {value: new MachineType({width:8, signed:true})},
 	UInt64: {value: new MachineType({width:8})},
-
-	UIntPtr: {value: new MachineType({width:MachineType.ptrSize})}, // platform sized pointer
-	IntSize: {value: new MachineType({width:MachineType.intSize})},	// analog: size_t
 
 	VarArg:{value: new MachineType({width:MachineType.ptrSize, vararg:true})}
 
