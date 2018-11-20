@@ -1,5 +1,5 @@
+#!/usr/bin/jse --shell-script
 
-// var echo = Command('echo');
 echo('Be quiet for a second, you might learn something..');
 
 var gtk3 = new SharedLibrary('libgtk-3.so');
