@@ -228,7 +228,15 @@ Object.defineProperties(this, {
 
 	Bool: {value: new MachineType({width: 1, boolean: true})},
 
-	Char: {value: new MachineType({width:1, signed:true})},
+	Char: {value: new MachineType({width:1, signed:true})}, // char is NOT signed within a C Program
+																													// this is a language-semantics-feature, not a bug
+	/* 
+		The issue is that, all integer types are signed types in JSE, and all unsigned types are prefixed
+		 with a 'U'. So in C, 'char' REALLY means 'unsigned char', which means UTF-8/ASCII-EXTENDED. JSE will use
+		 the LOGICAL representation (ASCII), rather than the "preferred" implementation. Char came before UChar
+		 and it was an ascii code in those days. Historical, Logical and Factual beats novelty for the money,
+		 every-time.
+	*/
 	UChar: {value: new MachineType({width:1})},
 
 	Short: {value: new MachineType({width:2, signed:true})},
