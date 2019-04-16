@@ -21,7 +21,7 @@ data/${DYNCALL_PKG}: ${CURL_PROGRAM}
 	@wget -O "data/${DYNCALL_PKG}" "${DYNCALL_URI}"
 
 share/license/dyncall.txt: data/${DYNCALL_PKG}
-	@tar -xf data/${DYNCALL_PKG} > /dev/null
+	@tar -xf data/${DYNCALL_PKG} 
 	@( \
 		cd ${DYNCALL_VER}; ./configure --prefix="${HERE}"; \
 		make -s install \
@@ -29,7 +29,7 @@ share/license/dyncall.txt: data/${DYNCALL_PKG}
 	@mkdir -p include/dyncall || true;
 	@mv include/dyn*h include/dyncall
 	@cp ${DYNCALL_VER}/LICENSE share/license/dyncall.txt
-	@rm -vrf ${DYNCALL_VER}
+	rm -vrf ${DYNCALL_VER}
 
 JSE_CFLAGS != pkg-config --cflags javascriptcoregtk-4.0
 JSE_CFLAGS := $(DEBUG) $(JSE_CFLAGS)
